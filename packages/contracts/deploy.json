@@ -1,0 +1,275 @@
+{
+  "components": [
+    "AddressPlayerComponent",
+    "BalanceComponent",
+    "BandwidthComponent",
+    "BlockLastComponent",
+    "CapacityComponent",
+    "ChargeComponent",
+    "CoinComponent",
+    "ExitsComponent",
+    "GenusComponent",
+    "IdDelegateeComponent",
+    "IdDelegatorComponent",
+    "IdHolderComponent",
+    "IdMerchantComponent",
+    "IdNodeComponent",
+    "IdOperatorComponent",
+    "IdOwnerComponent",
+    "IdPetComponent",
+    "IdRequesteeComponent",
+    "IdRequesterComponent",
+    "IndexItemComponent",
+    "IndexModifierComponent",
+    "IndexPetComponent",
+    "IsFoodComponent",
+    "IsInventoryComponent",
+    "IsListingComponent",
+    "IsMerchantComponent",
+    "IsModifierComponent",
+    "IsNodeComponent",
+    "IsOperatorComponent",
+    "IsPetComponent",
+    "IsProductionComponent",
+    "IsRegisterComponent",
+    "IsRegistryEntryComponent",
+    "IsRequestComponent",
+    "IsRoomComponent",
+    "IsTradeComponent",
+    "LocationComponent",
+    "MediaURIComponent",
+    "ModifierStatusComponent",
+    "ModifierTypeComponent",
+    "ModifierValueComponent",
+    "NameComponent",
+    "PriceBuyComponent",
+    "PriceSellComponent",
+    "PrototypeComponent",
+    "StateComponent",
+    "StorageSizeComponent",
+    "TimeLastActionComponent",
+    "TimeStartComponent"
+  ],
+  "systems": [
+    {
+      "name": "_InitSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_AddModifierSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_ListingSetSystem",
+      "writeAccess": [
+        "IsListingComponent",
+        "IdMerchantComponent",
+        "IndexItemComponent",
+        "PriceBuyComponent",
+        "PriceSellComponent"
+      ]
+    },
+    {
+      "name": "_MerchantCreateSystem",
+      "writeAccess": [
+        "IsMerchantComponent",
+        "LocationComponent",
+        "NameComponent"
+      ]
+    },
+    {
+      "name": "_NodeCreateSystem",
+      "writeAccess": [
+        "IsNodeComponent",
+        "LocationComponent",
+        "NameComponent"
+      ]
+    },
+    {
+      "name": "_RoomCreateSystem",
+      "writeAccess": [
+        "IsRoomComponent",
+        "ExitsComponent",
+        "LocationComponent",
+        "NameComponent"
+      ]
+    },
+    {
+      "name": "ERC721PetSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "ListingBuySystem",
+      "writeAccess": [
+        "BalanceComponent",
+        "BlockLastComponent",
+        "CoinComponent",
+        "IdHolderComponent",
+        "IndexItemComponent",
+        "IsInventoryComponent"
+      ]
+    },
+    {
+      "name": "ListingSellSystem",
+      "writeAccess": [
+        "BalanceComponent",
+        "BlockLastComponent",
+        "CoinComponent"
+      ]
+    },
+    {
+      "name": "OperatorMoveSystem",
+      "writeAccess": [
+        "BlockLastComponent",
+        "LocationComponent"
+      ]
+    },
+    {
+      "name": "OperatorSetSystem",
+      "writeAccess": [
+        "IsOperatorComponent",
+        "AddressPlayerComponent",
+        "IdOwnerComponent",
+        "LocationComponent",
+        "NameComponent"
+      ]
+    },
+    {
+      "name": "PetSetOperatorSystem",
+      "writeAccess": [
+        "IdOperatorComponent"
+      ]
+    },
+    {
+      "name": "ProductionCollectSystem",
+      "writeAccess": [
+        "BlockLastComponent",
+        "ChargeComponent",
+        "CoinComponent",
+        "TimeLastActionComponent",
+        "TimeStartComponent"
+      ]
+    },
+    {
+      "name": "ProductionStartSystem",
+      "writeAccess": [
+        "IsProductionComponent",
+        "BlockLastComponent",
+        "ChargeComponent",
+        "IdNodeComponent",
+        "IdPetComponent",
+        "StateComponent",
+        "TimeLastActionComponent",
+        "TimeStartComponent"
+      ]
+    },
+    {
+      "name": "ProductionStopSystem",
+      "writeAccess": [
+        "BlockLastComponent",
+        "ChargeComponent",
+        "CoinComponent",
+        "StateComponent",
+        "TimeLastActionComponent"
+      ]
+    },
+    {
+      "name": "PetMetadataSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "PetFoodSystem",
+      "writeAccess": [
+        "ChargeComponent",
+        "TimeLastActionComponent",
+        "BalanceComponent"
+      ]
+    },
+    {
+      "name": "TradeAcceptSystem",
+      "writeAccess": [
+        "IsRegisterComponent",
+        "IsRequestComponent",
+        "BlockLastComponent",
+        "IdDelegatorComponent",
+        "IdDelegateeComponent",
+        "StateComponent"
+      ]
+    },
+    {
+      "name": "TradeAddToSystem",
+      "writeAccess": [
+        "IsInventoryComponent",
+        "BalanceComponent",
+        "BlockLastComponent",
+        "IdHolderComponent",
+        "IndexItemComponent"
+      ]
+    },
+    {
+      "name": "TradeCancelSystem",
+      "writeAccess": [
+        "BlockLastComponent",
+        "CoinComponent",
+        "StateComponent"
+      ]
+    },
+    {
+      "name": "TradeConfirmSystem",
+      "writeAccess": [
+        "BlockLastComponent",
+        "CoinComponent",
+        "StateComponent"
+      ]
+    },
+    {
+      "name": "TradeInitiateSystem",
+      "writeAccess": [
+        "IsTradeComponent",
+        "IsRequestComponent",
+        "BlockLastComponent",
+        "IdRequesteeComponent",
+        "IdRequesterComponent",
+        "StateComponent"
+      ]
+    },
+    {
+      "name": "PetNameSystem",
+      "writeAccess": [
+        "NameComponent"
+      ]
+    },
+    {
+      "name": "OperatorNameSystem",
+      "writeAccess": [
+        "NameComponent"
+      ]
+    }
+  ],
+  "libraries": [
+    "LibBattery",
+    "LibCoin",
+    "LibInventory",
+    "LibListing",
+    "LibMerchant",
+    "LibModifier",
+    "LibNode",
+    "LibOperator",
+    "LibPet",
+    "LibProduction",
+    "LibPrototype",
+    "LibRegister",
+    "LibRegistry",
+    "LibModReg",
+    "LibRoom",
+    "LibTrade"
+  ]
+}
