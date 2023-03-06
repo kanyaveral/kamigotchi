@@ -5,6 +5,7 @@ import { registerMiningModal } from './MiningModal';
 import { registerObjectModal } from './ObjectModal';
 import { registerMyKamiButton } from './MyKamiButton';
 import { registerChatButton } from './ChatButton';
+import { registerFoodShopButton } from './FoodShopButton';
 import { registerPetList } from './PetList';
 import { registerRequestQueue } from './RequestQueue';
 import { registerTradeWindow } from './TradeWindow';
@@ -26,6 +27,7 @@ export function registerUIComponents() {
   registerTradeWindow();
   registerMyKamiButton();
   registerChatButton();
+  registerFoodShopButton();
   registerObjectModal();
   registerMintProcess();
   registerChat();

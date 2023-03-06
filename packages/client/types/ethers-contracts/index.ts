@@ -81,6 +81,7 @@ export type { _ListingSetSystem } from "./_ListingSetSystem";
 export type { _MerchantCreateSystem } from "./_MerchantCreateSystem";
 export type { _NodeCreateSystem } from "./_NodeCreateSystem";
 export type { _RoomCreateSystem } from "./_RoomCreateSystem";
+export type { _devGiveTokensSystem } from "./_devGiveTokensSystem";
 export * as factories from "./factories";
 export { AddressComponent__factory } from "./factories/AddressComponent__factory";
 export { AddressPlayerComponent__factory } from "./factories/AddressPlayerComponent__factory";
@@ -162,3 +163,4 @@ export { _ListingSetSystem__factory } from "./factories/_ListingSetSystem__facto
 export { _MerchantCreateSystem__factory } from "./factories/_MerchantCreateSystem__factory";
 export { _NodeCreateSystem__factory } from "./factories/_NodeCreateSystem__factory";
 export { _RoomCreateSystem__factory } from "./factories/_RoomCreateSystem__factory";
+export { _devGiveTokensSystem__factory } from "./factories/_devGiveTokensSystem__factory";

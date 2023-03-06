@@ -35,9 +35,9 @@ contract _InitSystem is System {
   }
 
   function initFood() internal {
-    LibBattery.addFoodRegistry(components, world, 11, 25, "food 1");
-    LibBattery.addFoodRegistry(components, world, 102, 100, "food 2");
-    LibBattery.addFoodRegistry(components, world, 103, 200, "food 3");
+    LibBattery.addFoodRegistry(components, world, 1, 25, "food 1");
+    LibBattery.addFoodRegistry(components, world, 2, 100, "food 2");
+    LibBattery.addFoodRegistry(components, world, 3, 200, "food 3");
   }
 
   function initMods() internal {
