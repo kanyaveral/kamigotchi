@@ -259,6 +259,7 @@
         ":forge-std/=../../node_modules/forge-std/src/",
         ":libraries/=src/libraries/",
         ":memmove/=../../node_modules/memmove/src/",
+        ":packages/=../../../mud/packages/",
         ":solady/=../../node_modules/solady/src/",
         ":solecs/=../../node_modules/@latticexyz/solecs/src/",
         ":solmate/=../../node_modules/@rari-capital/solmate/src/",
@@ -929,10 +930,10 @@
         "license": "Unlicense"
       },
       "src/libraries/LibBattery.sol": {
-        "keccak256": "0x4c317961850bcd89a80a25624ea0a74482d4f6a2d87ff187806de5a36910619b",
+        "keccak256": "0xf33c1744d1ff24ea3905cef907ce635baba246489b787a5681fa21a31a0501be",
         "urls": [
-          "bzz-raw://6ebae31b954af99dcc36995663c99b50d60931b03350cf4bfbd97f97bbfee601",
-          "dweb:/ipfs/QmP2aYFpWBmGiLN9Lg9EXf2LVsPDtn5E8NQt2nGwfeecVB"
+          "bzz-raw://f39889995872eb623d547c1d4a8a7d7159c56882cb25af89f36ce1f824bb97b2",
+          "dweb:/ipfs/QmNb4uAb1EEkUrCDWupc8i5qkE9mfEEFcqpmCiLx3UaAbQ"
         ],
         "license": "MIT"
       },
@@ -1000,14 +1001,6 @@
         ],
         "license": "MIT"
       },
-      "src/libraries/LibRegistry.sol": {
-        "keccak256": "0x1a0aa8ae03be43e89ebb4594c18457204d95ad5e0f006870cfd0193c8b7655f6",
-        "urls": [
-          "bzz-raw://de7aceece503c1d589efa987038d81a9c7dae19302df3f3779dbdcf76a14cc24",
-          "dweb:/ipfs/QmWYEUGEvKWzqbsowgRGvSGWJpPmAQPM42aCaseE5WeZze"
-        ],
-        "license": "MIT"
-      },
       "src/libraries/LibRoom.sol": {
         "keccak256": "0x53ee292e37eba126b57376821871a533abfe23cb4fdfbe333e716cb9e5d39431",
         "urls": [
@@ -1033,10 +1026,10 @@
         "license": "Unlicense"
       },
       "src/systems/_InitSystem.sol": {
-        "keccak256": "0xe1a7469dc1407085cf1479f1ccd39aecee73faea7dbc0f99542dce21f5408737",
+        "keccak256": "0x6e50c23ea03ed018908449d78ab0bd42f8aea8dcadd7924a3ed8bf8407cdfc86",
         "urls": [
-          "bzz-raw://2d40a65f99c408ac23a50d27bf4bef8fa56f1bb9415077c47af384df885feb1a",
-          "dweb:/ipfs/QmasHsyozMsiKzhQbMTvYhmJ93ph2d9u5fZixZMyFVqBSj"
+          "bzz-raw://d023ea6d1da568b2227a1ead541eed6bdb505151a5cd8f06b4e39c412a4f2b0b",
+          "dweb:/ipfs/QmaEdBCZXSnpvumJp5n7Esq8TkYTYHBLw6nAGos5mcAmx3"
         ],
         "license": "Unlicense"
       },
@@ -1059,5 +1052,5 @@
     },
     "version": 1
   },
-  "id": 158
+  "id": 157
 }

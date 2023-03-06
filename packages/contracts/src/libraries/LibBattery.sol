@@ -9,16 +9,16 @@ import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById, entityToAddress, addressToEntity } from "solecs/utils.sol";
 import { LibString } from "solady/utils/LibString.sol";
 
-// TODO: change ModReg to ItemReg. also implement ItemReg
-import { LibRegistry as LibModReg } from "libraries/LibRegistry.sol";
-
 import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComponent.sol";
 import { ChargeComponent, ID as ChargeCompID } from "components/ChargeComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastActionCompID } from "components/TimeLastActionComponent.sol";
 import { BalanceComponent, ID as BalanceCompID } from "components/BalanceComponent.sol";
 import { IsFoodComponent, ID as IsFoodCompID } from "components/IsFoodComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
-import { ID as IndexItemCompID } from "components/IndexItemComponent.sol";
+
+// indexes
+import { IndexItemComponent as IndexComp, ID as IndexCompID } from "components/IndexItemComponent.sol";
+import { IsRegistryEntryComponent, ID as IsRegistryEntryCompID } from "components/IsRegistryEntryComponent.sol";
 
 // at 150 points, 25h irl. shorten for demo
 // uint256 constant epoch = 10 minutes;
@@ -89,12 +89,12 @@ library LibBattery {
     BalanceComponent(getAddressById(components, BalanceCompID)).set(entityID, value);
     NameComponent(getAddressById(components, NameCompID)).set(entityID, name);
 
-    LibModReg.add(components, IndexItemCompID, index, entityID);
+    add(components, index, entityID);
   }
 
   function getFoodValue(IUintComp components, uint256 index) internal view returns (uint256) {
     // no additional check for isFood, but does not affect
-    uint256 entityID = LibModReg.get(components, IndexItemCompID, index);
+    uint256 entityID = get(components, index);
     return BalanceComponent(getAddressById(components, BalanceCompID)).getValue(entityID);
   }
 
@@ -137,5 +137,45 @@ library LibBattery {
     uint256 value
   ) internal {
     TimeLastActionComponent(getAddressById(components, TimeLastActionCompID)).set(petID, value);
+  }
+
+  ///////////////////////
+  // REGISTRY (to be depreciated)
+  
+  // returns entity at registry
+  function get(
+    IUintComp components,
+    uint256 index
+  ) internal view returns (uint256) {
+    QueryFragment[] memory fragments = new QueryFragment[](2);
+    fragments[0] = QueryFragment(
+      QueryType.Has,
+      getComponentById(components, IsRegistryEntryCompID),
+      new bytes(0)
+    );
+    fragments[1] = QueryFragment(
+      QueryType.HasValue,
+      getComponentById(components, IndexCompID),
+      abi.encode(index)
+    );
+    
+    uint256[] memory results = LibQuery.query(fragments);
+
+    require(results.length == 1, "index does not exist in registry");
+    // hardcoded to first index. should not create multiple indexes with same id
+    // create custom component for this?
+    return results[0];
+  }
+
+  function add(
+    IUintComp components,
+    uint256 index,
+    uint256 entityToAdd
+  ) internal {
+    // no check
+    IndexComp comp = IndexComp(getAddressById(components, IndexCompID));
+    IsRegistryEntryComponent isComp = IsRegistryEntryComponent(getAddressById(components, IsRegistryEntryCompID));
+    comp.set(entityToAdd, index);
+    isComp.set(entityToAdd);
   }
 }
