@@ -49,6 +49,7 @@ contract _InitSystem is System {
       1, // index
       1, // mod value
       "MUL",
+      "INSECT", 
       "Butterfly"
     );
     LibModifier.createIndex(
@@ -58,6 +59,7 @@ contract _InitSystem is System {
       2, // index
       2, // mod value
       "MUL",
+      "MECH",
       "Cube"
     );
 
@@ -68,6 +70,7 @@ contract _InitSystem is System {
       1, // index
       1, // mod value
       "ADD",
+      "",
       "Canto Green"
     );
 
@@ -78,6 +81,7 @@ contract _InitSystem is System {
       1, // index
       1, // mod value
       "UMUL",
+      "",
       "c-c"
     );
     LibModifier.createIndex(
@@ -87,6 +91,7 @@ contract _InitSystem is System {
       2, // index
       2, // mod value
       "UMUL",
+      "",
       "uwu"
     );
 
@@ -97,6 +102,7 @@ contract _InitSystem is System {
       1, // index
       1, // mod value
       "STORAGE",
+      "INSECT",
       "Slicers"
     );
     LibModifier.createIndex(
@@ -106,6 +112,7 @@ contract _InitSystem is System {
       2, // index
       2, // mod value
       "STORAGE",
+      "NORMAL",
       "Paws"
     );
 
@@ -116,6 +123,7 @@ contract _InitSystem is System {
       1, // index
       1, // mod value
       "UMUL",
+      "",
       "background1"
     );
   }

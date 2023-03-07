@@ -31,6 +31,7 @@ type Details = {
   capacity: string;
   storage: string;
   traits: TraitDetails[];
+  petTypes: string[];
 };
 
 export function registerPetDetails() {
@@ -95,6 +96,7 @@ export function registerPetDetails() {
             PetID,
             ModifierValue,
             ModifierType,
+            ModifierPetType,
             Name,
             State,
             StorageSize,
@@ -123,6 +125,7 @@ export function registerPetDetails() {
       };
 
       const getDetails = (index: EntityIndex) => {
+        const traitsHopper = getBaseTraits(index);
         return {
           nftID: getComponentValue(PetIndex, index)?.value as string,
           petName: getComponentValue(Name, index)?.value as string,
@@ -136,7 +139,8 @@ export function registerPetDetails() {
           storage: hexToString(
             getComponentValue(StorageSize, index)?.value as number
           ),
-          traits: getBaseTraits(index)?.value as TraitDetails[],
+          traits: traitsHopper?.value as TraitDetails[],
+          petTypes: traitsHopper?.petTypes as string[],
         };
       };
 
@@ -149,13 +153,20 @@ export function registerPetDetails() {
           'BACKGROUND',
         ];
         let result: Array<TraitDetails> = [];
+        let petTypes: Array<string> = [];
 
         for (let i = 0; i < genusArr.length; i++) {
-          result.push(getTrait(petIndex, genusArr[i]));
+          let details = getTrait(petIndex, genusArr[i]);
+          result.push(details.Individual);
+
+          if(details.PetType.petType && details.PetType.petType != "") {
+            petTypes.push(details.PetType.petType);
+          }
         }
 
         return {
           value: result,
+          petTypes: petTypes,
         };
       };
 
@@ -172,12 +183,15 @@ export function registerPetDetails() {
           ])
         )[0]; 
 
-        console.log(entity);
-
         return {
-          Name: getComponentValue(Name, entity)?.value as string,
-          Type: getComponentValue(ModifierType, entity)?.value as string,
-          Value: getComponentValue(ModifierValue, entity)?.value as string,
+          Individual: {
+            Name: getComponentValue(Name, entity)?.value as string,
+            Type: getComponentValue(ModifierType, entity)?.value as string,
+            Value: getComponentValue(ModifierValue, entity)?.value as string,
+          },
+          PetType:{
+            petType: getComponentValue(ModifierPetType, entity)?.value as string
+          }
         };
       };
 
@@ -194,6 +208,16 @@ export function registerPetDetails() {
           setDets(getDetails(getPetIndex(description)));
         }
       }, [description]);
+
+      const petTypes = (val: string[]) => {
+        if (!val) return;
+        let result = val[0];
+        
+        for (let i = 1; i < val.length; i++) {
+          result = result + " | " + val[i];
+        }
+        return result;
+      };
 
       const traitLines = dets?.traits.map((trait) => {
         return (
@@ -223,6 +247,7 @@ export function registerPetDetails() {
               <KamiBox>
                 <KamiBox style={{ gridColumn: 1, gridRow: 1 }}>
                   <KamiName>{dets?.petName} </KamiName>
+                  <KamiType>{petTypes(dets?.petTypes)}</KamiType>
                   <KamiImage src={dets?.uri} />
                 </KamiBox>
                 <KamiBox
@@ -307,12 +332,21 @@ const KamiName = styled.div`
   font-size: 22px;
   color: #333;
   text-align: center;
+  padding: 0px 0px 0px 0px;
+  font-family: Pixel;
+`;
+
+const KamiType = styled.div`
+  grid-row: 3;
+  font-size: 12px;
+  color: #333;
+  text-align: center;
   padding: 0px 0px 20px 0px;
   font-family: Pixel;
 `;
 
 const KamiDetails = styled.div`
-  grid-row: 2 / 5;
+  grid-row: 3 / 6;
 `;
 
 const KamiImage = styled.img`
