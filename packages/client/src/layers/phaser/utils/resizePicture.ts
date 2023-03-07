@@ -1,21 +1,19 @@
 export const resizePicture = () => {
-  let scale = 1;
-  const windowWidth = document.documentElement.clientWidth;
-  const windowHeight = document.documentElement.clientHeight;
+  const screenSizes = [
+    { width: 1366, height: 768, scale: 0.75 },
+    { width: 1536, height: 864, scale: 0.82 },
+    { width: 1920, height: 1080, scale: 0.85 },
+  ];
+  const { clientWidth: windowWidth, clientHeight: windowHeight } =
+    document.documentElement;
 
-  if (windowWidth <= 360 && windowHeight <= 640) {
-    scale = 0.15;
-  } else if (windowWidth <= 440 && windowHeight <= 900) {
-    scale = 0.33;
-  } else if (windowWidth <= 680 && windowHeight <= 900) {
-    scale = 0.5;
-  } else if (windowWidth <= 1366 && windowHeight <= 768) {
-    scale = 0.75;
-  } else if (windowWidth <= 1536 && windowHeight <= 864) {
-    scale = 0.82;
-  } else if (windowWidth <= 1920 && windowHeight <= 1080) {
-    scale = 0.85;
-  }
-  
-  return scale;
+  const screenSize = screenSizes.find(
+    ({ width, height }) => windowWidth <= width && windowHeight <= height
+  );
+
+  const scale = screenSize?.scale ?? 1;
+  const widthDiff = screenSize ? (screenSize.width - windowWidth) / 2 : 0;
+  const heightDiff = screenSize ? (screenSize.height - windowHeight) / 2 : 0;
+
+  return { scale, diff: { widthDiff, heightDiff } };
 };
