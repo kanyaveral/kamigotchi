@@ -13,8 +13,7 @@ import { registerMintProcess } from './MintProcess';
 import { registerPetMint } from './PetMint';
 import { registerPetDetails } from './PetDetails';
 import { registerChat } from './Chat';
-import { registerUpButton } from './UpButton';
-import { registerDownButton } from './DownButton';
+import { registerWorldMap } from './WorldMap';
 
 export function registerUIComponents() {
   registerLoadingState();
@@ -31,7 +30,6 @@ export function registerUIComponents() {
   registerChat();
   registerPetMint();
   registerPetDetails();
+  registerWorldMap();
   registerActionQueue();
-  registerUpButton();
-  registerDownButton();
 }
