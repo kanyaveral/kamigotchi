@@ -121,6 +121,17 @@ export function createPlayerAPI(systems: any) {
     return systems["system.TradeInitiate"].executeTyped(toID);
   }
 
+   /*********************
+   *       TRADE
+   *********************/
+  
+   // @dev feeds pet
+   // @param petID
+   // @param food type
+   function feedPet(petID: BigNumberish, food: number) {
+    return systems["system.Pet.Food"].executeTyped(petID, food);
+   }
+
   return {
     ERC721: {
       mint: mintPet,
@@ -147,6 +158,9 @@ export function createPlayerAPI(systems: any) {
       cancel: cancelTrade,
       confirm: confirmTrade,
       initiate: initiateTrade,
+    },
+    food: {
+      feed: feedPet,
     }
   };
 }

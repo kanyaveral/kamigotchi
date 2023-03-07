@@ -58,6 +58,12 @@
       ]
     },
     {
+      "name": "_devGiveTokensSystem",
+      "writeAccess": [
+        "CoinComponent"
+      ]
+    },
+    {
       "name": "_AddModifierSystem",
       "writeAccess": [
         "*"

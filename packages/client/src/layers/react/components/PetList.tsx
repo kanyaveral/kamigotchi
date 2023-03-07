@@ -20,17 +20,15 @@ import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
 import { ModalWrapper } from './styled/AnimModalWrapper';
 
 const ItemImages = new Map([
-  [1, pompom],
-  [2, gakki],
-  [3, ribbon],
-  [4, gum],
+  [1, gum],
+  [2, pompom],
+  [3, gakki],
 ]);
 
 const ItemNames = new Map([
-  [1, 'Pompom'],
-  [2, 'Gakki'],
-  [3, 'Ribbon'],
-  [4, 'Gum'],
+  [1, 'Gum'],
+  [2, 'Pompom'],
+  [3, 'Gakki'],
 ]);
 
 export function registerPetList() {
@@ -89,27 +87,21 @@ export function registerPetList() {
           {
             id: 1,
             itemIndex: 1,
-            image: pompom,
+            image: gum,
             balance: 0,
           },
           {
             id: 2,
             itemIndex: 2,
-            image: gakki,
+            image: pompom,
             balance: 0,
           },
           {
             id: 3,
             itemIndex: 3,
-            image: ribbon,
+            image: gakki,
             balance: 0,
           },
-          {
-            id: 4,
-            itemIndex: 4,
-            image: gum,
-            balance: 0,
-          }
         ];
       }
 
@@ -184,7 +176,8 @@ export function registerPetList() {
         Balance.update$,
         Coin.update$,
         State.update$,
-        StartTime.update$
+        StartTime.update$,
+        MediaURI.update$,
       ).pipe(
         map(() => {
           // get the operator entity of the controlling wallet
@@ -252,13 +245,14 @@ export function registerPetList() {
               pets,
               node: { id: nodeID },
             } as any,
+            world,
           };
         })
       );
     },
 
     // Render
-    ({ actions, api, data }) => {
+    ({ actions, api, data, world }) => {
       const { visibleDivs, setVisibleDivs } = dataStore();
       // console.log(data.pets);
 
@@ -325,6 +319,21 @@ export function registerPetList() {
           },
         });
       };
+
+      // feed pet, no inventory check
+      const feedPet = (petID: EntityID, food: number) => {
+        const actionID = `Collecting production at ${Date.now()}` as EntityID; // Date.now to have the actions ordered in the component browser
+        actions.add({
+          id: actionID,
+          components: {},
+          // on: data.????,
+          requirement: () => true,
+          updates: () => [],
+          execute: async () => {
+            return api.food.feed(petID, food);
+          },
+        }); 
+      }
 
       const hideModal = () => {
         const clickFX = new Audio(clickSound);
@@ -404,6 +413,21 @@ export function registerPetList() {
                   ) : (
                     <ThinButton>Select Node</ThinButton>
                   )}
+                    <ThinButton
+                      onClick={() => feedPet(kami.id, 1)}
+                    >
+                      Feed 1
+                    </ThinButton>
+                    <ThinButton
+                      onClick={() => feedPet(kami.id, 2)}
+                    >
+                      Feed 2
+                    </ThinButton>
+                    <ThinButton
+                      onClick={() => feedPet(kami.id, 3)}
+                    >
+                      Feed 3
+                    </ThinButton>
                 </KamiDetails>
               </KamiFacts>
             </KamiBox>
@@ -432,7 +456,11 @@ export function registerPetList() {
       }, [visibleDivs.petList]);
 
       return (
-        <ModalWrapper id="petlist_modal" isOpen={visibleDivs.petList}>
+        <ModalWrapper 
+        id="petlist_modal" 
+        isOpen={visibleDivs.petList}
+        style={{height: "75vh" }}
+        >
           <ModalContent>
             <TopGrid>
               <TopDescription>
@@ -443,13 +471,20 @@ export function registerPetList() {
             <ConsumableGrid>
               {ConsumableCells(data.operator.inventories)}
             </ConsumableGrid>
-            {KamiCards(data.pets)}
+            <Scrollable>
+              {KamiCards(data.pets)}
+            </Scrollable>
           </ModalContent >
         </ModalWrapper >
       );
     }
   );
 }
+
+const Scrollable = styled.div`
+  overflow: auto;
+  max-height: 100%;
+`;
 
 const ModalContent = styled.div`
   display: grid;
@@ -460,6 +495,8 @@ const ModalContent = styled.div`
   border-style: solid;
   border-width: 2px;
   border-color: black;
+
+  height: 100%;
 `;
 
 const Button = styled.button`

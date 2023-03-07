@@ -19,17 +19,15 @@ import { ModalWrapper } from './styled/AnimModalWrapper';
 import { dataStore } from '../store/createStore';
 
 const ItemImages = new Map([
-  [1, pompom],
-  [2, gakki],
-  [3, ribbon],
-  [4, gum],
+  [1, gum],
+  [2, pompom],
+  [3, gakki],
 ]);
 
 const ItemNames = new Map([
-  [1, 'Pom-Pom Fruit Candy'],
-  [2, 'Cookie Sticks'],
-  [3, 'Ribbon Licorice'],
-  [4, 'Maple-Flavor Ghost Gum'],
+  [1, 'Maple-Flavor Ghost Gum'],
+  [2, 'Pom-Pom Fruit Candy'],
+  [3, 'Cookie Sticks'],
 ]);
 
 // merchant window with listings. assumes at most 1 merchant per room
