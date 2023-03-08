@@ -4,7 +4,7 @@ import { resizePicture } from '../utils/resizePicture';
 import { triggerPetMintModal } from '../utils/triggerPetMintModal';
 import { getVendMachineCoordinates } from '../utils/coordinates';
 
-const scale = resizePicture();
+const { scale, diff } = resizePicture();
 
 export function room002() {
   return {
@@ -19,13 +19,13 @@ export function room002() {
       const vendMachineCoordinates = getVendMachineCoordinates(scale);
 
       const vend = scene.add.rectangle(
-        vendMachineCoordinates.x,
-        vendMachineCoordinates.y,
-        vendMachineCoordinates.width,
-        vendMachineCoordinates.height
+        vendMachineCoordinates.x - diff.widthDiff,
+        vendMachineCoordinates.y - diff.heightDiff,
+        vendMachineCoordinates.width - diff.widthDiff / 4,
+        vendMachineCoordinates.height - diff.heightDiff / 4
       );
 
-      scene.interactiveObjects.push(triggerPetMintModal(vend, 'Mint Pet'));
+      scene.interactiveObjects.push(triggerPetMintModal(vend));
     },
   };
 }

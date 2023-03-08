@@ -2,7 +2,7 @@ import { PhaserScene } from '../types';
 import { resizePicture } from '../utils/resizePicture';
 import room003image from '../../../public/assets/room3.png';
 
-const scale = resizePicture();
+const { scale } = resizePicture();
 
 export function room003() {
   return {

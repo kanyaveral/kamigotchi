@@ -1,10 +1,10 @@
 import { PhaserScene } from '../types';
 import { resizePicture } from '../utils/resizePicture';
 import room004image from '../../../public/assets/room4.png';
-import { getCouchCoordinates } from '../utils/coordinates';
+import { getGirlCoordinates } from '../utils/coordinates';
 import { triggerObjectModal } from '../utils/triggerObjectModal';
 
-const scale = resizePicture();
+const { scale, diff } = resizePicture();
 
 export function room004() {
   return {
@@ -16,21 +16,18 @@ export function room004() {
         .image(window.innerWidth / 2, window.innerHeight / 2, 'room004')
         .setScale(scale * 8.3);
 
-        const coordinates = getCouchCoordinates(scale);
+      const girlCoordinates = getGirlCoordinates(scale);
 
-        const girl = scene.add.rectangle(
-          coordinates.x,
-          coordinates.y,
-          coordinates.width,
-          coordinates.height
-        );
+      const girl = scene.add.rectangle(
+        girlCoordinates.x - diff.widthDiff,
+        girlCoordinates.y - diff.heightDiff,
+        girlCoordinates.width - diff.widthDiff / 4,
+        girlCoordinates.height - diff.heightDiff / 4,
+      );
 
-        scene.interactiveObjects.push(
-          triggerObjectModal(
-            girl,
-            'Buy something or get out.'
-          )
-        );
+      scene.interactiveObjects.push(
+        triggerObjectModal(girl, 'Buy something or get out.')
+      );
     },
   };
 }
