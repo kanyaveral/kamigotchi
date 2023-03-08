@@ -27,6 +27,7 @@ export type { IndexItemComponent } from "./IndexItemComponent";
 export type { IndexModifierComponent } from "./IndexModifierComponent";
 export type { IndexPetComponent } from "./IndexPetComponent";
 export type { IsFoodComponent } from "./IsFoodComponent";
+export type { IsFungibleComponent } from "./IsFungibleComponent";
 export type { IsInventoryComponent } from "./IsInventoryComponent";
 export type { IsListingComponent } from "./IsListingComponent";
 export type { IsMerchantComponent } from "./IsMerchantComponent";
@@ -109,6 +110,7 @@ export { IndexItemComponent__factory } from "./factories/IndexItemComponent__fac
 export { IndexModifierComponent__factory } from "./factories/IndexModifierComponent__factory";
 export { IndexPetComponent__factory } from "./factories/IndexPetComponent__factory";
 export { IsFoodComponent__factory } from "./factories/IsFoodComponent__factory";
+export { IsFungibleComponent__factory } from "./factories/IsFungibleComponent__factory";
 export { IsInventoryComponent__factory } from "./factories/IsInventoryComponent__factory";
 export { IsListingComponent__factory } from "./factories/IsListingComponent__factory";
 export { IsMerchantComponent__factory } from "./factories/IsMerchantComponent__factory";

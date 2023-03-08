@@ -23,6 +23,7 @@
     "IndexModifierComponent",
     "IndexPetComponent",
     "IsFoodComponent",
+    "IsFungibleComponent",
     "IsInventoryComponent",
     "IsListingComponent",
     "IsMerchantComponent",
@@ -118,6 +119,7 @@
         "CoinComponent",
         "IdHolderComponent",
         "IndexItemComponent",
+        "IsFungibleComponent",
         "IsInventoryComponent"
       ]
     },
@@ -213,6 +215,7 @@
     {
       "name": "TradeAddToSystem",
       "writeAccess": [
+        "IsFungibleComponent",
         "IsInventoryComponent",
         "BalanceComponent",
         "BlockLastComponent",

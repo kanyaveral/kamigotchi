@@ -87,7 +87,7 @@ library LibRegister {
     uint256 toID = (reversed) ? getDelegator(components, id) : getDelegatee(components, id);
 
     // Process each inventory associated with this register.
-    uint256[] memory registerInventoryIDs = LibInventory.getAll(components, id);
+    uint256[] memory registerInventoryIDs = LibInventory.getAllForHolder(components, id);
     for (uint256 i; i < registerInventoryIDs.length; i++) {
       fromInventoryID = registerInventoryIDs[i];
       itemIndex = LibInventory.getItemIndex(components, fromInventoryID);
