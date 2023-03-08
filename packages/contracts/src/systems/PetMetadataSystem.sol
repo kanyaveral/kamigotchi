@@ -137,6 +137,20 @@ contract PetMetadataSystem is System {
       );
   }
 
+  function _getPetType(uint256 entityID) public view returns (string memory) {
+    string[] memory types = LibModifier.getPetTypes(components, entityID);
+    return
+      string(
+        abi.encodePacked(
+          '{"trait_type": "',
+          "Type",
+          '", "value": "',
+          types[0], ' | ', types[1],
+          '"},\n'
+        )
+      );
+  }
+
   function _getBaseTraits(uint256 entityID) public view returns (string memory) {
     string memory result = "";
 
@@ -159,7 +173,8 @@ contract PetMetadataSystem is System {
         LibString.toCase(names[i], true), // genus, all caps
         0, // index, can vary
         ModStatus.NULL, 
-        "" // mod type, not searching
+        "", // mod type, not searching
+        "" // pet type, not searching
       )[0];
       string memory valName = LibModifier.getName(components, curID);
       string memory entry = string(

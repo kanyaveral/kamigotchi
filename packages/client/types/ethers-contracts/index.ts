@@ -45,6 +45,7 @@ export type { ListingBuySystem } from "./ListingBuySystem";
 export type { ListingSellSystem } from "./ListingSellSystem";
 export type { LocationComponent } from "./LocationComponent";
 export type { MediaURIComponent } from "./MediaURIComponent";
+export type { ModifierPetTypeComponent } from "./ModifierPetTypeComponent";
 export type { ModifierStatusComponent } from "./ModifierStatusComponent";
 export type { ModifierTypeComponent } from "./ModifierTypeComponent";
 export type { ModifierValueComponent } from "./ModifierValueComponent";
@@ -128,6 +129,7 @@ export { ListingBuySystem__factory } from "./factories/ListingBuySystem__factory
 export { ListingSellSystem__factory } from "./factories/ListingSellSystem__factory";
 export { LocationComponent__factory } from "./factories/LocationComponent__factory";
 export { MediaURIComponent__factory } from "./factories/MediaURIComponent__factory";
+export { ModifierPetTypeComponent__factory } from "./factories/ModifierPetTypeComponent__factory";
 export { ModifierStatusComponent__factory } from "./factories/ModifierStatusComponent__factory";
 export { ModifierTypeComponent__factory } from "./factories/ModifierTypeComponent__factory";
 export { ModifierValueComponent__factory } from "./factories/ModifierValueComponent__factory";

@@ -39,6 +39,7 @@
     "IsTradeComponent",
     "LocationComponent",
     "MediaURIComponent",
+    "ModifierPetTypeComponent",
     "ModifierStatusComponent",
     "ModifierTypeComponent",
     "ModifierValueComponent",

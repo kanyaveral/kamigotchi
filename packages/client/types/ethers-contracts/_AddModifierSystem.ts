@@ -30,7 +30,7 @@ import type {
 export interface _AddModifierSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(string,uint256,uint256,string,string)": FunctionFragment;
+    "executeTyped(string,uint256,uint256,string,string,string)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -53,6 +53,7 @@ export interface _AddModifierSystemInterface extends utils.Interface {
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
       PromiseOrValue<string>,
       PromiseOrValue<string>
     ]
@@ -130,6 +131,7 @@ export interface _AddModifierSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       modValue: PromiseOrValue<BigNumberish>,
       modType: PromiseOrValue<string>,
+      petType: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -152,6 +154,7 @@ export interface _AddModifierSystem extends BaseContract {
     index: PromiseOrValue<BigNumberish>,
     modValue: PromiseOrValue<BigNumberish>,
     modType: PromiseOrValue<string>,
+    petType: PromiseOrValue<string>,
     name: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -174,6 +177,7 @@ export interface _AddModifierSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       modValue: PromiseOrValue<BigNumberish>,
       modType: PromiseOrValue<string>,
+      petType: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
@@ -208,6 +212,7 @@ export interface _AddModifierSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       modValue: PromiseOrValue<BigNumberish>,
       modType: PromiseOrValue<string>,
+      petType: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -231,6 +236,7 @@ export interface _AddModifierSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       modValue: PromiseOrValue<BigNumberish>,
       modType: PromiseOrValue<string>,
+      petType: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
