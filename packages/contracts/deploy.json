@@ -47,7 +47,7 @@
     "PriceSellComponent",
     "PrototypeComponent",
     "StateComponent",
-    "StorageSizeComponent",
+    "StorageComponent",
     "TimeLastActionComponent",
     "TimeStartComponent"
   ],

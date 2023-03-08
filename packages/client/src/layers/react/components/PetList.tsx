@@ -72,7 +72,7 @@ export function registerPetList() {
             PetIndex,
             PlayerAddress,
             State,
-            StorageSize,
+            Storage,
             StartTime,
           },
           actions,
@@ -164,7 +164,7 @@ export function registerPetList() {
           charge: getComponentValue(Charge, index)?.value as number,
           lastChargeTime: getComponentValue(LastActionTime, index)
             ?.value as number,
-          storage: getComponentValue(StorageSize, index)?.value as number,
+          storage: getComponentValue(Storage, index)?.value as number,
           production,
         };
       };
@@ -332,7 +332,7 @@ export function registerPetList() {
           execute: async () => {
             return api.food.feed(petID, food);
           },
-        }); 
+        });
       }
 
       const hideModal = () => {
@@ -413,21 +413,21 @@ export function registerPetList() {
                   ) : (
                     <ThinButton>Select Node</ThinButton>
                   )}
-                    <ThinButton
-                      onClick={() => feedPet(kami.id, 1)}
-                    >
-                      Feed 1
-                    </ThinButton>
-                    <ThinButton
-                      onClick={() => feedPet(kami.id, 2)}
-                    >
-                      Feed 2
-                    </ThinButton>
-                    <ThinButton
-                      onClick={() => feedPet(kami.id, 3)}
-                    >
-                      Feed 3
-                    </ThinButton>
+                  <ThinButton
+                    onClick={() => feedPet(kami.id, 1)}
+                  >
+                    Feed 1
+                  </ThinButton>
+                  <ThinButton
+                    onClick={() => feedPet(kami.id, 2)}
+                  >
+                    Feed 2
+                  </ThinButton>
+                  <ThinButton
+                    onClick={() => feedPet(kami.id, 3)}
+                  >
+                    Feed 3
+                  </ThinButton>
                 </KamiDetails>
               </KamiFacts>
             </KamiBox>
@@ -456,10 +456,10 @@ export function registerPetList() {
       }, [visibleDivs.petList]);
 
       return (
-        <ModalWrapper 
-        id="petlist_modal" 
-        isOpen={visibleDivs.petList}
-        style={{height: "75vh" }}
+        <ModalWrapper
+          id="petlist_modal"
+          isOpen={visibleDivs.petList}
+          style={{ height: "75vh" }}
         >
           <ModalContent>
             <TopGrid>

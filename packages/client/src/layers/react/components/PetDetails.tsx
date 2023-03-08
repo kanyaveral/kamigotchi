@@ -45,29 +45,29 @@ export function registerPetDetails() {
     (layers) => {
       const {
         network: {
-          components: { 
+          components: {
             Balance,
             IsPet,
             IsModifier,
-            Genus, 
+            Genus,
             PetID,
             PetIndex,
             Name,
             MediaURI,
             Bandwidth,
             Capacity,
-            StorageSize,
+            Storage,
             ModifierType,
             ModifierValue
-           },
-           world,
+          },
+          world,
         },
       } = layers;
 
 
       return merge(
         IsPet.update$,
-        IsModifier.update$, 
+        IsModifier.update$,
         Balance.update$,
         PetID.update$,
         Genus.update$,
@@ -97,7 +97,7 @@ export function registerPetDetails() {
             ModifierType,
             Name,
             State,
-            StorageSize,
+            Storage,
           },
           world,
         },
@@ -134,7 +134,7 @@ export function registerPetDetails() {
             getComponentValue(Capacity, index)?.value as number
           ),
           storage: hexToString(
-            getComponentValue(StorageSize, index)?.value as number
+            getComponentValue(Storage, index)?.value as number
           ),
           traits: getBaseTraits(index)?.value as TraitDetails[],
         };
@@ -170,7 +170,7 @@ export function registerPetDetails() {
               value: world.entities[petIndex]
             })
           ])
-        )[0]; 
+        )[0];
 
         console.log(entity);
 
@@ -199,7 +199,7 @@ export function registerPetDetails() {
         return (
           <KamiList key={trait.Name}>
             {`${trait.Name}`}
-            <KamiText style={{paddingTop: '20px'}}>{`${trait.Type} | {${trait.Value}}`}</KamiText>
+            <KamiText style={{ paddingTop: '20px' }}>{`${trait.Type} | {${trait.Value}}`}</KamiText>
           </KamiList>
         );
       });

@@ -16,7 +16,7 @@ import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComp
 import { ChargeComponent, ID as ChargeCompID } from "components/ChargeComponent.sol";
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
-import { StorageSizeComponent, ID as StorSizeCompID } from "components/StorageSizeComponent.sol";
+import { StorageComponent, ID as StorSizeCompID } from "components/StorageComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
@@ -81,7 +81,7 @@ library LibPet {
   function setStats(IUintComp components, uint256 id) internal {
     BandwidthComponent(getAddressById(components, BandwidthCompID)).set(id, DEMO_BANDWIDTH);
     // BandwidthComponent(getAddressById(components, BandwidthCompID)).set(id, BASE_BANDWIDTH);
-    StorageSizeComponent(getAddressById(components, StorSizeCompID)).set(id, BASE_STORAGE);
+    StorageComponent(getAddressById(components, StorSizeCompID)).set(id, BASE_STORAGE);
 
     uint256 totalCapacity = BASE_CAPACITY;
     CapacityComponent(getAddressById(components, CapacityCompID)).set(
@@ -165,7 +165,7 @@ library LibPet {
   // calculate and return the total storage size of a pet (including equipment)
   // TODO: include equipment stats
   function getTotalStorage(IUintComp components, uint256 id) internal view returns (uint256) {
-    return StorageSizeComponent(getAddressById(components, StorSizeCompID)).getValue(id);
+    return StorageComponent(getAddressById(components, StorSizeCompID)).getValue(id);
   }
 
   // calculate and return the total bandwidth of a pet (including equipment)

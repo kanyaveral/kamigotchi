@@ -69,7 +69,7 @@ import { PriceBuyComponent, ID as PriceBuyComponentID } from "components/PriceBu
 import { PriceSellComponent, ID as PriceSellComponentID } from "components/PriceSellComponent.sol";
 import { PrototypeComponent, ID as PrototypeComponentID } from "components/PrototypeComponent.sol";
 import { StateComponent, ID as StateComponentID } from "components/StateComponent.sol";
-import { StorageSizeComponent, ID as StorageSizeComponentID } from "components/StorageSizeComponent.sol";
+import { StorageComponent, ID as StorageComponentID } from "components/StorageComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastActionComponentID } from "components/TimeLastActionComponent.sol";
 import { TimeStartComponent, ID as TimeStartComponentID } from "components/TimeStartComponent.sol";
 
@@ -149,7 +149,7 @@ PriceBuyComponent _PriceBuyComponent;
 PriceSellComponent _PriceSellComponent;
 PrototypeComponent _PrototypeComponent;
 StateComponent _StateComponent;
-StorageSizeComponent _StorageSizeComponent;
+StorageComponent _StorageComponent;
 TimeLastActionComponent _TimeLastActionComponent;
 TimeStartComponent _TimeStartComponent;
 
@@ -230,7 +230,7 @@ _PriceBuyComponent = PriceBuyComponent(component(PriceBuyComponentID));
 _PriceSellComponent = PriceSellComponent(component(PriceSellComponentID));
 _PrototypeComponent = PrototypeComponent(component(PrototypeComponentID));
 _StateComponent = StateComponent(component(StateComponentID));
-_StorageSizeComponent = StorageSizeComponent(component(StorageSizeComponentID));
+_StorageComponent = StorageComponent(component(StorageComponentID));
 _TimeLastActionComponent = TimeLastActionComponent(component(TimeLastActionComponentID));
 _TimeStartComponent = TimeStartComponent(component(TimeStartComponentID));
 

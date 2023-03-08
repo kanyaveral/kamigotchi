@@ -63,7 +63,7 @@ export type { ProductionStartSystem } from "./ProductionStartSystem";
 export type { ProductionStopSystem } from "./ProductionStopSystem";
 export type { PrototypeComponent } from "./PrototypeComponent";
 export type { StateComponent } from "./StateComponent";
-export type { StorageSizeComponent } from "./StorageSizeComponent";
+export type { StorageComponent } from "./StorageComponent";
 export type { StringComponent } from "./StringComponent";
 export type { TimeLastActionComponent } from "./TimeLastActionComponent";
 export type { TimeStartComponent } from "./TimeStartComponent";
@@ -146,7 +146,7 @@ export { ProductionStartSystem__factory } from "./factories/ProductionStartSyste
 export { ProductionStopSystem__factory } from "./factories/ProductionStopSystem__factory";
 export { PrototypeComponent__factory } from "./factories/PrototypeComponent__factory";
 export { StateComponent__factory } from "./factories/StateComponent__factory";
-export { StorageSizeComponent__factory } from "./factories/StorageSizeComponent__factory";
+export { StorageComponent__factory } from "./factories/StorageComponent__factory";
 export { StringComponent__factory } from "./factories/StringComponent__factory";
 export { TimeLastActionComponent__factory } from "./factories/TimeLastActionComponent__factory";
 export { TimeStartComponent__factory } from "./factories/TimeStartComponent__factory";

@@ -1,0 +1,153 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import { IUint256Component, IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { getAddressById, getComponentById } from "solecs/utils.sol";
+
+// level, capacity, storage, bandwidth, violence, harmony
+import { BandwidthComponent, ID as BandwidthCompID } from "components/BandwidthComponent.sol";
+import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComponent.sol";
+import { HarmonyComponent, ID as HarmonyCompID } from "components/HarmonyComponent.sol";
+import { StorageComponent, ID as StorageCompID } from "components/StorageComponent.sol";
+import { ViolenceComponent, ID as ViolenceCompID } from "components/ViolenceComponent.sol";
+
+// LibStat manages the retrieval and update of stats. This library differs from
+// others in the sense that it does not manage a single entity type, but rather
+// any entity that can have stats. Only handles uint256 components.
+library LibStat {
+  /////////////////
+  // INTERACTIONS
+
+  // Copy the set stats from one entity to another.
+  function copy(
+    IComponents components,
+    uint256 fromID,
+    uint256 toID
+  ) internal {
+    uint256[] memory componentIDs = getComponentsSet(components, fromID);
+    for (uint256 i = 0; i < componentIDs.length; i++) {
+      uint256 val = IUint256Component(getAddressById(components, componentIDs[i])).getValue(fromID);
+      IUint256Component(getAddressById(components, componentIDs[i])).set(toID, val);
+    }
+  }
+
+  // Wipe all set stats from an entity.
+  function wipe(IComponents components, uint256 id) internal {
+    uint256[] memory componentIDs = getComponentsSet(components, id);
+    for (uint256 i = 0; i < componentIDs.length; i++) {
+      getComponentById(components, componentIDs[i]).remove(id);
+    }
+  }
+
+  /////////////////
+  // CHECKERS
+
+  function hasBandwidth(IComponents components, uint256 id) internal view returns (bool) {
+    return BandwidthComponent(getAddressById(components, BandwidthCompID)).has(id);
+  }
+
+  function hasCapacity(IComponents components, uint256 id) internal view returns (bool) {
+    return CapacityComponent(getAddressById(components, CapacityCompID)).has(id);
+  }
+
+  function hasHarmony(IComponents components, uint256 id) internal view returns (bool) {
+    return HarmonyComponent(getAddressById(components, HarmonyCompID)).has(id);
+  }
+
+  function hasStorage(IComponents components, uint256 id) internal view returns (bool) {
+    return StorageComponent(getAddressById(components, StorageCompID)).has(id);
+  }
+
+  function hasViolence(IComponents components, uint256 id) internal view returns (bool) {
+    return ViolenceComponent(getAddressById(components, ViolenceCompID)).has(id);
+  }
+
+  /////////////////
+  // GETTERS
+
+  // Get all the component IDs of an entity's set stats
+  function getComponentsSet(IComponents components, uint256 id)
+    internal
+    view
+    returns (uint256[] memory)
+  {
+    uint256 statCount;
+    if (hasBandwidth(components, id)) statCount++;
+    if (hasCapacity(components, id)) statCount++;
+    if (hasHarmony(components, id)) statCount++;
+    if (hasStorage(components, id)) statCount++;
+    if (hasViolence(components, id)) statCount++;
+
+    uint256 i;
+    uint256[] memory statComponents = new uint256[](statCount);
+    if (hasBandwidth(components, id)) statComponents[i++] = BandwidthCompID;
+    if (hasCapacity(components, id)) statComponents[i++] = CapacityCompID;
+    if (hasHarmony(components, id)) statComponents[i++] = HarmonyCompID;
+    if (hasStorage(components, id)) statComponents[i++] = StorageCompID;
+    if (hasViolence(components, id)) statComponents[i++] = ViolenceCompID;
+    return statComponents;
+  }
+
+  function getBandwidth(IComponents components, uint256 id) internal view returns (uint256) {
+    return BandwidthComponent(getAddressById(components, BandwidthCompID)).getValue(id);
+  }
+
+  function getCapacity(IComponents components, uint256 id) internal view returns (uint256) {
+    return CapacityComponent(getAddressById(components, CapacityCompID)).getValue(id);
+  }
+
+  function getHarmony(IComponents components, uint256 id) internal view returns (uint256) {
+    return HarmonyComponent(getAddressById(components, HarmonyCompID)).getValue(id);
+  }
+
+  function getStorage(IComponents components, uint256 id) internal view returns (uint256) {
+    return StorageComponent(getAddressById(components, StorageCompID)).getValue(id);
+  }
+
+  function getViolence(IComponents components, uint256 id) internal view returns (uint256) {
+    return ViolenceComponent(getAddressById(components, ViolenceCompID)).getValue(id);
+  }
+
+  /////////////////
+  // SETTERS
+
+  function setBandwidth(
+    IComponents components,
+    uint256 id,
+    uint256 value
+  ) internal {
+    BandwidthComponent(getAddressById(components, BandwidthCompID)).set(id, value);
+  }
+
+  function setCapacity(
+    IComponents components,
+    uint256 id,
+    uint256 value
+  ) internal {
+    CapacityComponent(getAddressById(components, CapacityCompID)).set(id, value);
+  }
+
+  function setHarmony(
+    IComponents components,
+    uint256 id,
+    uint256 value
+  ) internal {
+    HarmonyComponent(getAddressById(components, HarmonyCompID)).set(id, value);
+  }
+
+  function setStorage(
+    IComponents components,
+    uint256 id,
+    uint256 value
+  ) internal {
+    StorageComponent(getAddressById(components, StorageCompID)).set(id, value);
+  }
+
+  function setViolence(
+    IComponents components,
+    uint256 id,
+    uint256 value
+  ) internal {
+    ViolenceComponent(getAddressById(components, ViolenceCompID)).set(id, value);
+  }
+}
