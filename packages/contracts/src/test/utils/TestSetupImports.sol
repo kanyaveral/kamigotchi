@@ -24,7 +24,7 @@ import { LibTrade } from "libraries/LibTrade.sol";
 // Components
 import { AddressPlayerComponent, ID as AddressPlayerComponentID } from "components/AddressPlayerComponent.sol";
 import { BalanceComponent, ID as BalanceComponentID } from "components/BalanceComponent.sol";
-import { BandwidthComponent, ID as BandwidthComponentID } from "components/BandwidthComponent.sol";
+import { PowerComponent, ID as PowerComponentID } from "components/PowerComponent.sol";
 import { BlockLastComponent, ID as BlockLastComponentID } from "components/BlockLastComponent.sol";
 import { CapacityComponent, ID as CapacityComponentID } from "components/CapacityComponent.sol";
 import { ChargeComponent, ID as ChargeComponentID } from "components/ChargeComponent.sol";
@@ -70,7 +70,6 @@ import { PriceBuyComponent, ID as PriceBuyComponentID } from "components/PriceBu
 import { PriceSellComponent, ID as PriceSellComponentID } from "components/PriceSellComponent.sol";
 import { PrototypeComponent, ID as PrototypeComponentID } from "components/PrototypeComponent.sol";
 import { StateComponent, ID as StateComponentID } from "components/StateComponent.sol";
-import { StorageComponent, ID as StorageComponentID } from "components/StorageComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastActionComponentID } from "components/TimeLastActionComponent.sol";
 import { TimeStartComponent, ID as TimeStartComponentID } from "components/TimeStartComponent.sol";
 
@@ -105,7 +104,7 @@ abstract contract TestSetupImports is MudTest {
 // Components vars
 AddressPlayerComponent _AddressPlayerComponent;
 BalanceComponent _BalanceComponent;
-BandwidthComponent _BandwidthComponent;
+PowerComponent _PowerComponent;
 BlockLastComponent _BlockLastComponent;
 CapacityComponent _CapacityComponent;
 ChargeComponent _ChargeComponent;
@@ -151,7 +150,6 @@ PriceBuyComponent _PriceBuyComponent;
 PriceSellComponent _PriceSellComponent;
 PrototypeComponent _PrototypeComponent;
 StateComponent _StateComponent;
-StorageComponent _StorageComponent;
 TimeLastActionComponent _TimeLastActionComponent;
 TimeStartComponent _TimeStartComponent;
 
@@ -187,7 +185,7 @@ super.setUp();
 
 _AddressPlayerComponent = AddressPlayerComponent(component(AddressPlayerComponentID));
 _BalanceComponent = BalanceComponent(component(BalanceComponentID));
-_BandwidthComponent = BandwidthComponent(component(BandwidthComponentID));
+_PowerComponent = PowerComponent(component(PowerComponentID));
 _BlockLastComponent = BlockLastComponent(component(BlockLastComponentID));
 _CapacityComponent = CapacityComponent(component(CapacityComponentID));
 _ChargeComponent = ChargeComponent(component(ChargeComponentID));
@@ -233,7 +231,6 @@ _PriceBuyComponent = PriceBuyComponent(component(PriceBuyComponentID));
 _PriceSellComponent = PriceSellComponent(component(PriceSellComponentID));
 _PrototypeComponent = PrototypeComponent(component(PrototypeComponentID));
 _StateComponent = StateComponent(component(StateComponentID));
-_StorageComponent = StorageComponent(component(StorageComponentID));
 _TimeLastActionComponent = TimeLastActionComponent(component(TimeLastActionComponentID));
 _TimeStartComponent = TimeStartComponent(component(TimeStartComponentID));
 

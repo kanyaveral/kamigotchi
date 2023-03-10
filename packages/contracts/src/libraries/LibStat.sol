@@ -4,11 +4,10 @@ pragma solidity ^0.8.0;
 import { IUint256Component, IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
-// level, capacity, storage, bandwidth, violence, harmony
-import { BandwidthComponent, ID as BandwidthCompID } from "components/BandwidthComponent.sol";
+// level, capacity, storage, power, violence, harmony
+import { PowerComponent, ID as PowerCompID } from "components/PowerComponent.sol";
 import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComponent.sol";
 import { HarmonyComponent, ID as HarmonyCompID } from "components/HarmonyComponent.sol";
-import { StorageComponent, ID as StorageCompID } from "components/StorageComponent.sol";
 import { ViolenceComponent, ID as ViolenceCompID } from "components/ViolenceComponent.sol";
 
 // LibStat manages the retrieval and update of stats. This library differs from
@@ -42,8 +41,8 @@ library LibStat {
   /////////////////
   // CHECKERS
 
-  function hasBandwidth(IComponents components, uint256 id) internal view returns (bool) {
-    return BandwidthComponent(getAddressById(components, BandwidthCompID)).has(id);
+  function hasPower(IComponents components, uint256 id) internal view returns (bool) {
+    return PowerComponent(getAddressById(components, PowerCompID)).has(id);
   }
 
   function hasCapacity(IComponents components, uint256 id) internal view returns (bool) {
@@ -52,10 +51,6 @@ library LibStat {
 
   function hasHarmony(IComponents components, uint256 id) internal view returns (bool) {
     return HarmonyComponent(getAddressById(components, HarmonyCompID)).has(id);
-  }
-
-  function hasStorage(IComponents components, uint256 id) internal view returns (bool) {
-    return StorageComponent(getAddressById(components, StorageCompID)).has(id);
   }
 
   function hasViolence(IComponents components, uint256 id) internal view returns (bool) {
@@ -72,24 +67,22 @@ library LibStat {
     returns (uint256[] memory)
   {
     uint256 statCount;
-    if (hasBandwidth(components, id)) statCount++;
+    if (hasPower(components, id)) statCount++;
     if (hasCapacity(components, id)) statCount++;
     if (hasHarmony(components, id)) statCount++;
-    if (hasStorage(components, id)) statCount++;
     if (hasViolence(components, id)) statCount++;
 
     uint256 i;
     uint256[] memory statComponents = new uint256[](statCount);
-    if (hasBandwidth(components, id)) statComponents[i++] = BandwidthCompID;
+    if (hasPower(components, id)) statComponents[i++] = PowerCompID;
     if (hasCapacity(components, id)) statComponents[i++] = CapacityCompID;
     if (hasHarmony(components, id)) statComponents[i++] = HarmonyCompID;
-    if (hasStorage(components, id)) statComponents[i++] = StorageCompID;
     if (hasViolence(components, id)) statComponents[i++] = ViolenceCompID;
     return statComponents;
   }
 
-  function getBandwidth(IComponents components, uint256 id) internal view returns (uint256) {
-    return BandwidthComponent(getAddressById(components, BandwidthCompID)).getValue(id);
+  function getPower(IComponents components, uint256 id) internal view returns (uint256) {
+    return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
   }
 
   function getCapacity(IComponents components, uint256 id) internal view returns (uint256) {
@@ -100,10 +93,6 @@ library LibStat {
     return HarmonyComponent(getAddressById(components, HarmonyCompID)).getValue(id);
   }
 
-  function getStorage(IComponents components, uint256 id) internal view returns (uint256) {
-    return StorageComponent(getAddressById(components, StorageCompID)).getValue(id);
-  }
-
   function getViolence(IComponents components, uint256 id) internal view returns (uint256) {
     return ViolenceComponent(getAddressById(components, ViolenceCompID)).getValue(id);
   }
@@ -111,12 +100,12 @@ library LibStat {
   /////////////////
   // SETTERS
 
-  function setBandwidth(
+  function setPower(
     IComponents components,
     uint256 id,
     uint256 value
   ) internal {
-    BandwidthComponent(getAddressById(components, BandwidthCompID)).set(id, value);
+    PowerComponent(getAddressById(components, PowerCompID)).set(id, value);
   }
 
   function setCapacity(
@@ -133,14 +122,6 @@ library LibStat {
     uint256 value
   ) internal {
     HarmonyComponent(getAddressById(components, HarmonyCompID)).set(id, value);
-  }
-
-  function setStorage(
-    IComponents components,
-    uint256 id,
-    uint256 value
-  ) internal {
-    StorageComponent(getAddressById(components, StorageCompID)).set(id, value);
   }
 
   function setViolence(

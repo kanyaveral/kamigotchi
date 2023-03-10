@@ -11,23 +11,21 @@ import { IdOperatorComponent, ID as IdOpCompID } from "components/IdOperatorComp
 import { IdOwnerComponent, ID as IdOwnerCompID } from "components/IdOwnerComponent.sol";
 import { IndexPetComponent, ID as IndexPetComponentID } from "components/IndexPetComponent.sol";
 import { IsPetComponent, ID as IsPetCompID } from "components/IsPetComponent.sol";
-import { BandwidthComponent, ID as BandwidthCompID } from "components/BandwidthComponent.sol";
+import { PowerComponent, ID as PowerCompID } from "components/PowerComponent.sol";
 import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComponent.sol";
 import { ChargeComponent, ID as ChargeCompID } from "components/ChargeComponent.sol";
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
-import { StorageComponent, ID as StorSizeCompID } from "components/StorageComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
 
 uint256 constant BASE_CAPACITY = 150;
-uint256 constant BASE_BANDWIDTH = 150;
-uint256 constant BASE_STORAGE = 500;
+uint256 constant BASE_POWER = 150;
 uint256 constant CHARGE_EPOCH = 600; // 10min
 
+uint256 constant DEMO_POWER = 15;
 uint256 constant DEMO_EPOCH = 1;
-uint256 constant DEMO_BANDWIDTH = 15;
 
 library LibPet {
   /////////////////
@@ -79,9 +77,8 @@ library LibPet {
   // set a pet's stats from its traits
   // TODO: actually set stats from traits. hardcoded currently
   function setStats(IUintComp components, uint256 id) internal {
-    BandwidthComponent(getAddressById(components, BandwidthCompID)).set(id, DEMO_BANDWIDTH);
-    // BandwidthComponent(getAddressById(components, BandwidthCompID)).set(id, BASE_BANDWIDTH);
-    StorageComponent(getAddressById(components, StorSizeCompID)).set(id, BASE_STORAGE);
+    PowerComponent(getAddressById(components, PowerCompID)).set(id, DEMO_POWER);
+    // PowerComponent(getAddressById(components, PowerCompID)).set(id, BASE_POWER);
 
     uint256 totalCapacity = BASE_CAPACITY;
     CapacityComponent(getAddressById(components, CapacityCompID)).set(
@@ -162,17 +159,11 @@ library LibPet {
   /////////////////
   // CALCULATIONS
 
-  // calculate and return the total storage size of a pet (including equipment)
+  // calculate and return the total power of a pet (including equipment)
   // TODO: include equipment stats
-  function getTotalStorage(IUintComp components, uint256 id) internal view returns (uint256) {
-    return StorageComponent(getAddressById(components, StorSizeCompID)).getValue(id);
-  }
-
-  // calculate and return the total bandwidth of a pet (including equipment)
-  // TODO: include equipment stats
-  // TODO: update this to bandwidth, soon:tm:
-  function getTotalBandwidth(IUintComp components, uint256 id) internal view returns (uint256) {
-    return BandwidthComponent(getAddressById(components, BandwidthCompID)).getValue(id);
+  // TODO: update this to power, soon:tm:
+  function getTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
+    return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
   }
 
   // calculate and return the total battery capacity of a pet (including equipment)

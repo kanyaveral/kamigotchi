@@ -27,9 +27,8 @@ type Details = {
   nftID: string;
   petName: string;
   uri: string;
-  bandwidth: string;
+  power: string;
   capacity: string;
-  storage: string;
   traits: TraitDetails[];
   petTypes: string[];
 };
@@ -52,16 +51,8 @@ export function registerPetDetails() {
             IsModifier,
             Genus,
             PetID,
-            PetIndex,
-            Name,
             MediaURI,
-            Bandwidth,
-            Capacity,
-            Storage,
-            ModifierType,
-            ModifierValue
           },
-          world,
         },
       } = layers;
 
@@ -86,7 +77,7 @@ export function registerPetDetails() {
       const {
         network: {
           components: {
-            Bandwidth,
+            Power,
             Capacity,
             Genus,
             IsPet,
@@ -99,7 +90,6 @@ export function registerPetDetails() {
             ModifierPetType,
             Name,
             State,
-            Storage,
           },
           world,
         },
@@ -130,14 +120,11 @@ export function registerPetDetails() {
           nftID: getComponentValue(PetIndex, index)?.value as string,
           petName: getComponentValue(Name, index)?.value as string,
           uri: getComponentValue(MediaURI, index)?.value as string,
-          bandwidth: hexToString(
-            getComponentValue(Bandwidth, index)?.value as number
+          power: hexToString(
+            getComponentValue(Power, index)?.value as number
           ),
           capacity: hexToString(
             getComponentValue(Capacity, index)?.value as number
-          ),
-          storage: hexToString(
-            getComponentValue(Storage, index)?.value as number
           ),
           traits: traitsHopper?.value as TraitDetails[],
           petTypes: traitsHopper?.petTypes as string[],
@@ -159,7 +146,7 @@ export function registerPetDetails() {
           let details = getTrait(petIndex, genusArr[i]);
           result.push(details.Individual);
 
-          if(details.PetType.petType && details.PetType.petType != "") {
+          if (details.PetType.petType && details.PetType.petType != "") {
             petTypes.push(details.PetType.petType);
           }
         }
@@ -189,7 +176,7 @@ export function registerPetDetails() {
             Type: getComponentValue(ModifierType, entity)?.value as string,
             Value: getComponentValue(ModifierValue, entity)?.value as string,
           },
-          PetType:{
+          PetType: {
             petType: getComponentValue(ModifierPetType, entity)?.value as string
           }
         };
@@ -198,6 +185,7 @@ export function registerPetDetails() {
       const hexToString = (num: BigNumberish) => {
         return BigNumber.from(num).toString();
       };
+
       /////////////////
       // Display values
 
@@ -209,10 +197,10 @@ export function registerPetDetails() {
         }
       }, [description]);
 
-      const petTypes = (val: string[]) => {
+      const petTypes = (val: string[] | undefined) => {
         if (!val) return;
         let result = val[0];
-        
+
         for (let i = 1; i < val.length; i++) {
           result = result + " | " + val[i];
         }
@@ -253,8 +241,7 @@ export function registerPetDetails() {
                 <KamiBox
                   style={{ gridColumn: 1, gridRow: 2, justifyItems: 'end' }}
                 >
-                  <KamiFacts>Bandwidth: {dets?.bandwidth} </KamiFacts>
-                  <KamiFacts>Storage: {dets?.storage} </KamiFacts>
+                  <KamiFacts>Power: {dets?.power} </KamiFacts>
                   <KamiFacts>Capacity: {dets?.capacity} </KamiFacts>
                 </KamiBox>
               </KamiBox>

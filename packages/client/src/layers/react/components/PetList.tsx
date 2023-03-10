@@ -53,7 +53,7 @@ export function registerPetList() {
             Capacity,
             Charge,
             Coin,
-            Bandwidth,
+            Power,
             HolderID,
             IsInventory,
             IsNode,
@@ -72,7 +72,6 @@ export function registerPetList() {
             PetIndex,
             PlayerAddress,
             State,
-            Storage,
             StartTime,
           },
           actions,
@@ -159,12 +158,11 @@ export function registerPetList() {
           index: getComponentValue(PetIndex, index)?.value as string,
           name: getComponentValue(Name, index)?.value as string,
           uri: getComponentValue(MediaURI, index)?.value as string,
-          bandwidth: getComponentValue(Bandwidth, index)?.value as number,
+          power: getComponentValue(Power, index)?.value as number,
           capacity: getComponentValue(Capacity, index)?.value as number,
           charge: getComponentValue(Charge, index)?.value as number,
           lastChargeTime: getComponentValue(LastActionTime, index)
             ?.value as number,
-          storage: getComponentValue(Storage, index)?.value as number,
           production,
         };
       };
@@ -363,8 +361,7 @@ export function registerPetList() {
           output = 0;
         if (kami.production && kami.production.state === 'ACTIVE') {
           duration = lastRefresh / 1000 - kami.production.startTime;
-          output = Math.round(duration * kami.bandwidth);
-          output = Math.min(output, kami.storage);
+          output = Math.round(duration * kami.power);
           output = Math.max(output, 0);
         }
         return output;
@@ -388,9 +385,9 @@ export function registerPetList() {
                   <Description>
                     Energy: {calcEnergy(kami)} %
                     <br />
-                    Bandwidth: {kami.bandwidth * 1} / hr
+                    Power: {kami.power * 1} / hr
                     <br />
-                    Storage: {calcOutput(kami)} / {kami.storage * 1}
+                    Harvest: {calcOutput(kami)} BYTES
                     <br />
                   </Description>
                   {kami.production && kami.production.state === 'ACTIVE' ? (

@@ -2,7 +2,7 @@
   "components": [
     "AddressPlayerComponent",
     "BalanceComponent",
-    "BandwidthComponent",
+    "PowerComponent",
     "BlockLastComponent",
     "CapacityComponent",
     "ChargeComponent",
@@ -48,7 +48,6 @@
     "PriceSellComponent",
     "PrototypeComponent",
     "StateComponent",
-    "StorageComponent",
     "TimeLastActionComponent",
     "TimeStartComponent"
   ],
