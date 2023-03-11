@@ -44,6 +44,8 @@
     "ModifierTypeComponent",
     "ModifierValueComponent",
     "NameComponent",
+    "NumSlotsBaseComponent",
+    "NumSlotsUpgradesComponent",
     "PriceBuyComponent",
     "PriceSellComponent",
     "PrototypeComponent",

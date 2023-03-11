@@ -4,10 +4,11 @@ pragma solidity ^0.8.0;
 import { IUint256Component, IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
-// level, capacity, storage, power, violence, harmony
-import { PowerComponent, ID as PowerCompID } from "components/PowerComponent.sol";
 import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComponent.sol";
 import { HarmonyComponent, ID as HarmonyCompID } from "components/HarmonyComponent.sol";
+import { NumSlotsBaseComponent, ID as NumSlotsBaseCompID } from "components/NumSlotsBaseComponent.sol";
+import { NumSlotsUpgradesComponent, ID as NumSlotsUpgradesCompID } from "components/NumSlotsUpgradesComponent.sol";
+import { PowerComponent, ID as PowerCompID } from "components/PowerComponent.sol";
 import { ViolenceComponent, ID as ViolenceCompID } from "components/ViolenceComponent.sol";
 
 // LibStat manages the retrieval and update of stats. This library differs from
@@ -57,10 +58,19 @@ library LibStat {
     return ViolenceComponent(getAddressById(components, ViolenceCompID)).has(id);
   }
 
+  function hasNumSlotsBase(IComponents components, uint256 id) internal view returns (bool) {
+    return NumSlotsBaseComponent(getAddressById(components, NumSlotsBaseCompID)).has(id);
+  }
+
+  function hasNumSlotsUpgrades(IComponents components, uint256 id) internal view returns (bool) {
+    return NumSlotsUpgradesComponent(getAddressById(components, NumSlotsUpgradesCompID)).has(id);
+  }
+
   /////////////////
   // GETTERS
 
-  // Get all the component IDs of an entity's set stats
+  // Get all the component IDs of an entity's set stats. NumSlots components are included
+  // with upgradable equipment in mind.
   function getComponentsSet(IComponents components, uint256 id)
     internal
     view
@@ -71,6 +81,8 @@ library LibStat {
     if (hasCapacity(components, id)) statCount++;
     if (hasHarmony(components, id)) statCount++;
     if (hasViolence(components, id)) statCount++;
+    if (hasNumSlotsBase(components, id)) statCount++;
+    if (hasNumSlotsUpgrades(components, id)) statCount++;
 
     uint256 i;
     uint256[] memory statComponents = new uint256[](statCount);
@@ -78,6 +90,8 @@ library LibStat {
     if (hasCapacity(components, id)) statComponents[i++] = CapacityCompID;
     if (hasHarmony(components, id)) statComponents[i++] = HarmonyCompID;
     if (hasViolence(components, id)) statComponents[i++] = ViolenceCompID;
+    if (hasNumSlotsBase(components, id)) statComponents[i++] = NumSlotsBaseCompID;
+    if (hasNumSlotsUpgrades(components, id)) statComponents[i++] = NumSlotsUpgradesCompID;
     return statComponents;
   }
 
@@ -95,6 +109,15 @@ library LibStat {
 
   function getViolence(IComponents components, uint256 id) internal view returns (uint256) {
     return ViolenceComponent(getAddressById(components, ViolenceCompID)).getValue(id);
+  }
+
+  function getNumSlotsBase(IComponents components, uint256 id) internal view returns (uint256) {
+    return NumSlotsBaseComponent(getAddressById(components, NumSlotsBaseCompID)).getValue(id);
+  }
+
+  function getNumSlotsUpgrades(IComponents components, uint256 id) internal view returns (uint256) {
+    return
+      NumSlotsUpgradesComponent(getAddressById(components, NumSlotsUpgradesCompID)).getValue(id);
   }
 
   /////////////////
@@ -130,5 +153,21 @@ library LibStat {
     uint256 value
   ) internal {
     ViolenceComponent(getAddressById(components, ViolenceCompID)).set(id, value);
+  }
+
+  function setNumSlotsBase(
+    IComponents components,
+    uint256 id,
+    uint256 value
+  ) internal {
+    NumSlotsBaseComponent(getAddressById(components, NumSlotsBaseCompID)).set(id, value);
+  }
+
+  function setNumSlotsUpgrades(
+    IComponents components,
+    uint256 id,
+    uint256 value
+  ) internal {
+    NumSlotsUpgradesComponent(getAddressById(components, NumSlotsUpgradesCompID)).set(id, value);
   }
 }
