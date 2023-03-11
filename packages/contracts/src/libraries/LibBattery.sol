@@ -9,8 +9,8 @@ import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById, entityToAddress, addressToEntity } from "solecs/utils.sol";
 import { LibString } from "solady/utils/LibString.sol";
 
-import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComponent.sol";
-import { ChargeComponent, ID as ChargeCompID } from "components/ChargeComponent.sol";
+import { HealthComponent, ID as HealthCompID } from "components/HealthComponent.sol";
+import { HealthCurrentComponent, ID as HealthCurrentCompID } from "components/HealthCurrentComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastActionCompID } from "components/TimeLastActionComponent.sol";
 import { BalanceComponent, ID as BalanceCompID } from "components/BalanceComponent.sol";
 import { IsFoodComponent, ID as IsFoodCompID } from "components/IsFoodComponent.sol";
@@ -29,47 +29,47 @@ library LibBattery {
   ///////////////////
   // CAL
 
-  // capacity is held as an arbituary value, no units
+  // healthCurrent is held as an arbituary value, no units
   // e.g. cap = 150, epoch = 10 mins,
-  //      cur = 150 * timeSinceCharge (min) / 10 (min)
-  // use charge to calculate, capacity is *max charge*
+  //      cur = 150 * timeSinceHealthCurrent (min) / 10 (min)
+  // use currHealth to calculate, healthCurrent is *max currHealth*
   function cal(IUintComp components, uint256 petID) internal view returns (uint256) {
-    uint256 charge = getCharge(components, petID);
-    uint256 lastChar = getLastCharge(components, petID);
+    uint256 currHealth = getHealthCurrent(components, petID);
+    uint256 lastChar = getLastHealthCurrent(components, petID);
 
-    // amount of charge that should be used
+    // amount of currHealth that should be used
     // (time diff) * 10 minutes
     uint256 charUsed = (block.timestamp - lastChar) / epoch;
 
-    if (charUsed >= charge) {
-      // used up all charge, out of battery
+    if (charUsed >= currHealth) {
+      // used up all currHealth, out of battery
       return 0;
     }
 
-    return charge - charUsed;
+    return currHealth - charUsed;
   }
 
   // returns true if still alive
-  function hasCharge(IUintComp components, uint256 petID) internal view returns (bool) {
+  function hasHealthCurrent(IUintComp components, uint256 petID) internal view returns (bool) {
     return cal(components, petID) == 0;
   }
 
-  // eat food, update charge
-  function chargeBat(
+  // eat food, update currHealth
+  function currHealthBat(
     IUintComp components,
     uint256 petID,
     uint256 toAdd
   ) internal {
-    uint256 capacity = getCapacity(components, petID);
+    uint256 healthCurrent = getHealth(components, petID);
     uint256 cur = cal(components, petID);
 
-    if (capacity < cur + toAdd) {
-      setCharge(components, petID, capacity);
+    if (healthCurrent < cur + toAdd) {
+      setHealthCurrent(components, petID, healthCurrent);
     } else {
-      setCharge(components, petID, cur + toAdd);
+      setHealthCurrent(components, petID, cur + toAdd);
     }
 
-    setLastCharge(components, petID, block.timestamp);
+    setLastHealthCurrent(components, petID, block.timestamp);
   }
 
   ///////////////////
@@ -100,38 +100,42 @@ library LibBattery {
 
   ///////////////////
   // GETTERS
-  function getCapacity(IUintComp components, uint256 petID) internal view returns (uint256) {
-    return CapacityComponent(getAddressById(components, CapacityCompID)).getValue(petID);
+  function getHealth(IUintComp components, uint256 petID) internal view returns (uint256) {
+    return HealthComponent(getAddressById(components, HealthCompID)).getValue(petID);
   }
 
-  function getCharge(IUintComp components, uint256 petID) internal view returns (uint256) {
-    return ChargeComponent(getAddressById(components, ChargeCompID)).getValue(petID);
+  function getHealthCurrent(IUintComp components, uint256 petID) internal view returns (uint256) {
+    return HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).getValue(petID);
   }
 
-  function getLastCharge(IUintComp components, uint256 petID) internal view returns (uint256) {
+  function getLastHealthCurrent(IUintComp components, uint256 petID)
+    internal
+    view
+    returns (uint256)
+  {
     return
       TimeLastActionComponent(getAddressById(components, TimeLastActionCompID)).getValue(petID);
   }
 
   ///////////////////
   // SETTERS
-  function setCapacity(
+  function setHealth(
     IUintComp components,
     uint256 petID,
     uint256 value
   ) internal {
-    CapacityComponent(getAddressById(components, CapacityCompID)).set(petID, value);
+    HealthComponent(getAddressById(components, HealthCompID)).set(petID, value);
   }
 
-  function setCharge(
+  function setHealthCurrent(
     IUintComp components,
     uint256 petID,
     uint256 value
   ) internal {
-    ChargeComponent(getAddressById(components, ChargeCompID)).set(petID, value);
+    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(petID, value);
   }
 
-  function setLastCharge(
+  function setLastHealthCurrent(
     IUintComp components,
     uint256 petID,
     uint256 value
@@ -141,12 +145,9 @@ library LibBattery {
 
   ///////////////////////
   // REGISTRY (to be depreciated)
-  
+
   // returns entity at registry
-  function get(
-    IUintComp components,
-    uint256 index
-  ) internal view returns (uint256) {
+  function get(IUintComp components, uint256 index) internal view returns (uint256) {
     QueryFragment[] memory fragments = new QueryFragment[](2);
     fragments[0] = QueryFragment(
       QueryType.Has,
@@ -158,7 +159,7 @@ library LibBattery {
       getComponentById(components, IndexCompID),
       abi.encode(index)
     );
-    
+
     uint256[] memory results = LibQuery.query(fragments);
 
     require(results.length == 1, "index does not exist in registry");
@@ -174,7 +175,9 @@ library LibBattery {
   ) internal {
     // no check
     IndexComp comp = IndexComp(getAddressById(components, IndexCompID));
-    IsRegistryEntryComponent isComp = IsRegistryEntryComponent(getAddressById(components, IsRegistryEntryCompID));
+    IsRegistryEntryComponent isComp = IsRegistryEntryComponent(
+      getAddressById(components, IsRegistryEntryCompID)
+    );
     comp.set(entityToAdd, index);
     isComp.set(entityToAdd);
   }

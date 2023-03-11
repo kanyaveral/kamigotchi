@@ -10,20 +10,16 @@ contract FoodTest is SetupTemplate {
   //   super.setUp();
   //   // vm.prank(deployer);
   //   // __InitSystem.executeTyped();
-
   //   vm.warp(START);
   //   _mintPets(1);
   // }
-
-  // function testCharge() public {
+  // function testHealthCurrent() public {
   //   assertEq(
-  //     150, // max charge
+  //     150, // max currHealth
   //     LibBattery.cal(components, petOneEntityID)
   //   );
-
   //   vm.warp(START + 10 seconds);
   //   assertEq(140, LibBattery.cal(components, petOneEntityID));
-
   //   vm.warp(START + 150 seconds);
   //   assertEq(0, LibBattery.cal(components, petOneEntityID));
   // }

@@ -45,7 +45,7 @@ contract PetMetadataSystem is System {
     require(_revealed, "collection not yet revealed");
     uint256 tokenID = abi.decode(arguments, (uint256));
     uint256 entityID = LibPet.indexToID(components, tokenID);
-    
+
     uint256 operatorID = LibOperator.getByAddress(components, msg.sender);
     require(LibPet.getOperator(components, entityID) == operatorID, "Pet: not urs");
 
@@ -92,7 +92,6 @@ contract PetMetadataSystem is System {
     return execute(abi.encode(tokenID));
   }
 
-
   /*********************
    *  METADATA ASSEMBLER
    **********************/
@@ -129,9 +128,9 @@ contract PetMetadataSystem is System {
       string(
         abi.encodePacked(
           '{"trait_type": "',
-          "Battery Capacity",
+          "Battery Health",
           '", "value": "',
-          LibString.toString(LibBattery.getCapacity(components, entityID)),
+          LibString.toString(LibBattery.getHealth(components, entityID)),
           '"},\n'
         )
       );
@@ -145,7 +144,9 @@ contract PetMetadataSystem is System {
           '{"trait_type": "',
           "Type",
           '", "value": "',
-          types[0], ' | ', types[1],
+          types[0],
+          " | ",
+          types[1],
           '"},\n'
         )
       );
@@ -172,7 +173,7 @@ contract PetMetadataSystem is System {
         entityID, // petID
         LibString.toCase(names[i], true), // genus, all caps
         0, // index, can vary
-        ModStatus.NULL, 
+        ModStatus.NULL,
         "", // mod type, not searching
         "" // pet type, not searching
       )[0];
