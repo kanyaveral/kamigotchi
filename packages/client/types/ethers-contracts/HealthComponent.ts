@@ -27,7 +27,7 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export interface ChargeComponentInterface extends utils.Interface {
+export interface HealthComponentInterface extends utils.Interface {
   functions: {
     "authorizeWriter(address)": FunctionFragment;
     "getEntities()": FunctionFragment;
@@ -203,12 +203,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface ChargeComponent extends BaseContract {
+export interface HealthComponent extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: ChargeComponentInterface;
+  interface: HealthComponentInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

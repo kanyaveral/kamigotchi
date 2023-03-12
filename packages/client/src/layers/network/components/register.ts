@@ -43,7 +43,6 @@ export function createComponents(world: any) {
     // Indices
     ItemIndex: defineNumberComponent(world, { id: "ItemIndex", metadata: { contractId: "component.Index.Item" } }),
     ModifierIndex: defineNumberComponent(world, { id: "ModifierIndex", metadata: { contractId: "component.Index.Modifier" } }),
-    Genus: defineStringComponent(world, { id: "Genus", metadata: { contractId: "component.Index.Genus" } }),
     PetIndex: defineStringComponent(world, { id: "PetIndex", metadata: { contractId: "component.Index.Pet" } }),
 
     // Values
@@ -51,6 +50,7 @@ export function createComponents(world: any) {
     BlockLast: defineNumberComponent(world, { id: "BlockLast", metadata: { contractId: "component.BlockLast" } }),
     Coin: defineNumberComponent(world, { id: "Coin", metadata: { contractId: "component.Coin" } }),
     Exits: defineNumberArrayComponent(world, "Exits", "component.Exits"),
+    Genus: defineStringComponent(world, { id: "Genus", metadata: { contractId: "component.Genus" } }),
     Health: defineNumberComponent(world, { id: "Health", metadata: { contractId: "component.Health" } }),
     HealthCurrent: defineNumberComponent(world, { id: "HealthCurrent", metadata: { contractId: "component.HealthCurrent" } }),
     Location: defineNumberComponent(world, { id: "Location", metadata: { contractId: "component.Location" } }),

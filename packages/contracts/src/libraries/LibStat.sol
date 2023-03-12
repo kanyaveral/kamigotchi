@@ -64,7 +64,7 @@ library LibStat {
   /////////////////
   // GETTERS
 
-  // Get all the component IDs of an entity's set stats. NumSlots components are included
+  // Get all the component IDs of an entity's set stats. Slots Component is included
   // with upgradable equipment in mind.
   function getComponentsSet(IComponents components, uint256 id)
     internal
