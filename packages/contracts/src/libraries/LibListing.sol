@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
@@ -27,7 +27,7 @@ library LibListing {
   // creates a merchant listing with the specified parameters
   function create(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 merchantID,
     uint256 itemIndex,
     uint256 buyPrice,
@@ -52,7 +52,7 @@ library LibListing {
   // processes a buy for amt of item from a listing to an operator. assumes the operator already
   // has the appropriate inventory entity
   function buyFrom(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 operatorID,
     uint256 amt
@@ -73,7 +73,7 @@ library LibListing {
 
   // processes a sell for amt of item from an operator to a listing
   function sellTo(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 operatorID,
     uint256 amt
@@ -96,12 +96,12 @@ library LibListing {
   // COMPONENT RETRIEVAL
 
   // return the merchant ID of a listing
-  function getMerchant(IComponents components, uint256 id) internal view returns (uint256) {
+  function getMerchant(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdMerchantComponent(getAddressById(components, IdMerchantCompID)).getValue(id);
   }
 
   // return the item index of a listing
-  function getItemIndex(IComponents components, uint256 id) internal view returns (uint256) {
+  function getItemIndex(IUintComp components, uint256 id) internal view returns (uint256) {
     return IndexItemComponent(getAddressById(components, IndexItemCompID)).getValue(id);
   }
 
@@ -110,7 +110,7 @@ library LibListing {
 
   // gets an item listing from a merchant by its index
   function get(
-    IComponents components,
+    IUintComp components,
     uint256 merchantID,
     uint256 itemIndex
   ) internal view returns (uint256 result) {
@@ -121,7 +121,7 @@ library LibListing {
   }
 
   // gets all listings from a merchant
-  function getAllForMerchant(IComponents components, uint256 merchantID)
+  function getAllForMerchant(IUintComp components, uint256 merchantID)
     internal
     view
     returns (uint256[] memory)
@@ -131,7 +131,7 @@ library LibListing {
 
   // Retrieves all listingsbased on any defined filters
   function _getAllX(
-    IComponents components,
+    IUintComp components,
     uint256 merchantID,
     uint256 itemIndex
   ) internal view returns (uint256[] memory) {

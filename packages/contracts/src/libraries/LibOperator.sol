@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
@@ -22,7 +22,7 @@ library LibOperator {
   // Create an account operator
   function create(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     address playerAddr,
     address ownerAddr
   ) internal returns (uint256) {
@@ -36,7 +36,7 @@ library LibOperator {
 
   // Move the Operator to a room
   function move(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 to
   ) internal {
@@ -47,7 +47,7 @@ library LibOperator {
   // SETTERS
 
   function setAddress(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     address addr
   ) internal returns (uint256) {
@@ -56,7 +56,7 @@ library LibOperator {
   }
 
   function setName(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     string memory name
   ) internal returns (uint256) {
@@ -71,7 +71,7 @@ library LibOperator {
   // This function assumes that the entity id provided belongs to a character.
   // NOTE(ja): This function can include any other checks we want moving forward.
   function canMoveTo(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 to
   ) internal view returns (bool) {
@@ -83,17 +83,17 @@ library LibOperator {
   // COMPONENT RETRIEVAL
 
   // get the address of an operator
-  function getAddress(IComponents components, uint256 id) internal view returns (address) {
+  function getAddress(IUintComp components, uint256 id) internal view returns (address) {
     return AddressPlayerComponent(getAddressById(components, AddrPlayerCompID)).getValue(id);
   }
 
   // gets the location of a specified account operator
-  function getLocation(IComponents components, uint256 id) internal view returns (uint256) {
+  function getLocation(IUintComp components, uint256 id) internal view returns (uint256) {
     return LocationComponent(getAddressById(components, LocCompID)).getValue(id);
   }
 
   // gets the OwnerID (address) of a specified account operator as a uint
-  function getOwner(IComponents components, uint256 id) internal view returns (uint256) {
+  function getOwner(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdOwnerComponent(getAddressById(components, IdOwnerCompID)).getValue(id);
   }
 
@@ -101,7 +101,7 @@ library LibOperator {
   // QUERIES
 
   // Get an operator entity by Wallet address. Assume only 1.
-  function getByAddress(IComponents components, address wallet)
+  function getByAddress(IUintComp components, address wallet)
     internal
     view
     returns (uint256 result)
@@ -113,7 +113,7 @@ library LibOperator {
   }
 
   // Get the operator of an owner. Assume only 1.
-  function getByOwner(IComponents components, uint256 ownerID)
+  function getByOwner(IUintComp components, uint256 ownerID)
     internal
     view
     returns (uint256 result)
@@ -125,13 +125,13 @@ library LibOperator {
   }
 
   // Get the operator of an owner by the owner's address. Assume only 1.
-  function getByOwner(IComponents components, address owner) internal view returns (uint256) {
+  function getByOwner(IUintComp components, address owner) internal view returns (uint256) {
     return getByOwner(components, addressToEntity(owner));
   }
 
   // Get all operator entities matching the specified filters.
   function _getAllX(
-    IComponents components,
+    IUintComp components,
     address wallet,
     uint256 ownerID,
     uint256 location

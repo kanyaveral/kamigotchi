@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
@@ -29,7 +29,7 @@ library LibRegister {
   // Create a register.
   function create(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 delegatorID, // assignor
     uint256 delegateeID // assignee
   ) internal returns (uint256) {
@@ -46,7 +46,7 @@ library LibRegister {
   // @return uint ID of the created (register) ItemInventory
   function addTo(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 itemIndex,
     uint256 amt
@@ -76,7 +76,7 @@ library LibRegister {
   // Process the contents of a register from the register to the specified entity.
   function process(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 id,
     bool reversed
   ) internal {
@@ -109,7 +109,7 @@ library LibRegister {
   // Revert all inventory and token balances in a register back to the delegator of the register.
   function reverse(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 id
   ) internal {
     process(world, components, id, true);
@@ -119,22 +119,22 @@ library LibRegister {
   /////////////////
   // COMPONENT SETTERS
 
-  function confirm(IComponents components, uint256 id) internal {
+  function confirm(IUintComp components, uint256 id) internal {
     StateComponent(getAddressById(components, StateCompID)).set(id, string("CONFIRMED"));
   }
 
-  function cancel(IComponents components, uint256 id) internal {
+  function cancel(IUintComp components, uint256 id) internal {
     StateComponent(getAddressById(components, StateCompID)).set(id, string("CANCELED"));
   }
 
   /////////////////
   // COMPONENT RETRIEVAL
 
-  function getDelegatee(IComponents components, uint256 id) internal view returns (uint256) {
+  function getDelegatee(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdDelegateeComponent(getAddressById(components, IdDelegateeCompID)).getValue(id);
   }
 
-  function getDelegator(IComponents components, uint256 id) internal view returns (uint256) {
+  function getDelegator(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdDelegatorComponent(getAddressById(components, IdDelegatorCompID)).getValue(id);
   }
 
@@ -143,7 +143,7 @@ library LibRegister {
 
   // Get the active register for a delegator, delegatee combo. Assume only 1
   function get(
-    IComponents components,
+    IUintComp components,
     uint256 delegatorID,
     uint256 delegateeID
   ) internal view returns (uint256 result) {
@@ -155,7 +155,7 @@ library LibRegister {
 
   // Retrieves all registers based on any defined filters
   function _getAllX(
-    IComponents components,
+    IUintComp components,
     uint256 delegatorID,
     uint256 delegateeID,
     string memory state

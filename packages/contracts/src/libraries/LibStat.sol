@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IUint256Component, IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component, IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
 import { HealthComponent, ID as HealthCompID } from "components/HealthComponent.sol";
@@ -19,7 +19,7 @@ library LibStat {
 
   // Copy the set stats from one entity to another.
   function copy(
-    IComponents components,
+    IUintComp components,
     uint256 fromID,
     uint256 toID
   ) internal {
@@ -31,7 +31,7 @@ library LibStat {
   }
 
   // Wipe all set stats from an entity.
-  function wipe(IComponents components, uint256 id) internal {
+  function wipe(IUintComp components, uint256 id) internal {
     uint256[] memory componentIDs = getComponentsSet(components, id);
     for (uint256 i = 0; i < componentIDs.length; i++) {
       getComponentById(components, componentIDs[i]).remove(id);
@@ -41,23 +41,23 @@ library LibStat {
   /////////////////
   // CHECKERS
 
-  function hasHarmony(IComponents components, uint256 id) internal view returns (bool) {
+  function hasHarmony(IUintComp components, uint256 id) internal view returns (bool) {
     return HarmonyComponent(getAddressById(components, HarmonyCompID)).has(id);
   }
 
-  function hasHealth(IComponents components, uint256 id) internal view returns (bool) {
+  function hasHealth(IUintComp components, uint256 id) internal view returns (bool) {
     return HealthComponent(getAddressById(components, HealthCompID)).has(id);
   }
 
-  function hasPower(IComponents components, uint256 id) internal view returns (bool) {
+  function hasPower(IUintComp components, uint256 id) internal view returns (bool) {
     return PowerComponent(getAddressById(components, PowerCompID)).has(id);
   }
 
-  function hasSlots(IComponents components, uint256 id) internal view returns (bool) {
+  function hasSlots(IUintComp components, uint256 id) internal view returns (bool) {
     return SlotsComponent(getAddressById(components, SlotsCompID)).has(id);
   }
 
-  function hasViolence(IComponents components, uint256 id) internal view returns (bool) {
+  function hasViolence(IUintComp components, uint256 id) internal view returns (bool) {
     return ViolenceComponent(getAddressById(components, ViolenceCompID)).has(id);
   }
 
@@ -66,7 +66,7 @@ library LibStat {
 
   // Get all the component IDs of an entity's set stats. Slots Component is included
   // with upgradable equipment in mind.
-  function getComponentsSet(IComponents components, uint256 id)
+  function getComponentsSet(IUintComp components, uint256 id)
     internal
     view
     returns (uint256[] memory)
@@ -88,23 +88,23 @@ library LibStat {
     return statComponents;
   }
 
-  function getHarmony(IComponents components, uint256 id) internal view returns (uint256) {
+  function getHarmony(IUintComp components, uint256 id) internal view returns (uint256) {
     return HarmonyComponent(getAddressById(components, HarmonyCompID)).getValue(id);
   }
 
-  function getHealth(IComponents components, uint256 id) internal view returns (uint256) {
+  function getHealth(IUintComp components, uint256 id) internal view returns (uint256) {
     return HealthComponent(getAddressById(components, HealthCompID)).getValue(id);
   }
 
-  function getPower(IComponents components, uint256 id) internal view returns (uint256) {
+  function getPower(IUintComp components, uint256 id) internal view returns (uint256) {
     return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
   }
 
-  function getSlots(IComponents components, uint256 id) internal view returns (uint256) {
+  function getSlots(IUintComp components, uint256 id) internal view returns (uint256) {
     return SlotsComponent(getAddressById(components, SlotsCompID)).getValue(id);
   }
 
-  function getViolence(IComponents components, uint256 id) internal view returns (uint256) {
+  function getViolence(IUintComp components, uint256 id) internal view returns (uint256) {
     return ViolenceComponent(getAddressById(components, ViolenceCompID)).getValue(id);
   }
 
@@ -112,7 +112,7 @@ library LibStat {
   // SETTERS
 
   function setHarmony(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 value
   ) internal {
@@ -120,7 +120,7 @@ library LibStat {
   }
 
   function setHealth(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 value
   ) internal {
@@ -128,7 +128,7 @@ library LibStat {
   }
 
   function setPower(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 value
   ) internal {
@@ -136,7 +136,7 @@ library LibStat {
   }
 
   function setSlots(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 value
   ) internal {
@@ -144,7 +144,7 @@ library LibStat {
   }
 
   function setViolence(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 value
   ) internal {

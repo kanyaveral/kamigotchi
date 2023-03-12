@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
@@ -25,7 +25,7 @@ library LibTrade {
   // Create a trade and set initial values.
   function create(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 aliceID,
     uint256 bobID
   ) internal returns (uint256) {
@@ -41,7 +41,7 @@ library LibTrade {
   // Accept the trade and create a register for both parties
   function accept(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 id
   ) internal {
     IsRequestComponent(getAddressById(components, IsRequestCompID)).remove(id);
@@ -56,7 +56,7 @@ library LibTrade {
   // Cancel an existing trade. World required bc LibRegister.reverse calls LibRegister.process
   function cancel(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 id
   ) internal {
     StateComponent(getAddressById(components, StateCompID)).set(id, string("CANCELED"));
@@ -80,7 +80,7 @@ library LibTrade {
   // TODO(jb): ? delete all the created inventory components
   function process(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 id
   ) internal returns (bool) {
     uint256 requesterID = getRequestee(components, id);
@@ -98,7 +98,7 @@ library LibTrade {
 
   // Check whether an operator is the requester or requestee in a trade.
   function hasParticipant(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 entityID
   ) internal view returns (bool) {
@@ -107,7 +107,7 @@ library LibTrade {
 
   // Check whether a trade has the specified state.
   function hasState(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     string memory state
   ) internal view returns (bool) {
@@ -115,7 +115,7 @@ library LibTrade {
   }
 
   // Check whether a trade is confirmed by both parties. Assumes exactly 2 parties
-  function isDoubleConfirmed(IComponents components, uint256 id) internal view returns (bool) {
+  function isDoubleConfirmed(IUintComp components, uint256 id) internal view returns (bool) {
     uint256[] memory registers = LibTrade.getRegisters(components, id);
     return
       Utils.hasState(components, registers[0], "CONFIRMED") &&
@@ -125,11 +125,11 @@ library LibTrade {
   /////////////////
   // COMPONENT RETRIEVAL
 
-  function getRequestee(IComponents components, uint256 id) internal view returns (uint256) {
+  function getRequestee(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdRequesteeComponent(getAddressById(components, IdReqeeCompID)).getValue(id);
   }
 
-  function getRequester(IComponents components, uint256 id) internal view returns (uint256) {
+  function getRequester(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdRequesterComponent(getAddressById(components, IdReqerCompID)).getValue(id);
   }
 
@@ -138,7 +138,7 @@ library LibTrade {
 
   // Gets active trade request Alice => Bob. Identified by IsTrade, INITIATED. Assume only 1.
   function getRequest(
-    IComponents components,
+    IUintComp components,
     uint256 aliceID,
     uint256 bobID
   ) internal view returns (uint256 result) {
@@ -149,18 +149,14 @@ library LibTrade {
   }
 
   // get the registers of this trade entity
-  function getRegisters(IComponents components, uint256 id)
-    internal
-    view
-    returns (uint256[] memory)
-  {
+  function getRegisters(IUintComp components, uint256 id) internal view returns (uint256[] memory) {
     return LibRegister._getAllX(components, 0, id, "");
   }
 
   // Retrieves all trades based on any defined filters. Doesn't include IsRequest filter
   // as that's redundant to the State filter (STATE == "INITIATED").
   function _getAllX(
-    IComponents components,
+    IUintComp components,
     uint256 aliceID,
     uint256 bobID,
     string memory state

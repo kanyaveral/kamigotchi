@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import { LibString } from "solady/utils/LibString.sol";
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
@@ -39,7 +39,7 @@ library LibRegistryItem {
   // Create a registry entry for an equipment item. (e.g. armor, helmet, etc.)
   function createEquip(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 equipIndex,
     string memory name,
     string memory type_,
@@ -68,7 +68,7 @@ library LibRegistryItem {
   // Create a Registry entry for a Mod item. (e.g. cpu, gem, etc.)
   function createMod(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 modIndex,
     string memory name,
     uint256 health,
@@ -94,7 +94,7 @@ library LibRegistryItem {
   // Q: should we run zero-value checks for name and health? (probably on system level)
   function createFood(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 foodIndex,
     string memory name,
     uint256 health
@@ -114,7 +114,7 @@ library LibRegistryItem {
 
   // set the field values of a food item registry entry
   function setFood(
-    IComponents components,
+    IUintComp components,
     uint256 foodIndex,
     string memory name,
     uint256 health
@@ -129,70 +129,70 @@ library LibRegistryItem {
   /////////////////
   // CHECKERS
 
-  function isInstance(IComponents components, uint256 id) internal view returns (bool) {
+  function isInstance(IUintComp components, uint256 id) internal view returns (bool) {
     return isRegistry(components, id) && hasItemIndex(components, id);
   }
 
-  function isRegistry(IComponents components, uint256 id) internal view returns (bool) {
+  function isRegistry(IUintComp components, uint256 id) internal view returns (bool) {
     return IsRegistryComponent(getAddressById(components, IsRegCompID)).has(id);
   }
 
-  function isFungible(IComponents components, uint256 id) internal view returns (bool) {
+  function isFungible(IUintComp components, uint256 id) internal view returns (bool) {
     return IsFungibleComponent(getAddressById(components, IsFungCompID)).has(id);
   }
 
-  function isNonFungible(IComponents components, uint256 id) internal view returns (bool) {
+  function isNonFungible(IUintComp components, uint256 id) internal view returns (bool) {
     return IsNonFungibleComponent(getAddressById(components, IsNonFungCompID)).has(id);
   }
 
-  function hasEquipIndex(IComponents components, uint256 id) internal view returns (bool) {
+  function hasEquipIndex(IUintComp components, uint256 id) internal view returns (bool) {
     return IndexEquipComponent(getAddressById(components, IndexEquipCompID)).has(id);
   }
 
-  function hasFoodIndex(IComponents components, uint256 id) internal view returns (bool) {
+  function hasFoodIndex(IUintComp components, uint256 id) internal view returns (bool) {
     return IndexFoodComponent(getAddressById(components, IndexFoodCompID)).has(id);
   }
 
-  function hasItemIndex(IComponents components, uint256 id) internal view returns (bool) {
+  function hasItemIndex(IUintComp components, uint256 id) internal view returns (bool) {
     return IndexItemComponent(getAddressById(components, IndexItemCompID)).has(id);
   }
 
-  function hasModIndex(IComponents components, uint256 id) internal view returns (bool) {
+  function hasModIndex(IUintComp components, uint256 id) internal view returns (bool) {
     return IndexModifierComponent(getAddressById(components, IndexModCompID)).has(id);
   }
 
-  function hasName(IComponents components, uint256 id) internal view returns (bool) {
+  function hasName(IUintComp components, uint256 id) internal view returns (bool) {
     return NameComponent(getAddressById(components, NameCompID)).has(id);
   }
 
-  function hasType(IComponents components, uint256 id) internal view returns (bool) {
+  function hasType(IUintComp components, uint256 id) internal view returns (bool) {
     return TypeComponent(getAddressById(components, TypeCompID)).has(id);
   }
 
   /////////////////
   // GETTERS
 
-  function getEquipIndex(IComponents components, uint256 id) internal view returns (uint256) {
+  function getEquipIndex(IUintComp components, uint256 id) internal view returns (uint256) {
     return IndexEquipComponent(getAddressById(components, IndexEquipCompID)).getValue(id);
   }
 
-  function getFoodIndex(IComponents components, uint256 id) internal view returns (uint256) {
+  function getFoodIndex(IUintComp components, uint256 id) internal view returns (uint256) {
     return IndexFoodComponent(getAddressById(components, IndexFoodCompID)).getValue(id);
   }
 
-  function getItemIndex(IComponents components, uint256 id) internal view returns (uint256) {
+  function getItemIndex(IUintComp components, uint256 id) internal view returns (uint256) {
     return IndexItemComponent(getAddressById(components, IndexItemCompID)).getValue(id);
   }
 
-  function getModIndex(IComponents components, uint256 id) internal view returns (uint256) {
+  function getModIndex(IUintComp components, uint256 id) internal view returns (uint256) {
     return IndexModifierComponent(getAddressById(components, IndexModCompID)).getValue(id);
   }
 
-  function getName(IComponents components, uint256 id) internal view returns (string memory) {
+  function getName(IUintComp components, uint256 id) internal view returns (string memory) {
     return NameComponent(getAddressById(components, NameCompID)).getValue(id);
   }
 
-  function getType(IComponents components, uint256 id) internal view returns (string memory) {
+  function getType(IUintComp components, uint256 id) internal view returns (string memory) {
     return TypeComponent(getAddressById(components, TypeCompID)).getValue(id);
   }
 
@@ -200,7 +200,7 @@ library LibRegistryItem {
   // QUERIES
 
   // get the number of item registry entries
-  function getItemCount(IComponents components) internal view returns (uint256) {
+  function getItemCount(IUintComp components) internal view returns (uint256) {
     QueryFragment[] memory fragments = new QueryFragment[](2);
     fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsRegCompID), "");
     fragments[1] = QueryFragment(QueryType.Has, getComponentById(components, IndexItemCompID), "");
@@ -208,7 +208,7 @@ library LibRegistryItem {
   }
 
   // get the registry entry by item index
-  function getByItemIndex(IComponents components, uint256 itemIndex)
+  function getByItemIndex(IUintComp components, uint256 itemIndex)
     internal
     view
     returns (uint256 result)
@@ -218,7 +218,7 @@ library LibRegistryItem {
   }
 
   // get the registry entry by item index
-  function getByEquipIndex(IComponents components, uint256 equipIndex)
+  function getByEquipIndex(IUintComp components, uint256 equipIndex)
     internal
     view
     returns (uint256 result)
@@ -228,7 +228,7 @@ library LibRegistryItem {
   }
 
   // get the registry entry by item index
-  function getByFoodIndex(IComponents components, uint256 foodIndex)
+  function getByFoodIndex(IUintComp components, uint256 foodIndex)
     internal
     view
     returns (uint256 result)
@@ -238,7 +238,7 @@ library LibRegistryItem {
   }
 
   // get the registry entry by item index
-  function getByModIndex(IComponents components, uint256 modIndex)
+  function getByModIndex(IUintComp components, uint256 modIndex)
     internal
     view
     returns (uint256 result)
@@ -249,7 +249,7 @@ library LibRegistryItem {
 
   // get all item registry entities matching filters. 0 values indicate no filter
   function _getAllX(
-    IComponents components,
+    IUintComp components,
     uint256 itemIndex,
     uint256 equipIndex,
     uint256 foodIndex,

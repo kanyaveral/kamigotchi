@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
@@ -22,7 +22,7 @@ library LibInventory {
   // Assume that an inventory for the item does not already exist on the target Holder.
   function create(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 holderID,
     uint256 itemIndex
   ) internal returns (uint256) {
@@ -37,7 +37,7 @@ library LibInventory {
 
   // Transfer the specified inventory amt from=>to entity by incrementing/decrementing balances
   function transfer(
-    IComponents components,
+    IUintComp components,
     uint256 fromID,
     uint256 toID,
     uint256 amt
@@ -48,7 +48,7 @@ library LibInventory {
 
   // Increase an inventory balance by the specified amount
   function inc(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 amt
   ) internal returns (uint256) {
@@ -60,7 +60,7 @@ library LibInventory {
 
   // Decrease an inventory balance by the specified amount
   function dec(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 amt
   ) internal returns (uint256) {
@@ -76,7 +76,7 @@ library LibInventory {
   }
 
   // Delete the inventory instance
-  function del(IComponents components, uint256 id) internal {
+  function del(IUintComp components, uint256 id) internal {
     IsInventoryComponent(getAddressById(components, IsInvCompID)).remove(id);
     IsFungibleComponent(getAddressById(components, IsFungCompID)).remove(id);
     IdHolderComponent(getAddressById(components, IdHolderCompID)).remove(id);
@@ -88,7 +88,7 @@ library LibInventory {
   // CHECKERS
 
   // Check if the specified entity is a fungible inventory instance
-  function isInstance(IComponents components, uint256 id) internal view returns (bool) {
+  function isInstance(IUintComp components, uint256 id) internal view returns (bool) {
     return
       IsInventoryComponent(getAddressById(components, IsInvCompID)).has(id) &&
       IsFungibleComponent(getAddressById(components, IsFungCompID)).has(id);
@@ -99,7 +99,7 @@ library LibInventory {
 
   // Set the balance of an existing inventory entity
   function _set(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     uint256 amt
   ) internal {
@@ -110,18 +110,18 @@ library LibInventory {
   // GETTERS
 
   // get the balance of a fungible inventory instance. return 0 if none exists
-  function getBalance(IComponents components, uint256 id) internal view returns (uint256 balance) {
+  function getBalance(IUintComp components, uint256 id) internal view returns (uint256 balance) {
     BalanceComponent balanceComp = BalanceComponent(getAddressById(components, BalanceCompID));
     if (balanceComp.has(id)) {
       balance = balanceComp.getValue(id);
     }
   }
 
-  function getItemIndex(IComponents components, uint256 id) internal view returns (uint256) {
+  function getItemIndex(IUintComp components, uint256 id) internal view returns (uint256) {
     return IndexItemComponent(getAddressById(components, IndexItemCompID)).getValue(id);
   }
 
-  function getHolder(IComponents components, uint256 id) internal view returns (uint256) {
+  function getHolder(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdHolderComponent(getAddressById(components, IdHolderCompID)).getValue(id);
   }
 
@@ -130,7 +130,7 @@ library LibInventory {
 
   // get a specific fungible(item) inventory instance. assume only one exists
   function get(
-    IComponents components,
+    IUintComp components,
     uint256 holderID,
     uint256 itemIndex
   ) internal view returns (uint256 result) {
@@ -138,7 +138,7 @@ library LibInventory {
     if (results.length > 0) result = results[0];
   }
 
-  function getAllForHolder(IComponents components, uint256 holderID)
+  function getAllForHolder(IUintComp components, uint256 holderID)
     internal
     view
     returns (uint256[] memory)
@@ -148,7 +148,7 @@ library LibInventory {
 
   // get all fungible(item) inventory entities matching filters. 0 values indicate no filter
   function _getAllX(
-    IComponents components,
+    IUintComp components,
     uint256 holderID,
     uint256 itemIndex
   ) internal view returns (uint256[] memory) {
