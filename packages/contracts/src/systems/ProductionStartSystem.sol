@@ -20,11 +20,11 @@ contract ProductionStartSystem is System {
   function execute(bytes memory arguments) public returns (bytes memory) {
     (uint256 petID, uint256 nodeID) = abi.decode(arguments, (uint256, uint256));
     uint256 operatorID = LibOperator.getByAddress(components, msg.sender);
-    uint256 currHealth = LibPet.updateHealthCurrent(components, petID);
+    uint256 currHealth = LibPet.syncHealth(components, petID);
 
     require(LibPet.getOperator(components, petID) == operatorID, "Pet: not urs");
-    require(currHealth != 0, "Pet: you have died (of spiritual Dysentery)");
-    require(!LibPet.isProducing(components, petID), "Pet: active production exists");
+    require(currHealth != 0, "Pet: no health remaining (pls feed)");
+    require(!LibPet.isProducing(components, petID), "Pet: already producing");
 
     uint256 id = LibProduction.getForPet(components, petID);
     if (id == 0) {

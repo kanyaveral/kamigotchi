@@ -30,7 +30,7 @@ import type {
 export interface PetMetadataSystemInterface extends utils.Interface {
   functions: {
     "_getBaseTraits(uint256)": FunctionFragment;
-    "_getBattery(uint256)": FunctionFragment;
+    "_getHealth(uint256)": FunctionFragment;
     "_getPetType(uint256)": FunctionFragment;
     "_setMaxElements(uint256[])": FunctionFragment;
     "_setRevealed(uint256,string)": FunctionFragment;
@@ -44,7 +44,7 @@ export interface PetMetadataSystemInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "_getBaseTraits"
-      | "_getBattery"
+      | "_getHealth"
       | "_getPetType"
       | "_setMaxElements"
       | "_setRevealed"
@@ -60,7 +60,7 @@ export interface PetMetadataSystemInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "_getBattery",
+    functionFragment: "_getHealth",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
@@ -97,10 +97,7 @@ export interface PetMetadataSystemInterface extends utils.Interface {
     functionFragment: "_getBaseTraits",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "_getBattery",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "_getHealth", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "_getPetType",
     data: BytesLike
@@ -176,7 +173,7 @@ export interface PetMetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    _getBattery(
+    _getHealth(
       entityID: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[string]>;
@@ -225,7 +222,7 @@ export interface PetMetadataSystem extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  _getBattery(
+  _getHealth(
     entityID: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<string>;
@@ -274,7 +271,7 @@ export interface PetMetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    _getBattery(
+    _getHealth(
       entityID: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
@@ -335,7 +332,7 @@ export interface PetMetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    _getBattery(
+    _getHealth(
       entityID: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -385,7 +382,7 @@ export interface PetMetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    _getBattery(
+    _getHealth(
       entityID: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;

@@ -33,10 +33,11 @@ import { LibStat } from "libraries/LibStat.sol";
 // exhaustively, but we should be consistent on depth within a given context.
 library LibRegistryItem {
   /////////////////
-  // REGISTRATION
+  // INTERACTIONS
+  // TODO: implement revives and scrolls
 
   // Create a registry entry for an equipment item. (e.g. armor, helmet, etc.)
-  function registerEquip(
+  function createEquip(
     IWorld world,
     IComponents components,
     uint256 equipIndex,
@@ -65,7 +66,7 @@ library LibRegistryItem {
   }
 
   // Create a Registry entry for a Mod item. (e.g. cpu, gem, etc.)
-  function registerMod(
+  function createMod(
     IWorld world,
     IComponents components,
     uint256 modIndex,
@@ -89,13 +90,12 @@ library LibRegistryItem {
     return id;
   }
 
-  // revives
-
   // Create a Registry entry for a Food item. (e.g. cpu, gem, etc.)
-  function registerFood(
+  // Q: should we run zero-value checks for name and health? (probably on system level)
+  function createFood(
     IWorld world,
     IComponents components,
-    uint256 consumableIndex,
+    uint256 foodIndex,
     string memory name,
     uint256 health
   ) internal returns (uint256) {
@@ -104,10 +104,26 @@ library LibRegistryItem {
     IsRegistryComponent(getAddressById(components, IsRegCompID)).set(id);
     IsFungibleComponent(getAddressById(components, IsFungCompID)).set(id);
     IndexItemComponent(getAddressById(components, IndexItemCompID)).set(id, itemIndex);
-    IndexFoodComponent(getAddressById(components, IndexFoodCompID)).set(id, consumableIndex);
-    NameComponent(getAddressById(components, NameCompID)).set(id, name);
-    if (health > 0) LibStat.setHealth(components, id, health);
+    IndexFoodComponent(getAddressById(components, IndexFoodCompID)).set(id, foodIndex);
+    setFood(components, foodIndex, name, health);
     return id;
+  }
+
+  /////////////////
+  // SETTERS
+
+  // set the field values of a food item registry entry
+  function setFood(
+    IComponents components,
+    uint256 foodIndex,
+    string memory name,
+    uint256 health
+  ) internal {
+    uint256 id = getByFoodIndex(components, foodIndex);
+    IndexFoodComponent(getAddressById(components, IndexFoodCompID)).set(id, foodIndex);
+    if (!LibString.eq(name, ""))
+      NameComponent(getAddressById(components, NameCompID)).set(id, name);
+    if (health > 0) LibStat.setHealth(components, id, health);
   }
 
   /////////////////
@@ -198,6 +214,36 @@ library LibRegistryItem {
     returns (uint256 result)
   {
     uint256[] memory results = _getAllX(components, itemIndex, 0, 0, 0);
+    if (results.length != 0) result = results[0];
+  }
+
+  // get the registry entry by item index
+  function getByEquipIndex(IComponents components, uint256 equipIndex)
+    internal
+    view
+    returns (uint256 result)
+  {
+    uint256[] memory results = _getAllX(components, 0, equipIndex, 0, 0);
+    if (results.length != 0) result = results[0];
+  }
+
+  // get the registry entry by item index
+  function getByFoodIndex(IComponents components, uint256 foodIndex)
+    internal
+    view
+    returns (uint256 result)
+  {
+    uint256[] memory results = _getAllX(components, 0, 0, foodIndex, 0);
+    if (results.length != 0) result = results[0];
+  }
+
+  // get the registry entry by item index
+  function getByModIndex(IComponents components, uint256 modIndex)
+    internal
+    view
+    returns (uint256 result)
+  {
+    uint256[] memory results = _getAllX(components, 0, 0, 0, modIndex);
     if (results.length != 0) result = results[0];
   }
 

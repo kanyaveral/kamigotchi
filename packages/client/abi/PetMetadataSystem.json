@@ -72,7 +72,7 @@
           "type": "uint256"
         }
       ],
-      "name": "_getBattery",
+      "name": "_getHealth",
       "outputs": [
         {
           "internalType": "string",
@@ -219,7 +219,7 @@
   ],
   "methodIdentifiers": {
     "_getBaseTraits(uint256)": "37d92217",
-    "_getBattery(uint256)": "388c1315",
+    "_getHealth(uint256)": "df5271db",
     "_getPetType(uint256)": "9201f93d",
     "_setMaxElements(uint256[])": "331343c1",
     "_setRevealed(uint256,string)": "2f2b1708",

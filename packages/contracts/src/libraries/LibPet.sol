@@ -2,8 +2,7 @@
 pragma solidity ^0.8.0;
 
 import { LibString } from "solady/utils/LibString.sol";
-import { IComponent } from "solecs/interfaces/IComponent.sol";
-import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { getAddressById, getComponentById, entityToAddress, addressToEntity } from "solecs/utils.sol";
 
@@ -19,6 +18,8 @@ import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
+import { LibRegistryItem } from "libraries/LibRegistryItem.sol";
+import { LibStat } from "libraries/LibStat.sol";
 
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
@@ -36,7 +37,7 @@ library LibPet {
   // TODO: include attributes in this generation
   function create(
     IWorld world,
-    IUintComp components,
+    IComponents components,
     address owner,
     uint256 operatorID,
     uint256 index,
@@ -56,10 +57,28 @@ library LibPet {
     return id;
   }
 
-  // update the battery currHealth of a pet based on its timestamp and currHealth at last action.
-  // NOTE: if the returned currHealth is 0 we should make sure the pet dies
+  // feed the pet with a food item
+  function feed(
+    IComponents components,
+    uint256 id,
+    uint256 foodIndex
+  ) internal returns (bool success) {
+    uint256 foodRegistryID = LibRegistryItem.getByFoodIndex(components, foodIndex);
+    if (foodRegistryID != 0) {
+      success = true;
+      uint256 healAmt = LibStat.getHealth(components, foodRegistryID);
+      uint256 health = getHealthCurrent(components, id);
+      uint256 newHealth = health + healAmt;
+
+      setHealthCurrent(components, id, newHealth);
+      setLastTs(components, id, block.timestamp);
+    }
+  }
+
+  // update the current health of a pet based on its timestamp and health at last action.
+  // TODO: update this to be based on the production rate, rather than raw time
   // NOTE: should be called at the top of a System and folllowed up with a require(!isDead)
-  function updateHealthCurrent(IUintComp components, uint256 id)
+  function syncHealth(IComponents components, uint256 id)
     internal
     returns (uint256 newHealthCurrent)
   {
@@ -79,25 +98,18 @@ library LibPet {
 
   // set a pet's stats from its traits
   // TODO: actually set stats from traits. hardcoded currently
-  function setStats(IUintComp components, uint256 id) internal {
+  function setStats(IComponents components, uint256 id) internal {
     PowerComponent(getAddressById(components, PowerCompID)).set(id, DEMO_POWER);
     // PowerComponent(getAddressById(components, PowerCompID)).set(id, BASE_POWER);
 
-    uint256 totalHealth = BASE_HEALTH;
-    HealthComponent(getAddressById(components, HealthCompID)).set(id, smolRandom(totalHealth, id));
-    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(
-      id,
-      smolRandom(totalHealth, id)
-    );
-  }
-
-  // temporary function to stimulate a little randomness
-  function smolRandom(uint256 base, uint256 seed) internal pure returns (uint256) {
-    return (base / 2) + (uint256(keccak256(abi.encode(seed, base))) % base);
+    uint256 totalHealth = _smolRandom(BASE_HEALTH, id);
+    uint256 currHealth = _smolRandom(totalHealth, id);
+    HealthComponent(getAddressById(components, HealthCompID)).set(id, totalHealth);
+    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, currHealth);
   }
 
   function setHealthCurrent(
-    IUintComp components,
+    IComponents components,
     uint256 id,
     uint256 currHealth
   ) internal {
@@ -106,7 +118,7 @@ library LibPet {
 
   // Update the TimeLastAction of a pet. used to expected battery drain on next action
   function setLastTs(
-    IUintComp components,
+    IComponents components,
     uint256 id,
     uint256 ts
   ) internal {
@@ -114,7 +126,7 @@ library LibPet {
   }
 
   function setName(
-    IUintComp components,
+    IComponents components,
     uint256 id,
     string memory name
   ) internal {
@@ -122,7 +134,7 @@ library LibPet {
   }
 
   function setOperator(
-    IUintComp components,
+    IComponents components,
     uint256 id,
     uint256 operatorID
   ) internal {
@@ -130,7 +142,7 @@ library LibPet {
   }
 
   function setOwner(
-    IUintComp components,
+    IComponents components,
     uint256 id,
     uint256 ownerID
   ) internal {
@@ -138,18 +150,18 @@ library LibPet {
   }
 
   /////////////////
-  // CHECKS
+  // CHECKERS
 
-  function isPet(IUintComp components, uint256 id) internal view returns (bool) {
+  function isPet(IComponents components, uint256 id) internal view returns (bool) {
     return IsPetComponent(getAddressById(components, IsPetCompID)).has(id);
   }
 
-  function isDead(IUintComp components, uint256 id) internal view returns (bool) {
+  function isDead(IComponents components, uint256 id) internal view returns (bool) {
     return getHealthCurrent(components, id) == 0;
   }
 
   // Check whether a pet has an ongoing production.
-  function isProducing(IUintComp components, uint256 id) internal view returns (bool result) {
+  function isProducing(IComponents components, uint256 id) internal view returns (bool result) {
     uint256[] memory results = LibProduction._getAllX(components, 0, id, "ACTIVE");
     if (results.length > 0) {
       result = true;
@@ -162,42 +174,42 @@ library LibPet {
   // calculate and return the total power of a pet (including equipment)
   // TODO: include equipment stats
   // TODO: update this to power, soon:tm:
-  function getTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
+  function getTotalPower(IComponents components, uint256 id) internal view returns (uint256) {
     return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
   }
 
-  // calculate and return the total battery healthCurrent of a pet (including equipment)
+  // calculate and return the total health of a pet (including equipment)
   // TODO: include equipment stats
-  function getTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
+  function getTotalHealth(IComponents components, uint256 id) internal view returns (uint256) {
     return HealthComponent(getAddressById(components, HealthCompID)).getValue(id);
   }
 
   /////////////////
-  // COMPONENT RETRIEVAL
+  // GETTERS
 
-  function getHealthCurrent(IUintComp components, uint256 id) internal view returns (uint256) {
+  function getHealthCurrent(IComponents components, uint256 id) internal view returns (uint256) {
     return HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).getValue(id);
   }
 
-  function getLastTs(IUintComp components, uint256 id) internal view returns (uint256) {
+  function getLastTs(IComponents components, uint256 id) internal view returns (uint256) {
     return TimeLastActionComponent(getAddressById(components, TimeLastCompID)).getValue(id);
   }
 
-  function getName(IUintComp components, uint256 id) internal view returns (string memory) {
+  function getName(IComponents components, uint256 id) internal view returns (string memory) {
     return NameComponent(getAddressById(components, NameCompID)).getValue(id);
   }
 
-  function getMediaURI(IUintComp components, uint256 id) internal view returns (string memory) {
+  function getMediaURI(IComponents components, uint256 id) internal view returns (string memory) {
     return MediaURIComponent(getAddressById(components, MediaURICompID)).getValue(id);
   }
 
   // get the entity ID of the pet operator
-  function getOperator(IUintComp components, uint256 id) internal view returns (uint256) {
+  function getOperator(IComponents components, uint256 id) internal view returns (uint256) {
     return IdOperatorComponent(getAddressById(components, IdOpCompID)).getValue(id);
   }
 
   // get the entity ID of the pet owner
-  function getOwner(IUintComp components, uint256 id) internal view returns (uint256) {
+  function getOwner(IComponents components, uint256 id) internal view returns (uint256) {
     return IdOwnerComponent(getAddressById(components, IdOwnerCompID)).getValue(id);
   }
 
@@ -205,7 +217,7 @@ library LibPet {
   // QUERIES
 
   // get the entity ID of a pet from its index (tokenID)
-  function indexToID(IUintComp components, uint256 index) internal view returns (uint256 result) {
+  function indexToID(IComponents components, uint256 index) internal view returns (uint256 result) {
     uint256[] memory results = IndexPetComponent(getAddressById(components, IndexPetComponentID))
       .getEntitiesWithValue(index);
     if (results.length > 0) {
@@ -213,13 +225,17 @@ library LibPet {
     }
   }
 
-  // get tokenID from entity
-  function entityToIndex(IUintComp components, uint256 entityID) internal view returns (uint256) {
+  // get the index of a pet (aka its 721 tokenID) from its entity ID
+  function idToIndex(IComponents components, uint256 entityID) internal view returns (uint256) {
     return IndexPetComponent(getAddressById(components, IndexPetComponentID)).getValue(entityID);
   }
 
   // Get the production of a pet. Return 0 if there are none.
-  function getProduction(IUintComp components, uint256 id) internal view returns (uint256 result) {
+  function getProduction(IComponents components, uint256 id)
+    internal
+    view
+    returns (uint256 result)
+  {
     uint256[] memory results = LibProduction._getAllX(components, 0, id, "");
     if (results.length > 0) {
       result = results[0];
@@ -233,7 +249,7 @@ library LibPet {
   // NOTE: it doesnt seem we actually need IdOwner directly on the pet as it can be
   // directly accessed through the operator entity.
   function transfer(
-    IUintComp components,
+    IComponents components,
     uint256 index,
     uint256 operatorID
   ) internal {
@@ -247,11 +263,19 @@ library LibPet {
 
   // return whether owner or operator
   function isOwnerOrOperator(
-    IUintComp components,
+    IComponents components,
     uint256 id,
     address sender
   ) internal view returns (bool) {
     uint256 senderAsID = addressToEntity(sender);
     return getOwner(components, id) == senderAsID || getOperator(components, id) == senderAsID;
+  }
+
+  /////////////////
+  // MISC
+
+  // temporary function to stimulate a little randomness
+  function _smolRandom(uint256 base, uint256 seed) internal pure returns (uint256) {
+    return (base / 2) + (uint256(keccak256(abi.encode(seed, base))) % base);
   }
 }

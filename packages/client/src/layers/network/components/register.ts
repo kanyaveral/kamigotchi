@@ -51,6 +51,7 @@ export function createComponents(world: any) {
     Coin: defineNumberComponent(world, { id: "Coin", metadata: { contractId: "component.Coin" } }),
     Exits: defineNumberArrayComponent(world, "Exits", "component.Exits"),
     Genus: defineStringComponent(world, { id: "Genus", metadata: { contractId: "component.Genus" } }),
+    Harmony: defineNumberComponent(world, { id: "Harmony", metadata: { contractId: "component.Harmony" } }),
     Health: defineNumberComponent(world, { id: "Health", metadata: { contractId: "component.Health" } }),
     HealthCurrent: defineNumberComponent(world, { id: "HealthCurrent", metadata: { contractId: "component.HealthCurrent" } }),
     Location: defineNumberComponent(world, { id: "Location", metadata: { contractId: "component.Location" } }),
@@ -61,7 +62,10 @@ export function createComponents(world: any) {
     Power: defineNumberComponent(world, { id: "Power", metadata: { contractId: "component.Power" } }),
     PriceBuy: defineNumberComponent(world, { id: "PriceBuy", metadata: { contractId: "component.PriceBuy" } }),
     PriceSell: defineNumberComponent(world, { id: "PriceSell", metadata: { contractId: "component.PriceSell" } }),
+    Slots: defineNumberComponent(world, { id: "Slots", metadata: { contractId: "component.Slots" } }),
     State: defineStringComponent(world, { id: "State", metadata: { contractId: "component.State" } }),
+    Type: defineStringComponent(world, { id: "Type", metadata: { contractId: "component.Type" } }),
+    Violence: defineNumberComponent(world, { id: "Violence", metadata: { contractId: "component.Violence" } }),
 
     // Times
     LastActionTime: defineNumberComponent(world, { id: "LastActionTime", metadata: { contractId: "component.time.LastAction" } }),

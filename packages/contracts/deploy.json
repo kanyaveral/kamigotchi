@@ -4,6 +4,7 @@
     "BalanceComponent",
     "PowerComponent",
     "BlockLastComponent",
+    "HarmonyComponent",
     "HealthComponent",
     "HealthCurrentComponent",
     "CoinComponent",
@@ -36,6 +37,7 @@
     "IsPetComponent",
     "IsProductionComponent",
     "IsRegisterComponent",
+    "IsRegistryComponent",
     "IsRegistryEntryComponent",
     "IsRequestComponent",
     "IsRoomComponent",
@@ -55,7 +57,8 @@
     "TimeLastActionComponent",
     "TimeStartComponent",
     "TypeComponent",
-    "UpgradesComponent"
+    "UpgradesComponent",
+    "ViolenceComponent"
   ],
   "systems": [
     {
@@ -270,7 +273,6 @@
     }
   ],
   "libraries": [
-    "LibBattery",
     "LibCoin",
     "LibInventory",
     "LibListing",
