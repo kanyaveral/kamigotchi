@@ -3,10 +3,10 @@ pragma solidity ^0.8.0;
 
 import "std-contracts/components/StringComponent.sol";
 
-uint256 constant ID = uint256(keccak256("component.Genus"));
+uint256 constant ID = uint256(keccak256("component.Affinity"));
 
-// The Class of an entity. On Registries this is for taxonomization
-contract GenusComponent is StringComponent {
+// The Affinity of an entity. For Kamis this is Eerie, Insect, Scrap and Mid.
+contract AffinityComponent is StringComponent {
   constructor(address world) StringComponent(world, ID) {}
 
   function hasValue(uint256 id, string memory name) public view returns (bool) {

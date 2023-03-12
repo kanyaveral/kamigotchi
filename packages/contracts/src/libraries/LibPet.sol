@@ -12,17 +12,17 @@ import { IdOwnerComponent, ID as IdOwnerCompID } from "components/IdOwnerCompone
 import { IndexPetComponent, ID as IndexPetComponentID } from "components/IndexPetComponent.sol";
 import { IsPetComponent, ID as IsPetCompID } from "components/IsPetComponent.sol";
 import { PowerComponent, ID as PowerCompID } from "components/PowerComponent.sol";
-import { CapacityComponent, ID as CapacityCompID } from "components/CapacityComponent.sol";
-import { ChargeComponent, ID as ChargeCompID } from "components/ChargeComponent.sol";
+import { HealthComponent, ID as HealthCompID } from "components/HealthComponent.sol";
+import { HealthCurrentComponent, ID as HealthCurrentCompID } from "components/HealthCurrentComponent.sol";
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
 
-uint256 constant BASE_CAPACITY = 150;
+uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
-uint256 constant CHARGE_EPOCH = 600; // 10min
+uint256 constant PROD_EPOCH = 600; // 10min
 
 uint256 constant DEMO_POWER = 15;
 uint256 constant DEMO_EPOCH = 1;
@@ -56,18 +56,21 @@ library LibPet {
     return id;
   }
 
-  // update the battery charge of a pet based on its timestamp and charge at last action.
-  // NOTE: if the returned charge is 0 we should make sure the pet dies
+  // update the battery currHealth of a pet based on its timestamp and currHealth at last action.
+  // NOTE: if the returned currHealth is 0 we should make sure the pet dies
   // NOTE: should be called at the top of a System and folllowed up with a require(!isDead)
-  function updateCharge(IUintComp components, uint256 id) internal returns (uint256 newCharge) {
+  function updateHealthCurrent(IUintComp components, uint256 id)
+    internal
+    returns (uint256 newHealthCurrent)
+  {
     uint256 lastTs = getLastTs(components, id);
     uint256 duration = block.timestamp - lastTs;
-    // uint256 drain = (duration + CHARGE_EPOCH - 1) / CHARGE_EPOCH; // round up on drainage
+    // uint256 drain = (duration + PROD_EPOCH - 1) / PROD_EPOCH; // round up on drainage
     uint256 drain = (duration + DEMO_EPOCH - 1) / DEMO_EPOCH; // round up on drainage
-    uint256 prevCharge = getCharge(components, id);
+    uint256 prevHealthCurrent = getHealthCurrent(components, id);
 
-    newCharge = (prevCharge > drain) ? prevCharge - drain : 0;
-    setCharge(components, id, newCharge);
+    newHealthCurrent = (prevHealthCurrent > drain) ? prevHealthCurrent - drain : 0;
+    setHealthCurrent(components, id, newHealthCurrent);
     setLastTs(components, id, block.timestamp);
   }
 
@@ -80,14 +83,11 @@ library LibPet {
     PowerComponent(getAddressById(components, PowerCompID)).set(id, DEMO_POWER);
     // PowerComponent(getAddressById(components, PowerCompID)).set(id, BASE_POWER);
 
-    uint256 totalCapacity = BASE_CAPACITY;
-    CapacityComponent(getAddressById(components, CapacityCompID)).set(
+    uint256 totalHealth = BASE_HEALTH;
+    HealthComponent(getAddressById(components, HealthCompID)).set(id, smolRandom(totalHealth, id));
+    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(
       id,
-      smolRandom(totalCapacity, id)
-    );
-    ChargeComponent(getAddressById(components, ChargeCompID)).set(
-      id,
-      smolRandom(totalCapacity, id)
+      smolRandom(totalHealth, id)
     );
   }
 
@@ -96,12 +96,12 @@ library LibPet {
     return (base / 2) + (uint256(keccak256(abi.encode(seed, base))) % base);
   }
 
-  function setCharge(
+  function setHealthCurrent(
     IUintComp components,
     uint256 id,
-    uint256 charge
+    uint256 currHealth
   ) internal {
-    ChargeComponent(getAddressById(components, ChargeCompID)).set(id, charge);
+    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, currHealth);
   }
 
   // Update the TimeLastAction of a pet. used to expected battery drain on next action
@@ -145,7 +145,7 @@ library LibPet {
   }
 
   function isDead(IUintComp components, uint256 id) internal view returns (bool) {
-    return getCharge(components, id) == 0;
+    return getHealthCurrent(components, id) == 0;
   }
 
   // Check whether a pet has an ongoing production.
@@ -166,17 +166,17 @@ library LibPet {
     return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
   }
 
-  // calculate and return the total battery capacity of a pet (including equipment)
+  // calculate and return the total battery healthCurrent of a pet (including equipment)
   // TODO: include equipment stats
-  function getTotalCapacity(IUintComp components, uint256 id) internal view returns (uint256) {
-    return CapacityComponent(getAddressById(components, CapacityCompID)).getValue(id);
+  function getTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
+    return HealthComponent(getAddressById(components, HealthCompID)).getValue(id);
   }
 
   /////////////////
   // COMPONENT RETRIEVAL
 
-  function getCharge(IUintComp components, uint256 id) internal view returns (uint256) {
-    return ChargeComponent(getAddressById(components, ChargeCompID)).getValue(id);
+  function getHealthCurrent(IUintComp components, uint256 id) internal view returns (uint256) {
+    return HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).getValue(id);
   }
 
   function getLastTs(IUintComp components, uint256 id) internal view returns (uint256) {

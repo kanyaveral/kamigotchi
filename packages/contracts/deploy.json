@@ -4,8 +4,8 @@
     "BalanceComponent",
     "PowerComponent",
     "BlockLastComponent",
-    "CapacityComponent",
-    "ChargeComponent",
+    "HealthComponent",
+    "HealthCurrentComponent",
     "CoinComponent",
     "ExitsComponent",
     "GenusComponent",
@@ -21,6 +21,10 @@
     "IdRequesterComponent",
     "IndexItemComponent",
     "IndexModifierComponent",
+    "IndexEquipComponent",
+    "IndexFoodComponent",
+    "IndexItemComponent",
+    "IndexModifierComponent",
     "IndexPetComponent",
     "IsFoodComponent",
     "IsFungibleComponent",
@@ -29,6 +33,7 @@
     "IsMerchantComponent",
     "IsModifierComponent",
     "IsNodeComponent",
+    "IsNonFungibleComponent",
     "IsOperatorComponent",
     "IsPetComponent",
     "IsProductionComponent",
@@ -49,9 +54,12 @@
     "PriceBuyComponent",
     "PriceSellComponent",
     "PrototypeComponent",
+    "SlotsComponent",
     "StateComponent",
     "TimeLastActionComponent",
-    "TimeStartComponent"
+    "TimeStartComponent",
+    "TypeComponent",
+    "UpgradesComponent"
   ],
   "systems": [
     {
@@ -160,7 +168,7 @@
       "name": "ProductionCollectSystem",
       "writeAccess": [
         "BlockLastComponent",
-        "ChargeComponent",
+        "HealthCurrentComponent",
         "CoinComponent",
         "TimeLastActionComponent",
         "TimeStartComponent"
@@ -171,7 +179,7 @@
       "writeAccess": [
         "IsProductionComponent",
         "BlockLastComponent",
-        "ChargeComponent",
+        "HealthCurrentComponent",
         "IdNodeComponent",
         "IdPetComponent",
         "StateComponent",
@@ -183,7 +191,7 @@
       "name": "ProductionStopSystem",
       "writeAccess": [
         "BlockLastComponent",
-        "ChargeComponent",
+        "HealthCurrentComponent",
         "CoinComponent",
         "StateComponent",
         "TimeLastActionComponent"
@@ -198,7 +206,7 @@
     {
       "name": "PetFoodSystem",
       "writeAccess": [
-        "ChargeComponent",
+        "HealthCurrentComponent",
         "TimeLastActionComponent",
         "BalanceComponent"
       ]
@@ -279,8 +287,10 @@
     "LibPrototype",
     "LibRegister",
     "LibRegistry",
+    "LibRegistryItem",
     "LibModReg",
     "LibRoom",
+    "LibStat",
     "LibTrade"
   ]
 }

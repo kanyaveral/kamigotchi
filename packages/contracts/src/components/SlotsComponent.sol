@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 import "std-contracts/components/Uint256BareComponent.sol";
 
-uint256 constant ID = uint256(keccak256("component.Slots.Upgrades"));
+uint256 constant ID = uint256(keccak256("component.Slots"));
 
-// the number of slot expansions on a kami
-contract NumSlotsUpgradesComponent is Uint256BareComponent {
+// the number of base mod slots on a kami or equipment
+contract SlotsComponent is Uint256BareComponent {
   constructor(address world) Uint256BareComponent(world, ID) {}
 }

@@ -49,10 +49,10 @@ export function createComponents(world: any) {
     // Values
     Balance: defineNumberComponent(world, { id: "Balance", metadata: { contractId: "component.Balance" } }),
     BlockLast: defineNumberComponent(world, { id: "BlockLast", metadata: { contractId: "component.BlockLast" } }),
-    Capacity: defineNumberComponent(world, { id: "Capacity", metadata: { contractId: "component.Capacity" } }),
-    Charge: defineNumberComponent(world, { id: "Charge", metadata: { contractId: "component.Charge" } }),
     Coin: defineNumberComponent(world, { id: "Coin", metadata: { contractId: "component.Coin" } }),
     Exits: defineNumberArrayComponent(world, "Exits", "component.Exits"),
+    Health: defineNumberComponent(world, { id: "Health", metadata: { contractId: "component.Health" } }),
+    HealthCurrent: defineNumberComponent(world, { id: "HealthCurrent", metadata: { contractId: "component.HealthCurrent" } }),
     Location: defineNumberComponent(world, { id: "Location", metadata: { contractId: "component.Location" } }),
     ModifierStatus: defineStringComponent(world, { id: "ModifierStatus", metadata: { contractId: "component.Modifier.Status" } }),
     ModifierType: defineStringComponent(world, { id: "ModifierType", metadata: { contractId: "component.Modifier.Type" } }),

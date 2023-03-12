@@ -50,8 +50,8 @@ export function registerPetList() {
           network,
           components: {
             Balance,
-            Capacity,
-            Charge,
+            Health,
+            HealthCurrent,
             Coin,
             Power,
             HolderID,
@@ -159,9 +159,9 @@ export function registerPetList() {
           name: getComponentValue(Name, index)?.value as string,
           uri: getComponentValue(MediaURI, index)?.value as string,
           power: getComponentValue(Power, index)?.value as number,
-          capacity: getComponentValue(Capacity, index)?.value as number,
-          charge: getComponentValue(Charge, index)?.value as number,
-          lastChargeTime: getComponentValue(LastActionTime, index)
+          health: getComponentValue(Health, index)?.value as number,
+          currHealth: getComponentValue(HealthCurrent, index)?.value as number,
+          lastHealthTime: getComponentValue(LastActionTime, index)
             ?.value as number,
           production,
         };
@@ -345,14 +345,14 @@ export function registerPetList() {
 
       // NOTE(ja): the battery epoch is hardcoded right now but we should save this
       // on the world's global config
-      const BATTERY_EPOCH = 1; // seconds
+      const HEALTH_EPOCH = 1; // seconds
 
-      // calculate energy (as % of total capacity) based on last charge and time passed since last charge
-      const calcEnergy = (kami: any) => {
-        let duration = (lastRefresh / 1000) - kami.lastChargeTime;
-        let newCharge = Math.max(kami.charge - duration / BATTERY_EPOCH, 0);
-        return (100 * newCharge / kami.capacity).toFixed(1);
-        // return Math.round(100 * (1 - newCharge / kami.capacity)); // hunger calculation
+      // calculate health (as % of total health) based on last health and time passed since last check
+      const calcHealth = (kami: any) => {
+        let duration = (lastRefresh / 1000) - kami.lastHealthTime;
+        let newHealth = Math.max(kami.currHealth - duration / HEALTH_EPOCH, 0);
+        return (100 * newHealth / kami.health).toFixed(1);
+        // return Math.round(100 * (1 - newHealth / kami.health)); // hunger calculation
       }
 
       // calculate the expected output from a pet production based on starttime and
@@ -383,7 +383,7 @@ export function registerPetList() {
                 </KamiName>
                 <KamiDetails>
                   <Description>
-                    Energy: {calcEnergy(kami)} %
+                    Energy: {calcHealth(kami)} %
                     <br />
                     Power: {kami.power * 1} / hr
                     <br />

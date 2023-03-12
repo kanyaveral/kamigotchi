@@ -28,7 +28,7 @@ type Details = {
   petName: string;
   uri: string;
   power: string;
-  capacity: string;
+  health: string;
   traits: TraitDetails[];
   petTypes: string[];
 };
@@ -47,11 +47,11 @@ export function registerPetDetails() {
         network: {
           components: {
             Balance,
+            Genus,
             IsPet,
             IsModifier,
-            Genus,
-            PetID,
             MediaURI,
+            PetID,
           },
         },
       } = layers;
@@ -77,18 +77,18 @@ export function registerPetDetails() {
       const {
         network: {
           components: {
-            Power,
-            Capacity,
             Genus,
+            Health,
             IsPet,
             IsModifier,
             MediaURI,
-            PetIndex,
-            PetID,
             ModifierValue,
             ModifierType,
             ModifierPetType,
             Name,
+            PetIndex,
+            PetID,
+            Power,
             State,
           },
           world,
@@ -123,8 +123,8 @@ export function registerPetDetails() {
           power: hexToString(
             getComponentValue(Power, index)?.value as number
           ),
-          capacity: hexToString(
-            getComponentValue(Capacity, index)?.value as number
+          health: hexToString(
+            getComponentValue(Health, index)?.value as number
           ),
           traits: traitsHopper?.value as TraitDetails[],
           petTypes: traitsHopper?.petTypes as string[],
@@ -242,7 +242,7 @@ export function registerPetDetails() {
                   style={{ gridColumn: 1, gridRow: 2, justifyItems: 'end' }}
                 >
                   <KamiFacts>Power: {dets?.power} </KamiFacts>
-                  <KamiFacts>Capacity: {dets?.capacity} </KamiFacts>
+                  <KamiFacts>Health: {dets?.health} </KamiFacts>
                 </KamiBox>
               </KamiBox>
               <KamiBox style={{ gridColumnStart: 2 }}>{traitLines}</KamiBox>
