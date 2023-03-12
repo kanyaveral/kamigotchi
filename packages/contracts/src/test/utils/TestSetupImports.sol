@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "std-contracts/test/MudTest.t.sol";
 
 // Libraries
-import { LibBattery } from "libraries/LibBattery.sol";
 import { LibCoin } from "libraries/LibCoin.sol";
 import { LibInventory } from "libraries/LibInventory.sol";
 import { LibListing } from "libraries/LibListing.sol";
@@ -28,6 +27,7 @@ import { AddressPlayerComponent, ID as AddressPlayerComponentID } from "componen
 import { BalanceComponent, ID as BalanceComponentID } from "components/BalanceComponent.sol";
 import { PowerComponent, ID as PowerComponentID } from "components/PowerComponent.sol";
 import { BlockLastComponent, ID as BlockLastComponentID } from "components/BlockLastComponent.sol";
+import { HarmonyComponent, ID as HarmonyComponentID } from "components/HarmonyComponent.sol";
 import { HealthComponent, ID as HealthComponentID } from "components/HealthComponent.sol";
 import { HealthCurrentComponent, ID as HealthCurrentComponentID } from "components/HealthCurrentComponent.sol";
 import { CoinComponent, ID as CoinComponentID } from "components/CoinComponent.sol";
@@ -60,6 +60,7 @@ import { IsOperatorComponent, ID as IsOperatorComponentID } from "components/IsO
 import { IsPetComponent, ID as IsPetComponentID } from "components/IsPetComponent.sol";
 import { IsProductionComponent, ID as IsProductionComponentID } from "components/IsProductionComponent.sol";
 import { IsRegisterComponent, ID as IsRegisterComponentID } from "components/IsRegisterComponent.sol";
+import { IsRegistryComponent, ID as IsRegistryComponentID } from "components/IsRegistryComponent.sol";
 import { IsRegistryEntryComponent, ID as IsRegistryEntryComponentID } from "components/IsRegistryEntryComponent.sol";
 import { IsRequestComponent, ID as IsRequestComponentID } from "components/IsRequestComponent.sol";
 import { IsRoomComponent, ID as IsRoomComponentID } from "components/IsRoomComponent.sol";
@@ -80,6 +81,7 @@ import { TimeLastActionComponent, ID as TimeLastActionComponentID } from "compon
 import { TimeStartComponent, ID as TimeStartComponentID } from "components/TimeStartComponent.sol";
 import { TypeComponent, ID as TypeComponentID } from "components/TypeComponent.sol";
 import { UpgradesComponent, ID as UpgradesComponentID } from "components/UpgradesComponent.sol";
+import { ViolenceComponent, ID as ViolenceComponentID } from "components/ViolenceComponent.sol";
 
 // Systems
 import { _InitSystem, ID as _InitSystemID } from "systems/_InitSystem.sol";
@@ -114,6 +116,7 @@ AddressPlayerComponent _AddressPlayerComponent;
 BalanceComponent _BalanceComponent;
 PowerComponent _PowerComponent;
 BlockLastComponent _BlockLastComponent;
+HarmonyComponent _HarmonyComponent;
 HealthComponent _HealthComponent;
 HealthCurrentComponent _HealthCurrentComponent;
 CoinComponent _CoinComponent;
@@ -146,6 +149,7 @@ IsOperatorComponent _IsOperatorComponent;
 IsPetComponent _IsPetComponent;
 IsProductionComponent _IsProductionComponent;
 IsRegisterComponent _IsRegisterComponent;
+IsRegistryComponent _IsRegistryComponent;
 IsRegistryEntryComponent _IsRegistryEntryComponent;
 IsRequestComponent _IsRequestComponent;
 IsRoomComponent _IsRoomComponent;
@@ -166,6 +170,7 @@ TimeLastActionComponent _TimeLastActionComponent;
 TimeStartComponent _TimeStartComponent;
 TypeComponent _TypeComponent;
 UpgradesComponent _UpgradesComponent;
+ViolenceComponent _ViolenceComponent;
 
 // System vars
 _InitSystem __InitSystem;
@@ -201,6 +206,7 @@ _AddressPlayerComponent = AddressPlayerComponent(component(AddressPlayerComponen
 _BalanceComponent = BalanceComponent(component(BalanceComponentID));
 _PowerComponent = PowerComponent(component(PowerComponentID));
 _BlockLastComponent = BlockLastComponent(component(BlockLastComponentID));
+_HarmonyComponent = HarmonyComponent(component(HarmonyComponentID));
 _HealthComponent = HealthComponent(component(HealthComponentID));
 _HealthCurrentComponent = HealthCurrentComponent(component(HealthCurrentComponentID));
 _CoinComponent = CoinComponent(component(CoinComponentID));
@@ -233,6 +239,7 @@ _IsOperatorComponent = IsOperatorComponent(component(IsOperatorComponentID));
 _IsPetComponent = IsPetComponent(component(IsPetComponentID));
 _IsProductionComponent = IsProductionComponent(component(IsProductionComponentID));
 _IsRegisterComponent = IsRegisterComponent(component(IsRegisterComponentID));
+_IsRegistryComponent = IsRegistryComponent(component(IsRegistryComponentID));
 _IsRegistryEntryComponent = IsRegistryEntryComponent(component(IsRegistryEntryComponentID));
 _IsRequestComponent = IsRequestComponent(component(IsRequestComponentID));
 _IsRoomComponent = IsRoomComponent(component(IsRoomComponentID));
@@ -253,6 +260,7 @@ _TimeLastActionComponent = TimeLastActionComponent(component(TimeLastActionCompo
 _TimeStartComponent = TimeStartComponent(component(TimeStartComponentID));
 _TypeComponent = TypeComponent(component(TypeComponentID));
 _UpgradesComponent = UpgradesComponent(component(UpgradesComponentID));
+_ViolenceComponent = ViolenceComponent(component(ViolenceComponentID));
 
 __InitSystem = _InitSystem(system(_InitSystemID));
 __devGiveTokensSystem = _devGiveTokensSystem(system(_devGiveTokensSystemID));

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
@@ -21,17 +21,17 @@ library Utils {
   // ARCHETYPE CHECKS
 
   // Check whether an entity is a Request.
-  function isRequest(IComponents components, uint256 id) internal view returns (bool) {
+  function isRequest(IUintComp components, uint256 id) internal view returns (bool) {
     return _isX(components, IsRequestCompID, id);
   }
 
   // Check whether an entity is a Trade.
-  function isTrade(IComponents components, uint256 id) internal view returns (bool) {
+  function isTrade(IUintComp components, uint256 id) internal view returns (bool) {
     return _isX(components, IsTradeCompID, id);
   }
 
   function _isX(
-    IComponents components,
+    IUintComp components,
     uint256 componentID,
     uint256 id
   ) internal view returns (bool) {
@@ -43,7 +43,7 @@ library Utils {
 
   // Check whether an entity has the specified state.
   function hasState(
-    IComponents components,
+    IUintComp components,
     uint256 id,
     string memory state
   ) internal view returns (bool) {
@@ -51,7 +51,7 @@ library Utils {
   }
 
   function sameRoom(
-    IComponents components,
+    IUintComp components,
     uint256 a,
     uint256 b
   ) internal view returns (bool) {
@@ -63,14 +63,14 @@ library Utils {
   // COMMON UPDATES
 
   // Update the BlockLast of an entity. Commonly used for throttling actions on operators.
-  function updateLastBlock(IComponents components, uint256 id) internal {
+  function updateLastBlock(IUintComp components, uint256 id) internal {
     BlockLastComponent(getAddressById(components, BlockLastCompID)).set(id, block.number);
   }
 
   // QUERIES
 
   // Get all operator entities matching the specified filters.
-  function getOperatorByAddress(IComponents components, address wallet)
+  function getOperatorByAddress(IUintComp components, address wallet)
     internal
     view
     returns (uint256 result)

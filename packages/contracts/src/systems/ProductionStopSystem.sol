@@ -22,10 +22,10 @@ contract ProductionStopSystem is System {
     uint256 productionID = abi.decode(arguments, (uint256));
     uint256 operatorID = LibOperator.getByAddress(components, msg.sender);
     uint256 petID = LibProduction.getPet(components, productionID);
-    uint256 currHealth = LibPet.updateHealthCurrent(components, petID);
+    uint256 currHealth = LibPet.syncHealth(components, petID);
 
     require(LibPet.getOperator(components, petID) == operatorID, "Pet: not urs");
-    require(currHealth != 0, "Pet: you have died (of spiritual Dysentery)");
+    require(currHealth != 0, "Pet: no health remaining (pls feed)");
     require(Utils.hasState(components, productionID, "ACTIVE"), "Production: must be active");
 
     uint256 amt = LibProduction.calc(components, productionID);

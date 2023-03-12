@@ -73,7 +73,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "food",
+          "name": "foodIndex",
           "type": "uint256"
         }
       ],

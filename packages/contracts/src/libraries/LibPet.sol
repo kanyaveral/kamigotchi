@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import { LibString } from "solady/utils/LibString.sol";
-import { IComponent } from "solecs/interfaces/IComponent.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { getAddressById, getComponentById, entityToAddress, addressToEntity } from "solecs/utils.sol";
@@ -19,6 +18,8 @@ import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
+import { LibRegistryItem } from "libraries/LibRegistryItem.sol";
+import { LibStat } from "libraries/LibStat.sol";
 
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
@@ -56,10 +57,28 @@ library LibPet {
     return id;
   }
 
-  // update the battery currHealth of a pet based on its timestamp and currHealth at last action.
-  // NOTE: if the returned currHealth is 0 we should make sure the pet dies
+  // feed the pet with a food item
+  function feed(
+    IUintComp components,
+    uint256 id,
+    uint256 foodIndex
+  ) internal returns (bool success) {
+    uint256 foodRegistryID = LibRegistryItem.getByFoodIndex(components, foodIndex);
+    if (foodRegistryID != 0) {
+      success = true;
+      uint256 healAmt = LibStat.getHealth(components, foodRegistryID);
+      uint256 health = getHealthCurrent(components, id);
+      uint256 newHealth = health + healAmt;
+
+      setHealthCurrent(components, id, newHealth);
+      setLastTs(components, id, block.timestamp);
+    }
+  }
+
+  // update the current health of a pet based on its timestamp and health at last action.
+  // TODO: update this to be based on the production rate, rather than raw time
   // NOTE: should be called at the top of a System and folllowed up with a require(!isDead)
-  function updateHealthCurrent(IUintComp components, uint256 id)
+  function syncHealth(IUintComp components, uint256 id)
     internal
     returns (uint256 newHealthCurrent)
   {
@@ -83,17 +102,10 @@ library LibPet {
     PowerComponent(getAddressById(components, PowerCompID)).set(id, DEMO_POWER);
     // PowerComponent(getAddressById(components, PowerCompID)).set(id, BASE_POWER);
 
-    uint256 totalHealth = BASE_HEALTH;
-    HealthComponent(getAddressById(components, HealthCompID)).set(id, smolRandom(totalHealth, id));
-    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(
-      id,
-      smolRandom(totalHealth, id)
-    );
-  }
-
-  // temporary function to stimulate a little randomness
-  function smolRandom(uint256 base, uint256 seed) internal pure returns (uint256) {
-    return (base / 2) + (uint256(keccak256(abi.encode(seed, base))) % base);
+    uint256 totalHealth = _smolRandom(BASE_HEALTH, id);
+    uint256 currHealth = _smolRandom(totalHealth, id);
+    HealthComponent(getAddressById(components, HealthCompID)).set(id, totalHealth);
+    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, currHealth);
   }
 
   function setHealthCurrent(
@@ -138,7 +150,7 @@ library LibPet {
   }
 
   /////////////////
-  // CHECKS
+  // CHECKERS
 
   function isPet(IUintComp components, uint256 id) internal view returns (bool) {
     return IsPetComponent(getAddressById(components, IsPetCompID)).has(id);
@@ -166,14 +178,14 @@ library LibPet {
     return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
   }
 
-  // calculate and return the total battery healthCurrent of a pet (including equipment)
+  // calculate and return the total health of a pet (including equipment)
   // TODO: include equipment stats
   function getTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
     return HealthComponent(getAddressById(components, HealthCompID)).getValue(id);
   }
 
   /////////////////
-  // COMPONENT RETRIEVAL
+  // GETTERS
 
   function getHealthCurrent(IUintComp components, uint256 id) internal view returns (uint256) {
     return HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).getValue(id);
@@ -213,8 +225,8 @@ library LibPet {
     }
   }
 
-  // get tokenID from entity
-  function entityToIndex(IUintComp components, uint256 entityID) internal view returns (uint256) {
+  // get the index of a pet (aka its 721 tokenID) from its entity ID
+  function idToIndex(IUintComp components, uint256 entityID) internal view returns (uint256) {
     return IndexPetComponent(getAddressById(components, IndexPetComponentID)).getValue(entityID);
   }
 
@@ -253,5 +265,13 @@ library LibPet {
   ) internal view returns (bool) {
     uint256 senderAsID = addressToEntity(sender);
     return getOwner(components, id) == senderAsID || getOperator(components, id) == senderAsID;
+  }
+
+  /////////////////
+  // MISC
+
+  // temporary function to stimulate a little randomness
+  function _smolRandom(uint256 base, uint256 seed) internal pure returns (uint256) {
+    return (base / 2) + (uint256(keccak256(abi.encode(seed, base))) % base);
   }
 }

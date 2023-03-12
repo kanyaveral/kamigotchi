@@ -4,10 +4,10 @@ pragma solidity ^0.8.0;
 import { System } from "solecs/System.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 
-import { LibOperator } from "libraries/LibOperator.sol";
-import { LibBattery } from "libraries/LibBattery.sol";
 import { LibInventory } from "libraries/LibInventory.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
+import { LibOperator } from "libraries/LibOperator.sol";
+import { LibRegistryItem } from "libraries/LibRegistryItem.sol";
 import { Utils } from "utils/Utils.sol";
 
 import { ID as PetSysID } from "systems/ERC721PetSystem.sol";
@@ -23,7 +23,7 @@ contract _InitSystem is System {
 
     initFood();
     initMods();
-    
+
     // for erc721 pet
     LibInventory._set(components, PetSysID, 0);
 
@@ -35,13 +35,12 @@ contract _InitSystem is System {
   }
 
   function initFood() internal {
-    LibBattery.addFoodRegistry(components, world, 1, 25, "food 1");
-    LibBattery.addFoodRegistry(components, world, 2, 100, "food 2");
-    LibBattery.addFoodRegistry(components, world, 3, 200, "food 3");
+    LibRegistryItem.createFood(world, components, 1, "food 1", 25);
+    LibRegistryItem.createFood(world, components, 2, "food 2", 100);
+    LibRegistryItem.createFood(world, components, 3, "food 3", 200);
   }
 
   function initMods() internal {
-
     LibModifier.createIndex(
       components,
       world,
@@ -49,7 +48,7 @@ contract _InitSystem is System {
       1, // index
       1, // mod value
       "MUL",
-      "INSECT", 
+      "INSECT",
       "Butterfly"
     );
     LibModifier.createIndex(

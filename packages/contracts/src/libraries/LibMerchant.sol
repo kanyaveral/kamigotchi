@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IUint256Component as IComponents } from "solecs/interfaces/IUint256Component.sol";
+import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
@@ -19,7 +19,7 @@ library LibMerchant {
   // create a merchant entity as specified
   function create(
     IWorld world,
-    IComponents components,
+    IUintComp components,
     uint256 location,
     string memory name
   ) internal returns (uint256) {
@@ -34,7 +34,7 @@ library LibMerchant {
   // COMPONENT RETRIEVAL
 
   // gets the name of a specified merchant
-  function getName(IComponents components, uint256 id) internal view returns (string memory) {
+  function getName(IUintComp components, uint256 id) internal view returns (string memory) {
     return NameComponent(getAddressById(components, NameCompID)).getValue(id);
   }
 
@@ -42,7 +42,7 @@ library LibMerchant {
   // QUERIES
 
   // get a specified merchant by location. return only the first result
-  function getAtLocation(IComponents components, uint256 location)
+  function getAtLocation(IUintComp components, uint256 location)
     internal
     view
     returns (uint256 result)
@@ -55,7 +55,7 @@ library LibMerchant {
 
   // Retrieves all listingsbased on any defined filters
   function _getAllX(
-    IComponents components,
+    IUintComp components,
     uint256 location,
     string memory name
   ) internal view returns (uint256[] memory) {

@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+import { LibString } from "solady/utils/LibString.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { System } from "solecs/System.sol";
 import { getAddressById } from "solecs/utils.sol";
-import { LibString } from "solady/utils/LibString.sol";
-
-import { LibBattery } from "libraries/LibBattery.sol";
-import { LibPet } from "libraries/LibPet.sol";
-import { LibModifier, ModStatus } from "libraries/LibModifier.sol";
-import { LibOperator } from "libraries/LibOperator.sol";
-import { LibMetadata } from "libraries/LibMetadata.sol";
-
-import { ERC721PetSystem, UNREVEALED_URI, ID as PetSystemID } from "systems/ERC721PetSystem.sol";
+// import "forge-std/console.sol";
 
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
-
-import "forge-std/console.sol";
+import { LibMetadata } from "libraries/LibMetadata.sol";
+import { LibModifier, ModStatus } from "libraries/LibModifier.sol";
+import { LibOperator } from "libraries/LibOperator.sol";
+import { LibPet } from "libraries/LibPet.sol";
+import { LibStat } from "libraries/LibStat.sol";
+import { ERC721PetSystem, UNREVEALED_URI, ID as PetSystemID } from "systems/ERC721PetSystem.sol";
 
 uint256 constant ID = uint256(keccak256("system.ERC721.metadata"));
 
@@ -113,7 +110,7 @@ contract PetMetadataSystem is System {
           '"a lil network spirit :3",\n',
           '"attributes": [\n',
           _getBaseTraits(petID),
-          _getBattery(petID),
+          _getHealth(petID),
           "],\n",
           '"image": "',
           LibPet.getMediaURI(components, petID),
@@ -123,14 +120,14 @@ contract PetMetadataSystem is System {
       );
   }
 
-  function _getBattery(uint256 entityID) public view returns (string memory) {
+  function _getHealth(uint256 entityID) public view returns (string memory) {
     return
       string(
         abi.encodePacked(
           '{"trait_type": "',
           "Battery Health",
           '", "value": "',
-          LibString.toString(LibBattery.getHealth(components, entityID)),
+          LibString.toString(LibStat.getHealth(components, entityID)),
           '"},\n'
         )
       );
