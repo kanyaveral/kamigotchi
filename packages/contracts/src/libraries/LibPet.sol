@@ -15,6 +15,7 @@ import { HealthComponent, ID as HealthCompID } from "components/HealthComponent.
 import { HealthCurrentComponent, ID as HealthCurrentCompID } from "components/HealthCurrentComponent.sol";
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
+import { StateComponent, ID as StateCompID } from "components/StateComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
@@ -23,7 +24,7 @@ import { LibStat } from "libraries/LibStat.sol";
 
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
-uint256 constant PROD_EPOCH = 600; // 10min
+uint256 constant PROD_BURN_RATIO = 50; // energy burned per 100 BYTES produced
 
 uint256 constant DEMO_POWER = 15;
 uint256 constant DEMO_EPOCH = 1;
@@ -46,14 +47,14 @@ library LibPet {
     uint256 id = world.getUniqueEntityId();
     IsPetComponent(getAddressById(components, IsPetCompID)).set(id);
     IndexPetComponent(getAddressById(components, IndexPetComponentID)).set(id, index);
-    IdOwnerComponent(getAddressById(components, IdOwnerCompID)).set(id, addressToEntity(owner));
-    IdOperatorComponent(getAddressById(components, IdOpCompID)).set(id, operatorID);
-    MediaURIComponent(getAddressById(components, MediaURICompID)).set(id, uri);
-    TimeLastActionComponent(getAddressById(components, TimeLastCompID)).set(id, block.timestamp);
 
     string memory name = LibString.concat("kamigotchi ", LibString.toString(index));
-    NameComponent(getAddressById(components, NameCompID)).set(id, name);
-
+    setName(components, id, name);
+    setOwner(components, id, addressToEntity(owner));
+    setOperator(components, id, operatorID);
+    setMediaURI(components, id, uri);
+    setLastTs(components, id, block.timestamp);
+    revive(components, id);
     return id;
   }
 
@@ -66,31 +67,92 @@ library LibPet {
     uint256 foodRegistryID = LibRegistryItem.getByFoodIndex(components, foodIndex);
     if (foodRegistryID != 0) {
       success = true;
+      uint256 totalHealth = LibStat.getHealth(components, id);
       uint256 healAmt = LibStat.getHealth(components, foodRegistryID);
-      uint256 health = getHealthCurrent(components, id);
+      uint256 health = getCurrHealth(components, id);
       uint256 newHealth = health + healAmt;
+      if (newHealth > totalHealth) newHealth = totalHealth;
 
-      setHealthCurrent(components, id, newHealth);
+      setCurrHealth(components, id, newHealth);
       setLastTs(components, id, block.timestamp);
     }
   }
 
-  // update the current health of a pet based on its timestamp and health at last action.
-  // TODO: update this to be based on the production rate, rather than raw time
-  // NOTE: should be called at the top of a System and folllowed up with a require(!isDead)
-  function syncHealth(IUintComp components, uint256 id)
-    internal
-    returns (uint256 newHealthCurrent)
-  {
-    uint256 lastTs = getLastTs(components, id);
-    uint256 duration = block.timestamp - lastTs;
-    // uint256 drain = (duration + PROD_EPOCH - 1) / PROD_EPOCH; // round up on drainage
-    uint256 drain = (duration + DEMO_EPOCH - 1) / DEMO_EPOCH; // round up on drainage
-    uint256 prevHealthCurrent = getHealthCurrent(components, id);
+  // Update a pet's state to DEAD
+  function kill(IUintComp components, uint256 id) internal {
+    StateComponent(getAddressById(components, StateCompID)).set(id, string("DEAD"));
+    uint256 productionID = LibProduction.getForPet(components, id);
+    LibProduction.stop(components, productionID);
+  }
 
-    newHealthCurrent = (prevHealthCurrent > drain) ? prevHealthCurrent - drain : 0;
-    setHealthCurrent(components, id, newHealthCurrent);
+  // Update a pet's state to ALIVE
+  function revive(IUintComp components, uint256 id) internal {
+    StateComponent(getAddressById(components, StateCompID)).set(id, string("ALIVE"));
+  }
+
+  // Update the current health of a pet based on its timestamp and health at last action.
+  // TODO: update this to be based on the production rate, rather than raw time
+  // NOTE: should be called at the top of a System and folllowed up with a require(!isDead).
+  // it's a bit gas-inefficient to be doing it this way but saves us plenty of mental energy
+  // in catching all the edge cases.
+  function syncHealth(IUintComp components, uint256 id) internal returns (uint256 health) {
+    health = getCurrHealth(components, id);
+    if (isProducing(components, id)) {
+      uint256 drain = getDrain(components, id);
+      health = (health > drain) ? health - drain : 0;
+      setCurrHealth(components, id, health);
+    }
     setLastTs(components, id, block.timestamp);
+  }
+
+  /////////////////
+  // CALCULATIONS
+
+  // Calculate the total health drain since the last check (rounded up), based on production
+  // NOTE: we can't just use LibProd.getOutput() here because that rounds down, while here
+  // we want to properly round. We need a game design discussion on how we want to do this.
+  function getDrain(IUintComp components, uint256 id) internal view returns (uint256) {
+    if (!isProducing(components, id)) return 0;
+    uint256 productionID = getProduction(components, id);
+    uint256 byteRate = LibProduction.getRate(components, productionID); // BYTES/s (1e18 precision)
+    uint256 duration = block.timestamp - getLastTs(components, id);
+    uint256 totalPrecision = 1e20; // 1e2(PROD_BURN_RATIO) * 1e18(byteRate)
+    return (duration * byteRate * PROD_BURN_RATIO + (totalPrecision / 2)) / totalPrecision;
+  }
+
+  // Calculate and return the total power of a pet (including mods and equips)
+  // TODO: include equipment and mod stats
+  function getTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
+    return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
+  }
+
+  // Calculate and return the total health of a pet (including mods and equips)
+  // TODO: include equipment and mod stats
+  function getTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
+    return HealthComponent(getAddressById(components, HealthCompID)).getValue(id);
+  }
+
+  /////////////////
+  // CHECKERS
+
+  // Check whether a pet is dead.
+  function isDead(IUintComp components, uint256 id) internal view returns (bool) {
+    return getCurrHealth(components, id) == 0;
+  }
+
+  // Check whether an operator is the pet's operator.
+  function isOperator(
+    IUintComp components,
+    uint256 id,
+    uint256 operatorID
+  ) internal view returns (bool) {
+    return getOperator(components, id) == operatorID;
+  }
+
+  // Check whether a pet has an ongoing production.
+  function isProducing(IUintComp components, uint256 id) internal view returns (bool result) {
+    uint256 productionID = LibProduction.getForPet(components, id);
+    if (productionID != 0 && LibProduction.isActive(components, productionID)) result = true;
   }
 
   /////////////////
@@ -108,7 +170,7 @@ library LibPet {
     HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, currHealth);
   }
 
-  function setHealthCurrent(
+  function setCurrHealth(
     IUintComp components,
     uint256 id,
     uint256 currHealth
@@ -123,6 +185,14 @@ library LibPet {
     uint256 ts
   ) internal {
     TimeLastActionComponent(getAddressById(components, TimeLastCompID)).set(id, ts);
+  }
+
+  function setMediaURI(
+    IUintComp components,
+    uint256 id,
+    string memory uri
+  ) internal {
+    MediaURIComponent(getAddressById(components, MediaURICompID)).set(id, uri);
   }
 
   function setName(
@@ -149,45 +219,18 @@ library LibPet {
     IdOwnerComponent(getAddressById(components, IdOwnerCompID)).set(id, ownerID);
   }
 
-  /////////////////
-  // CHECKERS
-
-  function isPet(IUintComp components, uint256 id) internal view returns (bool) {
-    return IsPetComponent(getAddressById(components, IsPetCompID)).has(id);
-  }
-
-  function isDead(IUintComp components, uint256 id) internal view returns (bool) {
-    return getHealthCurrent(components, id) == 0;
-  }
-
-  // Check whether a pet has an ongoing production.
-  function isProducing(IUintComp components, uint256 id) internal view returns (bool result) {
-    uint256[] memory results = LibProduction._getAllX(components, 0, id, "ACTIVE");
-    if (results.length > 0) {
-      result = true;
-    }
-  }
-
-  /////////////////
-  // CALCULATIONS
-
-  // calculate and return the total power of a pet (including equipment)
-  // TODO: include equipment stats
-  // TODO: update this to power, soon:tm:
-  function getTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
-    return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
-  }
-
-  // calculate and return the total health of a pet (including equipment)
-  // TODO: include equipment stats
-  function getTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
-    return HealthComponent(getAddressById(components, HealthCompID)).getValue(id);
+  function setState(
+    IUintComp components,
+    uint256 id,
+    string memory state
+  ) internal {
+    StateComponent(getAddressById(components, StateCompID)).set(id, state);
   }
 
   /////////////////
   // GETTERS
 
-  function getHealthCurrent(IUintComp components, uint256 id) internal view returns (uint256) {
+  function getCurrHealth(IUintComp components, uint256 id) internal view returns (uint256) {
     return HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).getValue(id);
   }
 
@@ -216,6 +259,11 @@ library LibPet {
   /////////////////
   // QUERIES
 
+  // Get the production of a pet. Return 0 if there are none.
+  function getProduction(IUintComp components, uint256 id) internal view returns (uint256) {
+    return LibProduction.getForPet(components, id);
+  }
+
   // get the entity ID of a pet from its index (tokenID)
   function indexToID(IUintComp components, uint256 index) internal view returns (uint256 result) {
     uint256[] memory results = IndexPetComponent(getAddressById(components, IndexPetComponentID))
@@ -228,14 +276,6 @@ library LibPet {
   // get the index of a pet (aka its 721 tokenID) from its entity ID
   function idToIndex(IUintComp components, uint256 entityID) internal view returns (uint256) {
     return IndexPetComponent(getAddressById(components, IndexPetComponentID)).getValue(entityID);
-  }
-
-  // Get the production of a pet. Return 0 if there are none.
-  function getProduction(IUintComp components, uint256 id) internal view returns (uint256 result) {
-    uint256[] memory results = LibProduction._getAllX(components, 0, id, "");
-    if (results.length > 0) {
-      result = results[0];
-    }
   }
 
   /////////////////

@@ -14,17 +14,17 @@ uint256 constant ID = uint256(keccak256("system.ProductionStart"));
 
 // ProductionStartSystem activates a pet production on a node. If it doesn't exist, we create one.
 // We limit to one production per pet, and one production on a node per character.
+// TODO: update this to kill the pet off if health is at 0
 contract ProductionStartSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
     (uint256 petID, uint256 nodeID) = abi.decode(arguments, (uint256, uint256));
     uint256 operatorID = LibOperator.getByAddress(components, msg.sender);
-    uint256 currHealth = LibPet.syncHealth(components, petID);
 
-    require(LibPet.getOperator(components, petID) == operatorID, "Pet: not urs");
-    require(currHealth != 0, "Pet: no health remaining (pls feed)");
+    require(LibPet.isOperator(components, petID, operatorID), "Pet: not urs");
     require(!LibPet.isProducing(components, petID), "Pet: already producing");
+    require(LibPet.syncHealth(components, petID) != 0, "Pet: is dead (pls revive)");
 
     uint256 id = LibProduction.getForPet(components, petID);
     if (id == 0) {

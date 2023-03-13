@@ -15,28 +15,28 @@ import { Utils } from "utils/Utils.sol";
 uint256 constant ID = uint256(keccak256("system.ProductionCollect"));
 
 // ProductionCollectSystem collects on an active pet production.
+// TODO: update this to kill the pet off if health is at 0
 contract ProductionCollectSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
-    uint256 productionID = abi.decode(arguments, (uint256));
+    uint256 id = abi.decode(arguments, (uint256));
     uint256 operatorID = LibOperator.getByAddress(components, msg.sender);
-    uint256 petID = LibProduction.getPet(components, productionID);
-    uint256 currHealth = LibPet.syncHealth(components, petID);
+    uint256 petID = LibProduction.getPet(components, id);
 
-    require(LibPet.getOperator(components, petID) == operatorID, "Pet: not urs");
-    require(currHealth != 0, "Pet: no health remaining (pls feed)");
-    require(Utils.hasState(components, productionID, "ACTIVE"), "Production: must be active");
+    require(LibPet.isOperator(components, petID, operatorID), "Pet: not urs");
+    require(LibPet.isProducing(components, petID), "Pet: must be producing");
+    require(LibPet.syncHealth(components, petID) != 0, "Pet: is dead (pls revive)");
 
-    uint256 amt = LibProduction.calc(components, productionID);
+    uint256 amt = LibProduction.getOutput(components, id);
     LibCoin.inc(components, operatorID, amt);
-    LibProduction.reset(components, productionID);
+    LibProduction.reset(components, id);
 
     Utils.updateLastBlock(components, operatorID);
     return abi.encode(amt);
   }
 
-  function executeTyped(uint256 productionID) public returns (bytes memory) {
-    return execute(abi.encode(productionID));
+  function executeTyped(uint256 id) public returns (bytes memory) {
+    return execute(abi.encode(id));
   }
 }
