@@ -25,9 +25,7 @@ import { LibStat } from "libraries/LibStat.sol";
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
 uint256 constant PROD_BURN_RATIO = 50; // energy burned per 100 BYTES produced
-
-uint256 constant DEMO_POWER = 15;
-uint256 constant DEMO_EPOCH = 1;
+uint256 constant DEMO_MULTIPLIER = 360;
 
 library LibPet {
   /////////////////
@@ -161,13 +159,12 @@ library LibPet {
   // set a pet's stats from its traits
   // TODO: actually set stats from traits. hardcoded currently
   function setStats(IUintComp components, uint256 id) internal {
-    PowerComponent(getAddressById(components, PowerCompID)).set(id, DEMO_POWER);
-    // PowerComponent(getAddressById(components, PowerCompID)).set(id, BASE_POWER);
+    uint256 power = BASE_POWER * DEMO_MULTIPLIER;
+    PowerComponent(getAddressById(components, PowerCompID)).set(id, power);
 
     uint256 totalHealth = _smolRandom(BASE_HEALTH, id);
-    uint256 currHealth = _smolRandom(totalHealth, id);
     HealthComponent(getAddressById(components, HealthCompID)).set(id, totalHealth);
-    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, currHealth);
+    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, totalHealth);
   }
 
   function setCurrHealth(
