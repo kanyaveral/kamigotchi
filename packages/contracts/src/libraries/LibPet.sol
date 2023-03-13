@@ -24,7 +24,7 @@ import { LibStat } from "libraries/LibStat.sol";
 
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
-uint256 constant PROD_BURN_RATIO = 50; // energy burned per 100 BYTES produced
+uint256 constant BURN_RATIO = 50; // energy burned per 100 BYTES produced
 uint256 constant DEMO_MULTIPLIER = 360;
 
 library LibPet {
@@ -114,8 +114,8 @@ library LibPet {
     uint256 productionID = getProduction(components, id);
     uint256 byteRate = LibProduction.getRate(components, productionID); // BYTES/s (1e18 precision)
     uint256 duration = block.timestamp - getLastTs(components, id);
-    uint256 totalPrecision = 1e20; // 1e2(PROD_BURN_RATIO) * 1e18(byteRate)
-    return (duration * byteRate * PROD_BURN_RATIO + (totalPrecision / 2)) / totalPrecision;
+    uint256 totalPrecision = 1e20; // 1e2(BURN_RATIO) * 1e18(byteRate)
+    return (duration * byteRate * BURN_RATIO + (totalPrecision / 2)) / totalPrecision;
   }
 
   // Calculate and return the total power of a pet (including mods and equips)
@@ -167,60 +167,32 @@ library LibPet {
     HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, totalHealth);
   }
 
-  function setCurrHealth(
-    IUintComp components,
-    uint256 id,
-    uint256 currHealth
-  ) internal {
+  function setCurrHealth(IUintComp components, uint256 id, uint256 currHealth) internal {
     HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, currHealth);
   }
 
   // Update the TimeLastAction of a pet. used to expected battery drain on next action
-  function setLastTs(
-    IUintComp components,
-    uint256 id,
-    uint256 ts
-  ) internal {
+  function setLastTs(IUintComp components, uint256 id, uint256 ts) internal {
     TimeLastActionComponent(getAddressById(components, TimeLastCompID)).set(id, ts);
   }
 
-  function setMediaURI(
-    IUintComp components,
-    uint256 id,
-    string memory uri
-  ) internal {
+  function setMediaURI(IUintComp components, uint256 id, string memory uri) internal {
     MediaURIComponent(getAddressById(components, MediaURICompID)).set(id, uri);
   }
 
-  function setName(
-    IUintComp components,
-    uint256 id,
-    string memory name
-  ) internal {
+  function setName(IUintComp components, uint256 id, string memory name) internal {
     NameComponent(getAddressById(components, NameCompID)).set(id, name);
   }
 
-  function setOperator(
-    IUintComp components,
-    uint256 id,
-    uint256 operatorID
-  ) internal {
+  function setOperator(IUintComp components, uint256 id, uint256 operatorID) internal {
     IdOperatorComponent(getAddressById(components, IdOpCompID)).set(id, operatorID);
   }
 
-  function setOwner(
-    IUintComp components,
-    uint256 id,
-    uint256 ownerID
-  ) internal {
+  function setOwner(IUintComp components, uint256 id, uint256 ownerID) internal {
     IdOwnerComponent(getAddressById(components, IdOwnerCompID)).set(id, ownerID);
   }
 
-  function setState(
-    IUintComp components,
-    uint256 id,
-    string memory state
-  ) internal {
+  function setState(IUintComp components, uint256 id, string memory state) internal {
     StateComponent(getAddressById(components, StateCompID)).set(id, state);
   }
 
@@ -281,11 +253,7 @@ library LibPet {
   // transfer ERC721 pet
   // NOTE: it doesnt seem we actually need IdOwner directly on the pet as it can be
   // directly accessed through the operator entity.
-  function transfer(
-    IUintComp components,
-    uint256 index,
-    uint256 operatorID
-  ) internal {
+  function transfer(IUintComp components, uint256 index, uint256 operatorID) internal {
     // does not need to check for previous owner, ERC721 handles it
     uint256 id = indexToID(components, index);
     uint256 ownerID = getOwner(components, operatorID);
