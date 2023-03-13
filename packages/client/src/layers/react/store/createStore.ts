@@ -18,6 +18,7 @@ export interface VisibleDivs {
   chat: boolean;
   merchant: boolean;
   petList: boolean;
+  worldMap: boolean;
 }
 
 export interface StoreState {
@@ -48,6 +49,7 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
       chat: false,
       merchant: false,
       petList: false,
+      worldMap: false,
     },
   };
 
