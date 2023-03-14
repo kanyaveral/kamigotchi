@@ -21,8 +21,9 @@ export function createGameConfig(): GameConfig | undefined {
 }
 
 // Get the network config of a local deployment based on url params
-function createGameConfigLocal(params: URLSearchParams): GameConfig {
+export function createGameConfigLocal(params: URLSearchParams): GameConfig {
   let config: GameConfig = <GameConfig>{};
+  config.devMode = true;
 
   // EOAs
   const wallet = new Wallet(
@@ -39,8 +40,10 @@ function createGameConfigLocal(params: URLSearchParams): GameConfig {
   config.wsRpc = wsRpc;
 
   // urls
-  config.checkpointUrl = params.get('checkpoint') || undefined;
-  config.snapshotUrl = params.get('snapshotUrl') || undefined;;
+  config.checkpointUrl = params.get('checkpoint') || '';
+  config.snapshotUrl = params.get('snapshotUrl') || '';
+  config.faucetServiceUrl = '';
+  config.relayServiceUrl = '';
 
   // chainId
   const chainIdString = params.get('chainId') || '31337';

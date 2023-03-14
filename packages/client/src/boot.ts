@@ -9,7 +9,9 @@ import {
 } from '@latticexyz/recs';
 import { Time } from './utils/time';
 import { Wallet } from 'ethers';
+
 import { GameConfig } from './layers/network/config';
+import { createGameConfigLocal } from './layers/network/createGameConfig';
 import { mountReact, setLayers, boot as bootReact } from './layers/react/boot';
 
 let createNetworkLayer = createNetworkLayerImport;
@@ -18,95 +20,18 @@ let createPhaserLayer = createPhaserLayerImport;
 // boot the whole thing
 export async function boot() {
   bootReact();
+  mountReact.current(false);
   const game = await bootGame();
+  mountReact.current(true);
   setLayers.current(game.layers as Layers);
 }
 
 // boot the game (phaser and network layers)
+// TODO: split this apart and boot the logic over to the network and phaser layers
 async function bootGame() {
-  const layers: Partial<Layers> = {};
   let initialBoot = true;
 
-  async function rebootGame(): Promise<Layers> {
-    mountReact.current(false);
-
-    const params = new URLSearchParams(window.location.search);
-    let worldAddress,
-      wallet,
-      chainIdString,
-      jsonRpc,
-      wsRpc,
-      checkpointUrl,
-      initialBlockNumber;
-    let relayServiceUrl = '',
-      faucetServiceUrl = '',
-      snapshotUrl = '';
-
-    const devMode = params.get('dev') === 'true';
-
-    // LOCAL
-    worldAddress = params.get('worldAddress');
-    chainIdString = params.get('chainId');
-    jsonRpc = params.get('rpc') || undefined;
-    wsRpc = params.get('wsRpc') || undefined; // || (jsonRpc && jsonRpc.replace("http", "ws"));
-    checkpointUrl = params.get('checkpoint') || undefined;
-    snapshotUrl = params.get('snapshotUrl') || '';
-    let initialBlockNumberString = params.get('initialBlockNumber');
-    initialBlockNumber = initialBlockNumberString
-      ? parseInt(initialBlockNumberString)
-      : 0;
-
-    wallet = new Wallet(
-      '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-    );
-    localStorage.setItem('burnerPrivateKey', wallet.privateKey);
-    localStorage.setItem('burnerAddress', wallet.publicKey);
-
-    let networkLayerConfig;
-    if (worldAddress && wallet && chainIdString && jsonRpc) {
-      networkLayerConfig = {
-        worldAddress,
-        privateKey: wallet.privateKey,
-        chainId: parseInt(chainIdString),
-        jsonRpc,
-        wsRpc,
-        checkpointUrl,
-        devMode,
-        initialBlockNumber,
-        faucetServiceUrl,
-        relayServiceUrl,
-        snapshotUrl,
-      };
-    }
-
-
-    if (!networkLayerConfig) throw new Error('Invalid config');
-
-    if (!layers.network)
-      layers.network = await createNetworkLayer(networkLayerConfig);
-    if (!layers.phaser) layers.phaser = await createPhaserLayer(layers.network);
-
-    Time.time.setPacemaker((setTimestamp) => {
-      layers.phaser?.game.events.on('poststep', (time: number) => {
-        setTimestamp(time);
-      });
-    });
-
-    if (document.querySelectorAll('#phaser-game canvas').length > 1) {
-      console.log('Detected two canvas elements, full reload');
-    }
-
-    if (initialBoot) {
-      initialBoot = false;
-      layers.network.startSync();
-    }
-
-    mountReact.current(true);
-
-    return layers as Layers;
-  }
-
-  await rebootGame();
+  const layers = await rebootGame(initialBoot);
 
   const ecs = {
     setComponent,
@@ -119,6 +44,42 @@ async function bootGame() {
   (window as any).time = Time.time;
 
   console.log('booted');
-
   return { layers, ecs };
+}
+
+// Reboot the game 
+async function rebootGame(initialBoot: boolean): Promise<Layers> {
+  const layers: Partial<Layers> = {};
+
+
+  // Set the game config
+  const params = new URLSearchParams(window.location.search);
+  const gameConfig: GameConfig = createGameConfigLocal(params);
+  if (!gameConfig) throw new Error('Invalid config');
+  console.log("gameConfig", gameConfig);
+
+  // Populate the layers
+  if (!layers.network) layers.network = await createNetworkLayer(gameConfig);
+  if (!layers.phaser) layers.phaser = await createPhaserLayer(layers.network);
+
+  // what is this for?
+  Time.time.setPacemaker((setTimestamp) => {
+    layers.phaser?.game.events.on('poststep', (time: number) => {
+      setTimestamp(time);
+    });
+  });
+
+  // Refresh if we detect two canvas elements. Something went wrong.
+  if (document.querySelectorAll('#phaser-game canvas').length > 1) {
+    console.log('Detected two canvas elements, full reload');
+  }
+
+  // we need to do something about this to actually hold onto existing indexed data
+  // we also need this specifically waited upon for proper data subscriptions and wallet flow
+  if (initialBoot) {
+    initialBoot = false;
+    layers.network.startSync();
+  }
+
+  return layers as Layers;
 }
