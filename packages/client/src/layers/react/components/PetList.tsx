@@ -101,7 +101,7 @@ export function registerPetList() {
             balance: 0,
           },
         ];
-      }
+      };
 
       // get an Inventory object by index
       // TODO: get name and decription here once we have item registry support
@@ -173,7 +173,7 @@ export function registerPetList() {
         Coin.update$,
         State.update$,
         StartTime.update$,
-        MediaURI.update$,
+        MediaURI.update$
       ).pipe(
         map(() => {
           // get the operator entity of the controlling wallet
@@ -190,20 +190,24 @@ export function registerPetList() {
             ?.value as number;
 
           // get the list of inventory indices for this account
-          const inventoryResults = Array.from(runQuery([
-            Has(IsInventory),
-            HasValue(HolderID, { value: operatorID }),
-          ]));
+          const inventoryResults = Array.from(
+            runQuery([
+              Has(IsInventory),
+              HasValue(HolderID, { value: operatorID }),
+            ])
+          );
           let inventories: any = hardCodeInventory(); // the hardcoded slots we want for consumables
 
           // if we have inventories for the operator, generate a list of inventory objects
           let itemIndex;
           for (let i = 0; i < inventoryResults.length; i++) {
             // match indices to the existing consumables
-            itemIndex = getComponentValue(ItemIndex, inventoryResults[i])?.value as number;
+            itemIndex = getComponentValue(ItemIndex, inventoryResults[i])
+              ?.value as number;
             for (let j = 0; j < inventories.length; j++) {
               if (inventories[j].itemIndex == itemIndex) {
-                let balance = getComponentValue(Balance, inventoryResults[j])?.value as number;
+                let balance = getComponentValue(Balance, inventoryResults[j])
+                  ?.value as number;
                 inventories[j].balance = balance ? balance * 1 : 0;
               }
             }
@@ -249,7 +253,11 @@ export function registerPetList() {
 
     // Render
     ({ actions, api, data, world }) => {
-      const { visibleDivs, setVisibleDivs } = dataStore();
+      const {
+        visibleDivs,
+        setVisibleDivs,
+        sound: { volume },
+      } = dataStore();
       // console.log(data.pets);
 
       const [lastRefresh, setLastRefresh] = useState(Date.now());
@@ -329,10 +337,12 @@ export function registerPetList() {
             return api.food.feed(petID, food);
           },
         });
-      }
+      };
 
       const hideModal = () => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
 
         setVisibleDivs({ ...visibleDivs, petList: !visibleDivs.petList });
@@ -348,18 +358,18 @@ export function registerPetList() {
           rate = kami.power / 3600;
         }
         return rate;
-      }
+      };
 
       // calculate health (as % of total health) based on the drain against last confirmed health
       const calcHealth = (kami: any) => {
         // calculate the health drain on the kami since the last health update
-        let duration = (lastRefresh / 1000) - kami.lastHealthTime;
+        let duration = lastRefresh / 1000 - kami.lastHealthTime;
         let drainRate = calcProductionRate(kami) / 2;
         let healthDrain = drainRate * duration;
 
         let newHealth = Math.max(kami.currHealth - healthDrain, 0);
-        return (100 * newHealth / kami.health).toFixed(1);
-      }
+        return ((100 * newHealth) / kami.health).toFixed(1);
+      };
 
       // calculate the expected output from a pet production based on starttime
       const calcOutput = (kami: any) => {
@@ -414,19 +424,13 @@ export function registerPetList() {
                   ) : (
                     <ThinButton>Select Node</ThinButton>
                   )}
-                  <ThinButton
-                    onClick={() => feedPet(kami.id, 1)}
-                  >
+                  <ThinButton onClick={() => feedPet(kami.id, 1)}>
                     Feed 1
                   </ThinButton>
-                  <ThinButton
-                    onClick={() => feedPet(kami.id, 2)}
-                  >
+                  <ThinButton onClick={() => feedPet(kami.id, 2)}>
                     Feed 2
                   </ThinButton>
-                  <ThinButton
-                    onClick={() => feedPet(kami.id, 3)}
-                  >
+                  <ThinButton onClick={() => feedPet(kami.id, 3)}>
                     Feed 3
                   </ThinButton>
                 </KamiDetails>
@@ -460,7 +464,7 @@ export function registerPetList() {
         <ModalWrapper
           id="petlist_modal"
           isOpen={visibleDivs.petList}
-          style={{ height: "75vh" }}
+          style={{ height: '75vh' }}
         >
           <ModalContent>
             <TopGrid>
@@ -471,11 +475,9 @@ export function registerPetList() {
             <ConsumableGrid>
               {ConsumableCells(data.operator.inventories)}
             </ConsumableGrid>
-            <Scrollable>
-              {KamiCards(data.pets)}
-            </Scrollable>
-          </ModalContent >
-        </ModalWrapper >
+            <Scrollable>{KamiCards(data.pets)}</Scrollable>
+          </ModalContent>
+        </ModalWrapper>
       );
     }
   );

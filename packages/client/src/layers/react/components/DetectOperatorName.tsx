@@ -5,6 +5,7 @@ import { registerUIComponent } from '../engine/store';
 import styled, { keyframes } from 'styled-components';
 import { HasValue, runQuery } from '@latticexyz/recs';
 import mintSound from '../../../public/sound/sound_effects/tami_mint_vending_sound.mp3'
+import { dataStore } from '../store/createStore';
 
 export function registerDetectOperatorName() {
   registerUIComponent(
@@ -42,6 +43,8 @@ export function registerDetectOperatorName() {
 
       const [isDivVisible, setIsDivVisible] = useState(false);
       const [name, setName] = useState("");
+      const { volume } = dataStore((state) => state.sound);
+
       const hasOperator = Array.from(
         runQuery([HasValue(PlayerAddress, { value: connectedAddress.get() })])
       )[0];
@@ -50,6 +53,8 @@ export function registerDetectOperatorName() {
         async (name) => {
           try {
             const mintFX = new Audio(mintSound)
+
+            mintFX.volume = volume;
             mintFX.play()
 
             await player.operator.set(connectedAddress.get()!, name);

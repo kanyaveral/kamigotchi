@@ -7,14 +7,18 @@ export const triggerObjectModal = (
 ) => {
   return object.setInteractive().on('pointerdown', () => {
     const clickFX = new Audio(dialogueSound);
+
+    const {
+      visibleDivs,
+      sound: { volume },
+    } = dataStore.getState();
+
+    clickFX.volume = volume;
     clickFX.play();
 
-    const { visibleDivs } = dataStore.getState();
-    
     dataStore.setState({ objectData: { description } });
     dataStore.setState({
       visibleDivs: { ...visibleDivs, objectModal: !visibleDivs.objectModal },
     });
-    
   });
 };

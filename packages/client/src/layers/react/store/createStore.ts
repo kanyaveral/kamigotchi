@@ -21,18 +21,25 @@ export interface VisibleDivs {
   worldMap: boolean;
 }
 
+export interface SoundState {
+  volume: number;
+}
+
 export interface StoreState {
   objectData: DataObject;
   roomExits: RoomExits;
   selectedPet: DataObject;
   visibleDivs: VisibleDivs;
+  sound: SoundState;
 }
+
 
 interface StoreActions {
   setObjectData: (data: DataObject) => void;
   setRoomExits: (data: RoomExits) => void;
   setSelectedPet: (data: DataObject) => void;
   setVisibleDivs: (data: VisibleDivs) => void;
+  setSoundState: (data: SoundState) => void;
 }
 
 export const dataStore = create<StoreState & StoreActions>((set) => {
@@ -51,6 +58,9 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
       petList: false,
       worldMap: false,
     },
+    sound: {
+      volume: localStorage.getItem('isSoundMuted') == 'true' ? 0 : 0.5,
+    },
   };
 
   return {
@@ -63,5 +73,7 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
       set((state: StoreState) => ({ ...state, objectData: data })),
     setVisibleDivs: (data: VisibleDivs) =>
       set((state: StoreState) => ({ ...state, visibleDivs: data })),
+    setSoundState: (data: SoundState) =>
+      set((state: StoreState) => ({ ...state, sound: data })),
   };
 });

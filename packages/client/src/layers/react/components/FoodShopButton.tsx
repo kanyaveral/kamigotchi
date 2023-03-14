@@ -17,10 +17,16 @@ export function registerFoodShopButton() {
     },
     (layers) => of(layers),
     () => {
-      const { visibleDivs, setVisibleDivs } = dataStore();
+      const {
+        visibleDivs,
+        setVisibleDivs,
+        sound: { volume },
+      } = dataStore();
 
       const show = () => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
 
         setVisibleDivs({ ...visibleDivs, merchant: !visibleDivs.merchant });

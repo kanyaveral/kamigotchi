@@ -58,11 +58,7 @@ export function registerPetMint() {
     ({ layers, nextToken }) => {
       const {
         network: {
-          components: {
-            OwnerID,
-            IsPet,
-            Balance
-          },
+          components: { OwnerID, IsPet, Balance },
           api: { player },
           network: { connectedAddress },
           actions,
@@ -70,8 +66,13 @@ export function registerPetMint() {
         },
       } = layers;
 
-      const { visibleDivs, setVisibleDivs, setSelectedPet, selectedPet } =
-        dataStore();
+      const {
+        visibleDivs,
+        setVisibleDivs,
+        setSelectedPet,
+        selectedPet,
+        sound: { volume },
+      } = dataStore();
 
       const mintTx = (address: string) => {
         const actionID = `Minting Kami` as EntityID;
@@ -103,6 +104,8 @@ export function registerPetMint() {
       const handleMinting = async () => {
         try {
           const mintFX = new Audio(mintSound);
+
+          mintFX.volume = volume;
           mintFX.play();
 
           const mintActionID = mintTx(connectedAddress.get()!);
@@ -133,6 +136,8 @@ export function registerPetMint() {
 
       const hideModal = () => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
 
         setVisibleDivs({ ...visibleDivs, petMint: !visibleDivs.petMint });

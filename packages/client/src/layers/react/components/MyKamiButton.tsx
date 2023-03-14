@@ -17,15 +17,21 @@ export function registerMyKamiButton() {
     },
     (layers) => of(layers),
     () => {
-      const { visibleDivs, setVisibleDivs } = dataStore();
+      const {
+        visibleDivs,
+        setVisibleDivs,
+        sound: { volume },
+      } = dataStore();
 
       const showMyKami = () => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
 
         setVisibleDivs({ ...visibleDivs, petList: !visibleDivs.petList });
       };
-      console.log(visibleDivs)
+      console.log(visibleDivs);
 
       return (
         <ModalWrapper id="mykami_button">
