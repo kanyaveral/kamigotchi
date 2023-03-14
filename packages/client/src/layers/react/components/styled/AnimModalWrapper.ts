@@ -24,9 +24,9 @@ interface ModalWrapperProps {
 
 export const ModalWrapper = styled.div<ModalWrapperProps>`
   display: none;
-  opacity: ${({ isOpen }) => (isOpen ? '1' : '0')};
   justify-content: center;
   align-items: center;
+  opacity: ${({ isOpen }) => (isOpen ? '1' : '0')};
   animation: ${({ isOpen }) => (isOpen ? fadeIn : fadeOut)} 0.5s ease-in-out;
   transition: opacity 0.5s ease-in-out;
   pointer-events: ${({ isOpen }) => (isOpen ? 'auto' : 'none')};

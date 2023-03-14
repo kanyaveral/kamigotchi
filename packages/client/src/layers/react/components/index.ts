@@ -4,6 +4,7 @@ import { registerMerchantWindow } from './MerchantWindow';
 import { registerMiningModal } from './MiningModal';
 import { registerObjectModal } from './ObjectModal';
 import { registerMyKamiButton } from './MyKamiButton';
+import { registerMapButton } from './MapButton';
 import { registerChatButton } from './ChatButton';
 import { registerFoodShopButton } from './FoodShopButton';
 import { registerPetList } from './PetList';
@@ -33,5 +34,6 @@ export function registerUIComponents() {
   registerPetMint();
   registerPetDetails();
   registerWorldMap();
+  registerMapButton();
   registerActionQueue();
 }
