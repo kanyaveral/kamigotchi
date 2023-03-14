@@ -8,14 +8,22 @@ import { ActionStateString, ActionState } from '@latticexyz/std-client';
 import { registerUIComponent } from '../engine/store';
 import styled from 'styled-components';
 
+// Color coding of action queue
+type ColorMapping = { [key: string]: string };
+const statusColors: ColorMapping = {
+  "pending": "orange",
+  "failed": "red",
+  "complete": "green",
+}
+
 export function registerActionQueue() {
   registerUIComponent(
     'ActionQueue',
     {
-      rowStart: 50,
-      rowEnd: 70,
-      colStart: 82,
-      colEnd: 98,
+      rowStart: 5,
+      rowEnd: 50,
+      colStart: 80,
+      colEnd: 99,
     },
     (layers) => {
       const {
@@ -31,20 +39,31 @@ export function registerActionQueue() {
       );
     },
     ({ Action }) => {
+
+      const StyledStatus = (status: string) => {
+        const text = status.toLowerCase();
+        const color = statusColors[text];
+        return (
+          <Description style={{ color: `${color}`, display: "inline" }}>
+            {text}
+          </Description>
+        );
+      }
+
       return (
         <ModalWrapper>
-          <ModalContent style={{ pointerEvents: 'auto'}}>
-          <Description>TX Queue:</Description>
-          {[...getComponentEntities(Action)].reverse().map((e) => {
-            const actionData = getComponentValueStrict(Action, e);
-            let state = ActionStateString[actionData.state as ActionState];
-            if (state == "WaitingForTxEvents") state = "Pending";
-            return (
-              <Description key={`action${e}`}>
-                {Action.world.entities[e]}: [{state}]
-              </Description>
-            );
-          })}
+          <ModalContent style={{ pointerEvents: 'auto' }}>
+            <Description>TX Queue:</Description>
+            {[...getComponentEntities(Action)].map((e) => {
+              const actionData = getComponentValueStrict(Action, e);
+              let state = ActionStateString[actionData.state as ActionState];
+              if (state == "WaitingForTxEvents") state = "Pending";
+              return (
+                <Description key={`action${e}`}>
+                  {Action.world.entities[e]}: {StyledStatus(state)}
+                </Description>
+              );
+            })}
           </ModalContent>
         </ModalWrapper>
       );
@@ -70,7 +89,7 @@ const ModalContent = styled.div`
   border-color: black;
 
   overflow: scroll;
-  max-height: 175px;
+  max-height: 300px;
 `;
 
 const Description = styled.p`
