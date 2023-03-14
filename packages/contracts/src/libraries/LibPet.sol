@@ -25,7 +25,7 @@ import { LibStat } from "libraries/LibStat.sol";
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
 uint256 constant BURN_RATIO = 50; // energy burned per 100 BYTES produced
-uint256 constant DEMO_MULTIPLIER = 360;
+uint256 constant DEMO_MULTIPLIER = 100;
 
 library LibPet {
   /////////////////
