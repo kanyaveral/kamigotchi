@@ -120,7 +120,7 @@ export interface ProductionCollectSystem extends BaseContract {
     ): Promise<ContractTransaction>;
 
     executeTyped(
-      productionID: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -138,7 +138,7 @@ export interface ProductionCollectSystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   executeTyped(
-    productionID: PromiseOrValue<BigNumberish>,
+    id: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -156,7 +156,7 @@ export interface ProductionCollectSystem extends BaseContract {
     ): Promise<string>;
 
     executeTyped(
-      productionID: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -186,7 +186,7 @@ export interface ProductionCollectSystem extends BaseContract {
     ): Promise<BigNumber>;
 
     executeTyped(
-      productionID: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -205,7 +205,7 @@ export interface ProductionCollectSystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     executeTyped(
-      productionID: PromiseOrValue<BigNumberish>,
+      id: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

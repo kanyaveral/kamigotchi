@@ -14,7 +14,6 @@ import { dataStore } from '../store/createStore';
 import './font.css';
 import pompom from '../../../public/img/pompom.png';
 import gakki from '../../../public/img/gakki.png';
-import ribbon from '../../../public/img/ribbon.png';
 import gum from '../../../public/img/gum.png';
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
 import { ModalWrapper } from './styled/AnimModalWrapper';
@@ -103,7 +102,6 @@ export function registerPetList() {
           },
         ];
       }
-
 
       // get an Inventory object by index
       // TODO: get name and decription here once we have item registry support
@@ -343,28 +341,34 @@ export function registerPetList() {
       /////////////////
       // DATA INTERPRETATION
 
-      // NOTE(ja): the battery epoch is hardcoded right now but we should save this
-      // on the world's global config
-      const HEALTH_EPOCH = 1; // seconds
-
-      // calculate health (as % of total health) based on last health and time passed since last check
-      const calcHealth = (kami: any) => {
-        let duration = (lastRefresh / 1000) - kami.lastHealthTime;
-        let newHealth = Math.max(kami.currHealth - duration / HEALTH_EPOCH, 0);
-        return (100 * newHealth / kami.health).toFixed(1);
-        // return Math.round(100 * (1 - newHealth / kami.health)); // hunger calculation
+      // get the production rate of the kami, only based on power right now
+      const calcProductionRate = (kami: any) => {
+        let rate = 0;
+        if (kami.production && kami.production.state === 'ACTIVE') {
+          rate = kami.power / 3600;
+        }
+        return rate;
       }
 
-      // calculate the expected output from a pet production based on starttime and
+      // calculate health (as % of total health) based on the drain against last confirmed health
+      const calcHealth = (kami: any) => {
+        // calculate the health drain on the kami since the last health update
+        let duration = (lastRefresh / 1000) - kami.lastHealthTime;
+        let drainRate = calcProductionRate(kami) / 2;
+        let healthDrain = drainRate * duration;
+
+        let newHealth = Math.max(kami.currHealth - healthDrain, 0);
+        return (100 * newHealth / kami.health).toFixed(1);
+      }
+
+      // calculate the expected output from a pet production based on starttime
       const calcOutput = (kami: any) => {
-        let duration = 0,
-          output = 0;
-        if (kami.production && kami.production.state === 'ACTIVE') {
-          duration = lastRefresh / 1000 - kami.production.startTime;
-          output = Math.round(duration * kami.power);
-          output = Math.max(output, 0);
+        if (kami.production) {
+          let duration = lastRefresh / 1000 - kami.production.startTime;
+          let output = Math.round(duration * calcProductionRate(kami));
+          return Math.max(output, 0);
         }
-        return output;
+        return 0;
       };
 
       /////////////////
@@ -463,7 +467,6 @@ export function registerPetList() {
               <TopDescription>
                 Bytes: {data.operator.bytes ? data.operator.bytes * 1 : '0'}
               </TopDescription>
-              <TopButton onClick={hideModal}>X</TopButton>
             </TopGrid>
             <ConsumableGrid>
               {ConsumableCells(data.operator.inventories)}
@@ -494,24 +497,6 @@ const ModalContent = styled.div`
   border-color: black;
 
   height: 100%;
-`;
-
-const Button = styled.button`
-  background-color: #ffffff;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  color: black;
-  padding: 5px;
-  display: inline-block;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 5px;
-  font-family: Pixel;
-
-  &:active {
-    background - color: #c2c2c2;
-}
 `;
 
 const TopButton = styled.button`
@@ -677,13 +662,6 @@ const CellTwo = styled.div`
 
 const CellThree = styled.div`
   grid-column: 3;
-  border-style: solid;
-  border-width: 0px 2px 0px 0px;
-  border-color: black;
-`;
-
-const CellFour = styled.div`
-  grid-column: 4;
 `;
 
 const Icon = styled.img`

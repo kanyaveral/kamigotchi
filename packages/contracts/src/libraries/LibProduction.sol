@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
+
+import { LibString } from "solady/utils/LibString.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
-import { ID as IdOpCompID } from "components/IdOperatorComponent.sol";
 import { IdNodeComponent, ID as IdNodeCompID } from "components/IdNodeComponent.sol";
 import { IdPetComponent, ID as IdPetCompID } from "components/IdPetComponent.sol";
 import { IsProductionComponent, ID as IsProdCompID } from "components/IsProductionComponent.sol";
@@ -43,7 +44,7 @@ library LibProduction {
     TimeStartComponent(getAddressById(components, TimeStartCompID)).set(id, block.timestamp);
   }
 
-  // Starts an _existing_ production if not already started. Update the owning character as needed.
+  // Starts an _existing_ production if not already started.
   function start(IUintComp components, uint256 id) internal {
     StateComponent StateC = StateComponent(getAddressById(components, StateCompID));
     if (!StateC.hasValue(id, "ACTIVE")) {
@@ -60,7 +61,45 @@ library LibProduction {
     }
   }
 
-  // set the node of a production
+  /////////////////////
+  // CALCULATIONS
+
+  // Calculate the duration since a production last started, measured in seconds.
+  function getDuration(IUintComp components, uint256 id) internal view returns (uint256) {
+    return
+      block.timestamp -
+      TimeStartComponent(getAddressById(components, TimeStartCompID)).getValue(id);
+  }
+
+  // Calculate the reward we would expect from a production, collected at the
+  // current time, measured in BYTES. INACTIVE productions will return 0.
+  function getOutput(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint256 rate = getRate(components, id);
+    uint256 duration = getDuration(components, id);
+    return (rate * duration) / 1e18;
+  }
+
+  // Calculate the rate of a production, measured in BYTES/s (1e18 precision).
+  // TODO: Account for affinity boosts.
+  function getRate(IUintComp components, uint256 id) internal view returns (uint256) {
+    if (!isActive(components, id)) return 0;
+
+    uint256 petID = getPet(components, id);
+    uint256 power = LibPet.getTotalPower(components, petID);
+    uint256 affinityMultiplier = 100; // defined as out of 100
+    return (((1e18 * affinityMultiplier) / 100) * power) / 3600;
+  }
+
+  /////////////////
+  // CHECKERS
+  function isActive(IUintComp components, uint256 id) internal view returns (bool) {
+    return LibString.eq("ACTIVE", getState(components, id));
+  }
+
+  /////////////////
+  // SETTERS
+
+  // Set the node for a pet's production
   function setNode(
     IUintComp components,
     uint256 id,
@@ -72,35 +111,8 @@ library LibProduction {
     }
   }
 
-  /////////////////////
-  // CALCULATIONS
-
-  // Calculate the reward from an ACTIVE production using equipment and attributes.
-  function calc(IUintComp components, uint256 id) internal view returns (uint256) {
-    uint256 petID = IdPetComponent(getAddressById(components, IdPetCompID)).getValue(id);
-
-    if (!StateComponent(getAddressById(components, StateCompID)).hasValue(id, "ACTIVE")) {
-      return 0;
-    }
-
-    // TODO: update this to include other multipliers (affinity boost/deboost) once we have theming of that
-    // TODO: handle any calculations for this in seconds (power is per hour but treated like seconds rn)
-    uint256 power = LibPet.getTotalPower(components, petID);
-    uint256 duration = getDuration(components, id);
-    uint256 output = power * duration;
-    return output;
-  }
-
-  // Get the duration since TimeStart of a production
-  function getDuration(IUintComp components, uint256 id) internal view returns (uint256) {
-    uint256 startTime = TimeStartComponent(getAddressById(components, TimeStartCompID)).getValue(
-      id
-    );
-    return block.timestamp - startTime;
-  }
-
   /////////////////
-  // COMPONENT RETRIEVAL
+  // GETTERS
 
   function getNode(IUintComp components, uint256 id) internal view returns (uint256) {
     return IdNodeComponent(getAddressById(components, IdNodeCompID)).getValue(id);
@@ -110,20 +122,12 @@ library LibProduction {
     return IdPetComponent(getAddressById(components, IdPetCompID)).getValue(id);
   }
 
+  function getState(IUintComp components, uint256 id) internal view returns (string memory) {
+    return StateComponent(getAddressById(components, StateCompID)).getValue(id);
+  }
+
   /////////////////
   // QUERIES
-
-  // get an active production of a pet. assumed 1 at most
-  function getActiveForPet(IUintComp components, uint256 petID)
-    internal
-    view
-    returns (uint256 result)
-  {
-    uint256[] memory results = _getAllX(components, 0, petID, "ACTIVE");
-    if (results.length != 0) {
-      result = results[0];
-    }
-  }
 
   // get a production by a pet. assumed only 1
   function getForPet(IUintComp components, uint256 petID) internal view returns (uint256 result) {
