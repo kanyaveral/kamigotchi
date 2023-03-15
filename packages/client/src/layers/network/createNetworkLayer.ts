@@ -18,15 +18,20 @@ export async function createNetworkLayer(config: GameConfig) {
     txReduced$,
     network,
     startSync,
-  } = await setupMUDNetwork<typeof components, SystemTypes>(getNetworkConfig(config), world, components, SystemAbis, {
+  } = await setupMUDNetwork<typeof components, SystemTypes>(
+    getNetworkConfig(config),
+    world,
+    components,
+    SystemAbis, {
     initialGasPrice: 2_000_000_000,
     fetchSystemCalls: true,
-  });
+  }
+  );
 
-  // --- ACTION SYSTEM --------------------------------------------------------------
   const actions = createActionSystem(world, txReduced$);
 
-  // --- API ------------------------------------------------------------------------
+  /////////////////
+  // API 
   const faucet = config.faucetServiceUrl ? createFaucetService(config.faucetServiceUrl) : undefined;
   const address = network.connectedAddress.get();
   address && (await faucet?.dripDev({ address }));

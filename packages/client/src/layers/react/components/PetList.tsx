@@ -281,7 +281,7 @@ export function registerPetList() {
 
       // starts a production for the given pet on the node in the room
       const startProduction = (petID: EntityID) => {
-        const actionID = `Starting Production at ${Date.now()}` as EntityID; // Date.now to have the actions ordered in the component browser
+        const actionID = `Starting Harvest` as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
           components: {},
@@ -296,7 +296,7 @@ export function registerPetList() {
 
       // stops a production
       const stopProduction = (productionID: EntityID) => {
-        const actionID = `Stopping production at ${Date.now()}` as EntityID; // Date.now to have the actions ordered in the component browser
+        const actionID = `Stopping Harvest` as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
           components: {},
@@ -311,7 +311,7 @@ export function registerPetList() {
 
       // collects on an existing production
       const reapProduction = (productionID: EntityID) => {
-        const actionID = `Collecting production at ${Date.now()}` as EntityID; // Date.now to have the actions ordered in the component browser
+        const actionID = `Collecting Harvest` as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
           components: {},
@@ -326,7 +326,7 @@ export function registerPetList() {
 
       // feed pet, no inventory check
       const feedPet = (petID: EntityID, food: number) => {
-        const actionID = `Collecting production at ${Date.now()}` as EntityID; // Date.now to have the actions ordered in the component browser
+        const actionID = `Feeding Kami` as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
           components: {},
@@ -372,6 +372,7 @@ export function registerPetList() {
       };
 
       // calculate the expected output from a pet production based on starttime
+      // set to N/A if dead
       const calcOutput = (kami: any) => {
         if (kami.production) {
           let duration = lastRefresh / 1000 - kami.production.startTime;
@@ -401,29 +402,27 @@ export function registerPetList() {
                     <br />
                     Power: {kami.power * 1} / hr
                     <br />
-                    Harvest: {calcOutput(kami)} BYTES
+                    Harvest: {
+                      (calcHealth(kami) != '0.0')
+                        ? calcOutput(kami)
+                        : "lol "
+                    } BYTES
                     <br />
                   </Description>
-                  {kami.production && kami.production.state === 'ACTIVE' ? (
-                    <ThinButton
-                      onClick={() => stopProduction(kami.production.id)}
-                    >
+                  {(kami.production && kami.production.state === 'ACTIVE')
+                    ? <ThinButton onClick={() => stopProduction(kami.production.id)}>
                       Stop
                     </ThinButton>
-                  ) : (
-                    <ThinButton onClick={() => startProduction(kami.id)}>
+                    : <ThinButton onClick={() => startProduction(kami.id)}>
                       Start
                     </ThinButton>
-                  )}
-                  {kami.production && kami.production.state === 'ACTIVE' ? (
-                    <ThinButton
-                      onClick={() => reapProduction(kami.production.id)}
-                    >
+                  }
+                  {(kami.production && kami.production.state === 'ACTIVE')
+                    ? <ThinButton onClick={() => reapProduction(kami.production.id)}>
                       Collect
                     </ThinButton>
-                  ) : (
-                    <ThinButton>Select Node</ThinButton>
-                  )}
+                    : <ThinButton>Select Node</ThinButton>
+                  }
                   <ThinButton onClick={() => feedPet(kami.id, 1)}>
                     Feed 1
                   </ThinButton>
@@ -537,7 +536,7 @@ const ThinButton = styled.button`
   margin: 3px;
   &:active {
     background - color: #c2c2c2;
-}
+  }
 `;
 
 const KamiBox = styled.div`
