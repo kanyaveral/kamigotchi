@@ -1,5 +1,6 @@
 import { defineSystem, Has, HasValue, runQuery } from "@latticexyz/recs";
 import { NetworkLayer } from "../../network/types";
+import { dataStore } from "../../react/store/createStore";
 import { PhaserLayer, PhaserScene } from "../types";
 import { getCurrentRoom } from "../utils";
 
@@ -31,6 +32,11 @@ export function createMusicSystem(network: NetworkLayer, phaser: PhaserLayer) {
 
       myMain.gmusic = myMain.sound.add(`m_${currentRoom}`);
 
+      const {
+        sound: { volume },
+      } = dataStore.getState();
+
+      myMain.gmusic.volume = volume;
       myMain.gmusic.loop = true;
       myMain.gmusic.play();
     }

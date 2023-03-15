@@ -17,10 +17,16 @@ export function registerMapButton() {
     },
     (layers) => of(layers),
     () => {
-      const { visibleDivs, setVisibleDivs } = dataStore();
+      const {
+        visibleDivs,
+        setVisibleDivs,
+        sound: { volume },
+      } = dataStore();
 
       const toggleMap = () => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
 
         setVisibleDivs({ ...visibleDivs, worldMap: !visibleDivs.worldMap });

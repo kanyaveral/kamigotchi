@@ -145,8 +145,12 @@ export function registerChat() {
         </li>
       ));
 
+      const { volume } = dataStore((state) => state.sound);
+
       const hideModal = () => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
 
         setVisibleDivs({ ...visibleDivs, chat: !visibleDivs.chat });

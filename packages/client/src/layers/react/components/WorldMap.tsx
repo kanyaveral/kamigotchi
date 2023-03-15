@@ -49,11 +49,14 @@ export function registerWorldMap() {
             api: player,
             data: { currentRoom },
           };
-        }))
+        })
+      );
     },
     ({ actions, api, data }) => {
-      const { visibleDivs, setVisibleDivs } = dataStore();
       const {
+        visibleDivs,
+        setVisibleDivs,
+        sound: { volume },
         roomExits: { down, up },
       } = dataStore();
 
@@ -67,6 +70,8 @@ export function registerWorldMap() {
 
       const changeRoom = (side: number) => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
 
         const actionID = `Moving...` as EntityID;
@@ -108,16 +113,10 @@ export function registerWorldMap() {
             }
           }
 
-          result.push(
-            <Room
-              key={`room_${i}`}
-              style={roomStyle}
-            />
-          );
+          result.push(<Room key={`room_${i}`} style={roomStyle} />);
         }
         return result;
       }, [objectKeys, data.currentRoom]);
-
 
       // <ModalWrapper id="world_map">
       return (

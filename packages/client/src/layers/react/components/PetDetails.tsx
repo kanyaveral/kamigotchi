@@ -45,17 +45,9 @@ export function registerPetDetails() {
     (layers) => {
       const {
         network: {
-          components: {
-            Balance,
-            Genus,
-            IsPet,
-            IsModifier,
-            MediaURI,
-            PetID,
-          },
+          components: { Balance, Genus, IsPet, IsModifier, MediaURI, PetID },
         },
       } = layers;
-
 
       return merge(
         IsPet.update$,
@@ -99,6 +91,7 @@ export function registerPetDetails() {
         visibleDivs,
         setVisibleDivs,
         selectedPet: { description },
+        sound: { volume },
       } = dataStore();
 
       /////////////////
@@ -120,9 +113,7 @@ export function registerPetDetails() {
           nftID: getComponentValue(PetIndex, index)?.value as string,
           petName: getComponentValue(Name, index)?.value as string,
           uri: getComponentValue(MediaURI, index)?.value as string,
-          power: hexToString(
-            getComponentValue(Power, index)?.value as number
-          ),
+          power: hexToString(getComponentValue(Power, index)?.value as number),
           health: hexToString(
             getComponentValue(Health, index)?.value as number
           ),
@@ -132,13 +123,7 @@ export function registerPetDetails() {
       };
 
       const getBaseTraits = (petIndex: EntityIndex) => {
-        const genusArr = [
-          "COLOR",
-          'BODY',
-          'HAND',
-          'FACE',
-          'BACKGROUND',
-        ];
+        const genusArr = ['COLOR', 'BODY', 'HAND', 'FACE', 'BACKGROUND'];
         let result: Array<TraitDetails> = [];
         let petTypes: Array<string> = [];
 
@@ -146,7 +131,7 @@ export function registerPetDetails() {
           let details = getTrait(petIndex, genusArr[i]);
           result.push(details.Individual);
 
-          if (details.PetType.petType && details.PetType.petType != "") {
+          if (details.PetType.petType && details.PetType.petType != '') {
             petTypes.push(details.PetType.petType);
           }
         }
@@ -162,11 +147,11 @@ export function registerPetDetails() {
           runQuery([
             Has(IsModifier),
             HasValue(Genus, {
-              value: genus
+              value: genus,
             }),
             HasValue(PetID, {
-              value: world.entities[petIndex]
-            })
+              value: world.entities[petIndex],
+            }),
           ])
         )[0];
 
@@ -177,8 +162,9 @@ export function registerPetDetails() {
             Value: getComponentValue(ModifierValue, entity)?.value as string,
           },
           PetType: {
-            petType: getComponentValue(ModifierPetType, entity)?.value as string
-          }
+            petType: getComponentValue(ModifierPetType, entity)
+              ?.value as string,
+          },
         };
       };
 
@@ -202,7 +188,7 @@ export function registerPetDetails() {
         let result = val[0];
 
         for (let i = 1; i < val.length; i++) {
-          result = result + " | " + val[i];
+          result = result + ' | ' + val[i];
         }
         return result;
       };
@@ -211,14 +197,19 @@ export function registerPetDetails() {
         return (
           <KamiList key={trait.Name}>
             {`${trait.Name}`}
-            <KamiText style={{ paddingTop: '20px' }}>{`${trait.Type} | {${trait.Value}}`}</KamiText>
+            <KamiText
+              style={{ paddingTop: '20px' }}
+            >{`${trait.Type} | {${trait.Value}}`}</KamiText>
           </KamiList>
         );
       });
 
       const hideModal = () => {
         const clickFX = new Audio(clickSound);
+
+        clickFX.volume = volume;
         clickFX.play();
+
         setVisibleDivs({ ...visibleDivs, petDetails: !visibleDivs.petDetails });
       };
 
