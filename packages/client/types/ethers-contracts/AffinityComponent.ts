@@ -27,22 +27,23 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export interface IdOperatorComponentInterface extends utils.Interface {
+export interface AffinityComponentInterface extends utils.Interface {
   functions: {
     "authorizeWriter(address)": FunctionFragment;
     "getEntities()": FunctionFragment;
     "getEntitiesWithValue(bytes)": FunctionFragment;
-    "getEntitiesWithValue(uint256)": FunctionFragment;
+    "getEntitiesWithValue(string)": FunctionFragment;
     "getRawValue(uint256)": FunctionFragment;
     "getSchema()": FunctionFragment;
     "getValue(uint256)": FunctionFragment;
     "has(uint256)": FunctionFragment;
+    "hasValue(uint256,string)": FunctionFragment;
     "id()": FunctionFragment;
     "owner()": FunctionFragment;
     "registerIndexer(address)": FunctionFragment;
     "registerWorld(address)": FunctionFragment;
     "remove(uint256)": FunctionFragment;
-    "set(uint256,uint256)": FunctionFragment;
+    "set(uint256,string)": FunctionFragment;
     "set(uint256,bytes)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unauthorizeWriter(address)": FunctionFragment;
@@ -55,17 +56,18 @@ export interface IdOperatorComponentInterface extends utils.Interface {
       | "authorizeWriter"
       | "getEntities"
       | "getEntitiesWithValue(bytes)"
-      | "getEntitiesWithValue(uint256)"
+      | "getEntitiesWithValue(string)"
       | "getRawValue"
       | "getSchema"
       | "getValue"
       | "has"
+      | "hasValue"
       | "id"
       | "owner"
       | "registerIndexer"
       | "registerWorld"
       | "remove"
-      | "set(uint256,uint256)"
+      | "set(uint256,string)"
       | "set(uint256,bytes)"
       | "transferOwnership"
       | "unauthorizeWriter"
@@ -86,8 +88,8 @@ export interface IdOperatorComponentInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getEntitiesWithValue(uint256)",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "getEntitiesWithValue(string)",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getRawValue",
@@ -101,6 +103,10 @@ export interface IdOperatorComponentInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "has",
     values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "hasValue",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "id", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -117,8 +123,8 @@ export interface IdOperatorComponentInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "set(uint256,uint256)",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    functionFragment: "set(uint256,string)",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "set(uint256,bytes)",
@@ -151,7 +157,7 @@ export interface IdOperatorComponentInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getEntitiesWithValue(uint256)",
+    functionFragment: "getEntitiesWithValue(string)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -161,6 +167,7 @@ export interface IdOperatorComponentInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "getSchema", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getValue", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "has", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "hasValue", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "id", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
@@ -173,7 +180,7 @@ export interface IdOperatorComponentInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "remove", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "set(uint256,uint256)",
+    functionFragment: "set(uint256,string)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -213,12 +220,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface IdOperatorComponent extends BaseContract {
+export interface AffinityComponent extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: IdOperatorComponentInterface;
+  interface: AffinityComponentInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -252,8 +259,8 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber[]]>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
+    "getEntitiesWithValue(string)"(
+      value: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber[]]>;
 
@@ -269,10 +276,16 @@ export interface IdOperatorComponent extends BaseContract {
     getValue(
       entity: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+    ): Promise<[string]>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    hasValue(
+      id: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
@@ -295,9 +308,9 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    "set(uint256,uint256)"(
+    "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
-      value: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -337,8 +350,8 @@ export interface IdOperatorComponent extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber[]>;
 
-  "getEntitiesWithValue(uint256)"(
-    value: PromiseOrValue<BigNumberish>,
+  "getEntitiesWithValue(string)"(
+    value: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<BigNumber[]>;
 
@@ -354,10 +367,16 @@ export interface IdOperatorComponent extends BaseContract {
   getValue(
     entity: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  ): Promise<string>;
 
   has(
     entity: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  hasValue(
+    id: PromiseOrValue<BigNumberish>,
+    name: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
@@ -380,9 +399,9 @@ export interface IdOperatorComponent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  "set(uint256,uint256)"(
+  "set(uint256,string)"(
     entity: PromiseOrValue<BigNumberish>,
-    value: PromiseOrValue<BigNumberish>,
+    value: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -422,8 +441,8 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber[]>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
+    "getEntitiesWithValue(string)"(
+      value: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber[]>;
 
@@ -439,10 +458,16 @@ export interface IdOperatorComponent extends BaseContract {
     getValue(
       entity: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    ): Promise<string>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    hasValue(
+      id: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -465,9 +490,9 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "set(uint256,uint256)"(
+    "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
-      value: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -519,8 +544,8 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
+    "getEntitiesWithValue(string)"(
+      value: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -538,6 +563,12 @@ export interface IdOperatorComponent extends BaseContract {
 
     has(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    hasValue(
+      id: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -560,9 +591,9 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    "set(uint256,uint256)"(
+    "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
-      value: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -603,8 +634,8 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
+    "getEntitiesWithValue(string)"(
+      value: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -622,6 +653,12 @@ export interface IdOperatorComponent extends BaseContract {
 
     has(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    hasValue(
+      id: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -644,9 +681,9 @@ export interface IdOperatorComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    "set(uint256,uint256)"(
+    "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
-      value: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
