@@ -31,6 +31,7 @@ export function createComponents(world: any) {
   return {
     // Archetypes
     IsAccount: defineBoolEZ(world, "IsAccount", "component.Is.Account"),
+    IsEquipped: defineBoolEZ(world, "IsEquipped", "component.Is.Equipped"),
     IsFood: defineBoolEZ(world, "IsFood", "component.Is.Food"),
     IsFungible: defineBoolEZ(world, "IsFungible", "component.Is.Fungible"),
     IsInventory: defineBoolEZ(world, "IsInventory", "component.Is.Inventory"),
@@ -61,9 +62,10 @@ export function createComponents(world: any) {
     RequesterID: defineStringEZ(world, "RequesterID", "component.Id.Requester"),
 
     // Indices
-    EquipIndex: defineNumberEZ(world, "EquipIndex", "component.Index.Equip"),
     FoodIndex: defineNumberEZ(world, "FoodIndex", "component.Index.Food"),
+    GearIndex: defineNumberEZ(world, "GearIndex", "component.Index.Gear"),
     ItemIndex: defineNumberEZ(world, "ItemIndex", "component.Index.Item"),
+    ModIndex: defineNumberEZ(world, "ModIndex", "component.Index.Mod"),
     ModifierIndex: defineNumberEZ(world, "ModifierIndex", "component.Index.Modifier"),
     PetIndex: defineStringEZ(world, "PetIndex", "component.Index.Pet"), // this should be updated to be a number component
 

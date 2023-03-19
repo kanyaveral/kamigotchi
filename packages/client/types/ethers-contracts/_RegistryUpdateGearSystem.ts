@@ -27,10 +27,10 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export interface PetFoodSystemInterface extends utils.Interface {
+export interface _RegistryUpdateGearSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(uint256,uint256)": FunctionFragment;
+    "executeTyped(uint256,string,string,uint256,uint256,uint256,uint256,uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -49,7 +49,16 @@ export interface PetFoodSystemInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "executeTyped",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -87,12 +96,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface PetFoodSystem extends BaseContract {
+export interface _RegistryUpdateGearSystem extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: PetFoodSystemInterface;
+  interface: _RegistryUpdateGearSystemInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -120,8 +129,14 @@ export interface PetFoodSystem extends BaseContract {
     ): Promise<ContractTransaction>;
 
     executeTyped(
-      petID: PromiseOrValue<BigNumberish>,
-      foodIndex: PromiseOrValue<BigNumberish>,
+      GearIndex: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      type_: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -139,8 +154,14 @@ export interface PetFoodSystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   executeTyped(
-    petID: PromiseOrValue<BigNumberish>,
-    foodIndex: PromiseOrValue<BigNumberish>,
+    GearIndex: PromiseOrValue<BigNumberish>,
+    name: PromiseOrValue<string>,
+    type_: PromiseOrValue<string>,
+    health: PromiseOrValue<BigNumberish>,
+    power: PromiseOrValue<BigNumberish>,
+    violence: PromiseOrValue<BigNumberish>,
+    harmony: PromiseOrValue<BigNumberish>,
+    slots: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -158,8 +179,14 @@ export interface PetFoodSystem extends BaseContract {
     ): Promise<string>;
 
     executeTyped(
-      petID: PromiseOrValue<BigNumberish>,
-      foodIndex: PromiseOrValue<BigNumberish>,
+      GearIndex: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      type_: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -189,8 +216,14 @@ export interface PetFoodSystem extends BaseContract {
     ): Promise<BigNumber>;
 
     executeTyped(
-      petID: PromiseOrValue<BigNumberish>,
-      foodIndex: PromiseOrValue<BigNumberish>,
+      GearIndex: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      type_: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -209,8 +242,14 @@ export interface PetFoodSystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     executeTyped(
-      petID: PromiseOrValue<BigNumberish>,
-      foodIndex: PromiseOrValue<BigNumberish>,
+      GearIndex: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
+      type_: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
