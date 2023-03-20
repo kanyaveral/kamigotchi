@@ -10,9 +10,8 @@ import { LibAccount } from "libraries/LibAccount.sol";
 import { LibPet } from "libraries/LibPet.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
 import { Strings } from "utils/Strings.sol";
-import { Utils } from "utils/Utils.sol";
 
-uint256 constant ID = uint256(keccak256("system.ProductionStop"));
+uint256 constant ID = uint256(keccak256("system.Production.Stop"));
 
 // ProductionStopSystem collects and stops an active pet production. This is the case
 // when a pet is stopped by the owner. When it is stopped by liquidation or death, the
@@ -34,7 +33,7 @@ contract ProductionStopSystem is System {
     LibCoin.inc(components, accountID, amt);
     LibProduction.stop(components, id);
 
-    Utils.updateLastBlock(components, accountID);
+    LibAccount.updateLastBlock(components, accountID);
     return abi.encode(amt);
   }
 

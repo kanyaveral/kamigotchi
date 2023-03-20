@@ -7,9 +7,8 @@ import { getAddressById } from "solecs/utils.sol";
 
 import { LibAccount } from "libraries/LibAccount.sol";
 import { LibPet } from "libraries/LibPet.sol";
-import { Utils } from "utils/Utils.sol";
 
-uint256 constant ID = uint256(keccak256("system.PetName"));
+uint256 constant ID = uint256(keccak256("system.Pet.Name"));
 
 // name pet. assumes account already created
 contract PetNameSystem is System {
@@ -22,7 +21,7 @@ contract PetNameSystem is System {
     require(LibPet.getAccount(components, id) == accountID, "Pet: not urs");
 
     LibPet.setName(components, id, name);
-    Utils.updateLastBlock(components, accountID);
+    LibAccount.updateLastBlock(components, accountID);
     return "";
   }
 
