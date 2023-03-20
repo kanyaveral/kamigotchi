@@ -17,6 +17,7 @@ import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComp
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
 import { StateComponent, ID as StateCompID } from "components/StateComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
+import { LibEquipment } from "libraries/LibEquipment.sol";
 import { LibModifier } from "libraries/LibModifier.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
 import { LibRegistryItem } from "libraries/LibRegistryItem.sol";
@@ -89,7 +90,6 @@ library LibPet {
   }
 
   // Update the current health of a pet based on its timestamp and health at last action.
-  // TODO: update this to be based on the production rate, rather than raw time
   // NOTE: should be called at the top of a System and folllowed up with a require(!isDead).
   // it's a bit gas-inefficient to be doing it this way but saves us plenty of mental energy
   // in catching all the edge cases.
@@ -118,16 +118,44 @@ library LibPet {
     return (duration * byteRate * BURN_RATIO + (totalPrecision / 2)) / totalPrecision;
   }
 
-  // Calculate and return the total power of a pet (including mods and equips)
-  // TODO: include equipment and mod stats
-  function getTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
-    return PowerComponent(getAddressById(components, PowerCompID)).getValue(id);
+  // Calculate and return the total health of a pet (including mods and equips)
+  function getTotalHarmony(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint totalHarmony = LibStat.getHarmony(components, id);
+    uint[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint i = 0; i < equipment.length; i++) {
+      totalHarmony += LibEquipment.getHarmony(components, equipment[i]);
+    }
+    return totalHarmony;
   }
 
   // Calculate and return the total health of a pet (including mods and equips)
-  // TODO: include equipment and mod stats
   function getTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
-    return HealthComponent(getAddressById(components, HealthCompID)).getValue(id);
+    uint totalHealth = LibStat.getHealth(components, id);
+    uint[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint i = 0; i < equipment.length; i++) {
+      totalHealth += LibEquipment.getHealth(components, equipment[i]);
+    }
+    return totalHealth;
+  }
+
+  // Calculate and return the total power of a pet (including mods and equips)
+  function getTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint totalPower = LibStat.getPower(components, id);
+    uint[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint i = 0; i < equipment.length; i++) {
+      totalPower += LibEquipment.getPower(components, equipment[i]);
+    }
+    return totalPower;
+  }
+
+  // Calculate and return the total violence of a pet (including mods and equips)
+  function getTotalViolence(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint totalViolence = LibStat.getViolence(components, id);
+    uint[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint i = 0; i < equipment.length; i++) {
+      totalViolence += LibEquipment.getViolence(components, equipment[i]);
+    }
+    return totalViolence;
   }
 
   /////////////////
