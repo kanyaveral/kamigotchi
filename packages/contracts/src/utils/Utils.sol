@@ -13,17 +13,6 @@ import { StateComponent, ID as StateCompID } from "components/StateComponent.sol
 // comparisons seem to be redundant across libraries while others don't have a clear domain
 library Utils {
   /////////////////
-  // ARCHETYPE CHECKS
-
-  function _isX(
-    IUintComp components,
-    uint256 componentID,
-    uint256 id
-  ) internal view returns (bool) {
-    return getComponentById(components, componentID).has(id);
-  }
-
-  /////////////////
   // VALUE COMPARISONS
 
   // Check whether an entity has the specified state.

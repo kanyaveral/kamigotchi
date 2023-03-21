@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import { LibString } from "solady/utils/LibString.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
@@ -242,5 +243,76 @@ library LibEquipment {
     } else if (isGear(components, id)) {
       violence = LibStat.getViolence(components, id);
     }
+  }
+
+  /////////////////
+  // QUERIES
+
+  // Get all items equipped to a Pet Entity.
+  function getForPet(IUintComp components, uint256 petID) internal view returns (uint256[] memory) {
+    return _getAllX(components, petID, "", "");
+  }
+
+  // Get the Gear items equipped to a Pet Entity. Get them all if type is empty.
+  function getGearForPet(
+    IUintComp components,
+    uint256 petID,
+    string memory type_
+  ) internal view returns (uint256[] memory) {
+    return _getAllX(components, petID, "GEAR", type_);
+  }
+
+  // Get all Mod items equipped to a Pet Entity.
+  function getModsForPet(
+    IUintComp components,
+    uint256 petID
+  ) internal view returns (uint256[] memory) {
+    return _getAllX(components, petID, "MOD", "");
+  }
+
+  // Get all instances of Equipped items as specified. Blank filters are not applied.
+  function _getAllX(
+    IUintComp components,
+    uint256 holderID,
+    string memory class, // GEAR | MOD
+    string memory type_ // gear type
+  ) internal view returns (uint256[] memory) {
+    uint256 setFilters; // number of optional non-zero filters
+    if (holderID != 0) setFilters++;
+    if (!LibString.eq(class, "")) setFilters++;
+    if (!LibString.eq(type_, "")) setFilters++;
+
+    uint256 filterCount = 1; // start with the number of mandatory filters
+    QueryFragment[] memory fragments = new QueryFragment[](setFilters + filterCount);
+    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsEquipCompID), "");
+
+    if (holderID != 0) {
+      fragments[filterCount++] = QueryFragment(
+        QueryType.HasValue,
+        getComponentById(components, IdHolderCompID),
+        abi.encode(holderID)
+      );
+    }
+    if (!LibString.eq(class, "")) {
+      uint componentID;
+      if (LibString.eq(class, "GEAR")) componentID = IndexGearCompID;
+      else if (LibString.eq(class, "MOD")) componentID = IndexModCompID;
+      else revert("LibEquip._getAllX(): Invalid equipment class");
+
+      fragments[filterCount++] = QueryFragment(
+        QueryType.Has,
+        getComponentById(components, componentID),
+        ""
+      );
+    }
+    if (!LibString.eq(type_, "")) {
+      fragments[filterCount++] = QueryFragment(
+        QueryType.HasValue,
+        getComponentById(components, TypeCompID),
+        abi.encode(type_)
+      );
+    }
+
+    return LibQuery.query(fragments);
   }
 }
