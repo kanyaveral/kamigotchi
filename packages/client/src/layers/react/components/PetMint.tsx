@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { map, merge } from 'rxjs';
 import { registerUIComponent } from '../engine/store';
 import { dataStore } from '../store/createStore';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import {
-  HasValue,
-  Has,
-  runQuery,
   EntityID,
   EntityIndex,
   getComponentValue,
@@ -17,6 +14,7 @@ import mintSound from '../../../public/sound/sound_effects/tami_mint_vending_sou
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
 import { BigNumber, utils } from 'ethers';
 import { ModalWrapper } from './styled/AnimModalWrapper';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 const SystemBalID = BigNumber.from(utils.id('system.ERC721.pet'));
 
@@ -134,22 +132,14 @@ export function registerPetMint() {
         }
       };
 
-      const hideModal = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, petMint: !visibleDivs.petMint });
-      };
-
-      useEffect(() => {
-        if (visibleDivs.petMint === true)
-          document.getElementById('petmint_modal')!.style.display = 'block';
-      }, [visibleDivs.petMint]);
+      const { handleClick, visibleDiv } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'petMint',
+        elementId: 'petmint_modal',
+      });
 
       return (
-        <ModalWrapper id="petmint_modal" isOpen={visibleDivs.petMint}>
+        <ModalWrapper id="petmint_modal" isOpen={visibleDiv}>
           <ModalContent>
             <div
               style={{
@@ -158,7 +148,7 @@ export function registerPetMint() {
                 width: '100%',
               }}
             >
-              <TopButton onClick={hideModal}>X</TopButton>
+              <TopButton onClick={handleClick}>X</TopButton>
             </div>
             <CenterBox>
               <KamiImage src="https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif" />

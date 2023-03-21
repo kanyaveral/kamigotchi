@@ -17,6 +17,7 @@ import gakki from '../../../public/img/gakki.png';
 import gum from '../../../public/img/gum.png';
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
 import { ModalWrapper } from './styled/AnimModalWrapper';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 const ItemImages = new Map([
   [1, gum],
@@ -339,15 +340,6 @@ export function registerPetList() {
         });
       };
 
-      const hideModal = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, petList: !visibleDivs.petList });
-      };
-
       /////////////////
       // DATA INTERPRETATION
 
@@ -454,15 +446,17 @@ export function registerPetList() {
         });
       };
 
-      useEffect(() => {
-        if (visibleDivs.petList == true)
-          document.getElementById('petlist_modal')!.style.display = 'block';
-      }, [visibleDivs.petList]);
+
+      const { visibleDiv } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'petList',
+        elementId: 'petlist_modal',
+      });
 
       return (
         <ModalWrapper
           id="petlist_modal"
-          isOpen={visibleDivs.petList}
+          isOpen={visibleDiv}
           style={{ height: '75vh' }}
         >
           <ModalContent>
@@ -515,7 +509,7 @@ const TopButton = styled.button`
   grid-column: 5;
   width: 30px;
   &:active {
-    background - color: #c2c2c2;
+    background-color: #c2c2c2;
 }
   justify-self: right;
 `;
@@ -535,7 +529,7 @@ const ThinButton = styled.button`
   font-family: Pixel;
   margin: 3px;
   &:active {
-    background - color: #c2c2c2;
+    background-color: #c2c2c2;
   }
 `;
 

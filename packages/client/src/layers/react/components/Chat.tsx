@@ -8,17 +8,16 @@ import {
   runQuery,
 } from '@latticexyz/recs';
 import { registerUIComponent } from '../engine/store';
-import { dataStore } from '../store/createStore';
 import styled from 'styled-components';
 import './font.css';
+import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
+import { ModalWrapper } from './styled/AnimModalWrapper';
 
 import * as mqtt from 'mqtt';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 const mqttServerUrl = 'wss://chatserver.asphodel.io:8083/mqtt';
 const mqttTopic = 'kamigotchi';
-
-import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
-import { ModalWrapper } from './styled/AnimModalWrapper';
 
 export function registerChat() {
   registerUIComponent(
@@ -69,8 +68,6 @@ export function registerChat() {
     },
 
     ({ chatName }) => {
-      const { visibleDivs, setVisibleDivs } = dataStore();
-
       type ChatMessage = { seenAt: number; message: string };
 
       const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -105,7 +102,7 @@ export function registerChat() {
 
         return () => {
           postMessage('<['.concat(chatName, '] went offline>'));
-          sub.unsubscribe(mqttTopic, function (err: any) { });
+          sub.unsubscribe(mqttTopic, function (err: any) {});
         };
       }, [chatName]);
 
@@ -145,26 +142,16 @@ export function registerChat() {
         </li>
       ));
 
-      const { volume } = dataStore((state) => state.sound);
-
-      const hideModal = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, chat: !visibleDivs.chat });
-      };
-
-      useEffect(() => {
-        if (visibleDivs.chat === true)
-          document.getElementById('chat_modal')!.style.display = 'block';
-      }, [visibleDivs.chat]);
+      const { handleClick, visibleDiv } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'chat',
+        elementId: 'chat_modal',
+      });
 
       return (
-        <ModalWrapper id="chat_modal" isOpen={visibleDivs.chat}>
+        <ModalWrapper id="chat_modal" isOpen={visibleDiv}>
           <ModalContent>
-            <TopButton onClick={hideModal}>X</TopButton>
+            <TopButton onClick={handleClick}>X</TopButton>
             <ChatWrapper>
               <ChatBox style={{ pointerEvents: 'auto' }}>
                 {messageLines}
@@ -209,8 +196,6 @@ const ChatBox = styled.div`
 
 const ChatInput = styled.input`
   width: 100%;
-
-  type: text
   background-color: #ffffff;
   border-style: solid;
   border-width: 2px;

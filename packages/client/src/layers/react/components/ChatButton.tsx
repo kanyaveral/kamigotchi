@@ -1,10 +1,10 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { registerUIComponent } from '../engine/store';
-import { dataStore } from '../store/createStore';
 import styled from 'styled-components';
 import './font.css';
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 export function registerChatButton() {
   registerUIComponent(
@@ -17,25 +17,16 @@ export function registerChatButton() {
     },
     (layers) => of(layers),
     () => {
-      const {
-        visibleDivs,
-        setVisibleDivs,
-        sound: { volume },
-      } = dataStore();
-
-      const showChat = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, chat: !visibleDivs.chat });
-      };
+      const { handleClick } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'chat',
+        elementId: 'chat_modal',
+      });
 
       return (
         <ModalWrapper id="chat_button">
           <ModalContent>
-            <Button style={{ pointerEvents: 'auto' }} onClick={showChat}>
+            <Button style={{ pointerEvents: 'auto' }} onClick={handleClick}>
               Chat
             </Button>
           </ModalContent>

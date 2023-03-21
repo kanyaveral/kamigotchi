@@ -9,7 +9,7 @@ export interface RoomExits {
   down: number;
 }
 
-export interface VisibleDivs {
+export interface  VisibleDivs {
   petMint: boolean;
   petDetails: boolean;
   objectModal: boolean;

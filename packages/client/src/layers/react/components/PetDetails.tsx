@@ -15,7 +15,7 @@ import { dataStore } from '../store/createStore';
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
 import { BigNumber, BigNumberish } from 'ethers';
 import { ModalWrapper } from './styled/AnimModalWrapper';
-import { hexToDecimal } from '../../phaser/utils';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 type TraitDetails = {
   Name: string;
@@ -88,10 +88,7 @@ export function registerPetDetails() {
       } = layers;
 
       const {
-        visibleDivs,
-        setVisibleDivs,
         selectedPet: { description },
-        sound: { volume },
       } = dataStore();
 
       /////////////////
@@ -204,24 +201,16 @@ export function registerPetDetails() {
         );
       });
 
-      const hideModal = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, petDetails: !visibleDivs.petDetails });
-      };
-
-      useEffect(() => {
-        if (visibleDivs.petDetails === true)
-          document.getElementById('petdetails_modal')!.style.display = 'block';
-      }, [visibleDivs.petDetails]);
+      const { handleClick ,visibleDiv } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'petDetails',
+        elementId: 'petdetails_modal',
+      });
 
       return (
-        <ModalWrapper id="petdetails_modal" isOpen={visibleDivs.petDetails}>
+        <ModalWrapper id="petdetails_modal" isOpen={visibleDiv}>
           <ModalContent>
-            <TopButton onClick={hideModal}>X</TopButton>
+            <TopButton onClick={handleClick}>X</TopButton>
             <KamiBox>
               <KamiBox>
                 <KamiBox style={{ gridColumn: 1, gridRow: 1 }}>

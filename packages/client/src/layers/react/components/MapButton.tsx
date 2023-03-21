@@ -5,6 +5,7 @@ import { dataStore } from '../store/createStore';
 import styled from 'styled-components';
 import './font.css';
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 export function registerMapButton() {
   registerUIComponent(
@@ -17,25 +18,16 @@ export function registerMapButton() {
     },
     (layers) => of(layers),
     () => {
-      const {
-        visibleDivs,
-        setVisibleDivs,
-        sound: { volume },
-      } = dataStore();
-
-      const toggleMap = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, worldMap: !visibleDivs.worldMap });
-      };
+      const { handleClick } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'worldMap',
+        elementId: 'world_map',
+      });
 
       return (
         <ModalWrapper id="map_button">
           <ModalContent>
-            <Button style={{ pointerEvents: 'auto' }} onClick={toggleMap}>
+            <Button style={{ pointerEvents: 'auto' }} onClick={handleClick}>
               World Map
             </Button>
           </ModalContent>
