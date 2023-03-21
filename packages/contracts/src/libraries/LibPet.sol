@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import { FixedPointMathLib as LibFPMath } from "solady/utils/FixedPointMathLib.sol";
 import { LibString } from "solady/utils/LibString.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { getAddressById, getComponentById, entityToAddress, addressToEntity } from "solecs/utils.sol";
+import { getAddressById, getComponentById, addressToEntity } from "solecs/utils.sol";
+import { Gaussian } from "solstat/Gaussian.sol";
 
 import { IdAccountComponent, ID as IdOpCompID } from "components/IdAccountComponent.sol";
 import { IdOwnerComponent, ID as IdOwnerCompID } from "components/IdOwnerComponent.sol";
@@ -26,9 +28,12 @@ import { LibStat } from "libraries/LibStat.sol";
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
 uint256 constant BURN_RATIO = 50; // energy burned per 100 BYTES produced
+uint256 constant REAP_RATIO = 50; // energy burned per 100 BYTES produced
 uint256 constant DEMO_MULTIPLIER = 100;
 
 library LibPet {
+  using LibFPMath for int256;
+
   /////////////////
   // INTERACTIONS
 
@@ -58,6 +63,7 @@ library LibPet {
   }
 
   // feed the pet with a food item
+  // NOTE: assumes the pet health is synced prior to this call
   function feed(
     IUintComp components,
     uint256 id,
@@ -66,20 +72,25 @@ library LibPet {
     uint256 foodRegistryID = LibRegistryItem.getByFoodIndex(components, foodIndex);
     if (foodRegistryID != 0) {
       success = true;
-      uint256 totalHealth = LibStat.getHealth(components, id);
       uint256 healAmt = LibStat.getHealth(components, foodRegistryID);
-      uint256 health = getCurrHealth(components, id);
-      uint256 newHealth = health + healAmt;
-      if (newHealth > totalHealth) newHealth = totalHealth;
-
-      setCurrHealth(components, id, newHealth);
-      setLastTs(components, id, block.timestamp);
+      heal(components, id, healAmt);
     }
+  }
+
+  // heal the pet by a given amount
+  // NOTE: assumes the pet health is synced prior to this call
+  function heal(IUintComp components, uint256 id, uint256 amt) internal {
+    uint256 totalHealth = calcTotalHealth(components, id);
+    uint256 health = getCurrHealth(components, id);
+    uint256 newHealth = health + amt;
+    if (newHealth > totalHealth) newHealth = totalHealth;
+    setCurrHealth(components, id, newHealth);
   }
 
   // Update a pet's state to DEAD
   function kill(IUintComp components, uint256 id) internal {
     StateComponent(getAddressById(components, StateCompID)).set(id, string("DEAD"));
+    setCurrHealth(components, id, 0);
     uint256 productionID = LibProduction.getForPet(components, id);
     LibProduction.stop(components, productionID);
   }
@@ -96,7 +107,7 @@ library LibPet {
   function syncHealth(IUintComp components, uint256 id) internal returns (uint256 health) {
     health = getCurrHealth(components, id);
     if (isProducing(components, id)) {
-      uint256 drain = getDrain(components, id);
+      uint256 drain = calcDrain(components, id);
       health = (health > drain) ? health - drain : 0;
       setCurrHealth(components, id, health);
     }
@@ -106,53 +117,93 @@ library LibPet {
   /////////////////
   // CALCULATIONS
 
+  // Calculate the affinity multiplier (1e2 precision)
+  // TODO: implement
+  function calcAffinityMultiplier(
+    IUintComp components,
+    uint256 sourceID,
+    uint256 targetID
+  ) internal view returns (uint256) {
+    // string sourceAff = getAffinity(components, sourceID);
+    components;
+    sourceID;
+    targetID;
+    return 100;
+  }
+
   // Calculate the total health drain since the last check (rounded up), based on production
   // NOTE: we can't just use LibProd.getOutput() here because that rounds down, while here
   // we want to properly round. We need a game design discussion on how we want to do this.
-  function getDrain(IUintComp components, uint256 id) internal view returns (uint256) {
+  function calcDrain(IUintComp components, uint256 id) internal view returns (uint256) {
     if (!isProducing(components, id)) return 0;
     uint256 productionID = getProduction(components, id);
-    uint256 byteRate = LibProduction.getRate(components, productionID); // BYTES/s (1e18 precision)
+    uint256 prodRate = LibProduction.getRate(components, productionID); // KAMI/s (1e18 precision)
     uint256 duration = block.timestamp - getLastTs(components, id);
-    uint256 totalPrecision = 1e20; // 1e2(BURN_RATIO) * 1e18(byteRate)
-    return (duration * byteRate * BURN_RATIO + (totalPrecision / 2)) / totalPrecision;
+    uint256 totalPrecision = 1e20; // BURN_RATIO(1e2) * prodRate(1e18)
+    return (duration * prodRate * BURN_RATIO + (totalPrecision / 2)) / totalPrecision;
+  }
+
+  // Calculate the liquidation threshold for target pet, attacked by the source pet.
+  // This is measured as a proportion of total health with 1e18 precision.
+  function calcThreshold(
+    IUintComp components,
+    uint256 sourceID,
+    uint256 targetID
+  ) internal view returns (uint256) {
+    uint256 baseThreshold = calcThresholdBase(components, sourceID, targetID);
+    uint256 affinityMultiplier = calcAffinityMultiplier(components, sourceID, targetID);
+    return (affinityMultiplier * baseThreshold) / 1e2;
+  }
+
+  // Calculate the base liquidation threshold for target pet, attacked by the source pet.
+  // LT = .2 * Φ(ln(V_s / H_t)) (as proportion of total health with 1e18 precision).
+  function calcThresholdBase(
+    IUintComp components,
+    uint256 sourceID,
+    uint256 targetID
+  ) internal view returns (uint256) {
+    uint256 sourceViolence = calcTotalViolence(components, sourceID);
+    uint256 targetHarmony = calcTotalHarmony(components, targetID);
+    int256 ratio = int256((1e18 * sourceViolence) / targetHarmony);
+    int256 weight = Gaussian.cdf(LibFPMath.lnWad(ratio));
+    return (uint256(weight) * 20) / 100;
   }
 
   // Calculate and return the total health of a pet (including mods and equips)
-  function getTotalHarmony(IUintComp components, uint256 id) internal view returns (uint256) {
-    uint totalHarmony = LibStat.getHarmony(components, id);
-    uint[] memory equipment = LibEquipment.getForPet(components, id);
-    for (uint i = 0; i < equipment.length; i++) {
+  function calcTotalHarmony(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint256 totalHarmony = LibStat.getHarmony(components, id);
+    uint256[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint256 i = 0; i < equipment.length; i++) {
       totalHarmony += LibEquipment.getHarmony(components, equipment[i]);
     }
     return totalHarmony;
   }
 
   // Calculate and return the total health of a pet (including mods and equips)
-  function getTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
-    uint totalHealth = LibStat.getHealth(components, id);
-    uint[] memory equipment = LibEquipment.getForPet(components, id);
-    for (uint i = 0; i < equipment.length; i++) {
+  function calcTotalHealth(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint256 totalHealth = LibStat.getHealth(components, id);
+    uint256[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint256 i = 0; i < equipment.length; i++) {
       totalHealth += LibEquipment.getHealth(components, equipment[i]);
     }
     return totalHealth;
   }
 
   // Calculate and return the total power of a pet (including mods and equips)
-  function getTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
-    uint totalPower = LibStat.getPower(components, id);
-    uint[] memory equipment = LibEquipment.getForPet(components, id);
-    for (uint i = 0; i < equipment.length; i++) {
+  function calcTotalPower(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint256 totalPower = LibStat.getPower(components, id);
+    uint256[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint256 i = 0; i < equipment.length; i++) {
       totalPower += LibEquipment.getPower(components, equipment[i]);
     }
     return totalPower;
   }
 
   // Calculate and return the total violence of a pet (including mods and equips)
-  function getTotalViolence(IUintComp components, uint256 id) internal view returns (uint256) {
-    uint totalViolence = LibStat.getViolence(components, id);
-    uint[] memory equipment = LibEquipment.getForPet(components, id);
-    for (uint i = 0; i < equipment.length; i++) {
+  function calcTotalViolence(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint256 totalViolence = LibStat.getViolence(components, id);
+    uint256[] memory equipment = LibEquipment.getForPet(components, id);
+    for (uint256 i = 0; i < equipment.length; i++) {
       totalViolence += LibEquipment.getViolence(components, equipment[i]);
     }
     return totalViolence;
@@ -161,9 +212,18 @@ library LibPet {
   /////////////////
   // CHECKERS
 
-  // Check whether a pet is dead.
-  function isDead(IUintComp components, uint256 id) internal view returns (bool) {
-    return getCurrHealth(components, id) == 0;
+  // Check whether the source pet can liquidate the target pet, based on their stats.
+  // NOTE: this asssumes that the source pet's health has been synced in this block and
+  // that the source can attack the target.
+  function canLiquidate(
+    IUintComp components,
+    uint256 sourceID,
+    uint256 targetID
+  ) internal view returns (bool) {
+    uint256 targetHealth = getCurrHealth(components, targetID);
+    uint256 targetTotalHealth = calcTotalHealth(components, targetID);
+    uint256 threshold = calcThreshold(components, sourceID, targetID); // 1e18 precision
+    return threshold * targetTotalHealth > targetHealth * 1e18;
   }
 
   // Check whether an account is the pet's account.
@@ -173,6 +233,12 @@ library LibPet {
     uint256 accountID
   ) internal view returns (bool) {
     return getAccount(components, id) == accountID;
+  }
+
+  // Check whether a pet is dead.
+  // NOTE: this assumes the pet's health has been synced in this block.
+  function isDead(IUintComp components, uint256 id) internal view returns (bool) {
+    return getCurrHealth(components, id) == 0;
   }
 
   // Check whether a pet has an ongoing production.
@@ -253,13 +319,13 @@ library LibPet {
     return IdOwnerComponent(getAddressById(components, IdOwnerCompID)).getValue(id);
   }
 
-  /////////////////
-  // QUERIES
-
   // Get the production of a pet. Return 0 if there are none.
   function getProduction(IUintComp components, uint256 id) internal view returns (uint256) {
     return LibProduction.getForPet(components, id);
   }
+
+  /////////////////
+  // QUERIES
 
   // get the entity ID of a pet from its index (tokenID)
   function indexToID(IUintComp components, uint256 index) internal view returns (uint256 result) {
@@ -288,16 +354,6 @@ library LibPet {
 
     setOwner(components, id, ownerID);
     setAccount(components, id, accountID);
-  }
-
-  // return whether owner or account
-  function isOwnerOrAccount(
-    IUintComp components,
-    uint256 id,
-    address sender
-  ) internal view returns (bool) {
-    uint256 senderAsID = addressToEntity(sender);
-    return getOwner(components, id) == senderAsID || getAccount(components, id) == senderAsID;
   }
 
   /////////////////

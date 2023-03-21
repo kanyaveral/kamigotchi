@@ -279,8 +279,8 @@ library LibEquipment {
   ) internal view returns (uint256[] memory) {
     uint256 setFilters; // number of optional non-zero filters
     if (holderID != 0) setFilters++;
-    if (LibString.eq(class, "")) setFilters++;
-    if (LibString.eq(type_, "")) setFilters++;
+    if (!LibString.eq(class, "")) setFilters++;
+    if (!LibString.eq(type_, "")) setFilters++;
 
     uint256 filterCount = 1; // start with the number of mandatory filters
     QueryFragment[] memory fragments = new QueryFragment[](setFilters + filterCount);

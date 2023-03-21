@@ -85,7 +85,7 @@ library LibProduction {
     if (!isActive(components, id)) return 0;
 
     uint256 petID = getPet(components, id);
-    uint256 power = LibPet.getTotalPower(components, petID);
+    uint256 power = LibPet.calcTotalPower(components, petID);
     uint256 affinityMultiplier = 100; // defined as out of 100
     return (((1e18 * affinityMultiplier) / 100) * power) / 3600;
   }
@@ -100,11 +100,7 @@ library LibProduction {
   // SETTERS
 
   // Set the node for a pet's production
-  function setNode(
-    IUintComp components,
-    uint256 id,
-    uint256 nodeID
-  ) internal {
+  function setNode(IUintComp components, uint256 id, uint256 nodeID) internal {
     IdNodeComponent NodeC = IdNodeComponent(getAddressById(components, IdNodeCompID));
     if (NodeC.getValue(id) != nodeID) {
       NodeC.set(id, nodeID);
