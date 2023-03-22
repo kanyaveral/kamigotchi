@@ -9,7 +9,7 @@ export interface RoomExits {
   down: number;
 }
 
-export interface  VisibleDivs {
+export interface VisibleDivs {
   petMint: boolean;
   petDetails: boolean;
   objectModal: boolean;
@@ -32,7 +32,6 @@ export interface StoreState {
   visibleDivs: VisibleDivs;
   sound: SoundState;
 }
-
 
 interface StoreActions {
   setObjectData: (data: DataObject) => void;
