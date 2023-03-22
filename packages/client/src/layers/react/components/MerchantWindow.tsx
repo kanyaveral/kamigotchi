@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { map, merge } from 'rxjs';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import {
   EntityID,
   EntityIndex,
@@ -16,7 +16,7 @@ import gakki from '../../../public/img/gakki.png';
 import ribbon from '../../../public/img/ribbon.png';
 import gum from '../../../public/img/gum.png';
 import { ModalWrapper } from './styled/AnimModalWrapper';
-import { dataStore } from '../store/createStore';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 const ItemImages = new Map([
   [1, gum],
@@ -149,7 +149,6 @@ export function registerMerchantWindow() {
 
     // Render
     ({ actions, api, data }) => {
-      const { visibleDivs, setVisibleDivs } = dataStore();
       // hide this component if merchant.index == 0
 
       ///////////////////
@@ -208,22 +207,16 @@ export function registerMerchantWindow() {
           </ShopEntry>
         ));
 
-      const hideModal = () => {
-        setVisibleDivs({
-          ...visibleDivs,
-          merchant: !visibleDivs.merchant,
+        const { handleClick, visibleDiv } = useModalVisibility({
+          soundUrl: null,
+          divName: 'merchant',
+          elementId: 'merchant',
         });
-      };
-
-      useEffect(() => {
-        if (visibleDivs.merchant === true)
-          document.getElementById('merchant')!.style.display = 'block';
-      }, [visibleDivs.merchant]);
 
       return (
-        <ModalWrapper id="merchant" isOpen={visibleDivs.merchant}>
+        <ModalWrapper id="merchant" isOpen={visibleDiv}>
           <ModalContent>
-            <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+            <TopButton style={{ pointerEvents: 'auto' }} onClick={handleClick}>
               X
             </TopButton>
             <ShopList>{listings(data.listings)}</ShopList>

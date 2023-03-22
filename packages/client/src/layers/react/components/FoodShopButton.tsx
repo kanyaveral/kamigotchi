@@ -1,10 +1,10 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { registerUIComponent } from '../engine/store';
-import { dataStore } from '../store/createStore';
 import styled from 'styled-components';
 import './font.css';
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 export function registerFoodShopButton() {
   registerUIComponent(
@@ -17,25 +17,16 @@ export function registerFoodShopButton() {
     },
     (layers) => of(layers),
     () => {
-      const {
-        visibleDivs,
-        setVisibleDivs,
-        sound: { volume },
-      } = dataStore();
-
-      const show = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, merchant: !visibleDivs.merchant });
-      };
+      const { handleClick } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'merchant',
+        elementId: 'merchant',
+      });
 
       return (
         <ModalWrapper id="foodShop_button">
           <ModalContent>
-            <Button style={{ pointerEvents: 'auto' }} onClick={show}>
+            <Button style={{ pointerEvents: 'auto' }} onClick={handleClick}>
               Food Shop
             </Button>
           </ModalContent>

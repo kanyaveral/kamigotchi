@@ -33,7 +33,6 @@ export interface StoreState {
   sound: SoundState;
 }
 
-
 interface StoreActions {
   setObjectData: (data: DataObject) => void;
   setRoomExits: (data: RoomExits) => void;

@@ -1,10 +1,10 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { registerUIComponent } from '../engine/store';
-import { dataStore } from '../store/createStore';
 import styled from 'styled-components';
 import './font.css';
 import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
+import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
 
 export function registerMyKamiButton() {
   registerUIComponent(
@@ -17,25 +17,16 @@ export function registerMyKamiButton() {
     },
     (layers) => of(layers),
     () => {
-      const {
-        visibleDivs,
-        setVisibleDivs,
-        sound: { volume },
-      } = dataStore();
-
-      const showMyKami = () => {
-        const clickFX = new Audio(clickSound);
-
-        clickFX.volume = volume;
-        clickFX.play();
-
-        setVisibleDivs({ ...visibleDivs, petList: !visibleDivs.petList });
-      };
+      const { handleClick } = useModalVisibility({
+        soundUrl: clickSound,
+        divName: 'petList',
+        elementId: 'petlist_modal',
+      });
 
       return (
         <ModalWrapper id="mykami_button">
           <ModalContent>
-            <Button style={{ pointerEvents: 'auto' }} onClick={showMyKami}>
+            <Button style={{ pointerEvents: 'auto' }} onClick={handleClick}>
               My Kami
             </Button>
           </ModalContent>
