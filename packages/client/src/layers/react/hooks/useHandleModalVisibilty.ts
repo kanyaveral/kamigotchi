@@ -12,12 +12,16 @@ export const useModalVisibility = ({
   divName,
   elementId,
 }: UseModalVisibilityParams) => {
-  const { visibleDivs, setVisibleDivs, sound: { volume } } = dataStore();
+  const {
+    visibleDivs,
+    setVisibleDivs,
+    sound: { volume },
+  } = dataStore();
 
   const handleClick = () => {
-    if(soundUrl){
+    if (soundUrl) {
       const clickSound = new Audio(soundUrl);
-      clickSound.volume = volume;
+      clickSound.volume = volume * 0.6;
       clickSound.play();
     }
     setVisibleDivs({ ...visibleDivs, [divName]: !visibleDivs[divName] });

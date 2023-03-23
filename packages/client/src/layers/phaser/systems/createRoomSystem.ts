@@ -5,6 +5,7 @@ import { NetworkLayer } from '../../network/types';
 import { dataStore } from '../../react/store/createStore';
 import { PhaserLayer, PhaserScene } from '../types';
 import { getCurrentRoom } from '../utils';
+import { closeModalsOnRoomChange } from '../utils/closeModalsOnRoomChange';
 
 export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
   const {
@@ -31,7 +32,7 @@ export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
     if (characterEntityNumber == update.entity) {
       const currentRoom = getCurrentRoom(Location, update.entity);
 
-      dataStore.setState({ roomExits: roomExits[currentRoom]  });
+      dataStore.setState({ roomExits: roomExits[currentRoom] });
 
       myMain.interactiveObjects.forEach((object: any) => {
         try {
@@ -42,6 +43,7 @@ export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
         }
       });
       myMain.interactiveObjects = [];
+      closeModalsOnRoomChange();
 
       myMain.rooms![currentRoom].create(myMain);
     }
