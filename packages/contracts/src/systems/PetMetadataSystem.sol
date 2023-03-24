@@ -9,7 +9,7 @@ import { getAddressById } from "solecs/utils.sol";
 
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { LibMetadata } from "libraries/LibMetadata.sol";
-import { LibModifier, ModStatus } from "libraries/LibModifier.sol";
+import { LibTrait } from "libraries/LibTrait.sol";
 import { LibAccount } from "libraries/LibAccount.sol";
 import { LibPet } from "libraries/LibPet.sol";
 import { LibStat } from "libraries/LibStat.sol";
@@ -65,20 +65,20 @@ contract PetMetadataSystem is System {
     uint256[] memory permTraits = LibMetadata._packedToArray(packed, _numElements);
     // assigning initial traits. genus is hardcoded
     string[] memory names = new string[](5);
-    names[0] = "BODY";
-    names[1] = "COLOR";
-    names[2] = "FACE";
+    names[0] = "COLOR";
+    names[1] = "BACKGROUND";
+    names[2] = "BODY";
     names[3] = "HAND";
-    names[4] = "BACKGROUND";
+    names[4] = "FACE";
     for (uint256 i; i < permTraits.length; i++) {
       // console.log(names[i]);
       // console.log(permTraits[i]);
-      LibModifier.addToPet(
+      LibTrait.addToPet(
         components,
         world,
         entityID,
-        names[i], // genus
-        permTraits[i] // index
+        LibString.toString(permTraits[i]), // genus, ie string based index
+        names[i] // type (body, color, etc)
       );
     }
 
@@ -135,7 +135,7 @@ contract PetMetadataSystem is System {
   }
 
   function _getPetType(uint256 entityID) public view returns (string memory) {
-    string[] memory types = LibModifier.getPetTypes(components, entityID);
+    string[] memory types = LibTrait.getAffinities(components, entityID);
     return
       string(
         abi.encodePacked(
@@ -166,16 +166,15 @@ contract PetMetadataSystem is System {
     // );
 
     for (uint256 i; i < names.length; i++) {
-      uint256 curID = LibModifier._getAllX(
+      uint256 curID = LibTrait._getAllX(
         components,
         entityID, // petID
-        LibString.toCase(names[i], true), // genus, all caps
+        "", // genus, not searching
         0, // index, can vary
-        ModStatus.NULL,
-        "", // mod type, not searching
-        "" // pet type, not searching
+        LibString.toCase(names[i], true), // mode type, all caps
+        "" // affinity, not searching
       )[0];
-      string memory valName = LibModifier.getName(components, curID);
+      string memory valName = LibTrait.getName(components, curID);
       string memory entry = string(
         abi.encodePacked('{"trait_type": "', names[i], '", "value": "', valName, '"},\n')
       );
