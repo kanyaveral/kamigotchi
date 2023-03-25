@@ -14,7 +14,7 @@ import clickSound from '../../../public/sound/sound_effects/mouseclick.wav';
 import { ModalWrapper } from './styled/AnimModalWrapper';
 
 import * as mqtt from 'mqtt';
-import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
+import { useModalVisibility } from 'layers/react/hooks/useHandleModalVisibilty';
 
 const mqttServerUrl = 'wss://chatserver.asphodel.io:8083/mqtt';
 const mqttTopic = 'kamigotchi';
@@ -34,7 +34,7 @@ export function registerChat() {
         network: {
           world,
           network,
-          components: { IsAccount, AccountID, PlayerAddress, Name },
+          components: { IsAccount, AccountID, OperatorAddress, Name },
         },
         phaser: {
           game: {
@@ -54,7 +54,7 @@ export function registerChat() {
           const accountIndex = Array.from(
             runQuery([
               Has(IsAccount),
-              HasValue(PlayerAddress, {
+              HasValue(OperatorAddress, {
                 value: network.connectedAddress.get(),
               }),
             ])
@@ -102,7 +102,7 @@ export function registerChat() {
 
         return () => {
           postMessage('<['.concat(chatName, '] went offline>'));
-          sub.unsubscribe(mqttTopic, function (err: any) {});
+          sub.unsubscribe(mqttTopic, function (err: any) { });
         };
       }, [chatName]);
 

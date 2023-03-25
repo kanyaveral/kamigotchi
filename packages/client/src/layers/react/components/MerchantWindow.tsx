@@ -16,7 +16,7 @@ import gakki from '../../../public/img/gakki.png';
 import ribbon from '../../../public/img/ribbon.png';
 import gum from '../../../public/img/gum.png';
 import { ModalWrapper } from './styled/AnimModalWrapper';
-import { useModalVisibility } from '../hooks/useHandleModalVisibilty';
+import { useModalVisibility } from 'layers/react/hooks/useHandleModalVisibilty';
 
 const ItemImages = new Map([
   [1, gum],
@@ -61,7 +61,7 @@ export function registerMerchantWindow() {
             MerchantID,
             Name,
             AccountID,
-            PlayerAddress,
+            OperatorAddress,
             PriceBuy,
             PriceSell,
           },
@@ -96,7 +96,7 @@ export function registerMerchantWindow() {
           const accountIndex = Array.from(
             runQuery([
               Has(IsAccount),
-              HasValue(PlayerAddress, {
+              HasValue(OperatorAddress, {
                 value: network.connectedAddress.get(),
               }),
             ])
@@ -207,11 +207,11 @@ export function registerMerchantWindow() {
           </ShopEntry>
         ));
 
-        const { handleClick, visibleDiv } = useModalVisibility({
-          soundUrl: null,
-          divName: 'merchant',
-          elementId: 'merchant',
-        });
+      const { handleClick, visibleDiv } = useModalVisibility({
+        soundUrl: null,
+        divName: 'merchant',
+        elementId: 'merchant',
+      });
 
       return (
         <ModalWrapper id="merchant" isOpen={visibleDiv}>
