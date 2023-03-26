@@ -4,12 +4,12 @@ import { registerUIComponent } from 'layers/react/engine/store';
 import { dataStore } from 'layers/react/store/createStore';
 import styled from 'styled-components';
 import 'layers/react/styles/font.css';
-import { ModalWrapperLite } from './library/ModalWrapper';
+import { ModalWrapperLite } from '../library/ModalWrapper';
 
 // TODO: update this file and component name to be more desctiptive
-export function registerObjectModal() {
+export function registerDialogueModal() {
   registerUIComponent(
-    'ObjectModal',
+    'DialogueModal',
     {
       colStart: 3,
       colEnd: 82,
@@ -19,32 +19,32 @@ export function registerObjectModal() {
     (layers) => of(layers),
     () => {
       const {
-        visibleDivs,
-        setVisibleDivs,
-        objectData: { description },
+        visibleModals,
+        setVisibleModals,
+        dialogue: { description },
       } = dataStore();
 
       const hideModal = () => {
-        setVisibleDivs({
-          ...visibleDivs,
-          objectModal: !visibleDivs.objectModal,
+        setVisibleModals({
+          ...visibleModals,
+          dialogue: !visibleModals.dialogue,
         });
       };
 
       const showShop = () => {
-        setVisibleDivs({
-          ...visibleDivs,
-          merchant: !visibleDivs.merchant,
+        setVisibleModals({
+          ...visibleModals,
+          merchant: !visibleModals.merchant,
         });
       };
 
       useEffect(() => {
-        if (visibleDivs.objectModal === true)
+        if (visibleModals.dialogue === true)
           document.getElementById('object_modal')!.style.display = 'block';
-      }, [visibleDivs.objectModal]);
+      }, [visibleModals.dialogue]);
 
       return (
-        <ModalWrapperLite id="object_modal" isOpen={visibleDivs.objectModal}>
+        <ModalWrapperLite id="object_modal" isOpen={visibleModals.dialogue}>
           <ModalContent>
             <AlignRight>
               <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>

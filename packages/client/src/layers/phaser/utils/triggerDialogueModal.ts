@@ -1,7 +1,7 @@
 import { dataStore } from 'layers/react/store/createStore';
 import dialogueSound from 'assets/sound/fx/speech3.mp3';
 
-export const triggerObjectModal = (
+export const triggerDialogueModal = (
   object: Phaser.GameObjects.GameObject,
   description: string
 ) => {
@@ -9,16 +9,16 @@ export const triggerObjectModal = (
     const clickFX = new Audio(dialogueSound);
 
     const {
-      visibleDivs,
+      visibleModals,
       sound: { volume },
     } = dataStore.getState();
 
     clickFX.volume = volume;
     clickFX.play();
 
-    dataStore.setState({ objectData: { description } });
+    dataStore.setState({ dialogue: { description } });
     dataStore.setState({
-      visibleDivs: { ...visibleDivs, objectModal: !visibleDivs.objectModal },
+      visibleModals: { ...visibleModals, dialogue: !visibleModals.dialogue },
     });
   });
 };
