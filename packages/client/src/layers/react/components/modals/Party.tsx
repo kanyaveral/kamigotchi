@@ -11,6 +11,7 @@ import {
 } from '@latticexyz/recs';
 
 import { ActionButton } from 'layers/react/components/library/ActionButton';
+import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import 'layers/react/styles/font.css';
@@ -167,11 +168,12 @@ export function registerPartyModal() {
       };
 
       return merge(
-        OwnerID.update$,
         AccountID.update$,
-        Location.update$,
         Balance.update$,
         Coin.update$,
+        HealthCurrent.update$,
+        Location.update$,
+        OwnerID.update$,
         State.update$,
         StartTime.update$,
         MediaURI.update$
@@ -344,21 +346,20 @@ export function registerPartyModal() {
         return rate;
       };
 
-      // calculate health (as % of total health) based on the drain against last confirmed health
+      // calculate health based on the drain against last confirmed health
       const calcHealth = (kami: any) => {
         // calculate the health drain on the kami since the last health update
         let duration = lastRefresh / 1000 - kami.lastHealthTime;
         let drainRate = calcProductionRate(kami) / 2;
         let healthDrain = drainRate * duration;
 
-        let newHealth = Math.max(kami.currHealth - healthDrain, 0);
-        return ((100 * newHealth) / kami.health).toFixed(1);
-      };
+        return Math.max(kami.currHealth - healthDrain, 0);
+      }
 
       // calculate the expected output from a pet production based on starttime
       // set to N/A if dead
       const calcOutput = (kami: any) => {
-        if (kami.production) {
+        if (isHarvesting(kami) && !isDead(kami)) {
           let duration = lastRefresh / 1000 - kami.production.startTime;
           let output = Math.round(duration * calcProductionRate(kami));
           return Math.max(output, 0);
@@ -366,76 +367,49 @@ export function registerPartyModal() {
         return 0;
       };
 
+      // naive check right now, needs to be updated with murder check as well
+      const isDead = (kami: any) => {
+        return calcHealth(kami) == 0;
+      }
+
+      // check whether the kami is currently harvesting
+      // TODO: replace this with a general state check
+      const isHarvesting = (kami: any): boolean => {
+        return kami.production && kami.production.state === 'ACTIVE';
+      };
+
+      // get the title of the kami as 'name (health / totHealth)'
+      const getTitle = (kami: any) => {
+        const health = calcHealth(kami).toFixed();
+        return kami.name + ` (${health}/${parseInt(kami.health)})`;
+      }
+
+      // get the description of the kami as a list of lines
+      // TODO: clean this up
+      const getDescription = (kami: any) => {
+        let description: string[] = [];
+        const health = calcHealth(kami);
+
+        if (isHarvesting(kami)) {
+          if (health == 0) {
+            description.push('died (of neglect)')
+          } else {
+            description.push(`Harvesting on ${kami.production.nodeId.slice(0, 6)}`);
+            description.push(`+${kami.power * 1} $KAMI/hr`);
+            description.push(`-${kami.power / 2} HP/hr`);
+          }
+        } else {
+          if (health == 0) {
+            description.push(`Murdered on ${kami.production.nodeId.slice(0, 6)}`);
+          } else {
+            description.push('chillin');
+          }
+        }
+        return description;
+      }
+
       /////////////////
       // DISPLAY
-
-      // Generate the list of Kami cards
-      // TODO: grab uri from SC side
-      const KamiCards = (kamis: any[]) => {
-        return kamis.map((kami) => {
-          return (
-            <KamiBox key={kami.id}>
-              <KamiImage src={kami.uri} />
-              <KamiFacts>
-                <KamiName>
-                  <Description>{kami.name}</Description>
-                </KamiName>
-                <KamiDetails>
-                  <Description>
-                    Energy: {calcHealth(kami)} %
-                    <br />
-                    Power: {kami.power * 1} / hr
-                    <br />
-                    Harvest: {
-                      (calcHealth(kami) != '0.0')
-                        ? calcOutput(kami)
-                        : "lol "
-                    } BYTES
-                    <br />
-                  </Description>
-                  {(kami.production && kami.production.state === 'ACTIVE')
-                    ? <ActionButton
-                      id={`action-${kami.id}-harvest-stop`}
-                      onClick={() => stopProduction(kami.production.id)}
-                    >
-                      Stop
-                    </ActionButton>
-                    : <ActionButton
-                      id={`action-${kami.id}-harvest-start`}
-                      onClick={() => startProduction(kami.id)}
-                    >
-                      Start
-                    </ActionButton>
-                  }
-                  {(kami.production && kami.production.state === 'ACTIVE')
-                    ? <ActionButton
-                      id={`action-${kami.id}-harvest-collect`}
-                      onClick={() => reapProduction(kami.production.id)}
-                    >
-                      Collect
-                    </ActionButton>
-                    : <ActionButton
-                      id={`action-${kami.id}-harvest-start`}
-                      onClick={() => null}
-                    >
-                      Select Node
-                    </ActionButton>
-                  }
-                  <ActionButton id={`action-${kami.id}-feed-1`} onClick={() => feed(kami.id, 1)}>
-                    Feed 1
-                  </ActionButton>
-                  <ActionButton id={`action-${kami.id}-feed-2`} onClick={() => feed(kami.id, 2)}>
-                    Feed 2
-                  </ActionButton>
-                  <ActionButton id={`action-${kami.id}-feed-3`} onClick={() => feed(kami.id, 3)}>
-                    Feed 3
-                  </ActionButton>
-                </KamiDetails>
-              </KamiFacts>
-            </KamiBox>
-          );
-        });
-      };
 
       // get the row of consumable items to display in the player inventory
       // NOTE: does not render until player inventories are populated
@@ -452,6 +426,54 @@ export function registerPartyModal() {
         });
       };
 
+      const CollectButton = (kami: any) => (
+        <ActionButton
+          id={`harvest-collect`}
+          onClick={() => reapProduction(kami.production.id)}
+          text='Collect' />
+      );
+
+      const FeedButton = (kami: any, foodIndex: number) => (
+        <ActionButton
+          id={`feed-${foodIndex}`}
+          onClick={() => feed(kami.id, foodIndex)}
+          text={`Feed ${foodIndex}`} />
+      );
+
+      const StartButton = (kami: any) => (
+        <ActionButton
+          id={`harvest-start`}
+          onClick={() => startProduction(kami.id)}
+          text='Start' />
+      );
+
+      const StopButton = (kami: any) => (
+        <ActionButton
+          id={`harvest-stop`}
+          onClick={() => stopProduction(kami.production.id)}
+          text='Stop' />
+      );
+
+      const KamiCards = (kamis: any[]) => {
+        return kamis.map((kami) => {
+          const title = getTitle(kami);
+          const description = getDescription(kami);
+          const action = isHarvesting(kami) ? StopButton(kami) : StartButton(kami);
+
+          return (
+            <KamiCard
+              key={kami.id}
+              title={title}
+              image={kami.uri}
+              subtext={`+${calcOutput(kami).toFixed(1)} $KAMI`}
+              action={action}
+              cornerContent={FeedButton(kami, 1)}
+              description={description}
+            />
+          )
+        })
+      };
+
       return (
         <ModalWrapperFull id='party_modal' divName='party' fill={true}>
           <TopGrid>
@@ -462,7 +484,9 @@ export function registerPartyModal() {
           <ConsumableGrid>
             {ConsumableCells(data.account.inventories)}
           </ConsumableGrid>
-          <Scrollable>{KamiCards(data.pets)}</Scrollable>
+          <Scrollable>
+            {KamiCards(data.pets)}
+          </Scrollable>
         </ModalWrapperFull>
       );
     }
@@ -472,49 +496,6 @@ export function registerPartyModal() {
 const Scrollable = styled.div`
   overflow: auto;
   max-height: 100%;
-`;
-
-const KamiBox = styled.div`
-  background-color: #ffffff;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  color: black;
-  text-decoration: none;
-  display: grid;
-  font-size: 18px;
-  margin: 4px 2px;
-  border-radius: 5px;
-  font-family: Pixel;
-`;
-
-const KamiFacts = styled.div`
-  background-color: #ffffff;
-  color: black;
-  font-size: 18px;
-  margin: 0px;
-  padding: 0px;
-  grid-column: 2 / span 1000;
-  display: grid;
-`;
-
-const KamiName = styled.div`
-  grid-row: 1;
-  border-style: solid;
-  border-width: 0px 0px 2px 0px;
-  border-color: black;
-`;
-
-const KamiDetails = styled.div`
-  grid-row: 2 / 5;
-`;
-
-const Description = styled.p`
-  font-size: 14px;
-  color: #333;
-  text-align: left;
-  padding: 2px;
-  font-family: Pixel;
 `;
 
 const TopDescription = styled.p`
@@ -529,16 +510,6 @@ const TopDescription = styled.p`
   border-color: black;
   border-radius: 5px;
   padding: 5px;
-`;
-
-const KamiImage = styled.img`
-  border-style: solid;
-  border-width: 0px 2px 0px 0px;
-  border-color: black;
-  height: 110px;
-  margin: 0px;
-  padding: 0px;
-  grid-column: 1 / span 1;
 `;
 
 const ConsumableGrid = styled.div`
