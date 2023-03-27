@@ -328,7 +328,16 @@ library LibRegistryItem {
     IUintComp components,
     uint256 itemIndex
   ) internal view returns (uint256 result) {
-    uint256[] memory results = _getAllX(components, itemIndex, 0, 0, 0);
+    QueryFragment[] memory fragments = new QueryFragment[](3);
+    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsRegCompID), "");
+    fragments[1] = QueryFragment(QueryType.Has, getComponentById(components, IndexItemCompID), "");
+    fragments[2] = QueryFragment(
+      QueryType.HasValue,
+      getComponentById(components, IndexItemCompID),
+      abi.encode(itemIndex)
+    );
+
+    uint256[] memory results = LibQuery.query(fragments);
     if (results.length != 0) result = results[0];
   }
 
@@ -337,7 +346,16 @@ library LibRegistryItem {
     IUintComp components,
     uint256 foodIndex
   ) internal view returns (uint256 result) {
-    uint256[] memory results = _getAllX(components, 0, 0, foodIndex, 0);
+    QueryFragment[] memory fragments = new QueryFragment[](3);
+    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsRegCompID), "");
+    fragments[1] = QueryFragment(QueryType.Has, getComponentById(components, IndexItemCompID), "");
+    fragments[2] = QueryFragment(
+      QueryType.HasValue,
+      getComponentById(components, IndexFoodCompID),
+      abi.encode(foodIndex)
+    );
+
+    uint256[] memory results = LibQuery.query(fragments);
     if (results.length != 0) result = results[0];
   }
 
@@ -346,7 +364,16 @@ library LibRegistryItem {
     IUintComp components,
     uint256 gearIndex
   ) internal view returns (uint256 result) {
-    uint256[] memory results = _getAllX(components, 0, gearIndex, 0, 0);
+    QueryFragment[] memory fragments = new QueryFragment[](3);
+    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsRegCompID), "");
+    fragments[1] = QueryFragment(QueryType.Has, getComponentById(components, IndexItemCompID), "");
+    fragments[2] = QueryFragment(
+      QueryType.HasValue,
+      getComponentById(components, IndexGearCompID),
+      abi.encode(gearIndex)
+    );
+
+    uint256[] memory results = LibQuery.query(fragments);
     if (results.length != 0) result = results[0];
   }
 
@@ -355,58 +382,16 @@ library LibRegistryItem {
     IUintComp components,
     uint256 modIndex
   ) internal view returns (uint256 result) {
-    uint256[] memory results = _getAllX(components, 0, 0, 0, modIndex);
-    if (results.length != 0) result = results[0];
-  }
-
-  // get all item registry entities matching filters. 0 values indicate no filter
-  function _getAllX(
-    IUintComp components,
-    uint256 itemIndex,
-    uint256 gearIndex,
-    uint256 foodIndex,
-    uint256 modIndex
-  ) internal view returns (uint256[] memory) {
-    uint256 setFilters; // number of optional non-zero filters
-    if (itemIndex != 0) setFilters++;
-    if (gearIndex != 0) setFilters++;
-    if (foodIndex != 0) setFilters++;
-    if (modIndex != 0) setFilters++;
-
-    uint256 filterCount = 2; // number of mandatory filters
-    QueryFragment[] memory fragments = new QueryFragment[](setFilters + filterCount);
+    QueryFragment[] memory fragments = new QueryFragment[](3);
     fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsRegCompID), "");
     fragments[1] = QueryFragment(QueryType.Has, getComponentById(components, IndexItemCompID), "");
+    fragments[2] = QueryFragment(
+      QueryType.HasValue,
+      getComponentById(components, IndexModCompID),
+      abi.encode(modIndex)
+    );
 
-    if (itemIndex != 0) {
-      fragments[filterCount++] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IndexItemCompID),
-        abi.encode(itemIndex)
-      );
-    }
-    if (foodIndex != 0) {
-      fragments[filterCount++] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IndexFoodCompID),
-        abi.encode(foodIndex)
-      );
-    }
-    if (gearIndex != 0) {
-      fragments[filterCount++] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IndexGearCompID),
-        abi.encode(gearIndex)
-      );
-    }
-    if (modIndex != 0) {
-      fragments[filterCount++] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IndexModCompID),
-        abi.encode(modIndex)
-      );
-    }
-
-    return LibQuery.query(fragments);
+    uint256[] memory results = LibQuery.query(fragments);
+    if (results.length != 0) result = results[0];
   }
 }

@@ -25,8 +25,13 @@
     "IndexGearComponent",
     "IndexItemComponent",
     "IndexModComponent",
-    "IndexModifierComponent",
+    "IndexBackgroundComponent",
+    "IndexBodyComponent",
+    "IndexColorComponent",
+    "IndexFaceComponent",
+    "IndexHandComponent",
     "IndexPetComponent",
+    "IndexTraitComponent",
     "IsAccountComponent",
     "IsEquippedComponent",
     "IsFoodComponent",
@@ -71,12 +76,6 @@
       "name": "_devGiveTokensSystem",
       "writeAccess": [
         "CoinComponent"
-      ]
-    },
-    {
-      "name": "_AddTraitSystem",
-      "writeAccess": [
-        "*"
       ]
     },
     {
@@ -125,6 +124,18 @@
     },
     {
       "name": "_RegistryUpdateGearSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryCreateTraitSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryUpdateTraitSystem",
       "writeAccess": [
         "*"
       ]
@@ -309,7 +320,6 @@
     "LibPrototype",
     "LibRegister",
     "LibRegistryItem",
-    "LibRegistryModifier",
     "LibRoom",
     "LibStat",
     "LibTrade"

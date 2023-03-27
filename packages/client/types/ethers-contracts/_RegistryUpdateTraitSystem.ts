@@ -27,10 +27,10 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export interface _AddTraitSystemInterface extends utils.Interface {
+export interface _RegistryUpdateTraitSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(uint256,uint256,string,string,string,string)": FunctionFragment;
+    "executeTyped(uint256,uint256,uint256,uint256,uint256,uint256,string,string)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -52,8 +52,10 @@ export interface _AddTraitSystemInterface extends utils.Interface {
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<string>
     ]
@@ -94,12 +96,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface _AddTraitSystem extends BaseContract {
+export interface _RegistryUpdateTraitSystem extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: _AddTraitSystemInterface;
+  interface: _RegistryUpdateTraitSystemInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -128,11 +130,13 @@ export interface _AddTraitSystem extends BaseContract {
 
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
-      modValue: PromiseOrValue<BigNumberish>,
-      genus: PromiseOrValue<string>,
-      modType: PromiseOrValue<string>,
-      affinity: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      traitType: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -151,11 +155,13 @@ export interface _AddTraitSystem extends BaseContract {
 
   executeTyped(
     index: PromiseOrValue<BigNumberish>,
-    modValue: PromiseOrValue<BigNumberish>,
-    genus: PromiseOrValue<string>,
-    modType: PromiseOrValue<string>,
-    affinity: PromiseOrValue<string>,
+    health: PromiseOrValue<BigNumberish>,
+    power: PromiseOrValue<BigNumberish>,
+    violence: PromiseOrValue<BigNumberish>,
+    harmony: PromiseOrValue<BigNumberish>,
+    slots: PromiseOrValue<BigNumberish>,
     name: PromiseOrValue<string>,
+    traitType: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -174,11 +180,13 @@ export interface _AddTraitSystem extends BaseContract {
 
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
-      modValue: PromiseOrValue<BigNumberish>,
-      genus: PromiseOrValue<string>,
-      modType: PromiseOrValue<string>,
-      affinity: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      traitType: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -209,11 +217,13 @@ export interface _AddTraitSystem extends BaseContract {
 
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
-      modValue: PromiseOrValue<BigNumberish>,
-      genus: PromiseOrValue<string>,
-      modType: PromiseOrValue<string>,
-      affinity: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      traitType: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -233,11 +243,13 @@ export interface _AddTraitSystem extends BaseContract {
 
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
-      modValue: PromiseOrValue<BigNumberish>,
-      genus: PromiseOrValue<string>,
-      modType: PromiseOrValue<string>,
-      affinity: PromiseOrValue<string>,
+      health: PromiseOrValue<BigNumberish>,
+      power: PromiseOrValue<BigNumberish>,
+      violence: PromiseOrValue<BigNumberish>,
+      harmony: PromiseOrValue<BigNumberish>,
+      slots: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      traitType: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
