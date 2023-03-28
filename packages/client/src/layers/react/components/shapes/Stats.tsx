@@ -2,6 +2,7 @@ import {
   EntityIndex,
   getComponentValue,
 } from '@latticexyz/recs';
+
 import { Layers } from 'src/types';
 
 // TODO: generalize this to any entities with stats

@@ -6,6 +6,7 @@ import {
   getComponentValue,
   runQuery,
 } from '@latticexyz/recs';
+
 import { Layers } from 'src/types';
 import { Account, getAccount } from './Account';
 import { Production, getProduction } from './Production';
@@ -19,7 +20,6 @@ export interface Kami {
   uri: string;
   health: number;
   lastUpdated: number;
-
   account?: Account;
   production?: Production;
   stats?: Stats;
@@ -78,12 +78,6 @@ export const getKami = (
     if (accountIndex) kami.account = getAccount(layers, accountIndex);
   }
 
-  // populate Kami Stats
-  if (options.stats) {
-    const stats = getStats(layers, index);
-    kami.stats = stats;
-  }
-
   // populate Production
   if (options.production) {
     const productionIndex = Array.from(
@@ -91,6 +85,13 @@ export const getKami = (
     )[0];
     if (productionIndex) kami.production = getProduction(layers, productionIndex, { node: true });
   }
+
+  // populate Kami Stats
+  if (options.stats) {
+    const stats = getStats(layers, index);
+    kami.stats = stats;
+  }
+
 
   return kami;
 };

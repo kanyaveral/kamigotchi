@@ -21,6 +21,7 @@ export interface VisibleModals {
   kami: boolean;
   map: boolean;
   merchant: boolean;
+  node: boolean;
   party: boolean;
 }
 
@@ -57,6 +58,7 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
       kamiMint: false,
       map: false,
       merchant: false,
+      node: false,
       party: false,
     },
     sound: {

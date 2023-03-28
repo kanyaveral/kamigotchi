@@ -27,7 +27,7 @@ export interface ProductionOptions {
 export const getProduction = (
   layers: Layers,
   index: EntityIndex,
-  options: ProductionOptions
+  options?: ProductionOptions
 ): Production => {
   const {
     network: {
@@ -56,7 +56,7 @@ export const getProduction = (
   if (options.kami) {
     const kamiID = getComponentValue(PetID, index)?.value as EntityID;
     const kamiIndex = world.entityToIndex.get(kamiID);
-    if (kamiIndex) production.kami = getKami(layers, kamiIndex);
+    if (kamiIndex) production.kami = getKami(layers, kamiIndex, { account: true, stats: true });
   }
 
   // populate Node
