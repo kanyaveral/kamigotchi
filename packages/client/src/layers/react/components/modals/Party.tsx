@@ -15,6 +15,7 @@ import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import 'layers/react/styles/font.css';
+import { getKami } from 'layers/react/components/shapes/Kami';
 
 import pompom from 'assets/images/food/pompom.png';
 import gakki from 'assets/images/food/gakki.png';
@@ -222,6 +223,11 @@ export function registerPartyModal() {
             runQuery([Has(IsPet), HasValue(AccountID, { value: accountID })])
           );
           for (let i = 0; i < petResults.length; i++) {
+            console.log("base kami", getKami(layers, petResults[i]));
+            console.log("kami with account", getKami(layers, petResults[i], { account: true }));
+            console.log("kami with stats", getKami(layers, petResults[i], { stats: true }));
+            console.log("kami with production", getKami(layers, petResults[i], { production: true }));
+            console.log("all kami", getKami(layers, petResults[i], { account: true, production: true, stats: true }));
             pets.push(getPet(petResults[i]));
           }
 
