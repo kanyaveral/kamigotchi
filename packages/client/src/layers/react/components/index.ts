@@ -5,6 +5,7 @@ import { registerDialogueModal } from './modals/Dialogue';
 import { registerChatButton } from './buttons/Chat';
 import { registerFoodShopButton } from './buttons/FoodShop';
 import { registerMapButton } from './buttons/Map';
+import { registerNodeButton } from './buttons/Node';
 import { registerPartyButton } from './buttons/Party';
 
 import { registerChatModal } from './modals/Chat';
@@ -16,6 +17,7 @@ import { registerMerchantModal } from './modals/Merchant';
 import { registerPartyModal } from './modals/Party';
 import { registerRequestQueue } from './modals/RequestQueue';
 import { registerTradeModal } from './modals/Trade';
+import { registerNodeModal } from './modals/Node';
 
 export function registerUIComponents() {
   registerActionQueue();
@@ -25,6 +27,7 @@ export function registerUIComponents() {
   registerChatButton();
   registerFoodShopButton();
   registerMapButton();
+  registerNodeButton();
   registerPartyButton();
 
   registerChatModal();
@@ -32,8 +35,9 @@ export function registerUIComponents() {
   registerKamiMintModal();
   registerKamiModal();
   registerMapModal();
+  registerNodeModal();
   registerMerchantModal();
   registerPartyModal();
-  registerRequestQueue();
-  registerTradeModal();
+  // registerRequestQueue();
+  // registerTradeModal();
 }

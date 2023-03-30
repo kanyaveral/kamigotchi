@@ -219,15 +219,25 @@ export function registerPartyModal() {
 
           // get all indices of pets linked to this account and create object array
           let pets: any = [];
+          let kamis: any = [];
           const petResults = Array.from(
             runQuery([Has(IsPet), HasValue(AccountID, { value: accountID })])
           );
           for (let i = 0; i < petResults.length; i++) {
-            console.log("base kami", getKami(layers, petResults[i]));
-            console.log("kami with account", getKami(layers, petResults[i], { account: true }));
-            console.log("kami with stats", getKami(layers, petResults[i], { stats: true }));
-            console.log("kami with production", getKami(layers, petResults[i], { production: true }));
-            console.log("all kami", getKami(layers, petResults[i], { account: true, production: true, stats: true }));
+            // console.log('base kami', getKami(layers, petResults[i]));
+            // console.log(
+            //   'kami with account',
+            //   getKami(layers, petResults[i], { account: true })
+            // );
+            // console.log(
+            //   'kami with stats',
+            //   getKami(layers, petResults[i], { stats: true })
+            // );
+            // console.log(
+            //   'kami with production',
+            //   getKami(layers, petResults[i], { production: true })
+            // );
+            kamis.push(getKami(layers, petResults[i], { account: true, production: true, stats: true }));
             pets.push(getPet(petResults[i]));
           }
 
@@ -252,6 +262,7 @@ export function registerPartyModal() {
                 bytes,
               },
               pets,
+              kamis,
               node: { id: nodeID },
             } as any,
           };
@@ -262,7 +273,6 @@ export function registerPartyModal() {
     // Render
     ({ actions, api, data }) => {
       const [lastRefresh, setLastRefresh] = useState(Date.now());
-
       /////////////////
       // TICKING
 
@@ -360,7 +370,7 @@ export function registerPartyModal() {
         let healthDrain = drainRate * duration;
 
         return Math.max(kami.currHealth - healthDrain, 0);
-      }
+      };
 
       // calculate the expected output from a pet production based on starttime
       // set to N/A if dead
@@ -376,7 +386,7 @@ export function registerPartyModal() {
       // naive check right now, needs to be updated with murder check as well
       const isDead = (kami: any) => {
         return calcHealth(kami) == 0;
-      }
+      };
 
       // check whether the kami is currently harvesting
       // TODO: replace this with a general state check
@@ -388,7 +398,7 @@ export function registerPartyModal() {
       const getTitle = (kami: any) => {
         const health = calcHealth(kami).toFixed();
         return kami.name + ` (${health}/${parseInt(kami.health)})`;
-      }
+      };
 
       // get the description of the kami as a list of lines
       // TODO: clean this up
@@ -398,21 +408,25 @@ export function registerPartyModal() {
 
         if (isHarvesting(kami)) {
           if (health == 0) {
-            description.push('died (of neglect)')
+            description.push('died (of neglect)');
           } else {
-            description.push(`Harvesting on ${kami.production.nodeId.slice(0, 6)}`);
+            description.push(
+              `Harvesting on ${kami.production.nodeId.slice(0, 6)}`
+            );
             description.push(`+${kami.power * 1} $KAMI/hr`);
             description.push(`-${kami.power / 2} HP/hr`);
           }
         } else {
           if (health == 0) {
-            description.push(`Murdered on ${kami.production.nodeId.slice(0, 6)}`);
+            description.push(
+              `Murdered on ${kami.production.nodeId.slice(0, 6)}`
+            );
           } else {
             description.push('chillin');
           }
         }
         return description;
-      }
+      };
 
       /////////////////
       // DISPLAY
@@ -422,10 +436,7 @@ export function registerPartyModal() {
       const ConsumableCells = (inventories: any[]) => {
         return inventories.map((inv) => {
           return (
-            <CellBordered
-              key={inv.id}
-              style={{ gridColumn: `${inv.id}` }}
-            >
+            <CellBordered key={inv.id} style={{ gridColumn: `${inv.id}` }}>
               <CellGrid>
                 <Icon src={inv.image} />
                 <ItemNumber>{inv.balance ?? 0}</ItemNumber>
@@ -439,35 +450,41 @@ export function registerPartyModal() {
         <ActionButton
           id={`harvest-collect`}
           onClick={() => reapProduction(kami.production.id)}
-          text='Collect' />
+          text="Collect"
+        />
       );
 
       const FeedButton = (kami: any, foodIndex: number) => (
         <ActionButton
           id={`feed-${foodIndex}`}
           onClick={() => feed(kami.id, foodIndex)}
-          text={`Feed ${foodIndex}`} />
+          text={`Feed ${foodIndex}`}
+        />
       );
 
       const StartButton = (kami: any) => (
         <ActionButton
           id={`harvest-start`}
           onClick={() => startProduction(kami.id)}
-          text='Start' />
+          text="Start"
+        />
       );
 
       const StopButton = (kami: any) => (
         <ActionButton
           id={`harvest-stop`}
           onClick={() => stopProduction(kami.production.id)}
-          text='Stop' />
+          text="Stop"
+        />
       );
 
       const KamiCards = (kamis: any[]) => {
         return kamis.map((kami) => {
           const title = getTitle(kami);
           const description = getDescription(kami);
-          const action = isHarvesting(kami) ? StopButton(kami) : StartButton(kami);
+          const action = isHarvesting(kami)
+            ? StopButton(kami)
+            : StartButton(kami);
 
           return (
             <KamiCard
@@ -479,12 +496,12 @@ export function registerPartyModal() {
               cornerContent={FeedButton(kami, 1)}
               description={description}
             />
-          )
-        })
+          );
+        });
       };
 
       return (
-        <ModalWrapperFull id='party_modal' divName='party' fill={true}>
+        <ModalWrapperFull id="party_modal" divName="party" fill={true}>
           <TopGrid>
             <TopDescription>
               Bytes: {data.account.bytes ? data.account.bytes * 1 : '0'}
@@ -493,9 +510,7 @@ export function registerPartyModal() {
           <ConsumableGrid>
             {ConsumableCells(data.account.inventories)}
           </ConsumableGrid>
-          <Scrollable>
-            {KamiCards(data.pets)}
-          </Scrollable>
+          <Scrollable>{KamiCards(data.pets)}</Scrollable>
         </ModalWrapperFull>
       );
     }
@@ -546,30 +561,6 @@ const CellBordered = styled.div`
   border-style: solid;
   border-width: 0px 2px 0px 0px;
   border-color: black;
-`;
-
-const CellBorderless = styled.div`
-  border-style: solid;
-  border-width: 0px 2px 0px 0px;
-  border-color: black;
-`;
-
-const CellOne = styled.div`
-  grid-column: 1;
-  border-style: solid;
-  border-width: 0px 2px 0px 0px;
-  border-color: black;
-`;
-
-const CellTwo = styled.div`
-  grid-column: 2;
-  border-style: solid;
-  border-width: 0px 2px 0px 0px;
-  border-color: black;
-`;
-
-const CellThree = styled.div`
-  grid-column: 3;
 `;
 
 const Icon = styled.img`
