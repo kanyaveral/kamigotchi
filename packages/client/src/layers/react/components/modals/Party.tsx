@@ -3,7 +3,6 @@ import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import {
   EntityID,
-  EntityIndex,
   Has,
   HasValue,
   getComponentValue,
@@ -23,18 +22,6 @@ import pompom from 'assets/images/food/pompom.png';
 import gakki from 'assets/images/food/gakki.png';
 import gum from 'assets/images/food/gum.png';
 
-const ItemImages = new Map([
-  [1, gum],
-  [2, pompom],
-  [3, gakki],
-]);
-
-const ItemNames = new Map([
-  [1, 'Gum'],
-  [2, 'Pompom'],
-  [3, 'Gakki'],
-]);
-
 export function registerPartyModal() {
   registerUIComponent(
     'PetList',
@@ -49,32 +36,23 @@ export function registerPartyModal() {
     (layers) => {
       const {
         network: {
-          world,
           api: { player },
           network,
           components: {
             AccountID,
             Balance,
-            Health,
             HealthCurrent,
             Coin,
-            Power,
             HolderID,
             IsAccount,
             IsInventory,
             IsNode,
-            IsProduction,
             IsPet,
             ItemIndex,
-            LastActionTime,
             Location,
             MediaURI,
-            Name,
-            NodeID,
             OperatorAddress,
             OwnerID,
-            PetID,
-            PetIndex,
             Rate,
             State,
             StartTime,
@@ -117,8 +95,8 @@ export function registerPartyModal() {
         Location.update$,
         OwnerID.update$,
         Rate.update$,
-        State.update$,
         StartTime.update$,
+        State.update$,
         MediaURI.update$
       ).pipe(
         map(() => {
@@ -129,7 +107,9 @@ export function registerPartyModal() {
           const accountIndex = Array.from(
             runQuery([
               Has(IsAccount),
-              HasValue(OperatorAddress, { value: network.connectedAddress.get() }),
+              HasValue(OperatorAddress, {
+                value: network.connectedAddress.get(),
+              }),
             ])
           )[0];
 
@@ -163,21 +143,13 @@ export function registerPartyModal() {
           if (account) {
             // get the kamis on this account
             const kamiIndices = Array.from(
-              runQuery([
-                Has(IsPet),
-                HasValue(AccountID, { value: account.id }),
-              ])
+              runQuery([Has(IsPet), HasValue(AccountID, { value: account.id })])
             );
 
             // get all kamis on the node
             for (let i = 0; i < kamiIndices.length; i++) {
-              kamis.push(getKami(
-                layers,
-                kamiIndices[i],
-                { production: true, stats: true },
-              ));
+              kamis.push(getKami(layers, kamiIndices[i], { production: true }));
             }
-
 
             // (hardcoded structures) populate inventory balances
             let itemIndex;
@@ -209,7 +181,7 @@ export function registerPartyModal() {
 
     // Render
     ({ actions, api, data }) => {
-      console.log(data);
+      // console.log(data);
       const [lastRefresh, setLastRefresh] = useState(Date.now());
       /////////////////
       // TICKING
@@ -296,7 +268,7 @@ export function registerPartyModal() {
       // this is based on a hardcoded value for the time being
       const calcDrainRate = (kami: Kami) => {
         return calcProductionRate(kami) / 2.0;
-      }
+      };
 
       // get emission rate of the Kami's production. measured in (KAMI/s)
       const calcProductionRate = (kami: Kami) => {
@@ -305,7 +277,7 @@ export function registerPartyModal() {
           rate = kami.production!.rate / RATE_PRECISION;
         }
         return rate;
-      }
+      };
 
       // calculate health based on the drain against last confirmed health
       const calcHealth = (kami: Kami) => {
@@ -319,7 +291,7 @@ export function registerPartyModal() {
           health -= healthDrain;
         }
         return Math.max(health, 0);
-      }
+      };
 
       // calculate the expected output from a pet production based on starttime
       // set to N/A if dead
@@ -330,7 +302,7 @@ export function registerPartyModal() {
           output = Math.round(duration * calcProductionRate(kami));
         }
         return Math.max(output, 0);
-      }
+      };
 
       // naive check right now, needs to be updated with murder check as well
       const isDead = (kami: Kami) => {
@@ -350,7 +322,7 @@ export function registerPartyModal() {
       // get the title of the kami as 'name (health / totHealth)'
       const getTitle = (kami: Kami) => {
         const health = calcHealth(kami);
-        return kami.name + ` (${health.toFixed()}/${kami.stats!.health * 1})`;
+        return kami.name + ` (${health.toFixed()}/${kami.stats.health * 1})`;
       };
 
       // get the description of the kami as a list of lines
