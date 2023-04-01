@@ -154,6 +154,16 @@ export function registerNodeModal() {
                 getKami(layers, kamiIndex!, { account: true, production: true })
               );
             }
+
+            // filter out accountKamis and inactive productions 
+            if (nodeKamis) {
+              const activeEnemies = nodeKamis.filter((kami) => {
+                if (kami.production && kami.production.state === 'ACTIVE') {
+                  return kami.account!.id !== account.id
+                }
+              });
+              nodeKamis = activeEnemies;
+            }
           }
 
           return {
@@ -170,7 +180,7 @@ export function registerNodeModal() {
 
     // Render
     ({ actions, api, data }) => {
-      console.log('data', data);
+      // console.log('data', data);
       const [lastRefresh, setLastRefresh] = useState(Date.now());
       /////////////////
       // TICKING
@@ -205,8 +215,9 @@ export function registerNodeModal() {
       };
 
       // liquidate a production
-      const liquidate = (production: Production, kami: Kami) => {
-        const actionID = `Liquidating ${production.kami?.name}` as EntityID; // itemIndex should be replaced with the item's name
+      // assume this function is only called with two kamis that have productions
+      const liquidate = (myKami: Kami, enemyKami: Kami) => {
+        const actionID = `Liquidating ${enemyKami.name}` as EntityID; // itemIndex should be replaced with the item's name
         actions.add({
           id: actionID,
           components: {},
@@ -214,7 +225,7 @@ export function registerNodeModal() {
           requirement: () => true,
           updates: () => [],
           execute: async () => {
-            return api.production.liquidate(production.id, kami.id);
+            return api.production.liquidate(enemyKami.production!.id, myKami.id);
           },
         });
       };
@@ -325,8 +336,8 @@ export function registerNodeModal() {
       const LiquidateButton = (myKami: Kami, enemyKami: Kami) => (
         <ActionButton
           id={`harvest-liquidate`}
-          onClick={() => liquidate(enemyKami.production!, myKami)}
-          text="liquidate"
+          onClick={() => liquidate(myKami, enemyKami)}
+          text="liquidate (1)"
         />
       );
 
@@ -337,7 +348,6 @@ export function registerNodeModal() {
         const health = calcHealth(kami, 0);
         const harvestRate = roundTo(calcProductionRate(kami) * 3600, 1);
         const healthPercent = Math.round((health / kami.stats.health) * 100);
-        console.log(health);
 
         const description = [
           '',
@@ -360,26 +370,25 @@ export function registerNodeModal() {
       };
 
       // rendering of enemy kami (production) on this node
-      const EnemyKamiCard = (kami: Kami, myKami: Kami) => {
-        const health = calcHealth(kami, 0);
-        const harvestRate = roundTo(calcProductionRate(kami) * 3600, 1);
-        const healthPercent = Math.round((health / kami.stats.health) * 100);
-        console.log(health);
+      const EnemyKamiCard = (enemyKami: Kami, myKami: Kami) => {
+        const health = calcHealth(enemyKami, 0);
+        const harvestRate = roundTo(calcProductionRate(enemyKami) * 3600, 1);
+        const healthPercent = Math.round((health / enemyKami.stats.health) * 100);
 
         const description = [
           '',
-          `Health: ${health}/${kami.stats.health * 1}`, // multiply by 1 to interpret hex
-          `Harmony: ${kami.stats.harmony * 1}`,
-          `$KAMI: ${calcOutput(kami)} (+${harvestRate.toFixed(1)}/hr)`,
+          `Health: ${health}/${enemyKami.stats.health * 1}`, // multiply by 1 to interpret hex
+          `Harmony: ${enemyKami.stats.harmony * 1}`,
+          `$KAMI: ${calcOutput(enemyKami)} (+${harvestRate.toFixed(1)}/hr)`,
         ];
 
         return (
           <KamiCard
-            key={kami.id}
-            title={kami.name}
-            image={kami.uri}
-            subtext={kami.account!.name}
-            action={LiquidateButton(kami, myKami)}
+            key={enemyKami.id}
+            title={enemyKami.name}
+            image={enemyKami.uri}
+            subtext={enemyKami.account!.name}
+            action={LiquidateButton(myKami, enemyKami)}
             cornerContent={<BatteryComponent level={healthPercent} />}
             description={description}
           />

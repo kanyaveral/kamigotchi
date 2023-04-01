@@ -5,33 +5,38 @@ import { FixedPointMathLib as LibFPMath } from "solady/utils/FixedPointMathLib.s
 import { LibString } from "solady/utils/LibString.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
+import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
+import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById, addressToEntity } from "solecs/utils.sol";
 import { Gaussian } from "solstat/Gaussian.sol";
 
-import { IdAccountComponent, ID as IdOpCompID } from "components/IdAccountComponent.sol";
+import { IdAccountComponent, ID as IdAccCompID } from "components/IdAccountComponent.sol";
 import { IdOwnerComponent, ID as IdOwnerCompID } from "components/IdOwnerComponent.sol";
 import { IndexPetComponent, ID as IndexPetComponentID } from "components/IndexPetComponent.sol";
 import { IsPetComponent, ID as IsPetCompID } from "components/IsPetComponent.sol";
-import { PowerComponent, ID as PowerCompID } from "components/PowerComponent.sol";
+import { HarmonyComponent, ID as HarmonyCompID } from "components/HarmonyComponent.sol";
 import { HealthComponent, ID as HealthCompID } from "components/HealthComponent.sol";
 import { HealthCurrentComponent, ID as HealthCurrentCompID } from "components/HealthCurrentComponent.sol";
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
+import { PowerComponent, ID as PowerCompID } from "components/PowerComponent.sol";
 import { StateComponent, ID as StateCompID } from "components/StateComponent.sol";
+import { ViolenceComponent, ID as ViolenceCompID } from "components/ViolenceComponent.sol";
 import { TimeLastActionComponent, ID as TimeLastCompID } from "components/TimeLastActionComponent.sol";
 import { LibEquipment } from "libraries/LibEquipment.sol";
 import { LibProduction, RATE_PRECISION as PRODUCTION_PRECISION } from "libraries/LibProduction.sol";
 import { LibRegistryItem } from "libraries/LibRegistryItem.sol";
 import { LibStat } from "libraries/LibStat.sol";
 
-uint256 constant BASE_HARMONY = 0;
+uint256 constant BASE_HARMONY = 10;
 uint256 constant BASE_HEALTH = 150;
 uint256 constant BASE_POWER = 150;
 uint256 constant BASE_SLOTS = 0;
-uint256 constant BASE_VIOLENCE = 0;
+uint256 constant BASE_VIOLENCE = 10;
 uint256 constant BURN_RATIO = 50; // energy burned per 100 KAMI produced
 uint256 constant BURN_RATIO_PRECISION = 1e2;
 uint256 constant DEMO_POWER_MULTIPLIER = 20;
+uint256 constant DEMO_VIOLENCE_MULTIPLIER = 5;
 
 library LibPet {
   using LibFPMath for int256;
@@ -61,13 +66,6 @@ library LibPet {
     setMediaURI(components, id, uri);
     setLastTs(components, id, block.timestamp);
     revive(components, id);
-
-    // set initial stats at 0 to prevent null values
-    LibStat.setHarmony(components, id, BASE_HARMONY);
-    LibStat.setHealth(components, id, BASE_HEALTH);
-    LibStat.setPower(components, id, BASE_POWER);
-    LibStat.setSlots(components, id, BASE_SLOTS);
-    LibStat.setViolence(components, id, BASE_VIOLENCE);
     return id;
   }
 
@@ -91,9 +89,9 @@ library LibPet {
   function heal(IUintComp components, uint256 id, uint256 amt) internal {
     uint256 totalHealth = calcTotalHealth(components, id);
     uint256 health = getCurrHealth(components, id);
-    uint256 newHealth = health + amt;
-    if (newHealth > totalHealth) newHealth = totalHealth;
-    setCurrHealth(components, id, newHealth);
+    health += amt;
+    if (health > totalHealth) health = totalHealth;
+    setCurrHealth(components, id, health);
   }
 
   // Update a pet's health to 0 and its state to DEAD
@@ -119,6 +117,18 @@ library LibPet {
       setCurrHealth(components, id, health);
     }
     setLastTs(components, id, block.timestamp);
+  }
+
+  // transfer ERC721 pet
+  // NOTE: it doesnt seem we actually need IdOwner directly on the pet as it can be
+  // directly accessed through the account entity.
+  function transfer(IUintComp components, uint256 index, uint256 accountID) internal {
+    // does not need to check for previous owner, ERC721 handles it
+    uint256 id = indexToID(components, index);
+    uint256 ownerID = getOwner(components, accountID);
+
+    setOwner(components, id, ownerID);
+    setAccount(components, id, accountID);
   }
 
   /////////////////
@@ -246,12 +256,20 @@ library LibPet {
   // set a pet's stats from its traits
   // TODO: actually set stats from traits. hardcoded currently
   function setStats(IUintComp components, uint256 id) internal {
-    uint256 power = BASE_POWER * DEMO_POWER_MULTIPLIER;
-    PowerComponent(getAddressById(components, PowerCompID)).set(id, power);
+    uint256 power = _smolRandom(BASE_POWER * DEMO_POWER_MULTIPLIER, id);
+    LibStat.setPower(components, id, power);
+
+    uint256 violence = _smolRandom(BASE_VIOLENCE * DEMO_VIOLENCE_MULTIPLIER, id);
+    LibStat.setViolence(components, id, violence);
+
+    uint256 harmony = _smolRandom(BASE_HARMONY, id);
+    LibStat.setHarmony(components, id, harmony);
 
     uint256 totalHealth = _smolRandom(BASE_HEALTH, id);
-    HealthComponent(getAddressById(components, HealthCompID)).set(id, totalHealth);
-    HealthCurrentComponent(getAddressById(components, HealthCurrentCompID)).set(id, totalHealth);
+    LibStat.setHealth(components, id, totalHealth);
+    setCurrHealth(components, id, totalHealth);
+
+    LibStat.setSlots(components, id, BASE_SLOTS);
   }
 
   function setCurrHealth(IUintComp components, uint256 id, uint256 currHealth) internal {
@@ -272,7 +290,7 @@ library LibPet {
   }
 
   function setAccount(IUintComp components, uint256 id, uint256 accountID) internal {
-    IdAccountComponent(getAddressById(components, IdOpCompID)).set(id, accountID);
+    IdAccountComponent(getAddressById(components, IdAccCompID)).set(id, accountID);
   }
 
   function setOwner(IUintComp components, uint256 id, uint256 ownerID) internal {
@@ -304,7 +322,7 @@ library LibPet {
 
   // get the entity ID of the pet account
   function getAccount(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IdAccountComponent(getAddressById(components, IdOpCompID)).getValue(id);
+    return IdAccountComponent(getAddressById(components, IdAccCompID)).getValue(id);
   }
 
   // get the entity ID of the pet owner
@@ -334,19 +352,20 @@ library LibPet {
     return IndexPetComponent(getAddressById(components, IndexPetComponentID)).getValue(entityID);
   }
 
-  /////////////////
-  // ERC721
+  // gets all the pets owned by an account
+  function getAllForAccount(
+    IUintComp components,
+    uint256 accountID
+  ) internal view returns (uint256[] memory) {
+    QueryFragment[] memory fragments = new QueryFragment[](2);
+    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsPetCompID), "");
+    fragments[1] = QueryFragment(
+      QueryType.HasValue,
+      getComponentById(components, IdAccCompID),
+      abi.encode(accountID)
+    );
 
-  // transfer ERC721 pet
-  // NOTE: it doesnt seem we actually need IdOwner directly on the pet as it can be
-  // directly accessed through the account entity.
-  function transfer(IUintComp components, uint256 index, uint256 accountID) internal {
-    // does not need to check for previous owner, ERC721 handles it
-    uint256 id = indexToID(components, index);
-    uint256 ownerID = getOwner(components, accountID);
-
-    setOwner(components, id, ownerID);
-    setAccount(components, id, accountID);
+    return LibQuery.query(fragments);
   }
 
   /////////////////
