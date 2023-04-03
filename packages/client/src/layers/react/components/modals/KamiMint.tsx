@@ -20,7 +20,7 @@ const SystemBalID = BigNumber.from(utils.id('system.ERC721.pet'));
 
 export function registerKamiMintModal() {
   registerUIComponent(
-    'PetMint',
+    'kamiMint',
     {
       colStart: 33,
       colEnd: 65,
