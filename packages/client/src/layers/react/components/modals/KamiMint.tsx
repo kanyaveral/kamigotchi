@@ -128,7 +128,7 @@ export function registerKamiMintModal() {
           mintFX.volume = volume * .6;
           mintFX.play();
         } catch (e) {
-          //
+          console.log("KamiMint.tsx: handleMinting() mint failed", e);
         }
       };
 

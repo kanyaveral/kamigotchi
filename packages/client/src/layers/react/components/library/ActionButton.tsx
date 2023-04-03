@@ -17,11 +17,11 @@ export const ActionButton = (props: Props) => {
   const { sound: { volume } } = dataStore();
 
   // layer on a sound effect
-  const handleClick = () => {
+  const handleClick = async () => {
     const clickSound = new Audio(clickSoundUrl);
     clickSound.volume = volume * 0.6;
     clickSound.play();
-    props.onClick();
+    await props.onClick();
   }
 
   // override styles if disabled
