@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 
 import "std-contracts/components/Uint256BareComponent.sol";
 
-uint256 constant ID = uint256(keccak256("component.Time.Start"));
+uint256 constant ID = uint256(keccak256("component.Time"));
 
-// the timestamp of the last action taken
-contract TimeStartComponent is Uint256BareComponent {
+// generalized timestamp component of when something occurred
+contract TimeComponent is Uint256BareComponent {
   constructor(address world) Uint256BareComponent(world, ID) {}
 }

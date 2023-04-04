@@ -5,8 +5,9 @@ import { System } from "solecs/System.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { getAddressById } from "solecs/utils.sol";
 
-import { LibCoin } from "libraries/LibCoin.sol";
 import { LibAccount } from "libraries/LibAccount.sol";
+import { LibCoin } from "libraries/LibCoin.sol";
+import { LibKill } from "libraries/LibKill.sol";
 import { LibPet } from "libraries/LibPet.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
 
@@ -53,6 +54,7 @@ contract ProductionLiquidateSystem is System {
     // kill the target and shut off the production
     LibPet.kill(components, targetPetID);
     LibProduction.stop(components, targetProductionID);
+    LibKill.create(world, components, petID, targetPetID, nodeID);
 
     LibAccount.updateLastBlock(components, accountID);
     return abi.encode(amt);
