@@ -20,7 +20,7 @@ const SystemBalID = BigNumber.from(utils.id('system.ERC721.pet'));
 
 export function registerKamiMintModal() {
   registerUIComponent(
-    'kamiMint',
+    'KamiMint',
     {
       colStart: 33,
       colEnd: 65,
@@ -108,6 +108,7 @@ export function registerKamiMintModal() {
             world.entityToIndex.get(mintActionID) as EntityIndex
           );
           const description = BigNumber.from(nextToken).add('1').toHexString();
+          setVisibleModals({ ...visibleModals, kamiMint: false, kami: true });
 
           // revealing
           // might/should not be here, but putting for sake of testing
@@ -118,11 +119,6 @@ export function registerKamiMintModal() {
           );
 
           dataStore.setState({ selectedKami: { description } });
-          setVisibleModals({ ...visibleModals, kamiMint: !visibleModals.kamiMint });
-          setVisibleModals({
-            ...visibleModals,
-            kami: !visibleModals.kami,
-          });
 
           const mintFX = new Audio(mintSound);
           mintFX.volume = volume * .6;
@@ -145,7 +141,7 @@ export function registerKamiMintModal() {
       );
 
       return (
-        <ModalWrapperFull divName="kamiMint" id='petmint_modal'>
+        <ModalWrapperFull divName="kamiMint" id='kamiMintModal'>
           <CenterBox>
             <KamiImage src="https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif" />
             <Description>Kamigotchi?</Description>

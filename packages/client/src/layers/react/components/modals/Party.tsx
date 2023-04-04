@@ -24,7 +24,7 @@ import gum from 'assets/images/food/gum.png';
 
 export function registerPartyModal() {
   registerUIComponent(
-    'PetList',
+    'PartyList',
     {
       colStart: 3,
       colEnd: 33,
@@ -181,7 +181,7 @@ export function registerPartyModal() {
 
     // Render
     ({ actions, api, data }) => {
-      console.log('PartyM: data', data);
+      // console.log('PartyM: data', data);
       const [lastRefresh, setLastRefresh] = useState(Date.now());
       /////////////////
       // TICKING

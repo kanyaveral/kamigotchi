@@ -24,7 +24,7 @@ export const ExitButton = (props: Props) => {
     setVisibleModals({ ...visibleModals, [props.divName]: false });
   };
 
-  return <Button onClick={() => handleClose()}>
+  return <Button onClick={handleClose}>
     X
   </Button>
 }

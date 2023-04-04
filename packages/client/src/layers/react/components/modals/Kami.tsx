@@ -37,7 +37,7 @@ type Details = {
 
 export function registerKamiModal() {
   registerUIComponent(
-    'PetDetails',
+    'KamiDetails',
     {
       colStart: 23,
       colEnd: 80,
@@ -202,7 +202,7 @@ export function registerKamiModal() {
       });
 
       return (
-        <ModalWrapperFull divName="kami" id="petdetails_modal">
+        <ModalWrapperFull divName="kami" id="kamiModal">
           <KamiBox>
             <KamiBox>
               <KamiBox>
