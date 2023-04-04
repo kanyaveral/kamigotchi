@@ -37,11 +37,11 @@ type Details = {
 
 export function registerKamiModal() {
   registerUIComponent(
-    'PetDetails',
+    'KamiDetails',
     {
-      colStart: 28,
-      colEnd: 75,
-      rowStart: 30,
+      colStart: 23,
+      colEnd: 80,
+      rowStart: 20,
       rowEnd: 80,
     },
     (layers) => {
@@ -202,7 +202,7 @@ export function registerKamiModal() {
       });
 
       return (
-        <ModalWrapperFull divName="kami" id="petdetails_modal">
+        <ModalWrapperFull divName="kami" id="kamiModal">
           <KamiBox>
             <KamiBox>
               <KamiBox>
@@ -291,7 +291,7 @@ const KamiText = styled.p`
 
 const KamiName = styled.div`
   grid-row: 2;
-  font-size: 45px;
+  font-size: 36px;
   color: #333;
   text-align: center;
   font-weight: bold;
