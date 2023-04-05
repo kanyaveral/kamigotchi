@@ -17,7 +17,6 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 
 import { Kami, getKami } from 'layers/react/components/shapes/Kami';
-import { Trait, getTrait } from 'layers/react/components/shapes/Trait';
 
 export function registerKamiModal() {
   registerUIComponent(
@@ -159,8 +158,7 @@ export function registerKamiModal() {
               padding: '15px',
             }}
           >
-            {/* <KamiImage src={dets?.uri} /> */}
-            <KamiImage src='https://kamigotchi.nyc3.cdn.digitaloceanspaces.com/tempKami.gif' />
+            <KamiImage src={dets?.uri} />
             <div
               style={{
                 display: 'flex',
