@@ -35,6 +35,7 @@ export function createComponents(world: any) {
     IsFood: defineBoolEZ(world, "IsFood", "component.Is.Food"),
     IsFungible: defineBoolEZ(world, "IsFungible", "component.Is.Fungible"),
     IsInventory: defineBoolEZ(world, "IsInventory", "component.Is.Inventory"),
+    IsKill: defineBoolEZ(world, "IsKill", "component.Is.Kill"),
     IsListing: defineBoolEZ(world, "IsListing", "component.Is.Listing"),
     IsMerchant: defineBoolEZ(world, "IsMerchant", "component.Is.Merchant"),
     IsNode: defineBoolEZ(world, "IsNode", "component.Is.Node"),
@@ -60,6 +61,8 @@ export function createComponents(world: any) {
     PetID: defineStringEZ(world, "PetID", "component.Id.Pet"),
     RequesteeID: defineStringEZ(world, "RequesteeID", "component.Id.Requestee"),
     RequesterID: defineStringEZ(world, "RequesterID", "component.Id.Requester"),
+    SourceID: defineStringEZ(world, "SourceID", "component.Id.Source"),
+    TargetID: defineStringEZ(world, "TargetID", "component.Id.Target"),
 
     // Indices
     BodyIndex: defineNumberEZ(world, "BodyIndex", "component.Index.Body"),
@@ -100,8 +103,9 @@ export function createComponents(world: any) {
 
     // Time/Block Tracking
     BlockLast: defineNumberEZ(world, "BlockLast", "component.BlockLast"),
-    LastActionTime: defineNumberEZ(world, "LastActionTime", "component.time.LastAction"),
-    StartTime: defineNumberEZ(world, "StartTime", "component.time.Start"),
+    LastActionTime: defineNumberEZ(world, "LastActionTime", "component.Time.LastAction"),
+    StartTime: defineNumberEZ(world, "StartTime", "component.Time.Start"),
+    Time: defineNumberEZ(world, "Time", "component.Time"),
 
     // speeeecial
     LoadingState: defineLoadingStateComponent(world),
