@@ -17,9 +17,9 @@ export function registerMapModal() {
   registerUIComponent(
     'WorldMap',
     {
-      colStart: 70,
-      colEnd: 100,
-      rowStart: 30,
+      colStart: 50,
+      colEnd: 80,
+      rowStart: 22,
       rowEnd: 60,
     },
     (layers) => {

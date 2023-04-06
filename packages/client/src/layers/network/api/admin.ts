@@ -26,7 +26,7 @@ export function createAdminAPI(systems: any) {
     createNode('Eerie Willow', 3);
     createNode('Trash Compactor', 7);
     createNode('Pristine Couch', 10);
-    createNode('Cash Register', 11);
+    createNode('Sacred Shrine', 11);
     createNode('Danger zone', 12);
 
     // create food registry items
