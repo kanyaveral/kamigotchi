@@ -10,7 +10,7 @@ export function registerPartyButton() {
     {
       colStart: 88,
       colEnd: 100,
-      rowStart: 74,
+      rowStart: 70,
       rowEnd: 78,
     },
     (layers) => of(layers),

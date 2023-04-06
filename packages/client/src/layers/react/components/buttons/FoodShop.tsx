@@ -10,7 +10,7 @@ export function registerFoodShopButton() {
     {
       colStart: 88,
       colEnd: 100,
-      rowStart: 82,
+      rowStart: 80,
       rowEnd: 86,
     },
     (layers) => of(layers),
