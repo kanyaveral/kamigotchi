@@ -50,7 +50,7 @@ export function createAdminAPI(systems: any) {
     systems['system._Init'].executeTyped(); // sets the balance of the Kami contract
     systems['system.ERC721.metadata']._setRevealed(
       '123',
-      'http://159.223.244.145:8080/image/'
+      'https://kami-image.asphodel.io/image/'
     );
     // systems["system.ERC721.metadata"]._setRevealed("123", "http://localhost:8080/image/");
     systems['system.ERC721.metadata']._setMaxElements([
