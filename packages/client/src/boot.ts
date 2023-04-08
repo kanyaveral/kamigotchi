@@ -6,9 +6,9 @@ import {
   removeComponent,
   setComponent,
 } from '@latticexyz/recs';
+import { SetupContractConfig } from '@latticexyz/std-client';
 
-import { NetworkConfig } from 'layers/network/config';
-import { createNetworkConfig } from 'layers/network/createNetworkConfig';
+import { createNetworkConfig } from 'layers/network/config';
 import { mountReact, setLayers, boot as bootReact } from 'layers/react/boot';
 import { Layers } from './types';
 import { Time } from './utils/time';
@@ -54,20 +54,23 @@ async function rebootGame(initialBoot: boolean): Promise<Layers> {
 
   // Set the game config
   // const params = new URLSearchParams(window.location.search);
-  const networkConfig: NetworkConfig | undefined = createNetworkConfig();
+  const networkConfig: SetupContractConfig | undefined = createNetworkConfig();
   if (!networkConfig) throw new Error('Invalid config');
+  else console.log('networkConfig', networkConfig);
   console.log("networkConfig", networkConfig);
 
   // Populate the layers
   if (!layers.network) layers.network = await createNetworkLayer(networkConfig);
   if (!layers.phaser) layers.phaser = await createPhaserLayer(layers.network);
 
-  // what is this for?
-  Time.time.setPacemaker((setTimestamp) => {
-    layers.phaser?.game.events.on('poststep', (time: number) => {
-      setTimestamp(time);
+  // Set phaser game tick
+  if (layers.phaser) {
+    Time.time.setPacemaker((setTimestamp) => {
+      layers.phaser!.game.events.on('poststep', (time: number) => {
+        setTimestamp(time);
+      });
     });
-  });
+  }
 
   // Refresh if we detect two canvas elements. Something went wrong.
   if (document.querySelectorAll('#phaser-game canvas').length > 1) {
