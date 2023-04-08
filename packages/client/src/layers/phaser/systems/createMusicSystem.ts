@@ -1,13 +1,18 @@
 import { defineSystem, Has, HasValue, runQuery } from "@latticexyz/recs";
-import { NetworkLayer } from "../../network/types";
+
+import { NetworkLayer } from "layers/network/types";
+import { PhaserLayer, PhaserScene } from "layers/phaser/types";
+import { getCurrentRoom } from "layers/phaser/utils";
 import { dataStore } from "layers/react/store/createStore";
-import { PhaserLayer, PhaserScene } from "../types";
-import { getCurrentRoom } from "../utils";
 
 export function createMusicSystem(network: NetworkLayer, phaser: PhaserLayer) {
   const {
     world,
-    components: { Location, OperatorAddress },
+    components: {
+      IsAccount,
+      Location,
+      OperatorAddress,
+    },
     network: { connectedAddress }
   } = network;
 
@@ -22,12 +27,13 @@ export function createMusicSystem(network: NetworkLayer, phaser: PhaserLayer) {
   const myMain = Main as PhaserScene;
 
   defineSystem(world, [Has(OperatorAddress), Has(Location)], (update) => {
-    const gNFTIDalt = Array.from(
-      runQuery([HasValue(OperatorAddress, { value: connectedAddress.get() })])
-    )[0];
+    const accountIndex = Array.from(runQuery([
+      HasValue(OperatorAddress, { value: connectedAddress.get() }),
+      Has(IsAccount),
+    ]))[0];
     const currentRoom = getCurrentRoom(Location, update.entity);
 
-    if (update.entity == gNFTIDalt) {
+    if (update.entity == accountIndex) {
       if (myMain.gmusic) myMain.gmusic.stop();
 
       myMain.gmusic = myMain.sound.add(`m_${currentRoom}`);

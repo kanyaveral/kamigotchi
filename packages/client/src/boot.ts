@@ -1,17 +1,18 @@
 /* eslint-disable prefer-const */
 import { createNetworkLayer as createNetworkLayerImport } from './layers/network/createNetworkLayer';
 import { createPhaserLayer as createPhaserLayerImport } from './layers/phaser/createPhaserLayer';
-import { Layers } from './types';
 import {
   getComponentValue,
   removeComponent,
   setComponent,
 } from '@latticexyz/recs';
+
+import { NetworkConfig } from 'layers/network/config';
+import { createNetworkConfig } from 'layers/network/createNetworkConfig';
+import { mountReact, setLayers, boot as bootReact } from 'layers/react/boot';
+import { Layers } from './types';
 import { Time } from './utils/time';
 
-import { GameConfig } from './layers/network/config';
-import { createGameConfig } from './layers/network/createGameConfig';
-import { mountReact, setLayers, boot as bootReact } from './layers/react/boot';
 
 let createNetworkLayer = createNetworkLayerImport;
 let createPhaserLayer = createPhaserLayerImport;
@@ -53,12 +54,12 @@ async function rebootGame(initialBoot: boolean): Promise<Layers> {
 
   // Set the game config
   // const params = new URLSearchParams(window.location.search);
-  const gameConfig: GameConfig | undefined = createGameConfig();
-  if (!gameConfig) throw new Error('Invalid config');
-  console.log("gameConfig", gameConfig);
+  const networkConfig: NetworkConfig | undefined = createNetworkConfig();
+  if (!networkConfig) throw new Error('Invalid config');
+  console.log("networkConfig", networkConfig);
 
   // Populate the layers
-  if (!layers.network) layers.network = await createNetworkLayer(gameConfig);
+  if (!layers.network) layers.network = await createNetworkLayer(networkConfig);
   if (!layers.phaser) layers.phaser = await createPhaserLayer(layers.network);
 
   // what is this for?

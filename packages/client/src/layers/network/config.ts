@@ -1,6 +1,6 @@
 import { SetupContractConfig } from "@latticexyz/std-client";
 
-export type GameConfig = {
+export type NetworkConfig = {
   worldAddress: string;
   privateKey: string;
   chainId: number;
@@ -14,7 +14,7 @@ export type GameConfig = {
   snapshotUrl?: string;
 };
 
-export const getNetworkConfig: (networkConfig: GameConfig) => SetupContractConfig = (config) => ({
+export const getNetworkConfig: (networkConfig: NetworkConfig) => SetupContractConfig = (config) => ({
   clock: {
     period: 1000,
     initialTime: 0,

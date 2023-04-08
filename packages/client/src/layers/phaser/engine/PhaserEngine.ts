@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { deferred, filterNullish } from "@latticexyz/utils";
+
 import {
   Subject,
   map,
@@ -39,7 +40,7 @@ export default async function CreatePhaserEngine(options: TPhaserConfig) {
 
   const input = CreateInput(game.input);
   const scenes = {
-    Main: { input,phaserScene: { ...game } },
+    Main: { input, phaserScene: { ...game } },
   };
   return {
     game,

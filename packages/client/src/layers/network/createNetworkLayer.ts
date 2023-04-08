@@ -1,15 +1,16 @@
 import { createFaucetService } from "@latticexyz/network";
 import { createWorld } from "@latticexyz/recs";
 import { createActionSystem, setupMUDNetwork } from "@latticexyz/std-client";
-import { SystemTypes } from "../../../types/SystemTypes";
-import { SystemAbis } from "../../../types/SystemAbis.mjs";
-import { GameConfig, getNetworkConfig } from "./config";
+
+import { SystemTypes } from "types/SystemTypes";
+import { SystemAbis } from "types/SystemAbis.mjs";
 import { createAdminAPI } from "./api/admin";
 import { createPlayerAPI } from "./api/player";
 import { setUpWorldAPI } from "./api/world";
+import { NetworkConfig, getNetworkConfig } from "./config";
 import { createComponents } from "./components/register";
 
-export async function createNetworkLayer(config: GameConfig) {
+export async function createNetworkLayer(config: NetworkConfig) {
   const world = createWorld();
   const components = createComponents(world);
 

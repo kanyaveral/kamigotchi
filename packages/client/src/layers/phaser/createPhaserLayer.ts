@@ -3,6 +3,7 @@ import CreatePhaserEngine from './engine/PhaserEngine';
 import { phaserConfig } from '../../config';
 import { createRoomSystem } from './systems/createRoomSystem';
 import { createMusicSystem } from './systems/createMusicSystem';
+import { TPhaserConfig } from "./types";
 
 /**
  * The Phaser layer is responsible for rendering game objects to the screen.
@@ -20,7 +21,7 @@ export async function createPhaserLayer(network: any) {
     game,
     scenes,
     dispose: disposePhaser,
-  } = await CreatePhaserEngine(phaserConfig as any);
+  } = await CreatePhaserEngine(phaserConfig as TPhaserConfig);
   world.registerDisposer(disposePhaser);
 
   // --- LAYER CONTEXT --------------------------------------------------------------

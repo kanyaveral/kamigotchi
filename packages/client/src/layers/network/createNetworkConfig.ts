@@ -1,13 +1,13 @@
 import { Wallet } from 'ethers';
-import { GameConfig } from './config';
+import { NetworkConfig } from './config';
 
 // Populate the network config based on url params
-export function createGameConfig(): GameConfig | undefined {
-  let config: GameConfig = <GameConfig>{};
+export function createNetworkConfig(): NetworkConfig | undefined {
+  let config: NetworkConfig = <NetworkConfig>{};
 
   const params = new URLSearchParams(window.location.search);
   const devMode = params.get('dev') === 'true';
-  config = (devMode) ? createGameConfigLocal() : createGameConfigLattice();
+  config = (devMode) ? createNetworkConfigLocal() : createNetworkConfigLattice();
   console.log('config', config);
 
   if (
@@ -21,10 +21,10 @@ export function createGameConfig(): GameConfig | undefined {
 }
 
 // Get the network config of a local deployment based on url params
-export function createGameConfigLocal(): GameConfig {
+export function createNetworkConfigLocal(): NetworkConfig {
   const params = new URLSearchParams(window.location.search);
 
-  let config: GameConfig = <GameConfig>{};
+  let config: NetworkConfig = <NetworkConfig>{};
   config.devMode = true;
 
   // EOAs and privatekey
@@ -71,7 +71,7 @@ export function createGameConfigLocal(): GameConfig {
 }
 
 // Get the network config of a deployment to Lattice's mudChain testnet
-function createGameConfigLattice(): GameConfig {
+function createNetworkConfigLattice(): NetworkConfig {
   // setting up local burner
   let privateKey = localStorage.getItem("operatorPrivateKey");
   const wallet = privateKey ? new Wallet(privateKey) : Wallet.createRandom();
@@ -79,7 +79,7 @@ function createGameConfigLattice(): GameConfig {
   localStorage.setItem("operatorPublicKey", wallet.publicKey);
 
 
-  let config: GameConfig = <GameConfig>{
+  let config: NetworkConfig = <NetworkConfig>{
     privateKey: wallet.privateKey,
     jsonRpc: "https://follower.testnet-chain.linfra.xyz",
     wsRpc: "wss://follower.testnet-chain.linfra.xyz",

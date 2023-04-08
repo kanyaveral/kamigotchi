@@ -16,7 +16,7 @@ import {
   room012,
   room013,
   room014,
-} from '../rooms/';
+} from 'layers/phaser/rooms/';
 import { PhaserScene, Room } from '../types';
 
 import room1Music from 'assets/sound/ost/1_Misty_Riverside.mp3';

@@ -1,17 +1,21 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { defineSystem, Has, HasValue, runQuery } from '@latticexyz/recs';
-import { roomExits } from '../../../constants';
-import { NetworkLayer } from '../../network/types';
+
+import { roomExits } from 'src/constants';
+import { NetworkLayer } from 'layers/network/types';
+import { PhaserLayer, PhaserScene } from 'layers/phaser/types';
+import { closeModalsOnRoomChange, getCurrentRoom } from 'layers/phaser/utils';
 import { dataStore } from 'layers/react/store/createStore';
-import { PhaserLayer, PhaserScene } from '../types';
-import { getCurrentRoom } from '../utils';
-import { closeModalsOnRoomChange } from '../utils/closeModalsOnRoomChange';
 
 export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
   const {
     network: { connectedAddress },
     world,
-    components: { Location, OperatorAddress },
+    components: {
+      IsAccount,
+      Location,
+      OperatorAddress
+    },
   } = network;
 
   const {
@@ -25,11 +29,12 @@ export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
   const myMain = Main as PhaserScene;
 
   defineSystem(world, [Has(OperatorAddress), Has(Location)], async (update) => {
-    const characterEntityNumber = Array.from(
-      runQuery([HasValue(OperatorAddress, { value: connectedAddress.get() })])
-    )[0];
+    const accountIndex = Array.from(runQuery([
+      HasValue(OperatorAddress, { value: connectedAddress.get() }),
+      Has(IsAccount),
+    ]))[0];
 
-    if (characterEntityNumber == update.entity) {
+    if (accountIndex == update.entity) {
       const currentRoom = getCurrentRoom(Location, update.entity);
 
       dataStore.setState({ roomExits: roomExits[currentRoom] });
