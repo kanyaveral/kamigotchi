@@ -1,8 +1,7 @@
 import { namespaceWorld } from '@latticexyz/recs';
 import CreatePhaserEngine from './engine/PhaserEngine';
 import { phaserConfig } from '../../config';
-import { createRoomSystem } from './systems/createRoomSystem';
-import { createMusicSystem } from './systems/createMusicSystem';
+import { changeRoomSystem } from './systems/changeRoomSystem';
 import { TPhaserConfig } from "./types";
 
 /**
@@ -34,8 +33,7 @@ export async function createPhaserLayer(network: any) {
   };
 
   // --- SYSTEMS --------------------------------------------------------------------
-  createRoomSystem(network, context);
-  createMusicSystem(network, context);
+  changeRoomSystem(network, context);
 
   return context;
 }

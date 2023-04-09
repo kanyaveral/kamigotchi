@@ -31,11 +31,9 @@ export default async function CreatePhaserEngine(options: TPhaserConfig) {
   function resize() {
     const width = window.innerWidth / game.scale.zoom;
     const height = window.innerHeight / game.scale.zoom;
-
     game.scale.resize(width, height);
   }
   resize();
-
   window.addEventListener('resize', resize);
 
   const input = CreateInput(game.input);

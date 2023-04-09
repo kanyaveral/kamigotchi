@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { defineSystem, Has, HasValue, runQuery } from '@latticexyz/recs';
 
-import { roomExits } from 'src/constants';
+import { rooms } from 'src/constants';
 import { NetworkLayer } from 'layers/network/types';
-import { PhaserLayer, PhaserScene } from 'layers/phaser/types';
+import { PhaserLayer } from 'layers/phaser/types';
 import { closeModalsOnRoomChange, getCurrentRoom } from 'layers/phaser/utils';
+import { GameScene } from 'layers/phaser/scenes/GameScene';
 import { dataStore } from 'layers/react/store/createStore';
 
-export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
+export function changeRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
   const {
     network: { connectedAddress },
     world,
@@ -21,12 +22,12 @@ export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
   const {
     game: {
       scene: {
-        keys: { Main },
+        keys: { Game },
       },
     },
   } = phaser;
 
-  const myMain = Main as PhaserScene;
+  const GameSceneInstance = Game as GameScene;
 
   defineSystem(world, [Has(OperatorAddress), Has(Location)], async (update) => {
     const accountIndex = Array.from(runQuery([
@@ -36,21 +37,11 @@ export function createRoomSystem(network: NetworkLayer, phaser: PhaserLayer) {
 
     if (accountIndex == update.entity) {
       const currentRoom = getCurrentRoom(Location, update.entity);
-
-      dataStore.setState({ roomExits: roomExits[currentRoom] });
-
-      myMain.interactiveObjects.forEach((object: any) => {
-        try {
-          object.removeInteractive();
-          object.removeFromDisplayList();
-        } catch (e) {
-          // Ignore objects that have already had their interactivity removed
-        }
-      });
-      myMain.interactiveObjects = [];
+      dataStore.setState({ roomExits: rooms[currentRoom].exits });
+      GameSceneInstance.room = rooms[currentRoom];
+      GameSceneInstance.sound.removeAll();
+      GameSceneInstance.scene.restart();
       closeModalsOnRoomChange();
-
-      myMain.rooms![currentRoom].create(myMain);
     }
   });
 }

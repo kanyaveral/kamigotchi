@@ -10,6 +10,7 @@ export { closeModalsOnRoomChange } from './closeModalsOnRoomChange';
 
 export const hexToDecimal = (hex: string) => parseInt(hex, 16);
 
+// NOTE: love this function, we should probably move it to the network layer
 export const getCurrentRoom = (
   component: Component<Schema, Metadata, undefined>,
   entity: EntityIndex

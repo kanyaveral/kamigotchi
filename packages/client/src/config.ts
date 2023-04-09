@@ -1,5 +1,4 @@
-import { defineScaleConfig } from '@latticexyz/phaserx';
-import { defineMainScene } from './layers/phaser/scenes/MainScene';
+import { GameScene } from './layers/phaser/scenes/GameScene';
 
 export const phaserConfig = {
   parent: 'phaser-game',
@@ -8,11 +7,12 @@ export const phaserConfig = {
     default: 'arcade',
     arcade: { debug: false, gravity: { y: 0 } },
   },
-  scene: [defineMainScene().Main],
+  scene: [GameScene],
   title: 'Kamigotchi',
-  scale: defineScaleConfig({
-    parent: 'phaser-game',
-    width: 544,
-    height: 288,
-  }),
+  scale: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    mode: Phaser.Scale.FIT,
+  },
 };
