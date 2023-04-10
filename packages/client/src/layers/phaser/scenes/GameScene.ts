@@ -1,4 +1,3 @@
-import { vendingmachine } from 'assets/images/objects';
 import { Room } from 'src/constants';
 
 // an additional field for the Phaser Scene for the GameScene
@@ -82,4 +81,3 @@ export class GameScene extends Phaser.Scene implements GameScene {
     console.log('clicked');
   }
 }
-
