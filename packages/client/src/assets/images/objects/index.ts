@@ -1,3 +1,3 @@
 import vendingmachine from './vendingmachine.png';
-
-export { vendingmachine };
+import mooringpost from './mooringpost.png'
+export { vendingmachine, mooringpost };

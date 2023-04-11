@@ -52,11 +52,6 @@ export function registerDialogueModal() {
               </TopButton>
             </AlignRight>
             <Description>{description}</Description>
-            <div style={{ textAlign: 'right' }}>
-              <Button style={{ pointerEvents: 'auto' }} onClick={showShop}>
-                Shop
-              </Button>
-            </div>
           </ModalContent>
         </ModalWrapperLite>
       );

@@ -1,4 +1,4 @@
-import { vendingmachine } from 'assets/images/objects';
+import { vendingmachine, mooringpost } from 'assets/images/objects';
 
 import {
   room1,
@@ -34,7 +34,7 @@ import {
   room14Music,
 } from 'assets/sound/ost';
 import { triggerPetMintModal } from 'layers/phaser/utils/triggerPetMintModal';
-
+import { triggerDialogueModal } from 'layers/phaser/utils/triggerDialogueModal';
 
 // NOTE: This is the most horrendous, hardcoded known to mankind. We should
 // move most things here to the store and populate the information from onchain.
@@ -96,7 +96,12 @@ export const rooms: Room[] = [
       key: 'm_room001',
       path: room1Music,
     },
-    objects: [],
+    objects: [  {
+        key: 'mooringpost',
+        path: mooringpost,
+        offset: { x: -19, y: 38 },
+        onClick: triggerDialogueModal
+      }],
   },
   {
     location: 2,
