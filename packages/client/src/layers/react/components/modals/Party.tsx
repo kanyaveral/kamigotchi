@@ -26,10 +26,10 @@ export function registerPartyModal() {
   registerUIComponent(
     'PartyList',
     {
-      colStart: 3,
-      colEnd: 33,
+      colStart: 2,
+      colEnd: 32,
       rowStart: 2,
-      rowEnd: 35,
+      rowEnd: 34,
     },
 
     // Requirement (Data Manangement)
@@ -370,7 +370,7 @@ export function registerPartyModal() {
         });
       };
 
-      // we're able to force the production attribute as we will only show this 
+      // we're able to force the production attribute as we will only show this
       // button if the kami is harvesting
       const CollectButton = (kami: Kami) => (
         <ActionButton
@@ -396,7 +396,7 @@ export function registerPartyModal() {
         />
       );
 
-      // we're able to force the production attribute as we will only show this 
+      // we're able to force the production attribute as we will only show this
       // button if the kami is harvesting
       const StopButton = (kami: Kami) => (
         <ActionButton
@@ -467,7 +467,7 @@ const TopDescription = styled.p`
 const ConsumableGrid = styled.div`
   display: grid;
   border-style: solid;
-  border-width: 2px;
+  border-width: 2px 0px 2px 2px;
   border-color: black;
   border-radius: 5px;
   margin: 5px 2px 5px 2px;
