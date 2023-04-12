@@ -100,7 +100,7 @@ export const rooms: Room[] = [
         key: 'mooringpost',
         path: mooringpost,
         offset: { x: -19, y: 38 },
-        onClick: triggerDialogueModal
+        onClick: (text) => triggerDialogueModal("test")
       }],
   },
   {

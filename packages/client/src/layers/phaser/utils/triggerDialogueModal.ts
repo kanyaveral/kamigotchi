@@ -1,7 +1,7 @@
 import { dataStore } from 'layers/react/store/createStore';
 import dialogueSound from 'assets/sound/fx/speech3.mp3';
 
-export const triggerDialogueModal = () => {
+export const triggerDialogueModal = (description) => {
 
   const {
     visibleModals,
@@ -13,7 +13,7 @@ export const triggerDialogueModal = () => {
   clickFX.volume = volume;
   clickFX.play();
 
-  dataStore.setState({ dialogue: { description: "hi" } });
+  dataStore.setState({ dialogue: { description } });
   dataStore.setState({
     visibleModals: { ...visibleModals, dialogue: true },
   });
