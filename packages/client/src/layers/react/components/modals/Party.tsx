@@ -27,7 +27,7 @@ export function registerPartyModal() {
     'PartyList',
     {
       colStart: 2,
-      colEnd: 32,
+      colEnd: 33,
       rowStart: 2,
       rowEnd: 76,
     },
