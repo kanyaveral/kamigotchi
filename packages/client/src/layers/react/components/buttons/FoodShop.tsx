@@ -8,8 +8,8 @@ export function registerFoodShopButton() {
   registerUIComponent(
     'FoodShopButton',
     {
-      colStart: 88,
-      colEnd: 100,
+      colStart: 87,
+      colEnd: 99,
       rowStart: 80,
       rowEnd: 86,
     },

@@ -17,10 +17,10 @@ export function registerMapModal() {
   registerUIComponent(
     'WorldMap',
     {
-      colStart: 50,
-      colEnd: 80,
-      rowStart: 22,
-      rowEnd: 60,
+      colStart: 60,
+      colEnd: 100,
+      rowStart: 51,
+      rowEnd: 100,
     },
     (layers) => {
       const {
