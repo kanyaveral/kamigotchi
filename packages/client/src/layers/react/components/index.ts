@@ -3,7 +3,6 @@ import { registerLoadingState } from './LoadingState';
 import { registerDialogueModal } from './modals/Dialogue';
 
 import { registerChatButton } from './buttons/Chat';
-import { registerFoodShopButton } from './buttons/FoodShop';
 import { registerMapButton } from './buttons/Map';
 import { registerPartyButton } from './buttons/Party';
 
@@ -24,7 +23,6 @@ export function registerUIComponents() {
   registerDialogueModal();
 
   registerChatButton();
-  registerFoodShopButton();
   registerMapButton();
   registerPartyButton();
 

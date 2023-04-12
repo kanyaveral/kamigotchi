@@ -1,4 +1,12 @@
-import { vendingmachine, mooringpost, toriigate, hollowstump, gate, shopdoor } from 'assets/images/objects';
+import {
+  vendingmachine,
+  mooringpost,
+  toriigate,
+  hollowstump,
+  gate,
+  shopdoor,
+  cashregister
+} from 'assets/images/objects';
 
 import {
   room1,
@@ -36,6 +44,7 @@ import {
 import { triggerPetMintModal } from 'layers/phaser/utils/triggerPetMintModal';
 import { triggerDialogueModal } from 'layers/phaser/utils/triggerDialogueModal';
 import { triggerNodeModal } from 'layers/phaser/utils/triggerNodeModal';
+import { triggerShopModal } from 'layers/phaser/utils/triggerShopModal';
 
 // NOTE: This is the most horrendous, hardcoded known to mankind. We should
 // move most things here to the store and populate the information from onchain.
@@ -289,7 +298,14 @@ export const rooms: Room[] = [
       key: 'm_room013',
       path: room13Music,
     },
-    objects: [],
+    objects: [
+      {
+          key: 'cashregister',
+          path: cashregister,
+          offset: { x: -50.5, y: -8.02 },
+          onClick: triggerShopModal
+      }
+    ],
   },
   {
     location: 14,
