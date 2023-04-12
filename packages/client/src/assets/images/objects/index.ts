@@ -1,4 +1,7 @@
 import vendingmachine from './vendingmachine.png';
 import mooringpost from './mooringpost.png'
 import toriigate from './toriigate.png'
-export { vendingmachine, mooringpost, toriigate };
+import hollowstump from './hollowstump.png'
+import gate from './gate.png'
+import shopdoor from './shopdoor.png'
+export { vendingmachine, mooringpost, toriigate, hollowstump, gate, shopdoor };

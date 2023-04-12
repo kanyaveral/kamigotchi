@@ -1,4 +1,4 @@
-import { vendingmachine, mooringpost, toriigate } from 'assets/images/objects';
+import { vendingmachine, mooringpost, toriigate, hollowstump, gate, shopdoor } from 'assets/images/objects';
 
 import {
   room1,
@@ -102,7 +102,8 @@ export const rooms: Room[] = [
         path: mooringpost,
         offset: { x: -19, y: 38 },
         onClick: (text) => triggerDialogueModal("This looks like a post for mooring boats. But there's no boats here.")
-      }],
+      }
+    ],
   },
   {
     location: 2,
@@ -115,7 +116,25 @@ export const rooms: Room[] = [
       key: 'm_room002',
       path: room2Music,
     },
-    objects: [],
+    objects: [  {
+        key: 'hollowstump',
+        path: hollowstump,
+        offset: { x: -48.5, y: 29.5 },
+        onClick: (text) => triggerDialogueModal("It's a hollow tree stump. There doesn't appear to be anything inside.")
+      },
+      {
+          key: 'gate',
+          path: gate,
+          offset: { x: -39.5, y: -33.5 },
+          onClick: (text) => triggerDialogueModal("There's some sort of gate in the distance.")
+      },
+      {
+          key: 'shopdoor',
+          path: shopdoor,
+          offset: { x: 5, y: -7 },
+          onClick: (text) => triggerDialogueModal("Wow. A shop. Maybe you can buy food here. Go west to enter.")
+      }
+    ],
   },
   {
     location: 3,

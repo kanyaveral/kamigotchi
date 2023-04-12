@@ -17,7 +17,7 @@ export function registerPartyButton() {
     () => {
       return (
         <MenuButton id="party_button" targetDiv="party">
-          My Kami
+          Kami
         </MenuButton>
       );
     }

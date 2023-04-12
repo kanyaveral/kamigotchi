@@ -10,14 +10,14 @@ export function registerFoodShopButton() {
     {
       colStart: 87,
       colEnd: 99,
-      rowStart: 80,
-      rowEnd: 86,
+      rowStart: 79,
+      rowEnd: 89,
     },
     (layers) => of(layers),
     () => {
       return (
         <MenuButton id="foodshop_button" targetDiv="merchant">
-          Food Shop
+          Food
         </MenuButton>
       );
     }

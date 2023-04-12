@@ -10,14 +10,14 @@ export function registerMapButton() {
     {
       colStart: 87,
       colEnd: 99,
-      rowStart: 90,
-      rowEnd: 100,
+      rowStart: 89,
+      rowEnd: 99,
     },
     (layers) => of(layers),
     () => {
       return (
         <MenuButton id="map_button" targetDiv="map">
-          World Map
+          Map
         </MenuButton>
       );
     }
