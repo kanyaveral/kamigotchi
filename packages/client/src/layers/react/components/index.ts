@@ -5,7 +5,6 @@ import { registerDialogueModal } from './modals/Dialogue';
 import { registerChatButton } from './buttons/Chat';
 import { registerFoodShopButton } from './buttons/FoodShop';
 import { registerMapButton } from './buttons/Map';
-import { registerNodeButton } from './buttons/Node';
 import { registerPartyButton } from './buttons/Party';
 
 import { registerChatModal } from './modals/Chat';
@@ -27,7 +26,6 @@ export function registerUIComponents() {
   registerChatButton();
   registerFoodShopButton();
   registerMapButton();
-  registerNodeButton();
   registerPartyButton();
 
   registerChatModal();

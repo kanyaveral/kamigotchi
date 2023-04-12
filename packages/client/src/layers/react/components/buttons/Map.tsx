@@ -10,7 +10,7 @@ export function registerMapButton() {
     {
       colStart: 88,
       colEnd: 100,
-      rowStart: 50,
+      rowStart: 60,
       rowEnd: 62,
     },
     (layers) => of(layers),

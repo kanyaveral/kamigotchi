@@ -95,7 +95,7 @@ const Button = styled.button`
 `;
 
 const Description = styled.p`
-  font-size: 22px;
+  font-size: 20px;
   color: #333;
   text-align: center;
   padding: 20px;

@@ -1,5 +1,5 @@
 import { dataStore } from 'layers/react/store/createStore';
-import dialogueSound from 'assets/sound/fx/speech3.mp3';
+import dialogueSound from 'assets/sound/fx/mouseclick.wav';
 
 export const triggerDialogueModal = (description) => {
 
