@@ -41,6 +41,7 @@ contract ProductionLiquidateSystem is System {
     require(nodeID == targetNodeID, "Production: not on same node");
 
     // check that the pet is capable of to liquidating the target production
+    LibPet.syncHealth(components, targetPetID);
     require(
       LibProduction.isLiquidatableBy(components, targetProductionID, petID),
       "Production: YOU HAVE NO POWER HERE (need moar violence)"
@@ -54,9 +55,9 @@ contract ProductionLiquidateSystem is System {
     // kill the target and shut off the production
     LibPet.kill(components, targetPetID);
     LibProduction.stop(components, targetProductionID);
-    LibKill.create(world, components, petID, targetPetID, nodeID);
+    // LibKill.create(world, components, petID, targetPetID, nodeID);
 
-    LibAccount.updateLastBlock(components, accountID);
+    // LibAccount.updateLastBlock(components, accountID);
     return abi.encode(amt);
   }
 
