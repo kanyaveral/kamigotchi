@@ -53,13 +53,13 @@ export function createAdminAPI(systems: any) {
       'https://kami-image.asphodel.io/image/'
     );
     // systems["system.ERC721.metadata"]._setRevealed("123", "http://localhost:8080/image/");
-    systems['system.ERC721.metadata']._setMaxElements([
-      '13',
-      '26',
-      '14',
-      '15',
-      '30',
-    ]);
+    // systems['system.ERC721.metadata']._setMaxElements([
+    //   '13',
+    //   '26',
+    //   '14',
+    //   '15',
+    //   '30',
+    // ]);
 
     createPlayerAPI(systems).ERC721.mint(
       '0x7681A73aed06bfb648a5818B978fb018019F6900'
@@ -176,6 +176,7 @@ export function createAdminAPI(systems: any) {
     violence: number,
     harmony: number,
     slots: number,
+    rarity: number,
     affinity: string,
     name: string,
     type: string
@@ -187,6 +188,7 @@ export function createAdminAPI(systems: any) {
       violence,
       harmony,
       slots,
+      rarity,
       affinity,
       name,
       type

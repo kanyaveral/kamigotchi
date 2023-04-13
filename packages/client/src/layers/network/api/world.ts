@@ -27,6 +27,7 @@ export function setUpWorldAPI(systems: any) {
   }
 
   async function initTraits() {
+    // inits a single type of trait, returns number of traits
     function initSingle(dataRaw: any, type: string) {
       const data = csvToMap(dataRaw);
       for (let i = 0; i < data.length; i++) {
@@ -37,19 +38,49 @@ export function setUpWorldAPI(systems: any) {
           data[i].get("Violence") ? data[i].get("Violence") : "0",
           data[i].get("Harmony") ? data[i].get("Harmony") : "0",
           data[i].get("Slots") ? data[i].get("Slots") : "0",
+          data[i].get("Rarity") ? rarityParser(data[i].get("Rarity")) : 0,
           data[i].get("Affinity") ? data[i].get("Affinity") : "",
           data[i].get("Name"), // name of trait
           type, // type: body, color, etc
         );
       }
+
+      // -1 because max includes 0, should remove this
+      return data.length - 1;
     }
 
-    initSingle(background, "BACKGROUND");
-    initSingle(body, "BODY");
-    initSingle(color, "COLOR");
-    initSingle(face, "FACE");
-    initSingle(hand, "HAND");
+    function rarityParser(rarity: string) {
+      switch (rarity) {
+        case "Common":
+          return 3;
+        case "Rare":
+          return 2;
+        case "Epic":
+          return 1;
+        default:
+          return 0;
+      }
+    }
 
+    const numBg = initSingle(background, "BACKGROUND");
+    const numBody = initSingle(body, "BODY");
+    const numColor = initSingle(color, "COLOR");
+    const numFace = initSingle(face, "FACE");
+    const numHand = initSingle(hand, "HAND");
+
+    // init max elements and set revealed
+    // ORDER: color, background, body, hand, face
+    systems['system.ERC721.metadata']._setRevealed(
+      '123', // salt! should be random
+      'http://159.223.244.145:8080/image/'
+    );
+    systems['system.ERC721.metadata']._setMaxElements([
+      numColor,
+      numBg,
+      numBody,
+      numHand,
+      numFace,
+    ]);
   }
 
   return {

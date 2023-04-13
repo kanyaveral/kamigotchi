@@ -59,6 +59,7 @@
     "PriceBuyComponent",
     "PriceSellComponent",
     "PrototypeComponent",
+    "RarityComponent",
     "RateComponent",
     "SlotsComponent",
     "StateComponent",
@@ -248,7 +249,6 @@
         "BlockLastComponent",
         "CoinComponent",
         "HealthCurrentComponent",
-        "RateComponent",
         "TimeLastActionComponent",
         "TimeStartComponent"
       ]
@@ -358,6 +358,7 @@
     "LibRegister",
     "LibRegistryItem",
     "LibRoom",
+    "LibRarity",
     "LibStat",
     "LibTrade"
   ]
