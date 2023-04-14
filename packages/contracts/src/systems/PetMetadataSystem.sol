@@ -120,7 +120,7 @@ contract PetMetadataSystem is System {
       LibString.concat(_baseURI, LibString.toString(packed))
     );
 
-    LibPet.setStats(components, petID);
+    LibPet.reveal(components, petID);
     return "";
   }
 

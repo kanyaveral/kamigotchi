@@ -67,8 +67,17 @@ library LibPet {
     setAccount(components, id, accountID);
     setMediaURI(components, id, uri);
     setLastTs(components, id, block.timestamp);
-    revive(components, id);
+    setState(components, id, "UNREVEALED");
     return id;
+  }
+
+  // called when a pet is revealed
+  // NOTE: most of the reveal logic (generation) is in the PetMetadataSystem itself
+  //       this function is for components that relate directly to the pet
+  function reveal(IUintComp components, uint256 id) internal {
+    setLastTs(components, id, block.timestamp);
+    revive(components, id);
+    setStats(components, id);
   }
 
   // feed the pet with a food item
@@ -271,7 +280,6 @@ library LibPet {
   // SETTERS
 
   // set a pet's stats from its traits
-  // TODO: actually set stats from traits. hardcoded currently
   function setStats(IUintComp components, uint256 id) internal {
     uint256 health;
     uint256 power;
@@ -361,6 +369,10 @@ library LibPet {
   // Get the production of a pet. Return 0 if there are none.
   function getProduction(IUintComp components, uint256 id) internal view returns (uint256) {
     return LibProduction.getForPet(components, id);
+  }
+
+  function getState(IUintComp components, uint256 id) internal view returns (string memory) {
+    return StateComponent(getAddressById(components, StateCompID)).getValue(id);
   }
 
   // Get the traits of a pet, specifically the list of trait registry IDs

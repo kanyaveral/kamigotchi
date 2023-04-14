@@ -17,7 +17,7 @@ export function registerKamiModal() {
       colStart: 23,
       colEnd: 80,
       rowStart: 5,
-      rowEnd: 85,
+      rowEnd: 90,
     },
     (layers) => {
       const {
@@ -82,16 +82,6 @@ export function registerKamiModal() {
           console.log('KamiDetails: kami', dets);
         }
       }, [description]);
-
-      // const petTypes = (val: string[] | undefined) => {
-      //   if (!val) return;
-      //   let result = val[0];
-
-      //   for (let i = 1; i < val.length; i++) {
-      //     result = result + ' | ' + val[i];
-      //   }
-      //   return result;
-      // };
 
       const traitBox = () => {
         return (

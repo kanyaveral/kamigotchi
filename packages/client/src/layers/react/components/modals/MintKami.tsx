@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BigNumber, utils } from 'ethers';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { registerUIComponent } from 'layers/react/engine/store';
@@ -15,8 +15,6 @@ import mintSound from 'assets/sound/fx/tami_mint_vending_sound.mp3';
 import { dataStore } from 'layers/react/store/createStore';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
-
-const SystemBalID = BigNumber.from(utils.id('system.ERC721.pet'));
 
 export function registerKamiMintModal() {
   registerUIComponent(
@@ -35,25 +33,16 @@ export function registerKamiMintModal() {
         },
       } = layers;
 
-      const getNextToken = () => {
-        const id = world.entityToIndex.get(
-          SystemBalID.toHexString() as EntityID
-        );
-        return getComponentValue(Balance, id as EntityIndex)?.value as number;
-      };
-
       return merge(IsPet.update$, Balance.update$).pipe(
         map(() => {
-          const nextToken = getNextToken();
           return {
             layers,
-            nextToken,
           };
         })
       );
     },
 
-    ({ layers, nextToken }) => {
+    ({ layers }) => {
       const {
         network: {
           api: { player },
@@ -86,20 +75,6 @@ export function registerKamiMintModal() {
         return actionID;
       };
 
-      const revealTx = (tokenID: string) => {
-        const actionID = `Revealing Kami` as EntityID;
-        actions.add({
-          id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
-          execute: async () => {
-            return player.ERC721.reveal(tokenID);
-          },
-        });
-        return actionID;
-      };
-
       const handleMinting = async () => {
         try {
           const mintActionID = mintTx(connectedAddress.get()!);
@@ -107,18 +82,7 @@ export function registerKamiMintModal() {
             actions.Action,
             world.entityToIndex.get(mintActionID) as EntityIndex
           );
-          const description = BigNumber.from(nextToken).add('1').toHexString();
-          setVisibleModals({ ...visibleModals, kamiMint: false, kami: true });
-
-          // revealing
-          // might/should not be here, but putting for sake of testing
-          const revealActionID = revealTx(description);
-          await waitForActionCompletion(
-            actions.Action,
-            world.entityToIndex.get(revealActionID) as EntityIndex
-          );
-
-          dataStore.setState({ selectedKami: { description } });
+          setVisibleModals({ ...visibleModals, kamiMint: false, kamiMintPost: true });
 
           const mintFX = new Audio(mintSound);
           mintFX.volume = volume * .6;
