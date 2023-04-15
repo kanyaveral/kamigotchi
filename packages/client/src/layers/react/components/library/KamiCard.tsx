@@ -7,10 +7,11 @@ interface Props {
   subtext: string;
   description: string[];
   cornerContent?: React.ReactNode;
+  info?: React.ReactNode;
   action: React.ReactNode;
 }
 
-// KamiCard is a card that displays information about a Kami. It is designed to display
+// KamiC  rd is a card that displays information about a Kami. It is designed to display
 // information ranging from current production or death as well as support common actions.
 export const KamiCard = (props: Props) => {
   // generate the styled text divs for the description
@@ -30,6 +31,7 @@ export const KamiCard = (props: Props) => {
       <Image src={props.image} />
       <Container>
         <TitleBar>
+          <TitleCorner>{props.info}</TitleCorner>
           <TitleText>{props.title}</TitleText>
           <TitleCorner>{props.cornerContent}</TitleCorner>
         </TitleBar>

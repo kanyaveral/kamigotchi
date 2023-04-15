@@ -21,6 +21,7 @@ export interface Kami {
   name: string;
   uri: string;
   health: number;
+  state: string;
   lastUpdated: number;
   account?: Account;
   production?: Production;
@@ -63,6 +64,7 @@ export const getKami = (
         Name,
         PetID,
         PetIndex,
+        State,
         TraitIndex,
       },
     },
@@ -75,6 +77,7 @@ export const getKami = (
     name: getComponentValue(Name, index)?.value as string,
     uri: getComponentValue(MediaURI, index)?.value as string,
     health: getComponentValue(HealthCurrent, index)?.value as number,
+    state: getComponentValue(State, index)?.value as string,
     lastUpdated: getComponentValue(LastActionTime, index)?.value as number,
     stats: getStats(layers, index),
   };

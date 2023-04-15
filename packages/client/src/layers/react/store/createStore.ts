@@ -20,6 +20,7 @@ export interface VisibleModals {
   dialogue: boolean;
   inventory: boolean;
   kamiMint: boolean;
+  kamiMintPost: boolean;
   kami: boolean;
   map: boolean;
   merchant: boolean;
@@ -58,6 +59,7 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
       inventory: false,
       kami: false,
       kamiMint: false,
+      kamiMintPost: false,
       map: false,
       merchant: false,
       node: false,

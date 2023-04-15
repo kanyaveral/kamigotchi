@@ -9,7 +9,8 @@ import { registerFoodShopButton } from './buttons/FoodShop';
 
 import { registerChatModal } from './modals/Chat';
 import { regiesterDetectAccountModal } from './modals/DetectAccount';
-import { registerKamiMintModal } from './modals/KamiMint';
+import { registerKamiMintModal } from './modals/MintKami';
+import { registerMintAfterModal } from './modals/MintAfter';
 import { registerKamiModal } from './modals/Kami';
 import { registerMapModal } from './modals/Map';
 import { registerMerchantModal } from './modals/Merchant';
@@ -31,11 +32,12 @@ export function registerUIComponents() {
   registerChatModal();
   regiesterDetectAccountModal();
   registerKamiMintModal();
-  registerKamiModal();
+  registerMintAfterModal();
   registerMapModal();
   registerNodeModal();
   registerMerchantModal();
   registerPartyModal();
+  registerKamiModal();
   // registerRequestQueue();
   // registerTradeModal();
 }

@@ -3,13 +3,16 @@ import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import {
   EntityID,
+  EntityIndex,
   Has,
   HasValue,
   getComponentValue,
   runQuery,
 } from '@latticexyz/recs';
+import { waitForActionCompletion } from '@latticexyz/std-client';
 
 import { ActionButton } from 'layers/react/components/library/ActionButton';
+import { dataStore } from 'layers/react/store/createStore';
 import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { Account, getAccount } from 'layers/react/components/shapes/Account';
@@ -57,9 +60,11 @@ export function registerPartyModal() {
             State,
             StartTime,
           },
+          world,
           actions,
         },
       } = layers;
+
 
       // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -174,14 +179,22 @@ export function registerPartyModal() {
               account: { ...account, inventories, kamis },
               node,
             } as any,
+            world,
           };
         })
       );
     },
 
     // Render
-    ({ actions, api, data }) => {
-      console.log('PartyM: data', data);
+    ({ actions, api, data, world }) => {
+
+      const {
+        visibleModals,
+        setVisibleModals,
+        selectedKami,
+      } = dataStore();
+
+      // console.log('PartyM: data', data);
       const [lastRefresh, setLastRefresh] = useState(Date.now());
       /////////////////
       // TICKING
@@ -260,6 +273,31 @@ export function registerPartyModal() {
         });
       };
 
+      // reveal pet
+      const revealPet = async (pet: Kami) => {
+        const actionID = `Revealing Kami ` + pet.index as EntityID; // Date.now to have the actions ordered in the component browser
+        actions.add({
+          id: actionID,
+          components: {},
+          requirement: () => true,
+          updates: () => [],
+          execute: async () => {
+            return api.ERC721.reveal(pet.index);
+          },
+        });
+        await waitForActionCompletion(
+          actions.Action,
+          world.entityToIndex.get(actionID) as EntityIndex
+        );
+        openKamiModal(pet);
+      };
+
+      const openKamiModal = (kami: Kami) => {
+        const description = kami.index;
+        dataStore.setState({ selectedKami: { description } });
+        setVisibleModals({ ...visibleModals, kami: true })
+      }
+
       /////////////////
       // DATA INTERPRETATION
       const RATE_PRECISION = 1e6;
@@ -319,6 +357,10 @@ export function registerPartyModal() {
         return result;
       };
 
+      const isRevealed = (kami: Kami): boolean => {
+        return !(kami.state == "UNREVEALED");
+      }
+
       // get the title of the kami as 'name (health / totHealth)'
       const getTitle = (kami: Kami) => {
         const health = calcHealth(kami);
@@ -329,6 +371,8 @@ export function registerPartyModal() {
       // TODO: clean this up
       const getDescription = (kami: Kami): string[] => {
         let description: string[];
+
+        if (!isRevealed(kami)) return ['unrevealed!'];
 
         if (isHarvesting(kami)) {
           if (!isDead(kami)) {
@@ -406,13 +450,45 @@ export function registerPartyModal() {
         />
       );
 
+      const RevealButton = (kami: Kami) => (
+        <ActionButton
+          id={`reveal-kami`}
+          onClick={() => revealPet(kami)}
+          text="Reveal"
+        />
+      );
+
+      const InfoButton = (kami: Kami) => (
+        <ActionButton
+          id={`info-button`}
+          onClick={() => openKamiModal(kami)}
+          text="i"
+        />
+      );
+
+      const selectAction = (kami: Kami) => {
+        if (!isRevealed(kami)) return RevealButton(kami);
+
+        if (isHarvesting(kami)) return StopButton(kami);
+        else return StartButton(kami);
+      }
+
+      // corner content, usually Food
+      const selectCorner = (kami: Kami) => {
+        if (isRevealed(kami)) return FeedButton(kami, 1);
+
+        return (<div></div>);
+      }
+
+      const selectInfo = (kami: Kami) => {
+        if (isRevealed(kami)) return InfoButton(kami);
+      }
+
       const KamiCards = (kamis: Kami[]) => {
         return kamis.map((kami) => {
           const title = getTitle(kami);
           const description = getDescription(kami);
-          const action = isHarvesting(kami)
-            ? CollectButton(kami)
-            : StartButton(kami);
+          const action = selectAction(kami);
 
           return (
             <KamiCard
@@ -421,7 +497,8 @@ export function registerPartyModal() {
               image={kami.uri}
               subtext={`${calcOutput(kami)} $KAMI`}
               action={action}
-              cornerContent={FeedButton(kami, 1)}
+              cornerContent={selectCorner(kami)}
+              info={selectInfo(kami)}
               description={description}
             />
           );
