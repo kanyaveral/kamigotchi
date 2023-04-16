@@ -32,12 +32,19 @@ export interface SoundState {
   volume: number;
 }
 
+export interface SelectedEntities {
+  kami: string;
+  node: string;
+  merchant: string;
+}
+
 export interface StoreState {
   dialogue: Dialogue;
   roomExits: RoomExits;
   selectedKami: Dialogue;
   visibleModals: VisibleModals;
   sound: SoundState;
+  selectedEntities: SelectedEntities;
 }
 
 interface StoreActions {
@@ -46,6 +53,7 @@ interface StoreActions {
   setSelectedKami: (data: Dialogue) => void;
   setVisibleModals: (data: VisibleModals) => void;
   setSoundState: (data: SoundState) => void;
+  setSelectedEntities: (data: SelectedEntities) => void;
 }
 
 export const dataStore = create<StoreState & StoreActions>((set) => {
@@ -68,19 +76,22 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
     sound: {
       volume: 0.7,
     },
+    selectedEntities: {
+      kami: '0x0',
+      node: '0x0',
+      merchant: '0x0',
+    },
   };
 
   return {
     ...initialState,
-    setObjectData: (data: Dialogue) =>
-      set((state: StoreState) => ({ ...state, dialogue: data })),
-    setRoomExits: (data: RoomExits) =>
-      set((state: StoreState) => ({ ...state, roomExits: data })),
-    setSelectedKami: (data: Dialogue) =>
-      set((state: StoreState) => ({ ...state, dialogue: data })),
+    setObjectData: (data: Dialogue) => set((state: StoreState) => ({ ...state, dialogue: data })),
+    setRoomExits: (data: RoomExits) => set((state: StoreState) => ({ ...state, roomExits: data })),
+    setSelectedKami: (data: Dialogue) => set((state: StoreState) => ({ ...state, dialogue: data })),
     setVisibleModals: (data: VisibleModals) =>
       set((state: StoreState) => ({ ...state, visibleModals: data })),
-    setSoundState: (data: SoundState) =>
-      set((state: StoreState) => ({ ...state, sound: data })),
+    setSoundState: (data: SoundState) => set((state: StoreState) => ({ ...state, sound: data })),
+    setSelectedEntities: (data: SelectedEntities) =>
+      set((state: StoreState) => ({ ...state, selectedEntities: data })),
   };
 });
