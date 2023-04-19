@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useEffect, useState, useCallback } from 'react';
+import 'layers/react/styles/font.css';
 import { map } from 'rxjs';
 import { registerUIComponent } from 'layers/react/engine/store';
 import styled, { keyframes } from 'styled-components';
 import { HasValue, runQuery } from '@latticexyz/recs';
-import mintSound from 'assets/sound/fx/tami_mint_vending_sound.mp3'
+import mintSound from 'assets/sound/fx/tami_mint_vending_sound.mp3';
 import { dataStore } from 'layers/react/store/createStore';
+import { Modal } from 'antd';
 
 export function regiesterDetectAccountModal() {
   registerUIComponent(
@@ -42,30 +44,28 @@ export function regiesterDetectAccountModal() {
       } = layers;
 
       const [isDivVisible, setIsDivVisible] = useState(false);
-      const [name, setName] = useState("");
+      const [name, setName] = useState('');
       const { volume } = dataStore((state) => state.sound);
 
       const hasAccount = Array.from(
         runQuery([HasValue(OperatorAddress, { value: connectedAddress.get() })])
       )[0];
 
-      const handleMinting = useCallback(
-        async (name) => {
-          try {
-            const mintFX = new Audio(mintSound)
+      const handleMinting = useCallback(async (name) => {
+        try {
+          const mintFX = new Audio(mintSound);
 
-            mintFX.volume = volume;
-            mintFX.play()
+          mintFX.volume = volume;
+          mintFX.play();
 
-            await player.account.set(connectedAddress.get()!, name);
+          await player.account.set(connectedAddress.get()!, name);
 
-            document.getElementById('detectAccount')!.style.display = 'none';
-            document.getElementById('mint_process')!.style.display = 'block';
-          } catch (e) {
-            //
-          }
-        }, []
-      );
+          document.getElementById('detectAccount')!.style.display = 'none';
+          document.getElementById('mint_process')!.style.display = 'block';
+        } catch (e) {
+          //
+        }
+      }, []);
 
       const catchKeys = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
@@ -84,22 +84,8 @@ export function regiesterDetectAccountModal() {
       }, [setIsDivVisible, hasAccount]);
 
       return (
-        <ModalWrapper
-          id="detectAccount"
-          style={{ display: isDivVisible ? 'block' : 'none' }}
-        >
-          <ModalContent>
-            <Description style={{ gridRow: 1 }}>
-              Your Name
-            </Description>
-            <Input style={{ gridRow: 2, pointerEvents: 'auto' }}
-              type="text"
-              onKeyDown={(e) => catchKeys(e)}
-              placeholder="username"
-              value={name}
-              onChange={(e) => handleChange(e)}>
-            </Input>
-          </ModalContent>
+        <ModalWrapper id='detectAccount' style={{ display: isDivVisible ? 'block' : 'none' }}>
+          <Stepper handleChange={handleChange} catchKeys={catchKeys} name={name} />
         </ModalWrapper>
       );
     }
@@ -133,7 +119,7 @@ const Input = styled.input`
   border-radius: 5px;
   justify-content: center;
   font-family: Pixel;
-`
+`;
 
 const ModalWrapper = styled.div`
   background-color: rgba(0, 0, 0, 0.5);
@@ -162,3 +148,130 @@ const Description = styled.p`
   padding: 20px;
   font-family: Pixel;
 `;
+
+const StepsWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+`;
+
+const StepButton = styled.button<any>`
+  background-color: ${(props) => (props.isActive ? '#007bff' : '#ccc')};
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 10px;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const StepOne = () => (
+  <ModalContent>
+    <Description>
+      <h2 style={{ color: 'black' }}>Welcome to the Game!</h2>
+      <p style={{ color: 'black' }}>
+        If you're new here, we're glad to have you! In this game, you'll get to raise and care for
+        your very own Kamigotchi, a special creature from another world.
+      </p>
+    </Description>
+  </ModalContent>
+);
+
+const StepTwo = () => (
+  <ModalContent>
+    <Description>
+      <h2 style={{ color: 'black' }}>Meet Your Kamigotchi!</h2>
+      <p style={{ color: 'black' }}>
+        Now that you know a bit about the game, it's time to meet your new friend. Your Kamigotchi
+        is a unique creature that you'll get to take care of and watch grow. They have their own
+        personality, likes, and dislikes, so be sure to pay attention to their needs and
+        preferences.
+      </p>
+    </Description>
+  </ModalContent>
+);
+
+const StepThree = (props: any) => {
+  const { catchKeys, handleChange, name } = props;
+
+  return (
+    <ModalContent>
+      <Description style={{ gridRow: 1 }}>Your Name</Description>
+      <Input
+        style={{ gridRow: 2, pointerEvents: 'auto' }}
+        type='text'
+        onKeyDown={(e) => catchKeys(e)}
+        placeholder='username'
+        value={name}
+        onChange={(e) => handleChange(e)}
+      ></Input>
+    </ModalContent>
+  );
+};
+
+const Stepper = (props: any) => {
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const steps = [
+    {
+      title: 'Welcome',
+      content: <StepOne />,
+    },
+    {
+      title: 'Introduction',
+      content: <StepTwo />,
+    },
+    {
+      title: 'Name',
+      content: (
+        <StepThree
+          catchKeys={props.catchKeys}
+          handleChange={props.handleChange}
+          name={props.name}
+        />
+      ),
+      modalContent: true,
+    },
+  ];
+
+  const handleStepClick = (stepIndex: any) => {
+    setCurrentStep(stepIndex);
+  };
+
+  const handleNext = () => {
+    if (currentStep < steps.length) setCurrentStep(currentStep + 1);
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
+  return (
+    <>
+      <StepsWrapper>
+        {steps.map((step, index) => (
+          <StepButton
+            key={step.title}
+            isActive={currentStep === index + 1}
+            onClick={() => handleStepClick(index + 1)}
+          >
+            {step.title}
+          </StepButton>
+        ))}
+      </StepsWrapper>
+      {steps[currentStep - 1].content}
+      {steps[currentStep - 1].modalContent && <Modal>{steps[currentStep - 1].content}</Modal>}
+      {currentStep < steps.length && (
+        <button style={{ pointerEvents: 'auto' }} onClick={handleNext}>
+          Next
+        </button>
+      )}{' '}
+      {currentStep > 1 && (
+        <button style={{ pointerEvents: 'auto' }} onClick={handlePrevious}>
+          Back
+        </button>
+      )}
+    </>
+  );
+};
