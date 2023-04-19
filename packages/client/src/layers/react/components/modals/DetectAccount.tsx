@@ -263,7 +263,7 @@ const Stepper = (props: any) => {
       )}{' '}
       {currentStep > 1 && (
         <button style={{ pointerEvents: 'auto' }} onClick={handlePrevious}>
-          Previous
+          Back
         </button>
       )}
     </>
