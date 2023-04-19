@@ -258,7 +258,7 @@ const Stepper = (props: any) => {
   return (
     <>
       <StepsWrapper>
-        {steps.map((step, index) => (
+        {/* {steps.map((step, index) => (
           <StepButton
             key={step.title}
             isActive={currentStep === index + 1}
@@ -266,7 +266,7 @@ const Stepper = (props: any) => {
           >
             {step.title}
           </StepButton>
-        ))}
+        ))} }  */}
       </StepsWrapper>
       {steps[currentStep - 1].content}
       {steps[currentStep - 1].modalContent && <Modal>{steps[currentStep - 1].content}</Modal>}
