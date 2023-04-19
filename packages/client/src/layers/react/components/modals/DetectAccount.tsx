@@ -15,7 +15,7 @@ export function regiesterDetectAccountModal() {
     {
       colStart: 40,
       colEnd: 60,
-      rowStart: 40,
+      rowStart: 20,
       rowEnd: 60,
     },
     (layers) => {
@@ -145,7 +145,13 @@ const Description = styled.p`
   font-size: 18px;
   color: #333;
   text-align: center;
-  padding: 20px;
+  font-family: Pixel;
+`;
+
+const Header = styled.p`
+  font-size: 24px;
+  color: #333;
+  text-align: center;
   font-family: Pixel;
 `;
 
@@ -157,23 +163,29 @@ const StepsWrapper = styled.div`
 `;
 
 const StepButton = styled.button<any>`
-  background-color: ${(props) => (props.isActive ? '#007bff' : '#ccc')};
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin: 0 10px;
-  border-radius: 5px;
-  cursor: pointer;
+background-color: #ffffff;
+border-style: solid;
+border-width: 2px;
+border-color: black;
+color: black;
+padding: 15px;
+display: inline-block;
+font-size: 14px;
+cursor: pointer;
+border-radius: 5px;
+font-family: Pixel;
+
+&:active {
+  background-color: #c2c2c2;
+}
 `;
 
 const StepOne = () => (
   <ModalContent>
     <Description>
-      <h2 style={{ color: 'black' }}>Welcome to the Game!</h2>
-      <p style={{ color: 'black' }}>
-        If you're new here, we're glad to have you! In this game, you'll get to raise and care for
-        your very own Kamigotchi, a special creature from another world.
-      </p>
+      <Header style={{ color: 'black' }}>Welcome to Kamigotchi World!</Header>
+      <br/>
+        This is the first of a series of screens that introduce new players to the game.
     </Description>
   </ModalContent>
 );
@@ -181,13 +193,9 @@ const StepOne = () => (
 const StepTwo = () => (
   <ModalContent>
     <Description>
-      <h2 style={{ color: 'black' }}>Meet Your Kamigotchi!</h2>
-      <p style={{ color: 'black' }}>
-        Now that you know a bit about the game, it's time to meet your new friend. Your Kamigotchi
-        is a unique creature that you'll get to take care of and watch grow. They have their own
-        personality, likes, and dislikes, so be sure to pay attention to their needs and
-        preferences.
-      </p>
+      <Header style={{ color: 'black' }}>Meet Your Kamigotchi!</Header>
+      <br/>
+      This is the second of a series of screens that introduce new players to the game.
     </Description>
   </ModalContent>
 );
@@ -215,15 +223,15 @@ const Stepper = (props: any) => {
 
   const steps = [
     {
-      title: 'Welcome',
+      title: 'One',
       content: <StepOne />,
     },
     {
-      title: 'Introduction',
+      title: 'Two',
       content: <StepTwo />,
     },
     {
-      title: 'Name',
+      title: 'Three',
       content: (
         <StepThree
           catchKeys={props.catchKeys}
@@ -263,14 +271,14 @@ const Stepper = (props: any) => {
       {steps[currentStep - 1].content}
       {steps[currentStep - 1].modalContent && <Modal>{steps[currentStep - 1].content}</Modal>}
       {currentStep < steps.length && (
-        <button style={{ pointerEvents: 'auto' }} onClick={handleNext}>
+        <StepButton style={{ pointerEvents: 'auto' }} onClick={handleNext}>
           Next
-        </button>
+        </StepButton>
       )}{' '}
       {currentStep > 1 && (
-        <button style={{ pointerEvents: 'auto' }} onClick={handlePrevious}>
+        <StepButton style={{ pointerEvents: 'auto' }} onClick={handlePrevious}>
           Back
-        </button>
+        </StepButton>
       )}
     </>
   );
