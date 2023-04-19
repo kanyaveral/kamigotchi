@@ -270,14 +270,16 @@ const Stepper = (props: any) => {
       </StepsWrapper>
       {steps[currentStep - 1].content}
       {steps[currentStep - 1].modalContent && <Modal>{steps[currentStep - 1].content}</Modal>}
-      {currentStep < steps.length && (
-        <StepButton style={{ pointerEvents: 'auto' }} onClick={handleNext}>
-          Next
-        </StepButton>
-      )}{' '}
+
       {currentStep > 1 && (
         <StepButton style={{ pointerEvents: 'auto' }} onClick={handlePrevious}>
           Back
+        </StepButton>
+      )}
+      {' '}
+      {currentStep < steps.length && (
+        <StepButton style={{ pointerEvents: 'auto' }} onClick={handleNext}>
+          Next
         </StepButton>
       )}
     </>
