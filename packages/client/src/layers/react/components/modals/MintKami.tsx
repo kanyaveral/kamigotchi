@@ -4,17 +4,14 @@ import React from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { registerUIComponent } from 'layers/react/engine/store';
-import {
-  EntityID,
-  EntityIndex,
-  getComponentValue,
-} from '@latticexyz/recs';
+import { EntityID, EntityIndex, getComponentValue } from '@latticexyz/recs';
 import { waitForActionCompletion } from '@latticexyz/std-client';
 
 import mintSound from 'assets/sound/fx/tami_mint_vending_sound.mp3';
 import { dataStore } from 'layers/react/store/createStore';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
+import { Stepper } from '../library/Stepper';
 
 export function registerKamiMintModal() {
   registerUIComponent(
@@ -85,10 +82,10 @@ export function registerKamiMintModal() {
           setVisibleModals({ ...visibleModals, kamiMint: false, kamiMintPost: true });
 
           const mintFX = new Audio(mintSound);
-          mintFX.volume = volume * .6;
+          mintFX.volume = volume * 0.6;
           mintFX.play();
         } catch (e) {
-          console.log("KamiMint.tsx: handleMinting() mint failed", e);
+          console.log('KamiMint.tsx: handleMinting() mint failed', e);
         }
       };
 
@@ -96,26 +93,60 @@ export function registerKamiMintModal() {
       // DISPLAY
 
       const MintButton = (
-        <ActionButton
-          id='button-mint'
-          onClick={handleMinting}
-          size='large'
-          text='Mint'
-        />
+        <ActionButton id='button-mint' onClick={handleMinting} size='large' text='Mint' />
       );
 
       return (
-        <ModalWrapperFull divName="kamiMint" id='kamiMintModal'>
-          <CenterBox>
-            <KamiImage src="https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif" />
-            <Description>Kamigotchi?</Description>
-          </CenterBox>
-          {MintButton}
+        <ModalWrapperFull divName='kamiMint' id='kamiMintModal'>
+          <Stepper steps={steps} MintButton={MintButton} />
         </ModalWrapperFull>
       );
     }
   );
 }
+
+const StepOne = () => (
+  <>
+    <Description>
+      <Header style={{ color: 'black' }}>Click next to hear more</Header>
+      <br />
+      This is the second of a series of screens that introduce new players to the game.
+    </Description>
+  </>
+);
+
+const StepTwo = (props: any) => {
+  const { MintButton } = props;
+
+  return (
+    <>
+      <CenterBox>
+        <KamiImage src='https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif' />
+        <Description>Kamigotchi?</Description>
+      </CenterBox>
+      {MintButton}
+    </>
+  );
+};
+
+const steps = (props: any) => [
+  {
+    title: 'One',
+    content: <StepOne />,
+  },
+  {
+    title: 'Two',
+    content: <StepTwo MintButton={props.MintButton} />,
+    modalContent: true,
+  },
+];
+
+const Header = styled.p`
+  font-size: 24px;
+  color: #333;
+  text-align: center;
+  font-family: Pixel;
+`;
 
 const CenterBox = styled.div`
   display: flex;
