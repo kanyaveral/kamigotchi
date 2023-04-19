@@ -49,6 +49,7 @@ library LibProduction {
 
   // Starts an _existing_ production if not already started.
   function start(IUintComp components, uint256 id) internal {
+    LibPet.setState(components, id, "HARVESTING");
     setState(components, id, "ACTIVE");
     reset(components, id);
     setRate(components, id, calcRate(components, id)); // always last
@@ -56,6 +57,7 @@ library LibProduction {
 
   // Stops an _existing_ production. All potential proceeds will be lost after this point.
   function stop(IUintComp components, uint256 id) internal {
+    LibPet.setState(components, id, "RESTING");
     setState(components, id, "INACTIVE");
     setRate(components, id, 0);
   }

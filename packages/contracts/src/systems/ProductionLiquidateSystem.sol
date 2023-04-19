@@ -21,26 +21,20 @@ contract ProductionLiquidateSystem is System {
   function execute(bytes memory arguments) public returns (bytes memory) {
     (uint256 targetProductionID, uint256 petID) = abi.decode(arguments, (uint256, uint256));
     uint256 accountID = LibAccount.getByAddress(components, msg.sender);
+    LibPet.syncHealth(components, petID);
 
     // standard checks
     require(LibPet.getAccount(components, petID) == accountID, "Pet: not urs");
-    require(LibPet.syncHealth(components, petID) != 0, "Pet: is dead (pls revive)");
-    require(LibProduction.isActive(components, targetProductionID), "Production: not active");
-
-    // ensure we're not targeting one of our own
-    uint256 targetPetID = LibProduction.getPet(components, targetProductionID);
-    require(LibPet.getAccount(components, targetPetID) != accountID, "Pet: the ultimate betrayal");
-
-    // check that the target production is active
-    uint256 productionID = LibPet.getProduction(components, petID);
-    require(LibProduction.isActive(components, productionID), "Pet: must be harvesting");
+    require(LibPet.isHarvesting(components, petID), "Pet: must be harvesting");
 
     // check that the two kamis share the same node
+    uint256 productionID = LibPet.getProduction(components, petID);
     uint256 nodeID = LibProduction.getNode(components, productionID);
     uint256 targetNodeID = LibProduction.getNode(components, targetProductionID);
     require(nodeID == targetNodeID, "Production: not on same node");
 
-    // check that the pet is capable of to liquidating the target production
+    // check that the pet is capable of liquidating the target production
+    uint256 targetPetID = LibProduction.getPet(components, targetProductionID);
     LibPet.syncHealth(components, targetPetID);
     require(
       LibProduction.isLiquidatableBy(components, targetProductionID, petID),
@@ -58,7 +52,7 @@ contract ProductionLiquidateSystem is System {
     // LibKill.create(world, components, petID, targetPetID, nodeID);
 
     // LibAccount.updateLastBlock(components, accountID);
-    return abi.encode(amt);
+    return "";
   }
 
   function executeTyped(uint256 targetProductionID, uint256 petID) public returns (bytes memory) {
