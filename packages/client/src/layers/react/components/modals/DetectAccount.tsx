@@ -188,6 +188,7 @@ const StepTwo = () => (
 
 const StepThree = (props: any) => {
   const { catchKeys, handleChange, name } = props;
+
   return (
     <ModalContent>
       <Description style={{ gridRow: 1 }}>Your Name</Description>
@@ -236,6 +237,10 @@ const Stepper = (props: any) => {
     if (currentStep < steps.length) setCurrentStep(currentStep + 1);
   };
 
+  const handlePrevious = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
   return (
     <>
       <StepsWrapper>
@@ -254,6 +259,11 @@ const Stepper = (props: any) => {
       {currentStep < steps.length && (
         <button style={{ pointerEvents: 'auto' }} onClick={handleNext}>
           Next
+        </button>
+      )}{' '}
+      {currentStep > 1 && (
+        <button style={{ pointerEvents: 'auto' }} onClick={handlePrevious}>
+          Previous
         </button>
       )}
     </>
