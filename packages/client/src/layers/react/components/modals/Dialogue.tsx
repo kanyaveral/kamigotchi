@@ -5,6 +5,7 @@ import { dataStore } from 'layers/react/store/createStore';
 import styled from 'styled-components';
 import 'layers/react/styles/font.css';
 import { ModalWrapperLite } from '../library/ModalWrapper';
+import { Stepper } from '../library/Stepper';
 
 // TODO: update this file and component name to be more desctiptive
 export function registerDialogueModal() {
@@ -13,8 +14,8 @@ export function registerDialogueModal() {
     {
       colStart: 2,
       colEnd: 60,
-      rowStart: 77,
-      rowEnd: 100,
+      rowStart: 60,
+      rowEnd: 82,
     },
     (layers) => of(layers),
     () => {
@@ -45,19 +46,56 @@ export function registerDialogueModal() {
 
       return (
         <ModalWrapperLite id='object_modal' isOpen={visibleModals.dialogue}>
-          <ModalContent>
-            <AlignRight>
-              <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
-                X
-              </TopButton>
-            </AlignRight>
-            <Description>{description}</Description>
-          </ModalContent>
+          <Stepper steps={steps} hideModal={hideModal} description={description} />
         </ModalWrapperLite>
       );
     }
   );
 }
+
+const StepOne = () => (
+  <ModalContent>
+    <Description>
+      <Header style={{ color: 'black' }}>Click next to hear more</Header>
+      <br />
+      This is the second of a series of screens that introduce new players to the game.
+    </Description>
+  </ModalContent>
+);
+
+const StepTwo = (props: any) => {
+  const { description, hideModal } = props;
+
+  return (
+    <ModalContent>
+      <AlignRight>
+        <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+          X
+        </TopButton>
+      </AlignRight>
+      <Description>{description}</Description>
+    </ModalContent>
+  );
+};
+
+const steps = (props: any) => [
+  {
+    title: 'One',
+    content: <StepOne />,
+  },
+  {
+    title: 'Two',
+    content: <StepTwo description={props.description} hideModal={props.hideModal} />,
+    modalContent: true,
+  },
+];
+
+const Header = styled.p`
+  font-size: 24px;
+  color: #333;
+  text-align: center;
+  font-family: Pixel;
+`;
 
 const AlignRight = styled.div`
   text-align: right;
@@ -76,24 +114,6 @@ const ModalContent = styled.div`
   border-width: 2px;
   border-color: black;
   height: 100%;
-`;
-
-const Button = styled.button`
-  background-color: #ffffff;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  color: black;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 18px;
-  margin: 4px 2px;
-  cursor: pointer;
-  border-radius: 5px;
-  justify-content: center;
-  font-family: Pixel;
 `;
 
 const Description = styled.p`

@@ -8,6 +8,7 @@ import { HasValue, runQuery } from '@latticexyz/recs';
 import mintSound from 'assets/sound/fx/tami_mint_vending_sound.mp3';
 import { dataStore } from 'layers/react/store/createStore';
 import { Modal } from 'antd';
+import { Stepper } from '../library/Stepper';
 
 export function regiesterDetectAccountModal() {
   registerUIComponent(
@@ -85,7 +86,7 @@ export function regiesterDetectAccountModal() {
 
       return (
         <ModalWrapper id='detectAccount' style={{ display: isDivVisible ? 'block' : 'none' }}>
-          <Stepper handleChange={handleChange} catchKeys={catchKeys} name={name} />
+          <Stepper handleChange={handleChange} catchKeys={catchKeys} name={name} steps={steps} />
         </ModalWrapper>
       );
     }
@@ -155,37 +156,12 @@ const Header = styled.p`
   font-family: Pixel;
 `;
 
-const StepsWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-`;
-
-const StepButton = styled.button<any>`
-background-color: #ffffff;
-border-style: solid;
-border-width: 2px;
-border-color: black;
-color: black;
-padding: 15px;
-display: inline-block;
-font-size: 14px;
-cursor: pointer;
-border-radius: 5px;
-font-family: Pixel;
-
-&:active {
-  background-color: #c2c2c2;
-}
-`;
-
 const StepOne = () => (
   <ModalContent>
     <Description>
       <Header style={{ color: 'black' }}>Welcome to Kamigotchi World!</Header>
-      <br/>
-        This is the first of a series of screens that introduce new players to the game.
+      <br />
+      This is the first of a series of screens that introduce new players to the game.
     </Description>
   </ModalContent>
 );
@@ -194,7 +170,7 @@ const StepTwo = () => (
   <ModalContent>
     <Description>
       <Header style={{ color: 'black' }}>Meet Your Kamigotchi!</Header>
-      <br/>
+      <br />
       This is the second of a series of screens that introduce new players to the game.
     </Description>
   </ModalContent>
@@ -218,70 +194,20 @@ const StepThree = (props: any) => {
   );
 };
 
-const Stepper = (props: any) => {
-  const [currentStep, setCurrentStep] = useState(1);
-
-  const steps = [
-    {
-      title: 'One',
-      content: <StepOne />,
-    },
-    {
-      title: 'Two',
-      content: <StepTwo />,
-    },
-    {
-      title: 'Three',
-      content: (
-        <StepThree
-          catchKeys={props.catchKeys}
-          handleChange={props.handleChange}
-          name={props.name}
-        />
-      ),
-      modalContent: true,
-    },
-  ];
-
-  const handleStepClick = (stepIndex: any) => {
-    setCurrentStep(stepIndex);
-  };
-
-  const handleNext = () => {
-    if (currentStep < steps.length) setCurrentStep(currentStep + 1);
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
-
-  return (
-    <>
-      <StepsWrapper>
-        {/* {steps.map((step, index) => (
-          <StepButton
-            key={step.title}
-            isActive={currentStep === index + 1}
-            onClick={() => handleStepClick(index + 1)}
-          >
-            {step.title}
-          </StepButton>
-        ))} }  */}
-      </StepsWrapper>
-      {steps[currentStep - 1].content}
-      {steps[currentStep - 1].modalContent && <Modal>{steps[currentStep - 1].content}</Modal>}
-
-      {currentStep > 1 && (
-        <StepButton style={{ pointerEvents: 'auto' }} onClick={handlePrevious}>
-          Back
-        </StepButton>
-      )}
-      {' '}
-      {currentStep < steps.length && (
-        <StepButton style={{ pointerEvents: 'auto' }} onClick={handleNext}>
-          Next
-        </StepButton>
-      )}
-    </>
-  );
-};
+const steps = (props: any) => [
+  {
+    title: 'One',
+    content: <StepOne />,
+  },
+  {
+    title: 'Two',
+    content: <StepTwo />,
+  },
+  {
+    title: 'Three',
+    content: (
+      <StepThree catchKeys={props.catchKeys} handleChange={props.handleChange} name={props.name} />
+    ),
+    modalContent: true,
+  },
+];
