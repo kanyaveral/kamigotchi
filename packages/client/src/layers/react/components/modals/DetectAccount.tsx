@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useEffect, useState, useCallback } from 'react';
+import 'layers/react/styles/font.css';
 import { map } from 'rxjs';
 import { registerUIComponent } from 'layers/react/engine/store';
 import styled, { keyframes } from 'styled-components';
@@ -167,22 +168,27 @@ const StepButton = styled.button<any>`
 
 const StepOne = () => (
   <ModalContent>
-    <h1 style={{ color: 'black' }}>Welcome to the Game!</h1>
-    <p style={{ color: 'black' }}>
-      If you're new here, we're glad to have you! In this game, you'll get to raise and care for
-      your very own Kamigotchi, a special creature from another world.
-    </p>
+    <Description>
+      <h2 style={{ color: 'black' }}>Welcome to the Game!</h2>
+      <p style={{ color: 'black' }}>
+        If you're new here, we're glad to have you! In this game, you'll get to raise and care for
+        your very own Kamigotchi, a special creature from another world.
+      </p>
+    </Description>
   </ModalContent>
 );
 
 const StepTwo = () => (
   <ModalContent>
-    <h1 style={{ color: 'black' }}>Meet Your Kamigotchi!</h1>
-    <p style={{ color: 'black' }}>
-      Now that you know a bit about the game, it's time to meet your new friend. Your Kamigotchi is
-      a unique creature that you'll get to take care of and watch grow. They have their own
-      personality, likes, and dislikes, so be sure to pay attention to their needs and preferences.
-    </p>
+    <Description>
+      <h2 style={{ color: 'black' }}>Meet Your Kamigotchi!</h2>
+      <p style={{ color: 'black' }}>
+        Now that you know a bit about the game, it's time to meet your new friend. Your Kamigotchi
+        is a unique creature that you'll get to take care of and watch grow. They have their own
+        personality, likes, and dislikes, so be sure to pay attention to their needs and
+        preferences.
+      </p>
+    </Description>
   </ModalContent>
 );
 

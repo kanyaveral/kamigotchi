@@ -44,7 +44,7 @@ export function registerDialogueModal() {
       }, [visibleModals.dialogue]);
 
       return (
-        <ModalWrapperLite id="object_modal" isOpen={visibleModals.dialogue}>
+        <ModalWrapperLite id='object_modal' isOpen={visibleModals.dialogue}>
           <ModalContent>
             <AlignRight>
               <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
@@ -119,6 +119,6 @@ const TopButton = styled.button`
   width: 30px;
   &:active {
     background-color: #c2c2c2;
-  };
+  }
   margin: 0px;
 `;
