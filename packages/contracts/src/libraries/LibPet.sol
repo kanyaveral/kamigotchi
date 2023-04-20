@@ -30,14 +30,16 @@ import { LibRegistryTrait } from "libraries/LibRegistryTrait.sol";
 import { LibStat } from "libraries/LibStat.sol";
 import { LibTrait } from "libraries/LibTrait.sol";
 
-uint256 constant BASE_HARMONY = 10;
-uint256 constant BASE_HEALTH = 150;
-uint256 constant BASE_POWER = 150;
-uint256 constant BASE_SLOTS = 0;
-uint256 constant BASE_VIOLENCE = 10;
+uint256 constant BASE_HARMONY = 20;
+uint256 constant BASE_HEALTH = 50;
+uint256 constant BASE_POWER = 20;
+uint256 constant BASE_VIOLENCE = 20;
+uint256 constant BASE_SLOTS = 2;
 uint256 constant BURN_RATIO = 50; // energy burned per 100 KAMI produced
 uint256 constant BURN_RATIO_PRECISION = 1e2;
-uint256 constant DEMO_POWER_MULTIPLIER = 1000;
+uint256 constant RECOVERY_RATE_PRECISION = 1e18;
+uint256 constant DEMO_RECOVERY_RATE_MULTIPLIER = 1000;
+uint256 constant DEMO_POWER_MULTIPLIER = 250;
 uint256 constant DEMO_VIOLENCE_MULTIPLIER = 3;
 
 library LibPet {
@@ -66,18 +68,15 @@ library LibPet {
     setOwner(components, id, addressToEntity(owner));
     setAccount(components, id, accountID);
     setMediaURI(components, id, uri);
-    setLastTs(components, id, block.timestamp);
     setState(components, id, "UNREVEALED");
     return id;
   }
 
-  // called when a pet is revealed
-  // NOTE: most of the reveal logic (generation) is in the PetMetadataSystem itself
-  //       this function is for components that relate directly to the pet
-  function reveal(IUintComp components, uint256 id) internal {
-    setLastTs(components, id, block.timestamp);
-    revive(components, id);
-    setStats(components, id);
+  // Drains HP from a pet. The opposite of heal().
+  function drain(IUintComp components, uint256 id, uint256 amt) internal {
+    uint256 health = getCurrHealth(components, id);
+    health = (health > amt) ? health - amt : 0;
+    setCurrHealth(components, id, health);
   }
 
   // feed the pet with a food item
@@ -99,8 +98,7 @@ library LibPet {
   // NOTE: assumes the pet health is synced prior to this call
   function heal(IUintComp components, uint256 id, uint256 amt) internal {
     uint256 totalHealth = calcTotalHealth(components, id);
-    uint256 health = getCurrHealth(components, id);
-    health += amt;
+    uint256 health = getCurrHealth(components, id) + amt;
     if (health > totalHealth) health = totalHealth;
     setCurrHealth(components, id, health);
   }
@@ -111,21 +109,33 @@ library LibPet {
     setCurrHealth(components, id, 0);
   }
 
-  // Update a pet's state to ALIVE
+  // called when a pet is revealed
+  // NOTE: most of the reveal logic (generation) is in the PetMetadataSystem itself
+  //       this function is for components saved directely on the Pet Entity
+  function reveal(IUintComp components, uint256 id) internal {
+    revive(components, id);
+    setStats(components, id);
+    setLastTs(components, id, block.timestamp);
+  }
+
+  // Update a pet's state to RESTING
   function revive(IUintComp components, uint256 id) internal {
-    StateComponent(getAddressById(components, StateCompID)).set(id, string("ALIVE"));
+    StateComponent(getAddressById(components, StateCompID)).set(id, string("RESTING"));
   }
 
   // Update the current health of a pet based on its timestamp and health at last action.
   // NOTE: should be called at the top of a System and folllowed up with a require(!isDead).
   // it's a bit gas-inefficient to be doing it this way but saves us plenty of mental energy
   // in catching all the edge cases.
-  function syncHealth(IUintComp components, uint256 id) internal returns (uint256 health) {
-    health = getCurrHealth(components, id);
-    if (isProducing(components, id)) {
-      uint256 drain = calcDrain(components, id);
-      health = (health > drain) ? health - drain : 0;
-      setCurrHealth(components, id, health);
+  function syncHealth(IUintComp components, uint256 id) internal {
+    if (isHarvesting(components, id)) {
+      // drain health if harvesting
+      uint256 drainAmt = calcDrain(components, id);
+      drain(components, id, drainAmt);
+    } else if (isResting(components, id)) {
+      // recover health if resting
+      uint256 healAmt = calcRecovery(components, id);
+      heal(components, id, healAmt);
     }
     setLastTs(components, id, block.timestamp);
   }
@@ -174,16 +184,29 @@ library LibPet {
     return 100;
   }
 
-  // Calculate the total health drain since the last check (rounded up), based on production
+  // Calculate the total health drain from harvesting (rounded up) since the last check. This is
+  // based on the Kami's production and assumes that information is up to date.
   // NOTE: we can't just use LibProd.calcOutput() here because that rounds down, while here
   // we want to properly round. We need a game design discussion on how we want to do this.
   function calcDrain(IUintComp components, uint256 id) internal view returns (uint256) {
-    if (!isProducing(components, id)) return 0;
     uint256 productionID = getProduction(components, id);
     uint256 prodRate = LibProduction.getRate(components, productionID); // KAMI/s (1e18 precision)
     uint256 duration = block.timestamp - getLastTs(components, id);
     uint256 totalPrecision = BURN_RATIO_PRECISION * PRODUCTION_PRECISION; // BURN_RATIO(1e2) * prodRate(1e18)
     return (duration * prodRate * BURN_RATIO + (totalPrecision / 2)) / totalPrecision;
+  }
+
+  // Calculate the recovery of the kami from resting. This assumes the Kami is actually resting.
+  function calcRecovery(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint256 duration = block.timestamp - getLastTs(components, id);
+    uint256 recoveryRate = calcRecoveryRate(components, id); // 1e18 precision
+    return (duration * recoveryRate) / RECOVERY_RATE_PRECISION;
+  }
+
+  // calculates the health recovery rate of the Kami per second (1e18 precision). Assumed resting.
+  function calcRecoveryRate(IUintComp components, uint256 id) internal view returns (uint256) {
+    uint256 totalHarmony = calcTotalHarmony(components, id);
+    return (totalHarmony * DEMO_RECOVERY_RATE_MULTIPLIER * RECOVERY_RATE_PRECISION) / 3600;
   }
 
   // Calculate the liquidation threshold for target pet, attacked by the source pet.
@@ -255,25 +278,21 @@ library LibPet {
   /////////////////
   // CHECKERS
 
-  // Check whether an account is the pet's account.
-  function isAccount(
-    IUintComp components,
-    uint256 id,
-    uint256 accountID
-  ) internal view returns (bool) {
-    return getAccount(components, id) == accountID;
-  }
-
   // Check whether a pet is dead.
-  // NOTE: this assumes the pet's health has been synced in this block.
   function isDead(IUintComp components, uint256 id) internal view returns (bool) {
-    return getCurrHealth(components, id) == 0;
+    return LibString.eq(getState(components, id), "DEAD");
   }
 
-  // Check whether a pet has an ongoing production.
-  function isProducing(IUintComp components, uint256 id) internal view returns (bool result) {
-    uint256 productionID = LibProduction.getForPet(components, id);
-    if (productionID != 0 && LibProduction.isActive(components, productionID)) result = true;
+  // Check whether a pet is harvesting.
+  function isHarvesting(IUintComp components, uint256 id) internal view returns (bool result) {
+    return LibString.eq(getState(components, id), "HARVESTING");
+    // uint256 productionID = LibProduction.getForPet(components, id);
+    // if (productionID != 0 && LibProduction.isActive(components, productionID)) result = true;
+  }
+
+  // Check whether a pet is resting.
+  function isResting(IUintComp components, uint256 id) internal view returns (bool) {
+    return LibString.eq(getState(components, id), "RESTING");
   }
 
   /////////////////
@@ -281,11 +300,11 @@ library LibPet {
 
   // set a pet's stats from its traits
   function setStats(IUintComp components, uint256 id) internal {
-    uint256 health;
-    uint256 power;
-    uint256 violence;
-    uint256 harmony;
-    uint256 slots;
+    uint256 health = BASE_HEALTH;
+    uint256 power = BASE_POWER;
+    uint256 violence = BASE_VIOLENCE;
+    uint256 harmony = BASE_HARMONY;
+    uint256 slots = BASE_SLOTS;
 
     // sum the stats from all traits
     uint256 traitRegistryID;

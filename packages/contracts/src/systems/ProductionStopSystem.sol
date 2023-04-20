@@ -24,10 +24,10 @@ contract ProductionStopSystem is System {
     uint256 id = abi.decode(arguments, (uint256));
     uint256 accountID = LibAccount.getByAddress(components, msg.sender);
     uint256 petID = LibProduction.getPet(components, id);
+    LibPet.syncHealth(components, petID);
 
     require(LibPet.getAccount(components, petID) == accountID, "Pet: not urs");
-    require(LibPet.isProducing(components, petID), "Pet: must be producing");
-    require(LibPet.syncHealth(components, petID) != 0, "Pet: is dead (pls revive)");
+    require(LibPet.isHarvesting(components, petID), "Pet: must be harvesting");
 
     uint256 amt = LibProduction.calcOutput(components, id);
     LibCoin.inc(components, accountID, amt);

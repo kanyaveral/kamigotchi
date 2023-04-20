@@ -25,8 +25,6 @@ contract PetFeedSystem is System {
     uint256 registryID = LibRegistryItem.getByFoodIndex(components, foodIndex);
     require(registryID != 0, "RegistryItem: no such food");
 
-    require(LibPet.syncHealth(components, petID) != 0, "Pet: is dead (pls revive)");
-
     uint256 itemIndex = LibRegistryItem.getItemIndex(components, registryID);
     uint256 inventoryID = LibInventory.get(components, accountID, itemIndex);
     require(inventoryID != 0, "Inventory: no bitches, no food");
@@ -34,6 +32,7 @@ contract PetFeedSystem is System {
     LibInventory.dec(components, inventoryID, 1); // inherent check for insufficient balance
 
     uint256 healAmt = LibStat.getHealth(components, registryID);
+    LibPet.syncHealth(components, petID);
     LibPet.heal(components, petID, healAmt);
     LibAccount.updateLastBlock(components, accountID); // gas limit :|
     return "";
