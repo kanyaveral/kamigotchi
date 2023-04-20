@@ -26,12 +26,7 @@ export function registerKamiModal() {
         },
       } = layers;
 
-      return merge(
-        IsPet.update$,
-        Balance.update$,
-        PetID.update$,
-        MediaURI.update$
-      ).pipe(
+      return merge(IsPet.update$, Balance.update$, PetID.update$, MediaURI.update$).pipe(
         map(() => {
           return {
             layers,
@@ -43,15 +38,14 @@ export function registerKamiModal() {
     ({ layers }) => {
       const {
         network: {
-          components: {
-            IsPet,
-            PetIndex,
-          },
+          components: { IsPet, PetIndex },
         },
       } = layers;
 
       const {
-        selectedKami: { description },
+        selectedEntities: {
+          kami: { description },
+        },
       } = dataStore();
 
       /////////////////
@@ -68,7 +62,7 @@ export function registerKamiModal() {
       };
 
       const hexToString = (num?: BigNumberish) => {
-        return num ? BigNumber.from(num).toString() : "0";
+        return num ? BigNumber.from(num).toString() : '0';
       };
 
       /////////////////
@@ -85,9 +79,11 @@ export function registerKamiModal() {
 
       const traitBox = () => {
         return (
-          <KamiBox style={{
-            maxWidth: '50%',
-          }}>
+          <KamiBox
+            style={{
+              maxWidth: '50%',
+            }}
+          >
             <KamiText>BACKGROUND</KamiText>
             <KamiFacts>{dets?.background?.name}</KamiFacts>
             <KamiText>BODY</KamiText>
@@ -99,14 +95,16 @@ export function registerKamiModal() {
             <KamiText>HAND</KamiText>
             <KamiFacts>{dets?.hand?.name}</KamiFacts>
           </KamiBox>
-        )
-      }
+        );
+      };
 
       const statsBox = () => {
         return (
-          <KamiBox style={{
-            maxWidth: '50%'
-          }}>
+          <KamiBox
+            style={{
+              maxWidth: '50%',
+            }}
+          >
             <KamiText>HEALTH</KamiText>
             <KamiFacts>{hexToString(dets?.stats.health)} </KamiFacts>
             <KamiText>POWER</KamiText>
@@ -118,20 +116,16 @@ export function registerKamiModal() {
             <KamiText>SLOTS</KamiText>
             <KamiFacts>{hexToString(dets?.stats.slots)} </KamiFacts>
           </KamiBox>
-        )
-      }
+        );
+      };
 
       const affinitiesBox = () => {
-        const str = dets?.affinities?.reduce((ac, x) => ac = ac + ' | ' + x);
-        return (
-          <KamiText>
-            {str}
-          </KamiText>
-        )
-      }
+        const str = dets?.affinities?.reduce((ac, x) => (ac = ac + ' | ' + x));
+        return <KamiText>{str}</KamiText>;
+      };
 
       return (
-        <ModalWrapperFull divName="kami" id="kamiModal">
+        <ModalWrapperFull divName='kami' id='kamiModal'>
           <div
             style={{
               display: 'flex',
@@ -239,4 +233,4 @@ const Line = styled.div`
   border-color: black;
   color: black;
   height: 200px;
-`
+`;

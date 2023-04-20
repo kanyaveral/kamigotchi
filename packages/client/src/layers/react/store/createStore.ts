@@ -1,3 +1,4 @@
+import { EntityIndex } from '@latticexyz/recs';
 import create from 'zustand';
 
 export interface Dialogue {
@@ -33,15 +34,14 @@ export interface SoundState {
 }
 
 export interface SelectedEntities {
-  kami: string;
-  node: string;
-  merchant: string;
+  kami: { id: EntityIndex; description: string };
+  node: EntityIndex;
+  merchant: EntityIndex;
 }
 
 export interface StoreState {
   dialogue: Dialogue;
   roomExits: RoomExits;
-  selectedKami: Dialogue;
   visibleModals: VisibleModals;
   sound: SoundState;
   selectedEntities: SelectedEntities;
@@ -50,17 +50,17 @@ export interface StoreState {
 interface StoreActions {
   setObjectData: (data: Dialogue) => void;
   setRoomExits: (data: RoomExits) => void;
-  setSelectedKami: (data: Dialogue) => void;
   setVisibleModals: (data: VisibleModals) => void;
   setSoundState: (data: SoundState) => void;
   setSelectedEntities: (data: SelectedEntities) => void;
 }
 
+const nonExistingEntityIndex: EntityIndex = 0;
+
 export const dataStore = create<StoreState & StoreActions>((set) => {
   const initialState: StoreState = {
     dialogue: { description: '' },
     roomExits: { up: 0, down: 0, left: 0, right: 0 },
-    selectedKami: { description: '' },
     visibleModals: {
       chat: false,
       dialogue: false,
@@ -77,9 +77,9 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
       volume: 0.7,
     },
     selectedEntities: {
-      kami: '0x0',
-      node: '0x0',
-      merchant: '0x0',
+      kami: { id: nonExistingEntityIndex, description: '' },
+      node: nonExistingEntityIndex,
+      merchant: nonExistingEntityIndex,
     },
   };
 
@@ -87,7 +87,6 @@ export const dataStore = create<StoreState & StoreActions>((set) => {
     ...initialState,
     setObjectData: (data: Dialogue) => set((state: StoreState) => ({ ...state, dialogue: data })),
     setRoomExits: (data: RoomExits) => set((state: StoreState) => ({ ...state, roomExits: data })),
-    setSelectedKami: (data: Dialogue) => set((state: StoreState) => ({ ...state, dialogue: data })),
     setVisibleModals: (data: VisibleModals) =>
       set((state: StoreState) => ({ ...state, visibleModals: data })),
     setSoundState: (data: SoundState) => set((state: StoreState) => ({ ...state, sound: data })),
