@@ -27,10 +27,12 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export interface _devGiveTokensSystemInterface extends utils.Interface {
+export interface ERC20HopperSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(address,uint256)": FunctionFragment;
+    "executeTyped(uint256)": FunctionFragment;
+    "getToken()": FunctionFragment;
+    "getTokenAddy()": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -39,6 +41,8 @@ export interface _devGiveTokensSystemInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "execute"
       | "executeTyped"
+      | "getToken"
+      | "getTokenAddy"
       | "owner"
       | "transferOwnership"
   ): FunctionFragment;
@@ -49,7 +53,12 @@ export interface _devGiveTokensSystemInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "executeTyped",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(functionFragment: "getToken", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getTokenAddy",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -60,6 +69,11 @@ export interface _devGiveTokensSystemInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "executeTyped",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "getToken", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenAddy",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -87,12 +101,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface _devGiveTokensSystem extends BaseContract {
+export interface ERC20HopperSystem extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: _devGiveTokensSystemInterface;
+  interface: ERC20HopperSystemInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -116,14 +130,17 @@ export interface _devGiveTokensSystem extends BaseContract {
   functions: {
     execute(
       arguments: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     executeTyped(
-      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    getToken(overrides?: CallOverrides): Promise<[string]>;
+
+    getTokenAddy(overrides?: CallOverrides): Promise<[string]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -135,14 +152,17 @@ export interface _devGiveTokensSystem extends BaseContract {
 
   execute(
     arguments: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   executeTyped(
-    to: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  getToken(overrides?: CallOverrides): Promise<string>;
+
+  getTokenAddy(overrides?: CallOverrides): Promise<string>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -158,10 +178,13 @@ export interface _devGiveTokensSystem extends BaseContract {
     ): Promise<string>;
 
     executeTyped(
-      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    getToken(overrides?: CallOverrides): Promise<string>;
+
+    getTokenAddy(overrides?: CallOverrides): Promise<string>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -185,14 +208,17 @@ export interface _devGiveTokensSystem extends BaseContract {
   estimateGas: {
     execute(
       arguments: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     executeTyped(
-      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getToken(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTokenAddy(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -205,14 +231,17 @@ export interface _devGiveTokensSystem extends BaseContract {
   populateTransaction: {
     execute(
       arguments: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     executeTyped(
-      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    getToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getTokenAddy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
