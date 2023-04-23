@@ -65,7 +65,6 @@ export function registerPartyModal() {
         },
       } = layers;
 
-
       // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       // aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -118,28 +117,19 @@ export function registerPartyModal() {
             ])
           )[0];
 
-          const account = (accountIndex !== undefined)
-            ? getAccount(layers, accountIndex)
-            : {} as Account;
+          const account =
+            accountIndex !== undefined ? getAccount(layers, accountIndex) : ({} as Account);
 
           // get the node through the location of the linked account
           const nodeIndex = Array.from(
-            runQuery([
-              Has(IsNode),
-              HasValue(Location, { value: account.location }),
-            ])
+            runQuery([Has(IsNode), HasValue(Location, { value: account.location })])
           )[0];
 
-          const node = (nodeIndex !== undefined)
-            ? getNode(layers, nodeIndex)
-            : {} as Node;
+          const node = nodeIndex !== undefined ? getNode(layers, nodeIndex) : ({} as Node);
 
           // get the list of inventory indices for this account
           const inventoryResults = Array.from(
-            runQuery([
-              Has(IsInventory),
-              HasValue(HolderID, { value: account.id }),
-            ])
+            runQuery([Has(IsInventory), HasValue(HolderID, { value: account.id })])
           );
 
           // if we have inventories for the account, generate a list of inventory objects
@@ -160,12 +150,10 @@ export function registerPartyModal() {
             let itemIndex;
             for (let i = 0; i < inventoryResults.length; i++) {
               // match indices to the existing consumables
-              itemIndex = getComponentValue(ItemIndex, inventoryResults[i])
-                ?.value as number;
+              itemIndex = getComponentValue(ItemIndex, inventoryResults[i])?.value as number;
               for (let j = 0; j < inventories.length; j++) {
                 if (inventories[j].itemIndex == itemIndex) {
-                  let balance = getComponentValue(Balance, inventoryResults[j])
-                    ?.value as number;
+                  let balance = getComponentValue(Balance, inventoryResults[j])?.value as number;
                   inventories[j].balance = balance ? balance * 1 : 0;
                 }
               }
@@ -187,12 +175,8 @@ export function registerPartyModal() {
 
     // Render
     ({ actions, api, data, world }) => {
-
-      const {
-        visibleModals,
-        setVisibleModals,
-        selectedKami,
-      } = dataStore();
+      const { visibleModals, setVisibleModals, selectedEntities, setSelectedEntities } =
+        dataStore();
 
       // console.log('PartyM: data', data);
       const [lastRefresh, setLastRefresh] = useState(Date.now());
@@ -275,7 +259,7 @@ export function registerPartyModal() {
 
       // reveal pet
       const revealPet = async (pet: Kami) => {
-        const actionID = `Revealing Kami ` + pet.index as EntityID; // Date.now to have the actions ordered in the component browser
+        const actionID = (`Revealing Kami ` + pet.index) as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
           components: {},
@@ -294,9 +278,12 @@ export function registerPartyModal() {
 
       const openKamiModal = (kami: Kami) => {
         const description = kami.index;
-        dataStore.setState({ selectedKami: { description } });
-        setVisibleModals({ ...visibleModals, kami: true })
-      }
+        setSelectedEntities({
+          ...selectedEntities,
+          kami: { ...selectedEntities.kami, description },
+        });
+        setVisibleModals({ ...visibleModals, kami: true });
+      };
 
       /////////////////
       // DATA INTERPRETATION
@@ -358,8 +345,8 @@ export function registerPartyModal() {
       };
 
       const isRevealed = (kami: Kami): boolean => {
-        return !(kami.state == "UNREVEALED");
-      }
+        return !(kami.state == 'UNREVEALED');
+      };
 
       // get the title of the kami as 'name (health / totHealth)'
       const getTitle = (kami: Kami) => {
@@ -420,7 +407,7 @@ export function registerPartyModal() {
         <ActionButton
           id={`harvest-collect`}
           onClick={() => reapProduction(kami.production!.id)}
-          text="Collect"
+          text='Collect'
         />
       );
 
@@ -433,11 +420,7 @@ export function registerPartyModal() {
       );
 
       const StartButton = (kami: Kami) => (
-        <ActionButton
-          id={`harvest-start`}
-          onClick={() => startProduction(kami.id)}
-          text="Start"
-        />
+        <ActionButton id={`harvest-start`} onClick={() => startProduction(kami.id)} text='Start' />
       );
 
       // we're able to force the production attribute as we will only show this
@@ -446,24 +429,16 @@ export function registerPartyModal() {
         <ActionButton
           id={`harvest-stop`}
           onClick={() => stopProduction(kami.production!.id)}
-          text="Stop"
+          text='Stop'
         />
       );
 
       const RevealButton = (kami: Kami) => (
-        <ActionButton
-          id={`reveal-kami`}
-          onClick={() => revealPet(kami)}
-          text="Reveal"
-        />
+        <ActionButton id={`reveal-kami`} onClick={() => revealPet(kami)} text='Reveal' />
       );
 
       const InfoButton = (kami: Kami) => (
-        <ActionButton
-          id={`info-button`}
-          onClick={() => openKamiModal(kami)}
-          text="i"
-        />
+        <ActionButton id={`info-button`} onClick={() => openKamiModal(kami)} text='i' />
       );
 
       const selectAction = (kami: Kami) => {
@@ -471,18 +446,18 @@ export function registerPartyModal() {
 
         if (isHarvesting(kami)) return StopButton(kami);
         else return StartButton(kami);
-      }
+      };
 
       // corner content, usually Food
       const selectCorner = (kami: Kami) => {
         if (isRevealed(kami)) return FeedButton(kami, 1);
 
-        return (<div></div>);
-      }
+        return <div></div>;
+      };
 
       const selectInfo = (kami: Kami) => {
         if (isRevealed(kami)) return InfoButton(kami);
-      }
+      };
 
       const KamiCards = (kamis: Kami[]) => {
         return kamis.map((kami) => {
@@ -506,15 +481,13 @@ export function registerPartyModal() {
       };
 
       return (
-        <ModalWrapperFull id="party_modal" divName="party" fill={true}>
+        <ModalWrapperFull id='party_modal' divName='party' fill={true}>
           <TopGrid>
             <TopDescription>
               $KAMI: {data.account.coin ? data.account.coin * 1 : '0'}
             </TopDescription>
           </TopGrid>
-          <ConsumableGrid>
-            {ConsumableCells(data.account.inventories)}
-          </ConsumableGrid>
+          <ConsumableGrid>{ConsumableCells(data.account.inventories)}</ConsumableGrid>
           <Scrollable>{KamiCards(data.account.kamis)}</Scrollable>
         </ModalWrapperFull>
       );
