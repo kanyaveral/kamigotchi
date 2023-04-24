@@ -18,6 +18,7 @@ import { registerPartyModal } from './modals/Party';
 import { registerRequestQueue } from './modals/RequestQueue';
 import { registerTradeModal } from './modals/Trade';
 import { registerNodeModal } from './modals/Node';
+import { registerVolumeControl } from './buttons/VolumeControl';
 
 export function registerUIComponents() {
   registerActionQueue();
@@ -28,6 +29,7 @@ export function registerUIComponents() {
   registerMapButton();
   registerPartyButton();
   registerFoodShopButton();
+  registerVolumeControl();
 
   registerChatModal();
   regiesterDetectAccountModal();
