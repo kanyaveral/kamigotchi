@@ -1,3 +1,4 @@
+import { dataStore } from 'layers/react/store/createStore';
 import { Room } from 'src/constants';
 
 // an additional field for the Phaser Scene for the GameScene
@@ -6,12 +7,15 @@ export interface GameScene {
   room: Room;
 }
 
-
 // the main game scene of Kamigotchi. this controls the rendering of assets
 // and the playback of sound in each room
 export class GameScene extends Phaser.Scene implements GameScene {
+  private gameSound: Phaser.Sound.BaseSound | undefined;
+  private currentVolume: number;
+
   constructor() {
     super('Game');
+    this.currentVolume = 0.5;
   }
 
   preload() {
@@ -32,15 +36,10 @@ export class GameScene extends Phaser.Scene implements GameScene {
 
       // set the background image
       if (room.background) {
-        let bg = this.add.image(
-          gameWidth / 2,
-          gameHeight / 2,
-          room.background.key
-        );
-        scale = .8 * gameHeight / bg.height;
+        let bg = this.add.image(gameWidth / 2, gameHeight / 2, room.background.key);
+        scale = (0.8 * gameHeight) / bg.height;
         bg.setScale(scale);
       }
-
 
       // generate all in-room visual assets
       if (room.objects) {
@@ -64,18 +63,30 @@ export class GameScene extends Phaser.Scene implements GameScene {
         });
       }
 
-      // run the music
-      // TODO: update this config somehow to pull settings from the Store
       if (this.room.music) {
-        this.sound.add(
-          this.room.music.key,
-          { volume: 0.5, loop: true }
-        ).play();
+        const {
+          sound: { volume },
+        } = dataStore.getState();
+        this.currentVolume = volume;
+        this.gameSound = this.sound.add(this.room.music.key, { volume: volume, loop: true });
+        this.gameSound.play();
       }
     }
+
+    // subscribe to changes in sound.volume
+    dataStore.subscribe(() => {
+      const {
+        sound: { volume },
+      } = dataStore.getState();
+      if (this.gameSound && volume !== this.currentVolume) {
+        this.currentVolume = volume;
+        this.gameSound.setVolume(volume);
+        this.update();
+      }
+    });
   }
 
-  update() { }
+  update() {}
 
   onClick() {
     console.log('clicked');
