@@ -28,7 +28,7 @@ export function registerUIComponents() {
   registerChatButton();
   registerMapButton();
   registerPartyButton();
-  registerFoodShopButton();
+  //registerFoodShopButton();
   registerVolumeControl();
 
   registerChatModal();
