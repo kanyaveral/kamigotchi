@@ -86,7 +86,13 @@ export function regiesterDetectAccountModal() {
 
       return (
         <ModalWrapper id='detectAccount' style={{ display: isDivVisible ? 'block' : 'none' }}>
-          <Stepper handleChange={handleChange} catchKeys={catchKeys} name={name} steps={steps} />
+          <Stepper
+            handleChange={handleChange}
+            catchKeys={catchKeys}
+            name={name}
+            steps={steps}
+            handleMinting={handleMinting}
+          />
         </ModalWrapper>
       );
     }
@@ -157,6 +163,24 @@ const Header = styled.p`
   font-family: Pixel;
 `;
 
+const Button = styled.button`
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 15px;
+  display: inline-block;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-family: Pixel;
+
+  &:active {
+    background-color: #c2c2c2;
+  }
+`;
+
 const StepOne = () => (
   <ModalContent>
     <Description>
@@ -183,7 +207,7 @@ const StepThree = (props: any) => {
   return (
     <ModalContent>
       <Description style={{ gridRow: 1 }}>
-      An entity will be created to facilitate your existence in this world. Give it a name.
+        An entity will be created to facilitate your existence in this world. Give it a name.
       </Description>
       <Input
         style={{ gridRow: 2, pointerEvents: 'auto' }}
@@ -209,7 +233,21 @@ const steps = (props: any) => [
   {
     title: 'Three',
     content: (
-      <StepThree catchKeys={props.catchKeys} handleChange={props.handleChange} name={props.name} />
+      <>
+        <StepThree
+          catchKeys={props.catchKeys}
+          handleChange={props.handleChange}
+          name={props.name}
+        />
+        <Button
+          style={{ pointerEvents: 'auto' }}
+          onClick={() => {
+            props.handleMinting(props.name);
+          }}
+        >
+          Submit
+        </Button>
+      </>
     ),
     modalContent: true,
   },
