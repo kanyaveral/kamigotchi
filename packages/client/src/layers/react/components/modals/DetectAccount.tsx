@@ -111,6 +111,7 @@ const Input = styled.input`
   border-color: black;
   color: black;
   padding: 15px 12px;
+  margin: 10px 5px 5px 5px;
 
   text-align: left;
   text-decoration: none;
@@ -159,9 +160,9 @@ const Header = styled.p`
 const StepOne = () => (
   <ModalContent>
     <Description>
-      <Header style={{ color: 'black' }}>Welcome to Kamigotchi World!</Header>
+      <Header style={{ color: 'black' }}>Welcome!</Header>
       <br />
-      This is the first of a series of screens that introduce new players to the game.
+      This is a decentralized world. Your actions in it are your own.
     </Description>
   </ModalContent>
 );
@@ -169,9 +170,9 @@ const StepOne = () => (
 const StepTwo = () => (
   <ModalContent>
     <Description>
-      <Header style={{ color: 'black' }}>Meet Your Kamigotchi!</Header>
+      <Header style={{ color: 'black' }}>You</Header>
       <br />
-      This is the second of a series of screens that introduce new players to the game.
+      You do not currently exist in this world.
     </Description>
   </ModalContent>
 );
@@ -181,7 +182,9 @@ const StepThree = (props: any) => {
 
   return (
     <ModalContent>
-      <Description style={{ gridRow: 1 }}>Your Name</Description>
+      <Description style={{ gridRow: 1 }}>
+      An entity will be created to facilitate your existence in this world. Give it a name.
+      </Description>
       <Input
         style={{ gridRow: 2, pointerEvents: 'auto' }}
         type='text'
