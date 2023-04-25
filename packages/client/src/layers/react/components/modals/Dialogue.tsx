@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { of } from 'rxjs';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { dataStore } from 'layers/react/store/createStore';
@@ -22,73 +22,47 @@ export function registerDialogueModal() {
       const {
         visibleModals,
         setVisibleModals,
-        dialogue: { description },
+        dialogue: { description: dialogueSteps },
       } = dataStore();
 
-      const hideModal = () => {
-        setVisibleModals({
-          ...visibleModals,
-          dialogue: !visibleModals.dialogue,
-        });
-      };
+      const hideModal = useCallback(() => {
+        setVisibleModals({ ...visibleModals, dialogue: false });
+      }, [setVisibleModals, visibleModals]);
 
-      const showShop = () => {
-        setVisibleModals({
-          ...visibleModals,
-          merchant: !visibleModals.merchant,
-        });
-      };
+      const toggleMerchant = useCallback(() => {
+        setVisibleModals({ ...visibleModals, merchant: !visibleModals.merchant });
+      }, [setVisibleModals, visibleModals]);
 
       useEffect(() => {
-        if (visibleModals.dialogue === true)
+        if (visibleModals.dialogue) {
           document.getElementById('object_modal')!.style.display = 'block';
+        }
       }, [visibleModals.dialogue]);
+
+      const steps = dialogueSteps.map((desc, i) => ({
+        title: i.toString(),
+        content: <Step description={desc} hideModal={hideModal} />,
+      }));
 
       return (
         <ModalWrapperLite id='object_modal' isOpen={visibleModals.dialogue}>
-          <Stepper steps={steps} hideModal={hideModal} description={description} />
+          {dialogueSteps.length > 0 && <Stepper steps={steps} hideModal={hideModal} />}
         </ModalWrapperLite>
       );
     }
   );
 }
 
-const StepOne = () => (
+const Step = ({ description, hideModal }: { description: string; hideModal: any }) => (
   <ModalContent>
-    <Description>
-      <Header style={{ color: 'black' }}>Click next to hear more</Header>
-      <br />
-      This is the second of a series of screens that introduce new players to the game.
-    </Description>
+    <AlignRight>
+      <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+        X
+      </TopButton>
+    </AlignRight>
+    <Description>{description}</Description>
   </ModalContent>
 );
-
-const StepTwo = (props: any) => {
-  const { description, hideModal } = props;
-
-  return (
-    <ModalContent>
-      <AlignRight>
-        <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
-          X
-        </TopButton>
-      </AlignRight>
-      <Description>{description}</Description>
-    </ModalContent>
-  );
-};
-
-const steps = (props: any) => [
-  {
-    title: 'One',
-    content: <StepOne />,
-  },
-  {
-    title: 'Two',
-    content: <StepTwo description={props.description} hideModal={props.hideModal} />,
-    modalContent: true,
-  },
-];
 
 const Header = styled.p`
   font-size: 24px;
