@@ -2,7 +2,7 @@ import { EntityIndex } from '@latticexyz/recs';
 import create from 'zustand';
 
 export interface Dialogue {
-  description: string;
+  description: string[];
 }
 
 export interface Kami {
@@ -59,7 +59,7 @@ const nonExistingEntityIndex: EntityIndex = 0;
 
 export const dataStore = create<StoreState & StoreActions>((set) => {
   const initialState: StoreState = {
-    dialogue: { description: '' },
+    dialogue: { description: [] },
     roomExits: { up: 0, down: 0, left: 0, right: 0 },
     visibleModals: {
       chat: false,
