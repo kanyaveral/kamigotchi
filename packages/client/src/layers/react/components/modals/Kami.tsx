@@ -98,27 +98,6 @@ export function registerKamiModal() {
         );
       };
 
-      const statsBox = () => {
-        return (
-          <KamiBox
-            style={{
-              maxWidth: '50%',
-            }}
-          >
-            <KamiText>HEALTH</KamiText>
-            <KamiFacts>{hexToString(dets?.stats.health)} </KamiFacts>
-            <KamiText>POWER</KamiText>
-            <KamiFacts>{hexToString(dets?.stats.power)} </KamiFacts>
-            <KamiText>VIOLENCE</KamiText>
-            <KamiFacts>{hexToString(dets?.stats.violence)} </KamiFacts>
-            <KamiText>HARMONY</KamiText>
-            <KamiFacts>{hexToString(dets?.stats.harmony)}</KamiFacts>
-            <KamiText>SLOTS</KamiText>
-            <KamiFacts>{hexToString(dets?.stats.slots)} </KamiFacts>
-          </KamiBox>
-        );
-      };
-
       const affinitiesBox = () => {
         const str = dets?.affinities?.reduce((ac, x) => (ac = ac + ' | ' + x));
         return <KamiText>{str}</KamiText>;
@@ -126,28 +105,38 @@ export function registerKamiModal() {
 
       return (
         <ModalWrapperFull divName='kami' id='kamiModal'>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: '0px',
-            }}
-          >
+          <TopDiv>
             <KamiImage src={dets?.uri} />
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
+            <div style ={{
+              display: 'grid'
+            }}>
               <KamiName>{dets?.name} </KamiName>
-              <KamiText>{affinitiesBox()}</KamiText>
+              <KamiText
+              style={{gridRow: 2, gridColumnStart: 1, gridColumnEnd: 5, margin: '10px'}}>
+                {affinitiesBox()}
+              </KamiText>
+              <StatBox style= {{gridRow: 3, gridColumn: 1, marginLeft: '5px'}}>
+                <KamiText> Health </KamiText>
+                <KamiFacts> {hexToString(dets?.stats.health)} </KamiFacts>
+              </StatBox>
+              <StatBox style= {{gridRow: 3, gridColumn: 2, marginLeft: '5px'}}>
+                <KamiText> Power </KamiText>
+                <KamiFacts> {hexToString(dets?.stats.power)} </KamiFacts>
+              </StatBox>
+              <StatBox style= {{gridRow: 3, gridColumn: 3, marginLeft: '5px'}}>
+                <KamiText> Violence </KamiText>
+                <KamiFacts> {hexToString(dets?.stats.violence)} </KamiFacts>
+              </StatBox>
+              <StatBox style= {{gridRow: 3, gridColumn: 4, marginLeft: '5px'}}>
+                <KamiText> Harmony </KamiText>
+                <KamiFacts> {hexToString(dets?.stats.harmony)} </KamiFacts>
+              </StatBox>
+              <StatBox style= {{gridRow: 3, gridColumn: 5, marginLeft: '5px'}}>
+                <KamiText> Harmony </KamiText>
+                <KamiFacts> {hexToString(dets?.stats.slots)} </KamiFacts>
+              </StatBox>
             </div>
-          </div>
+          </TopDiv>
           <div
             style={{
               display: 'flex',
@@ -157,8 +146,6 @@ export function registerKamiModal() {
               padding: '10px',
             }}
           >
-            {statsBox()}
-            <Line> </Line>
             {traitBox()}
           </div>
         </ModalWrapperFull>
@@ -188,43 +175,44 @@ const KamiBox = styled.div`
   grid-column-gap: 10px;
 `;
 
+const KamiText = styled.p`
+  background-color: #ffffff;
+  color: black;
+  font-size: 14px;
+  font-family: Pixel;
+  grid-row: 1
+`;
+
 const KamiFacts = styled.div`
   background-color: #ffffff;
   color: black;
   font-size: 20px;
   font-weight: 600;
   font-family: Pixel;
-  margin: 0px;
-  padding: 5px;
-`;
-
-const KamiText = styled.p`
-  background-color: #ffffff;
-  color: black;
-  font-size: 14px;
-  font-family: Pixel;
-  margin: 0px;
-  padding: 0px;
+  margin: auto;
+  grid-row: 2
 `;
 
 const KamiName = styled.div`
-  grid-row: 2;
+  grid-row: 1;
+  grid-column-start: 1;
+  grid-column-end: 5;
   font-size: 36px;
   color: #333;
-  text-align: center;
   font-weight: bold;
-  padding: 0px 0px 20px 0px;
+  padding: 10px;
   font-family: Pixel;
 `;
 
 const KamiImage = styled.img`
-  height: 250px;
-  width: 250px;
+  height: 200px;
+  width: 200px;
   margin: 0px;
-  padding: 10px;
+  padding: 0px;
   grid-row: 1 / span 1;
-  border-width: 1px;
+  border-width: 0px 2px 0px 0px;
   border-color: black;
+  border-style: solid;
 `;
 
 const Line = styled.div`
@@ -233,4 +221,20 @@ const Line = styled.div`
   border-color: black;
   color: black;
   height: 200px;
+`;
+
+const TopDiv = styled.div`
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  display: flex;
+  padding: 0px;
+`;
+
+const StatBox = styled.div`
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  padding: 5px;
+  display: grid;
 `;
