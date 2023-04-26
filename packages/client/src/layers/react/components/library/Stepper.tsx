@@ -29,6 +29,7 @@ const StepButton = styled.button`
 
 export const Stepper = (props: any) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const { handleSubmit, name, submit } = props;
 
   const steps = typeof props.steps === 'function' ? props.steps(props) : props.steps;
 
@@ -53,6 +54,16 @@ export const Stepper = (props: any) => {
       {currentStep < steps.length && (
         <StepButton style={{ pointerEvents: 'auto' }} onClick={handleNext}>
           Next
+        </StepButton>
+      )}
+      {submit && currentStep === steps.length && (
+        <StepButton
+          style={{ pointerEvents: 'auto' }}
+          onClick={() => {
+            handleSubmit(name);
+          }}
+        >
+          Submit
         </StepButton>
       )}
     </>
