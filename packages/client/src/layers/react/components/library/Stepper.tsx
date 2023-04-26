@@ -6,7 +6,7 @@ const StepsWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 0px;
 `;
 
 const StepButton = styled.button`

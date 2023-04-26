@@ -108,9 +108,9 @@ export function registerKamiMintModal() {
 const StepOne = () => (
   <>
     <Description>
-      <Header style={{ color: 'black' }}>Click next to hear more</Header>
+      <Header style={{ color: 'black' }}>Vending Machine</Header>
       <br />
-      This is the second of a series of screens that introduce new players to the game.
+      There's some sort of vending machine here. A machine for NFTs. You hope it can be trusted.
     </Description>
   </>
 );
@@ -156,7 +156,7 @@ const CenterBox = styled.div`
 `;
 
 const Description = styled.p`
-  font-size: 22px;
+  font-size: 20px;
   color: #333;
   text-align: center;
   padding: 10px;

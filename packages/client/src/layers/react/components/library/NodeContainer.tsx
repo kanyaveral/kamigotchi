@@ -60,11 +60,19 @@ export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
       <div className="text-container">
         <p>{node.name}</p>
         <div className="text1">{node.text1 ?? '(Eerie) Remote Hillside'}</div>
-        <div className="text2">
+        <KamiText className="text2">
           {node.text2 ??
             'This is a node. You can harvest from it by using your Kamigotchi! This is the only way to get $KAMI, the only hope you have to find self worth.'}
-        </div>
+        </KamiText>
       </div>
     </NodeInfoContainer>
   );
 };
+
+const KamiText = styled.p`
+  background-color: #ffffff;
+  color: black;
+  font-size: 14px;
+  font-family: Pixel;
+  grid-row: 1
+`;
