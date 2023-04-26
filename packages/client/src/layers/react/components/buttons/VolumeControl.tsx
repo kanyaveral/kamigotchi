@@ -13,7 +13,7 @@ export function registerVolumeControl() {
       colStart: 82,
       colEnd: 92,
       rowStart: 5,
-      rowEnd: 13,
+      rowEnd: 12,
     },
     (layers) => of(layers),
     () => {

@@ -58,11 +58,11 @@ export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
         alt={node.name}
       />
       <div className="text-container">
-        <p>{node.name}</p>
-        <div className="text1">{node.text1 ?? '(Eerie) Remote Hillside'}</div>
+        <Header>{node.name}</Header>
+        <BoldKamiText className="text1">{node.text1 ?? '(Eerie) Remote Hillside'}</BoldKamiText>
         <KamiText className="text2">
           {node.text2 ??
-            'This is a node. You can harvest from it by using your Kamigotchi! This is the only way to get $KAMI, the only hope you have to find self worth.'}
+            'This is a node. You can harvest from it by using your Kamigotchi! This is the only way to get $KAMI.'}
         </KamiText>
       </div>
     </NodeInfoContainer>
@@ -74,5 +74,25 @@ const KamiText = styled.p`
   color: black;
   font-size: 14px;
   font-family: Pixel;
-  grid-row: 1
+  grid-row: 1;
+  padding-bottom: 10px;
+`;
+
+const BoldKamiText = styled.p`
+  background-color: #ffffff;
+  color: black;
+  font-size: 14px;
+  font-family: Pixel;
+  grid-row: 1;
+  font-weight: 600;
+`;
+
+const Header = styled.p`
+  background-color: #ffffff;
+  color: black;
+  font-size: 20px;
+  font-family: Pixel;
+  grid-row: 1;
+  font-weight: 600;
+  padding-top: 10px;
 `;
