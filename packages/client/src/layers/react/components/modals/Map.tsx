@@ -44,13 +44,13 @@ export function registerMapModal() {
               }),
             ])
           )[0];
-          const health = getComponentValue(Stamina, accountEntityIndex)?.value ?? 0;
+          const stamina = getComponentValue(Stamina, accountEntityIndex)?.value ?? 0;
 
           const currentRoom = getCurrentRoom(Location, accountEntityIndex);
           return {
             actions,
             api: player,
-            data: { currentRoom, health },
+            data: { currentRoom, stamina },
           };
         })
       );
@@ -148,13 +148,13 @@ export function registerMapModal() {
         />
       );
 
-      const MAX_OPERATOR_HEALTH = 20;
-      const operatorStaminaPercentage = ((data.health * 1) / MAX_OPERATOR_HEALTH) * 100;
+      const MAX_OPERATOR_STAMINA = 20;
+      const operatorStaminaPercentage = ((data.stamina * 1) / MAX_OPERATOR_STAMINA) * 100;
 
       return (
         <ModalWrapperFull id='world_map' divName='map'>
           <Map highlightedRoom={`room${data.currentRoom}`} />
-          {data.health && <BatteryComponent level={operatorStaminaPercentage} />}
+          {data.stamina && <BatteryComponent level={operatorStaminaPercentage} />}
           <ButtonWrapper style={{ marginRight: '8.3%' }}>{UpButton}</ButtonWrapper>
           <ButtonWrapper>
             {LeftButton}
