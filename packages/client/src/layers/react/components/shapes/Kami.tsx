@@ -12,12 +12,13 @@ import { Layers } from 'src/types';
 import { Account, getAccount } from './Account';
 import { Production, getProduction } from './Production';
 import { Stats, getStats } from './Stats';
-import { Trait, getTrait } from './Trait';
+import { Traits, TraitIndices, getTraits } from './Trait';
 
 // standardized shape of a Kami Entity
 export interface Kami {
   id: EntityID;
   index: string;
+  entityIndex: EntityIndex;
   name: string;
   uri: string;
   health: number;
@@ -26,11 +27,7 @@ export interface Kami {
   account?: Account;
   production?: Production;
   stats: Stats;
-  background?: Trait;
-  body?: Trait;
-  color?: Trait;
-  face?: Trait;
-  hand?: Trait;
+  traits?: Traits;
   affinities?: string[];
 }
 
@@ -74,6 +71,7 @@ export const getKami = (
   let kami: Kami = {
     id: world.entities[index],
     index: getComponentValue(PetIndex, index)?.value as string,
+    entityIndex: index,
     name: getComponentValue(Name, index)?.value as string,
     uri: getComponentValue(MediaURI, index)?.value as string,
     health: getComponentValue(HealthCurrent, index)?.value as number,
@@ -117,17 +115,26 @@ export const getKami = (
     }
 
     // adding traits
-    kami.background = getTrait(layers, traitPointer(BackgroundIndex));
-    kami.body = getTrait(layers, traitPointer(BodyIndex));
-    kami.color = getTrait(layers, traitPointer(ColorIndex));
-    kami.face = getTrait(layers, traitPointer(FaceIndex));
-    kami.hand = getTrait(layers, traitPointer(HandIndex));
+    const backgroundIndex = traitPointer(BackgroundIndex);
+    const bodyIndex = traitPointer(BodyIndex);
+    const colorIndex = traitPointer(ColorIndex);
+    const faceIndex = traitPointer(FaceIndex);
+    const handIndex = traitPointer(HandIndex);
+
+    const traitIndices: TraitIndices = {
+      backgroundIndex,
+      bodyIndex,
+      colorIndex,
+      faceIndex,
+      handIndex,
+    }
+    kami.traits = getTraits(layers, traitIndices);
 
     // adding affinities
     kami.affinities = [
-      kami.body.affinity,
-      kami.hand.affinity,
-      kami.face.affinity,
+      kami.traits.body.affinity,
+      kami.traits.hand.affinity,
+      kami.traits.face.affinity,
     ]
   }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import {
@@ -182,17 +182,13 @@ export function registerPartyModal() {
       // console.log('PartyM: data', data);
       const { visibleModals, setVisibleModals, selectedEntities, setSelectedEntities } =
         dataStore();
-      const [lastRefresh, setLastRefresh] = useState(Date.now());
 
       /////////////////
-      // TICKING
-
-      function refreshClock() {
-        setLastRefresh(Date.now());
-      }
+      // STATE TRACKING
 
       const scrollableRef = useRef<HTMLDivElement>(null);
       const [scrollPosition, setScrollPosition] = useState<number>(0);
+      const [lastRefresh, setLastRefresh] = useState(Date.now());
 
       useEffect(() => {
         const handleScroll = () => {
@@ -210,8 +206,12 @@ export function registerPartyModal() {
         };
       }, []);
 
+      // ticking
       useEffect(() => {
-        const timerId = setInterval(refreshClock, 1000);
+        const refreshClock = () => {
+          setLastRefresh(Date.now());
+        }
+        const timerId = setInterval(refreshClock, 3000);
         return function cleanup() {
           clearInterval(timerId);
         };
@@ -296,14 +296,13 @@ export function registerPartyModal() {
           actions.Action,
           world.entityToIndex.get(actionID) as EntityIndex
         );
-        openKamiModal(pet);
+        openKamiModal(pet.entityIndex);
       };
 
-      const openKamiModal = (kami: Kami) => {
-        const description = kami.index;
+      const openKamiModal = (entityIndex: EntityIndex) => {
         setSelectedEntities({
           ...selectedEntities,
-          kami: { ...selectedEntities.kami, description },
+          kami: entityIndex,
         });
         setVisibleModals({ ...visibleModals, kami: true });
       };
@@ -499,7 +498,7 @@ export function registerPartyModal() {
       );
 
       const InfoButton = (kami: Kami) => (
-        <ActionButton id={`info-button`} onClick={() => openKamiModal(kami)} text='i' />
+        <ActionButton id={`info-button`} onClick={() => openKamiModal(kami.entityIndex)} text='i' />
       );
 
       const selectAction = (kami: Kami) => {

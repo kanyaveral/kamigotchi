@@ -1,10 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
-import { EntityID, Has, HasValue, getComponentValue, runQuery } from '@latticexyz/recs';
+import {
+  EntityID,
+  EntityIndex,
+  Has,
+  HasValue,
+  getComponentValue,
+  runQuery,
+} from '@latticexyz/recs';
 
 import { registerUIComponent } from 'layers/react/engine/store';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
+import {
+  ActionListButton,
+  Option as ActionListOption,
+} from 'layers/react/components/library/ActionListButton';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { Account, getAccount } from 'layers/react/components/shapes/Account';
 import { Kami, getKami } from 'layers/react/components/shapes/Kami';
@@ -63,6 +74,7 @@ export function registerNodeModal() {
         State.update$
       ).pipe(
         map(() => {
+
           /////////////////
           // ROOT DATA
 
@@ -75,52 +87,54 @@ export function registerNodeModal() {
               }),
             ])
           )[0];
-
           const account =
             accountIndex !== undefined ? getAccount(layers, accountIndex) : ({} as Account);
 
           // get the node through the location of the linked account
-          const nodeIndex = Array.from(
-            runQuery([Has(IsNode), HasValue(Location, { value: account.location })])
+          const nodeEntityIndex = Array.from(
+            runQuery([
+              Has(IsNode),
+              HasValue(Location, {
+                value: account.location
+              }),
+            ])
           )[0];
+          const node = nodeEntityIndex !== undefined ? getNode(layers, nodeEntityIndex) : ({} as Node);
 
-          const node = nodeIndex !== undefined ? getNode(layers, nodeIndex) : ({} as Node);
+          // get the selected Node
+
 
           /////////////////
           // DEPENDENT DATA
 
-          // get the kamis on this account
-          let accountKamis: Kami[] = [];
-          if (account && node) {
+          // get the resting kamis on this account
+          let restingKamis: Kami[] = [];
+          if (account) {
             const accountKamiIndices = Array.from(
-              runQuery([Has(IsPet), HasValue(AccountID, { value: account.id })])
+              runQuery([
+                Has(IsPet),
+                HasValue(AccountID, { value: account.id }),
+                HasValue(State, { value: "RESTING" }),
+              ])
             );
 
-            // get all kamis on the node
-            for (let i = 0; i < accountKamiIndices.length; i++) {
-              accountKamis.push(getKami(layers, accountKamiIndices[i], { production: true }));
-            }
-
-            // filter by the kamis with active productions on the current node
-            // we can assume there is at most one
-            if (accountKamis) {
-              const kamisOnNode = accountKamis.filter((kami) => {
-                if (!node) return false;
-
-                if (kami.production && kami.production.state === 'ACTIVE') {
-                  return kami.production.node!.id === node.id;
-                }
-              });
-              accountKamis = kamisOnNode;
-            }
+            restingKamis = accountKamiIndices.map((kamiIndex) => {
+              return getKami(layers, kamiIndex);
+            });
           }
 
           // get the productions on this node
           let nodeKamis: Kami[] = [];
+          let nodeKamisMine: Kami[] = [];
+          let nodeKamisOthers: Kami[] = [];
           if (node) {
             // populate the account Kamis
             const nodeProductionIndices = Array.from(
-              runQuery([Has(IsProduction), HasValue(NodeID, { value: node.id })])
+              runQuery([
+                Has(IsProduction),
+                HasValue(NodeID, { value: node.id }),
+                HasValue(State, { value: "ACTIVE" }),
+              ])
             );
 
             for (let i = 0; i < nodeProductionIndices.length; i++) {
@@ -132,14 +146,16 @@ export function registerNodeModal() {
               nodeKamis.push(getKami(layers, kamiIndex!, { account: true, production: true }));
             }
 
-            // filter out accountKamis and inactive productions
+            // split node kamis between mine and others
             if (nodeKamis) {
-              const activeEnemies = nodeKamis.filter((kami) => {
-                if (kami.production && kami.production.state === 'ACTIVE') {
-                  return kami.account!.id !== account.id;
-                }
+              const activeMine = nodeKamis.filter((kami) => {
+                return kami.account!.id === account.id;
               });
-              nodeKamis = activeEnemies;
+              const activeOthers = nodeKamis.filter((kami) => {
+                return kami.account!.id !== account.id;
+              });
+              nodeKamisMine = activeMine;
+              nodeKamisOthers = activeOthers;
             }
           }
 
@@ -147,8 +163,14 @@ export function registerNodeModal() {
             actions,
             api: player,
             data: {
-              account: { ...account, kamis: accountKamis }, // account => kami[] => production
-              node: { ...node, kamis: nodeKamis }, // node => production[] => kami
+              account: { ...account, kamis: restingKamis },
+              node: {
+                ...node,
+                kamis: {
+                  mine: nodeKamisMine,
+                  others: nodeKamisOthers,
+                },
+              },
             } as any,
           };
         })
@@ -158,16 +180,38 @@ export function registerNodeModal() {
     // Render
     ({ actions, api, data }) => {
       // console.log('data', data);
-      const [lastRefresh, setLastRefresh] = useState(Date.now());
+
       /////////////////
-      // TICKING
+      // STATE TRACKING
 
-      function refreshClock() {
-        setLastRefresh(Date.now());
-      }
+      const scrollableRef = useRef<HTMLDivElement>(null);
+      const [scrollPosition, setScrollPosition] = useState<number>(0);
+      const [lastRefresh, setLastRefresh] = useState(Date.now());
+      const [tab, setTab] = useState<'mine' | 'others'>('mine');
 
+      // scrolling
       useEffect(() => {
-        const timerId = setInterval(refreshClock, 2000);
+        const handleScroll = () => {
+          if (scrollableRef.current) {
+            setScrollPosition(scrollableRef.current.scrollTop);
+          }
+        };
+        if (scrollableRef.current) {
+          scrollableRef.current.addEventListener('scroll', handleScroll);
+        }
+        return () => {
+          if (scrollableRef.current) {
+            scrollableRef.current.removeEventListener('scroll', handleScroll);
+          }
+        };
+      }, []);
+
+      // ticking
+      useEffect(() => {
+        const refreshClock = () => {
+          setLastRefresh(Date.now());
+        }
+        const timerId = setInterval(refreshClock, 3000);
         return function cleanup() {
           clearInterval(timerId);
         };
@@ -175,6 +219,21 @@ export function registerNodeModal() {
 
       ///////////////////
       // ACTIONS
+
+      // starts a production for the given pet and node
+      const start = (kami: Kami, node: Node) => {
+        const actionID = `Starting Harvest` as EntityID; // Date.now to have the actions ordered in the component browser
+        actions.add({
+          id: actionID,
+          components: {},
+          // on: data.????,
+          requirement: () => true,
+          updates: () => [],
+          execute: async () => {
+            return api.production.start(kami.id, node.id);
+          },
+        });
+      };
 
       // collects on an existing production
       const collect = (production: Production) => {
@@ -295,34 +354,88 @@ export function registerNodeModal() {
       ///////////////////
       // DISPLAY
 
-      // stop production action button
-      const StopButton = (myKami: Kami) => (
-        <ActionButton id={`harvest-stop`} onClick={() => stop(myKami.production!)} text='Stop' />
-      );
-
-      // liquidate production action button
-      // TODO: update this to check if myKami is not empty. disable button if so
-      const LiquidateButton = (myKami: Kami, enemyKami: Kami) => (
+      // button for tabbing over to my Kamis
+      const MyTabButton = () => (
         <ActionButton
-          id={`harvest-liquidate`}
-          onClick={() => liquidate(myKami, enemyKami)}
-          text='liquidate (1)'
+          id={`my-tab`}
+          onClick={() => setTab('mine')}
+          text='Allies'
         />
       );
 
+      // button for tabbing over to enemy Kamis
+      const EnemyTabButton = () => (
+        <ActionButton
+          id={`enemy-tab`}
+          onClick={() => setTab('others')}
+          text='Enemies'
+        />
+      );
+
+      // button for adding Kami to node
+      const AddButton = (node: Node, restingKamis: Kami[]) => {
+        const options: ActionListOption[] = restingKamis.map((kami) => {
+          return { text: `${kami.name}`, onClick: () => start(kami, node) }
+        });
+        return (
+          <ActionListButton
+            id={`harvest-add`}
+            text='Add Kami'
+            hidden={true}
+            scrollPosition={scrollPosition}
+            options={options}
+            disabled={restingKamis.length == 0}
+          />
+        );
+      };
+
+      // button for collecting on production
+      const CollectButton = (myKami: Kami) => (
+        <ActionButton
+          id={`harvest-collect`}
+          onClick={() => collect(myKami.production!)}
+          text='Collect'
+        />
+      );
+
+      // button for stopping production
+      const StopButton = (myKami: Kami) => (
+        <ActionButton
+          id={`harvest-stop`}
+          onClick={() => stop(myKami.production!)}
+          text='Stop'
+        />
+      );
+
+      // button for liquidating production
+      const LiquidateButton = (target: Kami, soldiers: Kami[]) => {
+        const options: ActionListOption[] = soldiers.map((myKami) => {
+          return { text: `${myKami.name}`, onClick: () => liquidate(myKami, target) }
+        });
+
+        return (
+          <ActionListButton
+            id={`liquidate-button-${target.index}`}
+            text='Liquidate'
+            hidden={true}
+            scrollPosition={scrollPosition}
+            options={options}
+            disabled={soldiers.length == 0}
+          />
+        );
+      };
+
       // rendering of my kami on this node
-      // NOTE: the smart contract does not currently gate multiple kamis being
-      // on the same node. The above data population just grabs the first one.
-      const MyKamiCard = (kami: Kami) => {
+      const MyKard = (kami: Kami) => {
         const health = calcHealth(kami, 0);
-        const harvestRate = roundTo(calcProductionRate(kami) * 3600, 1);
         const healthPercent = Math.round((health / kami.stats.health) * 100);
+        const output = calcOutput(kami);
 
         const description = [
           '',
           `Health: ${health}/${kami.stats.health * 1}`, // multiply by 1 to interpret hex
+          `Harmony: ${kami.stats.harmony * 1}`,
           `Violence: ${kami.stats.violence * 1}`,
-          `$KAMI: ${calcOutput(kami)} (+${harvestRate.toFixed(1)}/hr)`,
         ];
 
         return (
@@ -330,60 +443,64 @@ export function registerNodeModal() {
             key={kami.id}
             title={kami.name}
             image={kami.uri}
-            subtext={'yours'}
-            action={StopButton(kami)}
+            subtext={`yours (\$${output})`}
+            action={[CollectButton(kami), StopButton(kami)]}
             cornerContent={<BatteryComponent level={healthPercent} />}
             description={description}
           />
         );
       };
 
-      // rendering of enemy kami (production) on this node
-      const EnemyKamiCard = (enemyKami: Kami, myKami: Kami) => {
-        const health = calcHealth(enemyKami, 0);
-        const harvestRate = roundTo(calcProductionRate(enemyKami) * 3600, 1);
-        const healthPercent = Math.round((health / enemyKami.stats.health) * 100);
+      // rendering of enemy kami on this node
+      const EnemyKard = (kami: Kami, myKamis: Kami[]) => {
+        const health = calcHealth(kami, 0);
+        const healthPercent = Math.round((health / kami.stats.health) * 100);
+        const output = calcOutput(kami);
 
         const description = [
           '',
-          `Health: ${health}/${enemyKami.stats.health * 1}`, // multiply by 1 to interpret hex
-          `Harmony: ${enemyKami.stats.harmony * 1}`,
-          `$KAMI: ${calcOutput(enemyKami)} (+${harvestRate.toFixed(1)}/hr)`,
+          `Health: ${health}/${kami.stats.health * 1}`, // multiply by 1 to interpret hex
+          `Harmony: ${kami.stats.harmony * 1}`,
+          `Violence: ${kami.stats.violence * 1}`,
         ];
 
         return (
           <KamiCard
-            key={enemyKami.id}
-            title={enemyKami.name}
-            image={enemyKami.uri}
-            subtext={enemyKami.account!.name}
-            action={LiquidateButton(myKami, enemyKami)}
+            key={kami.id}
+            title={kami.name}
+            image={kami.uri}
+            subtext={`${kami.account!.name} (\$${output})`}
+            action={LiquidateButton(kami, myKamis)}
             cornerContent={<BatteryComponent level={healthPercent} />}
             description={description}
           />
         );
       };
 
-      // the rendering of all the enemy kamis on this node
-      // may be easier/better to pass in the list of Productions instead
-      const EnemyProductions = (kamis: Kami[], myKami: Kami) => {
-        return kamis.map((kami: Kami) => EnemyKamiCard(kami, myKami));
+      // the rendering of all my kamis on this node
+      const MyKards = (myKamis: Kami[]) => {
+        let kardList = myKamis.map((kami: Kami) => MyKard(kami));
+        kardList.push(<Underline />);
+        kardList.push(AddButton(data.node, data.account.kamis));
+        return kardList;
+      };
+
+      // the rendering of all enemy kamis on this node
+      const EnemyKards = (enemies: Kami[], myKamis: Kami[]) => {
+        return enemies.map((enemyKami: Kami) => EnemyKard(enemyKami, myKamis));
       };
 
       if (data.node.id) {
         return (
           <ModalWrapperFull id='node' divName='node' fill={true}>
-            {<NodeInfo node={data.node} />}
-            <Scrollable>
-              <WrappedKamis>
-                {data.account.kamis.map((kami: Kami) => MyKamiCard(kami))}
-              </WrappedKamis>
-            </Scrollable>
-            <Underline />
-            <Scrollable>
-              <WrappedKamis>
-                {EnemyProductions(data.node.kamis, data.account.kamis[0])}
-              </WrappedKamis>
+            <NodeInfo node={data.node} />
+            {MyTabButton()}
+            {EnemyTabButton()}
+            <Scrollable ref={scrollableRef}>
+              {(tab === 'mine')
+                ? MyKards(data.node.kamis.mine)
+                : EnemyKards(data.node.kamis.others, data.node.kamis.mine)
+              }
             </Scrollable>
           </ModalWrapperFull>
         );
@@ -400,8 +517,8 @@ export function registerNodeModal() {
 }
 
 const Scrollable = styled.div`
-  overflow: auto;
-  max-height: 50%;
+  overflow-y: scroll;
+  max-height: 100%;
 `;
 
 const Underline = styled.div`
@@ -409,10 +526,4 @@ const Underline = styled.div`
   margin: 3% auto;
   border-bottom: 2px solid silver;
   font-weight: bold;
-`;
-
-const WrappedKamis = styled.div`
-  display: 'flex';
-  flex-direction: column;
-  margin: 10px;
 `;
