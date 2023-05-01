@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BigNumber, BigNumberish } from 'ethers';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 
@@ -24,7 +24,6 @@ export function registerKamiModal() {
           components: { Balance, IsPet, MediaURI, PetID },
         },
       } = layers;
-
       return merge(IsPet.update$, Balance.update$, PetID.update$, MediaURI.update$).pipe(
         map(() => {
           return {
@@ -35,7 +34,7 @@ export function registerKamiModal() {
     },
 
     ({ layers }) => {
-      const { selectedEntities: { kami } } = dataStore();
+      const { selectedEntities: { kami }, visibleModals, setVisibleModals } = dataStore();
 
       /////////////////
       // Get values
@@ -88,8 +87,15 @@ export function registerKamiModal() {
         return <KamiText>{str}</KamiText>;
       };
 
+      const hideModal = useCallback(() => {
+        setVisibleModals({ ...visibleModals, kami: false });
+      }, [setVisibleModals, visibleModals]);
+
       return (
         <ModalWrapperFull divName='kami' id='kamiModal'>
+        <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+          X
+        </TopButton>
           <TopDiv>
             <KamiImage src={dets?.uri} />
             <div style={{
@@ -218,4 +224,23 @@ const StatBox = styled.div`
   padding: 5px;
   display: grid;
   margin: 2px;
+`;
+
+const TopButton = styled.button`
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 5px;
+  font-family: Pixel;
+  width: 30px;
+  &:active {
+    background-color: #c4c4c4;
+  }
+  margin: 0px;
 `;
