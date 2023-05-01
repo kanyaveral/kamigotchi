@@ -38,7 +38,6 @@ export const ModalWrapperFull = (props: Props) => {
       style={wrapperStyle}
     >
       <Content style={contentStyle}>
-        <ExitButton divName={props.divName} />
         {props.children}
       </Content>
     </Wrapper>

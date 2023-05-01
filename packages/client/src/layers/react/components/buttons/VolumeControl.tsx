@@ -10,9 +10,9 @@ export function registerVolumeControl() {
   registerUIComponent(
     'VolumeControl',
     {
-      colStart: 82,
-      colEnd: 92,
-      rowStart: 5,
+      colStart: 80,
+      colEnd: 87,
+      rowStart: 3,
       rowEnd: 12,
     },
     (layers) => of(layers),

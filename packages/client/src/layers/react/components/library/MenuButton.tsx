@@ -23,13 +23,11 @@ export const MenuButton = (props: Props) => {
   };
 
   return (
-    <Wrapper id={props.id}>
-      <Content>
+    <div id={props.id}>
         <Button style={{ pointerEvents: 'auto' }} onClick={handleToggle}>
           {props.children}
         </Button>
-      </Content>
-    </Wrapper>
+    </div>
   );
 }
 
@@ -39,36 +37,8 @@ interface Props {
   children: React.ReactNode;
 }
 
-const Wrapper = styled.div`
-  background-color: rgba(0, 0, 0, 0.5);
-  display: block;
-`;
-
-const Content = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  width: 99%;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  padding: 8px;
-`;
-
 const Button = styled.button`
-  background-color: #ffffff;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  color: black;
-  padding: 15px;
-  display: inline-block;
-  font-size: 14px;
   cursor: pointer;
-  border-radius: 5px;
-  font-family: Pixel;
 
   &:active {
     background-color: #c4c4c4;
