@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import {
@@ -24,6 +24,7 @@ import { Production, getProduction } from 'layers/react/components/shapes/Produc
 import { KamiCard } from '../library/KamiCard';
 import { BatteryComponent } from '../library/Battery';
 import { NodeInfo } from '../library/NodeContainer';
+import { dataStore } from 'layers/react/store/createStore';
 
 // merchant window with listings. assumes at most 1 merchant per room
 export function registerNodeModal() {
@@ -188,7 +189,7 @@ export function registerNodeModal() {
       const [scrollPosition, setScrollPosition] = useState<number>(0);
       const [lastRefresh, setLastRefresh] = useState(Date.now());
       const [tab, setTab] = useState<'mine' | 'others'>('mine');
-
+      const { selectedEntities: { kami }, visibleModals, setVisibleModals } = dataStore();
       // scrolling
       useEffect(() => {
         const handleScroll = () => {
@@ -490,9 +491,16 @@ export function registerNodeModal() {
         return enemies.map((enemyKami: Kami) => EnemyKard(enemyKami, myKamis));
       };
 
+      const hideModal = useCallback(() => {
+        setVisibleModals({ ...visibleModals, node: false });
+      }, [setVisibleModals, visibleModals]);
+
       if (data.node.id) {
         return (
           <ModalWrapperFull id='node' divName='node' fill={true}>
+            <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+              X
+            </TopButton>
             <NodeInfo node={data.node} />
             {MyTabButton()}
             {EnemyTabButton()}
@@ -526,4 +534,23 @@ const Underline = styled.div`
   margin: 3% auto;
   border-bottom: 2px solid silver;
   font-weight: bold;
+`;
+
+const TopButton = styled.button`
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 5px;
+  font-family: Pixel;
+  width: 30px;
+  &:active {
+    background-color: #c4c4c4;
+  }
+  margin: 0px;
 `;
