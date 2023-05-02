@@ -188,7 +188,7 @@ const StepOne = () => (
     <Description>
       <Header style={{ color: 'black' }}>Welcome!</Header>
       <br />
-      This is a decentralized world. Your actions in it are your own.
+      Kamigotchi World exists entirely on-chain. 
     </Description>
   </ModalContent>
 );
@@ -198,7 +198,9 @@ const StepTwo = () => (
     <Description>
       <Header style={{ color: 'black' }}>You</Header>
       <br />
-      You do not currently exist in this world.
+      You will not be given instructions on what to do. You can move using the map.
+
+      Look for a vending machine and a gate.
     </Description>
   </ModalContent>
 );
@@ -209,7 +211,7 @@ const StepThree = (props: any) => {
   return (
     <ModalContent>
       <Description style={{ gridRow: 1 }}>
-        An entity will be created to facilitate your existence in this world. Give it a name.
+        Name your Operator.
       </Description>
       <Input
         style={{ gridRow: 2, pointerEvents: 'auto' }}
