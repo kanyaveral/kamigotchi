@@ -15,7 +15,7 @@ export function regiesterDetectAccountModal() {
     'DetectMint',
     {
       colStart: 40,
-      colEnd: 60,
+      colEnd: 70,
       rowStart: 20,
       rowEnd: 60,
     },
@@ -188,7 +188,10 @@ const StepOne = () => (
     <Description>
       <Header style={{ color: 'black' }}>Welcome!</Header>
       <br />
-      Kamigotchi World exists entirely on-chain. 
+      Kamigotchi World exists entirely on-chain.
+      <br />
+      <br />
+      It currently uses a burner wallet in your LocalStorage for testing.
     </Description>
   </ModalContent>
 );
@@ -196,11 +199,12 @@ const StepOne = () => (
 const StepTwo = () => (
   <ModalContent>
     <Description>
-      <Header style={{ color: 'black' }}>You</Header>
+      <Header style={{ color: 'black' }}>Tips</Header>
       <br />
-      You will not be given instructions on what to do. You can move using the map.
-
-      Look for a vending machine and a gate.
+      You can move using the map.
+      <br/>
+      <br/>
+      Look for a vending machine and for Nodes scattered throughout the world.
     </Description>
   </ModalContent>
 );
@@ -211,7 +215,7 @@ const StepThree = (props: any) => {
   return (
     <ModalContent>
       <Description style={{ gridRow: 1 }}>
-        Name your Operator.
+        Now, give yourself a name.
       </Description>
       <Input
         style={{ gridRow: 2, pointerEvents: 'auto' }}
