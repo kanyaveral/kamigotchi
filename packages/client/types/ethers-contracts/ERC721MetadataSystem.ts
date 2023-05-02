@@ -31,9 +31,10 @@ export interface ERC721MetadataSystemInterface extends utils.Interface {
   functions: {
     "_getBaseTraits(uint256)": FunctionFragment;
     "_getHealth(uint256)": FunctionFragment;
-    "_setRevealed(uint256,string)": FunctionFragment;
+    "_setBaseURI(string)": FunctionFragment;
     "execute(bytes)": FunctionFragment;
     "executeTyped(uint256)": FunctionFragment;
+    "forceReveal(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "tokenURI(uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
@@ -43,9 +44,10 @@ export interface ERC721MetadataSystemInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "_getBaseTraits"
       | "_getHealth"
-      | "_setRevealed"
+      | "_setBaseURI"
       | "execute"
       | "executeTyped"
+      | "forceReveal"
       | "owner"
       | "tokenURI"
       | "transferOwnership"
@@ -60,8 +62,8 @@ export interface ERC721MetadataSystemInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "_setRevealed",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
+    functionFragment: "_setBaseURI",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "execute",
@@ -69,6 +71,10 @@ export interface ERC721MetadataSystemInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "executeTyped",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "forceReveal",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -87,12 +93,16 @@ export interface ERC721MetadataSystemInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "_getHealth", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "_setRevealed",
+    functionFragment: "_setBaseURI",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "executeTyped",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "forceReveal",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -158,8 +168,7 @@ export interface ERC721MetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    _setRevealed(
-      seed: PromiseOrValue<BigNumberish>,
+    _setBaseURI(
       baseURI: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -170,6 +179,11 @@ export interface ERC721MetadataSystem extends BaseContract {
     ): Promise<ContractTransaction>;
 
     executeTyped(
+      petIndex: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    forceReveal(
       petIndex: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -197,8 +211,7 @@ export interface ERC721MetadataSystem extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  _setRevealed(
-    seed: PromiseOrValue<BigNumberish>,
+  _setBaseURI(
     baseURI: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -209,6 +222,11 @@ export interface ERC721MetadataSystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   executeTyped(
+    petIndex: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  forceReveal(
     petIndex: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -236,8 +254,7 @@ export interface ERC721MetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    _setRevealed(
-      seed: PromiseOrValue<BigNumberish>,
+    _setBaseURI(
       baseURI: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -248,6 +265,11 @@ export interface ERC721MetadataSystem extends BaseContract {
     ): Promise<string>;
 
     executeTyped(
+      petIndex: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    forceReveal(
       petIndex: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
@@ -287,8 +309,7 @@ export interface ERC721MetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    _setRevealed(
-      seed: PromiseOrValue<BigNumberish>,
+    _setBaseURI(
       baseURI: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -299,6 +320,11 @@ export interface ERC721MetadataSystem extends BaseContract {
     ): Promise<BigNumber>;
 
     executeTyped(
+      petIndex: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    forceReveal(
       petIndex: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -327,8 +353,7 @@ export interface ERC721MetadataSystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    _setRevealed(
-      seed: PromiseOrValue<BigNumberish>,
+    _setBaseURI(
       baseURI: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -339,6 +364,11 @@ export interface ERC721MetadataSystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     executeTyped(
+      petIndex: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    forceReveal(
       petIndex: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

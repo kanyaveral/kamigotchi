@@ -58,6 +58,7 @@ contract ERC721PetTest is SetupTemplate {
     // minting
     vm.startPrank(alice);
     uint256 petID = abi.decode(_ERC721MintSystem.executeTyped(alice), (uint256));
+    vm.roll(block.number + 1);
     _assertPetState(petID, "UNREVEALED");
 
     // revealing
@@ -92,5 +93,23 @@ contract ERC721PetTest is SetupTemplate {
     vm.prank(alice);
     _KamiERC721.transferFrom(alice, bob, 1);
     _assertOwnerOutGame(1, bob);
+  }
+
+  function testForceReveal() public {
+    vm.prank(alice);
+    uint256 petID = abi.decode(_ERC721MintSystem.executeTyped(alice), (uint256));
+
+    vm.roll(block.number + 256);
+    _assertPetState(petID, "UNREVEALED");
+
+    // do something to mine the block
+    _ERC721MintSystem.executeTyped(alice);
+
+    vm.roll(block.number + 1);
+    vm.startPrank(deployer);
+    _ERC721MetadataSystem.forceReveal(LibPet.idToIndex(components, petID));
+    vm.stopPrank();
+
+    _assertPetState(petID, "RESTING");
   }
 }

@@ -5,7 +5,6 @@ import { LibString } from "solady/utils/LibString.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { System } from "solecs/System.sol";
 import { getAddressById } from "solecs/utils.sol";
-// import "forge-std/console.sol";
 
 import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { LibRandom } from "libraries/LibRandom.sol";
@@ -19,32 +18,52 @@ uint256 constant ID = uint256(keccak256("system.ERC721.metadata"));
 uint256 constant _numElements = 5;
 
 contract ERC721MetadataSystem is System {
-  uint256 _seed;
-  bool _revealed;
   string _baseURI;
 
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
-  /*********************
-   *  PET SET PIC
-   **********************/
-
-  // sets metadata with a random seed
-  // second phase of commit/reveal scheme. pet owners call directly
   function execute(bytes memory arguments) public returns (bytes memory) {
-    // checks
-    require(_revealed, "collection not yet revealed");
     uint256 petIndex = abi.decode(arguments, (uint256));
     uint256 petID = LibPet.indexToID(components, petIndex);
 
+    // checks
     uint256 accountID = LibAccount.getByAddress(components, msg.sender);
     require(LibPet.getAccount(components, petID) == accountID, "Pet: not urs");
-
-    MediaURIComponent mediaComp = MediaURIComponent(getAddressById(components, MediaURICompID));
-
-    // require(LibString.eq(mediaComp.getValue(petID), UNREVEALED_URI), "already revealed!");
     require(LibPet.isUnrevealed(components, petID), "already revealed!");
 
+    uint256 seed = LibRandom.getSeedBlockhash(LibRandom.getRevealBlock(components, petID));
+    LibRandom.removeRevealBlock(components, petID);
+
+    return reveal(petID, seed);
+  }
+
+  // needed as a backup in case user misses the 256 block window to reveal (25 minutes)
+  // pet will be forever locked as unrevealed otherwise
+  // takes previous blockhash for random seed; fairly obvious if admin bots randomness
+  function forceReveal(uint256 petIndex) public onlyOwner returns (bytes memory) {
+    uint256 petID = LibPet.indexToID(components, petIndex);
+
+    // checks
+    require(
+      uint256(blockhash(LibRandom.getRevealBlock(components, petID))) == 0,
+      "adminReveal: blockhash is valid"
+    );
+    require(LibPet.isUnrevealed(components, petID), "already revealed!");
+
+    uint256 seed = uint256(blockhash(block.number - 1));
+    LibRandom.removeRevealBlock(components, petID);
+
+    return reveal(petID, seed);
+  }
+
+  // accepts erc721 petIndex as input
+  function executeTyped(uint256 petIndex) public returns (bytes memory) {
+    return execute(abi.encode(petIndex));
+  }
+
+  // sets metadata with a random seed
+  // second phase of commit/reveal scheme. pet owners call directly
+  function reveal(uint256 petID, uint256 seed) internal returns (bytes memory) {
     // generates array of traits with weighted random
     uint256[] memory traits = new uint256[](_numElements);
     // scoping is used to save memory while execution
@@ -56,7 +75,7 @@ contract ERC721MetadataSystem is System {
       traits[4] = LibRandom.selectFromWeighted(
         keys,
         weights,
-        uint256(keccak256(abi.encode(_seed, petID, "Color")))
+        uint256(keccak256(abi.encode(seed, petID, "Color")))
       );
     }
     {
@@ -67,7 +86,7 @@ contract ERC721MetadataSystem is System {
       traits[3] = LibRandom.selectFromWeighted(
         keys,
         weights,
-        uint256(keccak256(abi.encode(_seed, petID, "Background")))
+        uint256(keccak256(abi.encode(seed, petID, "Background")))
       );
     }
     {
@@ -78,7 +97,7 @@ contract ERC721MetadataSystem is System {
       traits[2] = LibRandom.selectFromWeighted(
         keys,
         weights,
-        uint256(keccak256(abi.encode(_seed, petID, "Body")))
+        uint256(keccak256(abi.encode(seed, petID, "Body")))
       );
     }
     {
@@ -89,7 +108,7 @@ contract ERC721MetadataSystem is System {
       traits[1] = LibRandom.selectFromWeighted(
         keys,
         weights,
-        uint256(keccak256(abi.encode(_seed, petID, "Hand")))
+        uint256(keccak256(abi.encode(seed, petID, "Hand")))
       );
     }
     {
@@ -100,7 +119,7 @@ contract ERC721MetadataSystem is System {
       traits[0] = LibRandom.selectFromWeighted(
         keys,
         weights,
-        uint256(keccak256(abi.encode(_seed, petID, "Face")))
+        uint256(keccak256(abi.encode(seed, petID, "Face")))
       );
     }
 
@@ -113,6 +132,7 @@ contract ERC721MetadataSystem is System {
 
     // set media uri with the packed attributes key
     uint256 packed = LibRandom.packArray(traits, 8);
+    MediaURIComponent mediaComp = MediaURIComponent(getAddressById(components, MediaURICompID));
     mediaComp.set(
       petID,
       // LibString.concat(_baseURI, LibString.concat(LibString.toString(packed), ".gif"))
@@ -121,11 +141,6 @@ contract ERC721MetadataSystem is System {
 
     LibPet.reveal(components, petID);
     return "";
-  }
-
-  // accepts erc721 petIndex as input
-  function executeTyped(uint256 petIndex) public returns (bytes memory) {
-    return execute(abi.encode(petIndex));
   }
 
   /*********************
@@ -205,12 +220,7 @@ contract ERC721MetadataSystem is System {
    *  CONFIG FUNCTIONS
    **********************/
 
-  // sets a seed. maybe VRF in future
-  // TODO: update this to a more appropriate name
-  function _setRevealed(uint256 seed, string memory baseURI) public onlyOwner {
-    require(!_revealed, "already revealed");
-    _seed = seed;
+  function _setBaseURI(string memory baseURI) public onlyOwner {
     _baseURI = baseURI;
-    _revealed = true;
   }
 }
