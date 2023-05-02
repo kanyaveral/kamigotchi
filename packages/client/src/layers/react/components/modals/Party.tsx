@@ -220,53 +220,8 @@ export function registerPartyModal() {
       /////////////////
       // INTERACTIONS
 
-      // starts a production for the given pet on the node in the room
-      const startProduction = (petID: EntityID) => {
-        const actionID = `Starting Harvest` as EntityID; // Date.now to have the actions ordered in the component browser
-        actions.add({
-          id: actionID,
-          components: {},
-          // on: data.????,
-          requirement: () => true,
-          updates: () => [],
-          execute: async () => {
-            return api.production.start(petID, data.node.id);
-          },
-        });
-      };
-
-      // stops a production
-      const stopProduction = (productionID: EntityID) => {
-        const actionID = `Stopping Harvest` as EntityID; // Date.now to have the actions ordered in the component browser
-        actions.add({
-          id: actionID,
-          components: {},
-          // on: data.????,
-          requirement: () => true,
-          updates: () => [],
-          execute: async () => {
-            return api.production.stop(productionID);
-          },
-        });
-      };
-
-      // collects on an existing production
-      const reapProduction = (productionID: EntityID) => {
-        const actionID = `Collecting Harvest` as EntityID; // Date.now to have the actions ordered in the component browser
-        actions.add({
-          id: actionID,
-          components: {},
-          // on: data.????,
-          requirement: () => true,
-          updates: () => [],
-          execute: async () => {
-            return api.production.collect(productionID);
-          },
-        });
-      };
-
-      // feed pet, no inventory check
-      const feed = (petID: EntityID, foodIndex: number) => {
+      // feedKami pet, no inventory check
+      const feedKami = (petID: EntityID, foodIndex: number) => {
         const actionID = `Feeding Kami` as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
@@ -281,7 +236,7 @@ export function registerPartyModal() {
       };
 
       // reveal pet
-      const revealPet = async (pet: Kami) => {
+      const revealKami = async (pet: Kami) => {
         const actionID = (`Revealing Kami ` + pet.index) as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
@@ -309,8 +264,8 @@ export function registerPartyModal() {
 
       /////////////////
       // DATA INTERPRETATION
+
       const RATE_PRECISION = 1e6;
-      const DEMO_RECOVERY_MULTIPLIER = 1e2;
 
       // get the health drain rate, based on the kami's production
       // this is based on a hardcoded value for the time being
@@ -322,7 +277,7 @@ export function registerPartyModal() {
       const calcRecoveryRate = (kami: Kami) => {
         let rate = 0;
         if (isResting(kami)) {
-          rate = (DEMO_RECOVERY_MULTIPLIER * kami.stats.harmony) / 3600;
+          rate = kami.stats.harmony / 3600;
         }
         return rate;
       };
@@ -369,34 +324,27 @@ export function registerPartyModal() {
 
       // naive check right now, needs to be updated with murder check as well
       const isDead = (kami: Kami): boolean => {
-        return kami.state === 'DEAD' || calcHealth(kami) == 0; // shoudl we include this check as well?
+        return kami.state === 'DEAD'
       };
 
-      // check whether the kami is currently harvesting
-      const isHarvesting = (kami: Kami): boolean => {
-        return kami.state === 'HARVESTING' && kami.production != undefined;
-      };
+      // check whether the kami is harvesting
+      const isHarvesting = (kami: Kami): boolean => (
+        kami.state === 'HARVESTING' && kami.production != undefined
+      );
 
+      // check whether the kami is resting
       const isResting = (kami: Kami): boolean => {
         return kami.state === 'RESTING';
       };
 
-      const isRevealed = (kami: Kami): boolean => {
-        return !(kami.state === 'UNREVEALED');
+      // check whether the kami is revealed
+      const isUnrevealed = (kami: Kami): boolean => {
+        return kami.state === 'UNREVEALED';
       };
 
+      // check whether the kami is captured by slave traders
       const isOffWorld = (kami: Kami): boolean => {
         return kami.state === '721_EXTERNAL';
-      };
-
-      // get the title of the kami as 'name (health / totHealth)'
-      const getTitle = (kami: Kami) => {
-        let title = kami.name;
-        if (isRevealed(kami)) {
-          const health = calcHealth(kami);
-          title += ` (${health.toFixed()}/${kami.stats.health * 1})`;
-        }
-        return title;
       };
 
       // get the description of the kami as a list of lines
@@ -404,32 +352,27 @@ export function registerPartyModal() {
       const getDescription = (kami: Kami): string[] => {
         let description: string[] = [];
 
-        switch (kami.state) {
-          case '721_EXTERNAL':
-            description = ['kidnapped by slave traders'];
-            break;
-          case 'UNREVEALED':
-            description = ['unrevealed!'];
-            break;
-          case 'RESTING':
-            description = ['resting'];
-            break;
-          case 'HARVESTING':
-            if (kami.production) {
-              const harvestRate = calcProductionRate(kami) * 3600; //hourly
-              const drainRate = calcDrainRate(kami) * 3600; //hourly
-              description = [
-                `Harvesting on ${kami.production!.node!.name}`,
-                `+${harvestRate.toFixed(1)} $KAMI/hr`,
-                `-${drainRate.toFixed(1)} HP/hr`,
-              ];
-            }
-            break;
-          case 'DEAD':
-            description = [`Murdered by ???`];
-            break;
+        if (isOffWorld(kami)) {
+          description = ['kidnapped by slave traders'];
+        } else if (isUnrevealed(kami)) {
+          description = ['unrevealed!'];
+        } else if (isResting(kami)) {
+          description = ['resting'];
+        } else if (isDead(kami)) {
+          description = [`murdered by ???`];
+        } else if (isHarvesting(kami)) {
+          if (calcHealth(kami) == 0) {
+            description = [`died of dysentery`];
+          } else {
+            const harvestRate = calcProductionRate(kami) * 3600; //hourly
+            const drainRate = calcDrainRate(kami) * 3600; //hourly
+            description = [
+              `Harvesting on ${kami.production!.node!.name}`,
+              `+${harvestRate.toFixed(1)} $KAMI/hr`,
+              `-${drainRate.toFixed(1)} HP/hr`,
+            ];
+          }
         }
-
         return description;
       };
 
@@ -451,26 +394,16 @@ export function registerPartyModal() {
         });
       };
 
-      // we're able to force the production attribute as we will only show this
-      // button if the kami is harvesting
-      const CollectButton = (kami: Kami) => (
-        <ActionButton
-          id={`harvest-collect`}
-          onClick={() => reapProduction(kami.production!.id)}
-          text='Collect'
-        />
-      );
-
       const FeedButton = (kami: Kami) => {
         const feedOptions: ActionListOption[] = [
-          { text: 'Maple-Flavor Ghost Gum', onClick: () => feed(kami.id, 1) },
-          { text: 'Pom-Pom Fruit Candy', onClick: () => feed(kami.id, 2) },
-          { text: 'Gakki Cookie Sticks', onClick: () => feed(kami.id, 3) },
+          { text: 'Maple-Flavor Ghost Gum', onClick: () => feedKami(kami.id, 1) },
+          { text: 'Pom-Pom Fruit Candy', onClick: () => feedKami(kami.id, 2) },
+          { text: 'Gakki Cookie Sticks', onClick: () => feedKami(kami.id, 3) },
         ];
 
         return (
           <ActionListButton
-            id={`feed-button-${kami.index}`}
+            id={`feedKami-button-${kami.index}`}
             text='Feed'
             hidden={true}
             scrollPosition={scrollPosition}
@@ -479,69 +412,43 @@ export function registerPartyModal() {
         );
       };
 
-      const StartButton = (kami: Kami) => (
-        <ActionButton id={`harvest-start`} onClick={() => startProduction(kami.id)} text='Start' />
-      );
-
-      // we're able to force the production attribute as we will only show this
-      // button if the kami is harvesting
-      const StopButton = (kami: Kami) => (
-        <ActionButton
-          id={`harvest-stop`}
-          onClick={() => stopProduction(kami.production!.id)}
-          text='Stop'
-        />
-      );
-
       const RevealButton = (kami: Kami) => (
-        <ActionButton id={`reveal-kami`} onClick={() => revealPet(kami)} text='Reveal' />
+        <ActionButton id={`reveal-kami`} onClick={() => revealKami(kami)} text='Reveal' />
       );
 
-      const InfoButton = (kami: Kami) => (
-        <ActionButton id={`info-button`} onClick={() => openKamiModal(kami.entityIndex)} text='i' />
+      const ReviveButton = (kami: Kami) => (
+        <ActionButton id={`revive-kami`} onClick={() => null} text='Revive' disabled={true} />
       );
 
-      const selectAction = (kami: Kami) => {
-        if (!isRevealed(kami)) return RevealButton(kami);
-
-        if (isHarvesting(kami)) return CollectButton(kami);
-        else return StartButton(kami);
+      // Choose and return the action button to display
+      const DisplayedAction = (kami: Kami) => {
+        if (isUnrevealed(kami)) return RevealButton(kami);
+        if (isResting(kami)) return FeedButton(kami);
+        if (isHarvesting(kami) && calcHealth(kami) > 0) return FeedButton(kami);
+        if (isHarvesting(kami) && calcHealth(kami) == 0) return ReviveButton(kami);
+        if (isDead(kami)) return ReviveButton(kami);
       };
 
-      // corner content, usually Food
-      const selectCornerContent = (kami: Kami) => {
-        if (isRevealed(kami)) return FeedButton(kami);
-        else
-          return (
-            <ActionListButton
-              id={`feed-button-${kami.index}`}
-              text='Feed'
-              // scrollPosition={scrollPosition}
-              options={[]}
-            />
-          );
-      };
-
-      const selectInfo = (kami: Kami) => {
-        if (isRevealed(kami)) return InfoButton(kami);
-      };
-
+      // Rendering of Individual Kami Cards in the Party Modal
       const KamiCards = (kamis: Kami[]) => {
         return kamis.map((kami) => {
-          const title = getTitle(kami);
+          const action = DisplayedAction(kami);
           const description = getDescription(kami);
-          const action = selectAction(kami);
+          const healthString = (!isUnrevealed(kami))
+            ? `(${calcHealth(kami).toFixed()}/${kami.stats.health * 1})`
+            : '';
 
           return (
             <KamiCard
               key={kami.id}
-              title={title}
               image={kami.uri}
+              title={kami.name}
+              description={description}
               subtext={`${calcOutput(kami)} $KAMI`}
               action={action}
-              cornerContent={selectCornerContent(kami)}
-              info={selectInfo(kami)}
-              description={description}
+              cornerContent={healthString}
+              imageOnClick={() => openKamiModal(kami.entityIndex)}
+              titleOnClick={() => openKamiModal(kami.entityIndex)}
             />
           );
         });
@@ -551,7 +458,7 @@ export function registerPartyModal() {
         <ModalWrapperFull id='party_modal' divName='party' fill={true}>
           <TopGrid>
             <TopDescription>
-              $KAMI: {data.account.coin ? data.account.coin * 1 : '0'}
+              $KAMI: {data.account.coin ? data.account.coin * 1 : 0}
             </TopDescription>
           </TopGrid>
           <ConsumableGrid>{ConsumableCells(data.account.inventories)}</ConsumableGrid>
