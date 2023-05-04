@@ -23,14 +23,14 @@ export function createAdminAPI(systems: any) {
     createRoom("Manager's Office", 14, [7]);
 
     // create nodes
-    // TODO: save these details in a separate json to be loaded in 
+    // TODO: save these details in a separate json to be loaded in
     createNode(
-      'Eerie Willow',
+      'Torii Gate',
       3,
       'HARVEST',
-      `The willow seems to sway with the wind. Upon closer inspection, however, the trunk stands resolute against the forces of nature.`
+      `It's a Torii Gate.`
     );
-    setNodeAffinity('Eerie Willow', 'INSECT');
+    setNodeAffinity('Torii Gate', 'NORMAL');
 
     createNode(
       'Trash Compactor',
@@ -62,7 +62,7 @@ export function createAdminAPI(systems: any) {
       'HARVEST',
       'Danger Zone'
     );
-    setNodeAffinity('Danger Zone', 'NORMAL');
+    setNodeAffinity('Danger Zone', 'SCRAP');
 
 
     // create food registry items

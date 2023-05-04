@@ -59,10 +59,9 @@ export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
       />
       <div className="text-container">
         <Header>{node.name}</Header>
-        <BoldKamiText className="text1">{node.text1 ?? '(Eerie) Remote Hillside'}</BoldKamiText>
+        <BoldKamiText className="text1">{node.affinity}</BoldKamiText>
         <KamiText className="text2">
-          {node.text2 ??
-            'This is a node. You can harvest from it by using your Kamigotchi! This is the only way to get $KAMI.'}
+          {node.description}
         </KamiText>
       </div>
     </NodeInfoContainer>
