@@ -38,7 +38,7 @@ export class GameScene extends Phaser.Scene implements GameScene {
       // set the background image
       if (room.background) {
         let bg = this.add.image(gameWidth / 2, gameHeight / 2, room.background.key);
-        scale = (0.8 * gameHeight) / bg.height;
+        scale = (1 * gameHeight) / bg.height;
         bg.setScale(scale);
       }
 

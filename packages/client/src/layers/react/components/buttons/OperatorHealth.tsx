@@ -8,8 +8,8 @@ export function registerOperatorHealthButton() {
   registerUIComponent(
     'OperatorHealth',
     {
-      colStart: 86,
-      colEnd: 96,
+      colStart: 85,
+      colEnd: 95,
       rowStart: 2,
       rowEnd: 10,
     },

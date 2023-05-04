@@ -15,7 +15,7 @@ export function registerMapModal() {
     {
       colStart: 65,
       colEnd: 100,
-      rowStart: 49,
+      rowStart: 60,
       rowEnd: 100,
     },
     (layers) => {
