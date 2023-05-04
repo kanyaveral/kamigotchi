@@ -56,8 +56,8 @@ export function registerOperatorHealthButton() {
         <Button id='battery_button'>
           {staminaCurrent && (
             <>
-              <TopDescription>$KAMI: {coin ? coin * 1 : 0}</TopDescription>
               <Centered>
+              <TopDescription>$KAMI: {coin ? coin * 1 : 0}</TopDescription>
                 <BatteryComponent level={operatorStaminaPercentage} />
               </Centered>
             </>
@@ -70,7 +70,6 @@ export function registerOperatorHealthButton() {
 
 const Button = styled.button`
   cursor: pointer;
-  padding-left: 10px;
   &:active {
     background-color: #c4c4c4;
   }
@@ -78,7 +77,6 @@ const Button = styled.button`
 
 const Centered = styled.div`
   display: flex;
-  justify-content: center;
   align-items: center;
   height: 100%;
 `;
@@ -88,11 +86,4 @@ const TopDescription = styled.p`
   color: #333;
   text-align: left;
   font-family: Pixel;
-  grid-column: 1;
-  align-self: center;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  border-radius: 5px;
-  padding: 5px;
 `;
