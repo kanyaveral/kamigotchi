@@ -61,14 +61,19 @@
           "type": "bytes"
         }
       ],
-      "stateMutability": "pure",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "args",
+          "name": "petID",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "reviveIndex",
           "type": "uint256"
         }
       ],
@@ -80,33 +85,7 @@
           "type": "bytes"
         }
       ],
-      "stateMutability": "pure",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getToken",
-      "outputs": [
-        {
-          "internalType": "contract KamiERC721",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getTokenAddy",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -138,9 +117,7 @@
   ],
   "methodIdentifiers": {
     "execute(bytes)": "09c5eabe",
-    "executeTyped(uint256)": "3e991df3",
-    "getToken()": "21df0da7",
-    "getTokenAddy()": "96b443fe",
+    "executeTyped(uint256,uint256)": "915657fb",
     "owner()": "8da5cb5b",
     "transferOwnership(address)": "f2fde38b"
   }

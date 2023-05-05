@@ -19,8 +19,6 @@
     "IdNodeComponent",
     "IdOwnerComponent",
     "IdPetComponent",
-    "IdRequesteeComponent",
-    "IdRequesterComponent",
     "IdSourceComponent",
     "IdTargetComponent",
     "IndexFoodComponent",
@@ -33,10 +31,10 @@
     "IndexFaceComponent",
     "IndexHandComponent",
     "IndexPetComponent",
+    "IndexReviveComponent",
     "IndexTraitComponent",
     "IsAccountComponent",
     "IsEquippedComponent",
-    "IsFoodComponent",
     "IsFungibleComponent",
     "IsInventoryComponent",
     "IsKillComponent",
@@ -47,12 +45,8 @@
     "IsNonFungibleComponent",
     "IsPetComponent",
     "IsProductionComponent",
-    "IsRegisterComponent",
     "IsRegistryComponent",
-    "IsRegistryEntryComponent",
-    "IsRequestComponent",
     "IsRoomComponent",
-    "IsTradeComponent",
     "LocationComponent",
     "MediaURIComponent",
     "NameComponent",
@@ -159,6 +153,12 @@
       ]
     },
     {
+      "name": "_RegistryCreateReviveSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
       "name": "_RegistryCreateTraitSystem",
       "writeAccess": [
         "*"
@@ -178,6 +178,12 @@
     },
     {
       "name": "_RegistryUpdateModSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryUpdateReviveSystem",
       "writeAccess": [
         "*"
       ]
@@ -319,6 +325,16 @@
       ]
     },
     {
+      "name": "PetReviveSystem",
+      "writeAccess": [
+        "BalanceComponent",
+        "BlockLastComponent",
+        "HealthCurrentComponent",
+        "StateComponent",
+        "TimeLastActionComponent"
+      ]
+    },
+    {
       "name": "PetSetAccountSystem",
       "writeAccess": [
         "IdAccountComponent"
@@ -392,7 +408,6 @@
     "LibRegistryItem",
     "LibRoom",
     "LibRarity",
-    "LibStat",
-    "LibTrade"
+    "LibStat"
   ]
 }

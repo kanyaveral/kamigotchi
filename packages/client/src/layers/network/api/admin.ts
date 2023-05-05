@@ -68,17 +68,22 @@ export function createAdminAPI(systems: any) {
     registerFood(2, 'Pom-Pom Fruit Candy', 100);
     registerFood(3, 'Gakki Cookie Sticks', 200);
 
+    // create revive registry items
+    registerRevive(1, 'Red Gakki Ribbon', 10);
+
     // set listings on global merchant
     createMerchant('hawker', 0);
     setListing('hawker', 1, 25, 0); // merchant, item index, buy price, sell price
     setListing('hawker', 2, 90, 0);
-    setListing('hawker', 3, 150, 0);
+    setListing('hawker', 3, 160, 0);
+    setListing('hawker', 4, 500, 0);
 
     // // create our hottie merchant ugajin. names are unique
-    // createMerchant('ugajin', 13);
-    // setListing('ugajin', 1, 25, 0); // merchant, item index, buy price, sell price
-    // setListing('ugajin', 2, 90, 0);
-    // setListing('ugajin', 3, 150, 0);
+    createMerchant('ugajin', 13);
+    setListing('ugajin', 1, 25, 0); // merchant, item index, buy price, sell price
+    setListing('ugajin', 2, 90, 0);
+    setListing('ugajin', 3, 150, 0);
+    setListing('ugajin', 4, 500, 0);
 
     // init general, TODO: move to worldSetUp
     systems['system._Init'].executeTyped(); // sets the balance of the Kami contract
@@ -213,6 +218,15 @@ export function createAdminAPI(systems: any) {
     );
   }
 
+  // @dev add a revive item registry entry
+  function registerRevive(reviveIndex: number, name: string, health: number) {
+    return systems['system._Registry.Revive.Create'].executeTyped(
+      reviveIndex,
+      name,
+      health
+    );
+  }
+
   // @dev adds a trait in registry
   function registerTrait(
     index: number,
@@ -291,6 +305,15 @@ export function createAdminAPI(systems: any) {
     );
   }
 
+  // @dev update a revive item registry entry
+  function updateRegistryRevive(reviveIndex: number, name: string, health: number) {
+    return systems['system._Registry.Revive.Update'].executeTyped(
+      reviveIndex,
+      name,
+      health
+    );
+  }
+
   return {
     init,
     giveCoins,
@@ -322,6 +345,10 @@ export function createAdminAPI(systems: any) {
         create: registerModification,
         update: updateRegistryModification,
       },
+      revive: {
+        create: registerRevive,
+        update: updateRegistryRevive,
+      }
     },
     room: { create: createRoom },
   };
