@@ -5,4 +5,7 @@ import hollowstump from './hollowstump.png'
 import gate from './gate.png'
 import shopdoor from './shopdoor.png'
 import cashregister from './cashregister.png'
-export { vendingmachine, mooringpost, toriigate, hollowstump, gate, shopdoor, cashregister };
+import prayerwheels from './prayerwheels.png'
+import bellshapeddevice from './bellshapeddevice.png'
+import glassbox from './glassbox.png'
+export { vendingmachine, mooringpost, toriigate, hollowstump, gate, shopdoor, cashregister, prayerwheels, bellshapeddevice, glassbox };

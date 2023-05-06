@@ -6,6 +6,9 @@ import {
   gate,
   shopdoor,
   cashregister,
+  prayerwheels,
+  bellshapeddevice,
+  glassbox
 } from 'assets/images/objects';
 
 import {
@@ -299,7 +302,35 @@ export const rooms: Room[] = [
       key: 'm_room012',
       path: room12Music,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'prayerwheels',
+        path: prayerwheels,
+        offset: { x: -48.65, y: 13 },
+        onClick: () =>
+          triggerDialogueModal([
+            "This set of prayer wheels will allow $KAMI to be removed from the game world.",
+          ]),
+      },
+      {
+        key: 'bellshapeddevice',
+        path: bellshapeddevice,
+        offset: { x: 39.04, y: -13.92 },
+        onClick: () =>
+          triggerDialogueModal([
+            "This device will allow Kamigotchi to leave the world as tokens.",
+          ]),
+      },
+      {
+        key: 'glassbox',
+        path: glassbox,
+        offset: { x: -9, y: -3.92 },
+        onClick: () =>
+          triggerDialogueModal([
+            "This device will allow you to view information about balances.",
+          ]),
+      },
+    ],
   },
   {
     location: 13,
