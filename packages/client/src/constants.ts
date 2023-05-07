@@ -30,7 +30,7 @@ import {
 
 import {
   room1Music,
-  room2Music,
+  forest,
   room3Music,
   room4Music,
   room5Music,
@@ -130,7 +130,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room002',
-      path: room2Music,
+      path: room3Music,
     },
     objects: [
       {
@@ -222,7 +222,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room006',
-      path: room6Music,
+      path: room5Music,
     },
     objects: [],
   },
@@ -235,7 +235,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room007',
-      path: room7Music,
+      path: room14Music,
     },
     objects: [],
   },
@@ -248,7 +248,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room008',
-      path: room8Music,
+      path: room14Music,
     },
     objects: [],
   },
@@ -261,7 +261,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room009',
-      path: room9Music,
+      path: forest,
     },
     objects: [],
   },
@@ -274,7 +274,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room010',
-      path: room10Music,
+      path: forest,
     },
     objects: [],
   },

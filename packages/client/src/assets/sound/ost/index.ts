@@ -1,5 +1,5 @@
 import room1Music from './1_Misty_Riverside.mp3';
-import room2Music from './2_Tunnel_of_Trees.mp3';
+import forest from './forest.mp3';
 import room3Music from './3_Torii_Gate.mp3';
 import room4Music from './4_Vending_Machine.mp3';
 import room5Music from './5_Dump_Edge_Restricted_Area.mp3';
@@ -15,7 +15,7 @@ import room14Music from './14_Hidden_Room.mp3';
 
 export {
   room1Music,
-  room2Music,
+  forest,
   room3Music,
   room4Music,
   room5Music,
