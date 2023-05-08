@@ -80,12 +80,13 @@ export function registerSettingsModal() {
           }}
         >
           <div style={{ display: 'grid', height: '100%', pointerEvents: 'auto' }}>
-            <div
-              style={{
-                gridColumn: 1,
-                gridRow: 2
-              }}
-            >
+            <Header style={{gridRow: 1, gridColumn: 1}}>
+              Settings
+            </Header>
+            <SubHeader style={{gridRow: 2, gridColumn: 1}}>
+              Sound
+            </SubHeader>
+            <div style={{gridColumn: 1, gridRow: 4}}>
               <input
                 type='range'
                 min='0'
@@ -99,9 +100,9 @@ export function registerSettingsModal() {
             <div
               className='window'
               onClick={toggleSound}
-              style={{ pointerEvents: 'auto', gridColumn: 1, gridRow: 1 }}
+              style={{ pointerEvents: 'auto', gridColumn: 1, gridRow: 3 }}
             >
-              <img style={{height: '100%', width: 'auto' }}
+              <img
                 src={!muted ? soundImage : mutedSoundImage}
                 alt='sound_icon'
               />
@@ -123,3 +124,19 @@ const rangeInputStyle = {
   opacity: 0.7,
   transition: 'opacity 0.2s',
 };
+
+const Header = styled.p`
+  font-size: 20px;
+  color: #333;
+  text-align: left;
+  padding: 2px;
+  font-family: Pixel;
+`;
+
+const SubHeader = styled.p`
+  font-size: 14px;
+  color: #333;
+  text-align: left;
+  padding: 2px;
+  font-family: Pixel;
+`;
