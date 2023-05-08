@@ -28,6 +28,7 @@ import 'layers/react/styles/font.css';
 import pompom from 'assets/images/food/pompom.png';
 import gakki from 'assets/images/food/gakki.png';
 import gum from 'assets/images/food/gum.png';
+import ribbon from 'assets/images/food/ribbon.png';
 
 export function registerPartyModal() {
   registerUIComponent(
@@ -90,6 +91,12 @@ export function registerPartyModal() {
             id: 3,
             itemIndex: 3,
             image: gakki,
+            balance: 0,
+          },
+          {
+            id: 4,
+            itemIndex: 4,
+            image: ribbon,
             balance: 0,
           },
         ];
@@ -395,9 +402,10 @@ export function registerPartyModal() {
 
       const FeedButton = (kami: Kami, disabled: boolean) => {
         const feedOptions: ActionListOption[] = [
-          { text: 'Maple-Flavor Ghost Gum', onClick: () => feedKami(kami.id, 1) },
-          { text: 'Pom-Pom Fruit Candy', onClick: () => feedKami(kami.id, 2) },
-          { text: 'Gakki Cookie Sticks', onClick: () => feedKami(kami.id, 3) },
+          { text: 'Ghost Gum', onClick: () => feedKami(kami.id, 1) },
+          { text: 'Fruit Candy', onClick: () => feedKami(kami.id, 2) },
+          { text: 'Cookie Sticks', onClick: () => feedKami(kami.id, 3) },
+          { text: 'Ribbon', onClick: () => feedKami(kami.id, 4) },
         ];
 
         return (
