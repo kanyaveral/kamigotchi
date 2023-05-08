@@ -63,9 +63,9 @@ const Tooltip = styled.div<TooltipProps>`
   position: absolute;
   transform: translateX(-50%);
   padding: 10px;
-  background-color: #333;
-  color: #fff;
+  background-color: #ffffff;
   font-size: 12px;
+  font-family: Pixel;
   opacity: ${(props) => (props.show ? 1 : 0)};
   visibility: ${(props) => (props.show ? 'visible' : 'hidden')};
   transition: all 0.3s ease-in-out;
