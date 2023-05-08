@@ -23,7 +23,7 @@ export function registerActionQueue() {
       rowStart: 13,
       rowEnd: 50,
       colStart: 80,
-      colEnd: 99,
+      colEnd: 100,
     },
     (layers) => {
       const {
