@@ -13,7 +13,7 @@ export function registerOperatorHealthButton() {
       colStart: 2,
       colEnd: 93,
       rowStart: 2,
-      rowEnd: 10,
+      rowEnd: 30,
     },
     (layers) => {
       const {
@@ -57,8 +57,19 @@ export function registerOperatorHealthButton() {
           {staminaCurrent && (
             <>
               <Centered>
-              <TopDescription>$KAMI: {coin ? coin * 1 : 0}</TopDescription>
-                <BatteryComponent level={operatorStaminaPercentage} />
+                <NameCell>
+                  <Text>
+                    OperatorName
+                  </Text>
+                </NameCell>
+                <KamiCell>
+                  <Text>
+                    $KAMI: {coin ? coin * 1 : 0}
+                  </Text>
+                </KamiCell>
+                <BatteryCell>
+                  <BatteryComponent level={operatorStaminaPercentage} />
+                </BatteryCell>
               </Centered>
             </>
           )}
@@ -76,14 +87,30 @@ const Button = styled.button`
 `;
 
 const Centered = styled.div`
-  display: flex;
-  align-items: center;
+  display: grid;
   height: 100%;
+  column-gap: 6px;
+  margin: 5px;
 `;
 
-const TopDescription = styled.p`
-  font-size: 8px;
+const Text = styled.p`
+  font-size: 12px;
   color: #333;
-  text-align: left;
   font-family: Pixel;
+`;
+
+const BatteryCell = styled.div`
+  grid-column: 3;
+  grid-row: 2;
+`;
+
+const KamiCell = styled.div`
+  grid-column: 1 / 2;
+  grid-row: 2;
+  align-self: center;
+`;
+
+const NameCell = styled.div`
+  grid-column: 1 / 3;
+  grid-row: 1;
 `;
