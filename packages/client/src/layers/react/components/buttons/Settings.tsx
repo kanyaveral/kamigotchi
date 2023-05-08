@@ -17,7 +17,7 @@ export function registerSettingsButton() {
     (layers) => of(layers),
     () => {
       return (
-        <MenuButton id="settings_button" targetDiv="settings">
+        <MenuButton id="settings_button" targetDiv="settings" text="Settings">
           <img style={{height: '100%', width: 'auto' }}
             src={settingsImage}
             alt='settings_icon'

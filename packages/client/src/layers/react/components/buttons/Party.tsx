@@ -20,7 +20,7 @@ export function registerPartyButton() {
         <MenuButton
           id='party_button'
           targetDiv='party'
-          text="it's friday again it's saturday sunday what"
+          text="Party"
         >
           <img style={{ height: '100%', width: 'auto' }} src={kamiImage} alt='kami_icon' />
         </MenuButton>

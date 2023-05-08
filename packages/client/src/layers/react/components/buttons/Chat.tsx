@@ -17,7 +17,7 @@ export function registerChatButton() {
     (layers) => of(layers),
     () => {
       return (
-        <MenuButton id="chat_button" targetDiv="chat">
+        <MenuButton id="chat_button" targetDiv="chat" text="Chat">
           <img style={{height: '100%', width: 'auto' }}
             src={chatImage}
             alt='chat_icon'

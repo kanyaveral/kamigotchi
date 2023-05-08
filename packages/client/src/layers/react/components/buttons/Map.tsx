@@ -17,7 +17,7 @@ export function registerMapButton() {
     (layers) => of(layers),
     () => {
       return (
-        <MenuButton id='map_button' targetDiv='map' text='Hello Kitty'>
+        <MenuButton id='map_button' targetDiv='map' text='Map'>
           <img style={{ height: '100%', width: 'auto' }} src={mapImage} alt='map_icon' />
         </MenuButton>
       );
