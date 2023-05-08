@@ -36,7 +36,7 @@ export function registerPartyModal() {
     {
       colStart: 2,
       colEnd: 33,
-      rowStart: 8,
+      rowStart: 11,
       rowEnd: 76,
     },
 
