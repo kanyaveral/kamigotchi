@@ -82,7 +82,7 @@ const BatteryContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 12px;
   font-family: Pixel;
 `;
 
