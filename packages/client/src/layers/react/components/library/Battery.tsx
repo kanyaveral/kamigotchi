@@ -82,14 +82,13 @@ const BatteryContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-right: 10px;
   font-size: 14px;
 `;
 
 export const BatteryComponent: React.FC<BatteryLevelProps> = ({ level, showPercentage }) => {
   return (
     <BatteryContainer>
-      {showPercentage ? `${level} %` : ''}
+      {showPercentage ? `${level}%` : ''}
       <Battery>
         <BatteryLevel level={level} />
       </Battery>

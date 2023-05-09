@@ -17,7 +17,7 @@ export function registerOperatorHealthButton() {
     'OperatorHealth',
     {
       colStart: 2,
-      colEnd: 20,
+      colEnd: 17,
       rowStart: 2,
       rowEnd: 30,
     },
@@ -70,7 +70,7 @@ export function registerOperatorHealthButton() {
                   <Text>{operatorName}</Text>
                 </NameCell>
                 <KamiCell>
-                  <Text>$KAMI: {coin ? coin * 1 : 0}</Text>
+                    <Text>$KAMI: {coin ? coin * 1 : 0}</Text>
                 </KamiCell>
                 <BatteryCell>
                   <BatteryComponent showPercentage={true} level={operatorStaminaPercentage} />
@@ -105,8 +105,12 @@ const Button = styled.button`
 const Centered = styled.div`
   display: grid;
   height: 100%;
-  column-gap: 6px;
-  margin: 5px;
+  border-color: black;
+  border-width: 2px;
+  border-style: solid;
+  padding: 5px;
+  height: 100%;
+  width: 100%;
 `;
 
 const Text = styled.p`
@@ -116,17 +120,38 @@ const Text = styled.p`
 `;
 
 const BatteryCell = styled.div`
-  grid-column: 3;
+  grid-column: 2;
   grid-row: 2;
+  border-color: black;
+  border-width: 0px 2px 2px 0px;
+  border-style: solid;
+  padding: 5px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 `;
 
 const KamiCell = styled.div`
-  grid-column: 1 / 2;
+  grid-column: 1;
   grid-row: 2;
-  align-self: center;
+  border-color: black;
+  border-width: 0px 2px 2px 2px;
+  border-style: solid;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 `;
 
 const NameCell = styled.div`
   grid-column: 1 / 3;
   grid-row: 1;
+  border-color: black;
+  border-width: 2px;
+  border-style: solid;
+  padding: 5px;
+  height: 100%;
+  width: 100%;
 `;
