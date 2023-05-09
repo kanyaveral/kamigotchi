@@ -9,6 +9,7 @@ import prayerwheels from './prayerwheels.png'
 import bellshapeddevice from './bellshapeddevice.png'
 import glassbox from './glassbox.png'
 import trashbag from './trashbag.png'
+import acompanybuilding from './acompanybuilding.png'
 
 export {
   vendingmachine,
@@ -21,5 +22,6 @@ export {
   prayerwheels,
   bellshapeddevice,
   glassbox,
-  trashbag
+  trashbag,
+  acompanybuilding
 };

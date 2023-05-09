@@ -9,7 +9,8 @@ import {
   prayerwheels,
   bellshapeddevice,
   glassbox,
-  trashbag
+  trashbag,
+  acompanybuilding
 } from 'assets/images/objects';
 
 import {
@@ -217,7 +218,13 @@ export const rooms: Room[] = [
         key: 'trashbag',
         path: trashbag,
         offset: { x: -55.5, y: 50 },
-        onClick: () => triggerDialogueModal(["A bag of trash."]),
+        onClick: () => triggerDialogueModal(["A bag of trash. Looks worthless."]),
+      },
+      {
+        key: 'acompanybuilding',
+        path: acompanybuilding,
+        offset: { x: -30.1, y: -35 },
+        onClick: () => triggerDialogueModal(["There's a huge office building here for some reason."]),
       },
     ],
   },
