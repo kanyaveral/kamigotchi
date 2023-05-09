@@ -10,7 +10,9 @@ import {
   bellshapeddevice,
   glassbox,
   trashbag,
-  acompanybuilding
+  acompanybuilding,
+  abuildinglogo,
+  foxstatues
 } from 'assets/images/objects';
 
 import {
@@ -239,7 +241,20 @@ export const rooms: Room[] = [
       key: 'm_room006',
       path: room5Music,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'abuildinglogo',
+        path: abuildinglogo,
+        offset: { x: 0, y: -45 },
+        onClick: () => triggerDialogueModal(["Looks like their logo."]),
+      },
+      {
+        key: 'foxstatues',
+        path: foxstatues,
+        offset: { x: 0, y: 28 },
+        onClick: () => triggerDialogueModal(["There's a pair of fox statues flanking the entrance."]),
+      },
+    ],
   },
   {
     location: 7,

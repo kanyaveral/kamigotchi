@@ -10,6 +10,8 @@ import bellshapeddevice from './bellshapeddevice.png'
 import glassbox from './glassbox.png'
 import trashbag from './trashbag.png'
 import acompanybuilding from './acompanybuilding.png'
+import abuildinglogo from './abuildinglogo.png'
+import foxstatues from './foxstatues.png'
 
 export {
   vendingmachine,
@@ -23,5 +25,7 @@ export {
   bellshapeddevice,
   glassbox,
   trashbag,
-  acompanybuilding
+  acompanybuilding,
+  abuildinglogo,
+  foxstatues
 };
