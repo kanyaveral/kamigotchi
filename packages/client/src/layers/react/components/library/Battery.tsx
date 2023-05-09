@@ -83,6 +83,7 @@ const BatteryContainer = styled.div`
   align-items: center;
   gap: 10px;
   font-size: 14px;
+  font-family: Pixel;
 `;
 
 export const BatteryComponent: React.FC<BatteryLevelProps> = ({ level, showPercentage }) => {
