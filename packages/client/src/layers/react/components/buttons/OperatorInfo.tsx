@@ -17,7 +17,7 @@ export function registerOperatorHealthButton() {
     'OperatorHealth',
     {
       colStart: 2,
-      colEnd: 93,
+      colEnd: 20,
       rowStart: 2,
       rowEnd: 30,
     },
@@ -89,6 +89,17 @@ const Button = styled.button`
   &:active {
     background-color: #c4c4c4;
   }
+  border-color: black;
+  border-width: 2px;
+  border-radius: 10px;
+  border-style: solid;
+  background-color: white;
+  padding: 8px;
+  width: 99%;
+
+  display: flex;
+  flex-flow: column nowrap;
+  font-family: Pixel;
 `;
 
 const Centered = styled.div`
