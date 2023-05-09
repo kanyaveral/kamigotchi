@@ -73,7 +73,7 @@ export function registerOperatorHealthButton() {
                   <Text>$KAMI: {coin ? coin * 1 : 0}</Text>
                 </KamiCell>
                 <BatteryCell>
-                  <BatteryComponent level={operatorStaminaPercentage} />
+                  <BatteryComponent showPercentage={true} level={operatorStaminaPercentage} />
                 </BatteryCell>
               </Centered>
             </>
