@@ -105,10 +105,6 @@ const Button = styled.button`
 const Centered = styled.div`
   display: grid;
   height: 100%;
-  border-color: black;
-  border-width: 2px;
-  border-style: solid;
-  padding: 5px;
   height: 100%;
   width: 100%;
 `;
