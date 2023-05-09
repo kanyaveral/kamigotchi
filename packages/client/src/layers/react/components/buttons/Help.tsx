@@ -1,6 +1,6 @@
 import React from 'react';
 import { of } from 'rxjs';
-import settingsImage from '../../../../assets/images/settings_native.png';
+import helpImage from '../../../../assets/images/help_native.png';
 
 import { MenuButton } from 'layers/react/components/library/MenuButton';
 import { registerUIComponent } from 'layers/react/engine/store';
@@ -19,7 +19,7 @@ export function registerHelpButton() {
       return (
         <MenuButton id="settings_button" targetDiv="help" text="Help">
           <img style={{height: '100%', width: 'auto' }}
-            src={settingsImage}
+            src={helpImage}
             alt='help_icon'
           />
         </MenuButton>
