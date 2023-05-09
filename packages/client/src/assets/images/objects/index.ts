@@ -12,6 +12,8 @@ import trashbag from './trashbag.png'
 import acompanybuilding from './acompanybuilding.png'
 import abuildinglogo from './abuildinglogo.png'
 import foxstatues from './foxstatues.png'
+import chair from './chair.png'
+import cabinet from './cabinet.png'
 
 export {
   vendingmachine,
@@ -27,5 +29,7 @@ export {
   trashbag,
   acompanybuilding,
   abuildinglogo,
-  foxstatues
+  foxstatues,
+  chair,
+  cabinet
 };

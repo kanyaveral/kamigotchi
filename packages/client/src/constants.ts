@@ -12,7 +12,9 @@ import {
   trashbag,
   acompanybuilding,
   abuildinglogo,
-  foxstatues
+  foxstatues,
+  chair,
+  cabinet
 } from 'assets/images/objects';
 
 import {
@@ -267,7 +269,20 @@ export const rooms: Room[] = [
       key: 'm_room007',
       path: room14Music,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'chair',
+        path: chair,
+        offset: { x: -40, y: 31.9 },
+        onClick: () => triggerDialogueModal(["Looks comfortable."]),
+      },
+      {
+        key: 'cabinet',
+        path: cabinet,
+        offset: { x: 26, y: 17.4 },
+        onClick: () => triggerDialogueModal(["A cabinet."]),
+      },
+    ],
   },
   {
     location: 8,
