@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { of } from 'rxjs';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { dataStore } from 'layers/react/store/createStore';
@@ -37,8 +37,15 @@ export function registerMintAfterModal() {
         />
       );
 
+      const hideModal = useCallback(() => {
+        setVisibleModals({ ...visibleModals, kamiMintPost: false });
+      }, [setVisibleModals, visibleModals]);
+
       return (
         <ModalWrapperFull divName="kamiMintPost" id="postMintModal">
+        <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+          X
+        </TopButton>
           <CenterBox>
             <Description>Minted!</Description>
           </CenterBox>
@@ -71,4 +78,23 @@ const KamiImage = styled.img`
   height: 90px;
   margin: 0px;
   padding: 0px;
+`;
+
+const TopButton = styled.button`
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 5px;
+  font-family: Pixel;
+  width: 30px;
+  &:active {
+    background-color: #c4c4c4;
+  }
+  margin: 0px;
 `;

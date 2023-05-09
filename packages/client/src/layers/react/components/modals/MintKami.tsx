@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { BigNumber, utils } from 'ethers';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { registerUIComponent } from 'layers/react/engine/store';
@@ -96,8 +96,15 @@ export function registerKamiMintModal() {
         <ActionButton id='button-mint' onClick={handleMinting} size='large' text='Mint' />
       );
 
+      const hideModal = useCallback(() => {
+        setVisibleModals({ ...visibleModals, kamiMint: false });
+      }, [setVisibleModals, visibleModals]);
+
       return (
         <ModalWrapperFull divName='kamiMint' id='kamiMintModal'>
+        <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+          X
+        </TopButton>
           <Stepper steps={steps} MintButton={MintButton} />
         </ModalWrapperFull>
       );
@@ -170,4 +177,23 @@ const KamiImage = styled.img`
   height: 90px;
   margin: 0px;
   padding: 0px;
+`;
+
+const TopButton = styled.button`
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 5px;
+  font-family: Pixel;
+  width: 30px;
+  &:active {
+    background-color: #c4c4c4;
+  }
+  margin: 0px;
 `;
