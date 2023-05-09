@@ -8,4 +8,18 @@ import cashregister from './cashregister.png'
 import prayerwheels from './prayerwheels.png'
 import bellshapeddevice from './bellshapeddevice.png'
 import glassbox from './glassbox.png'
-export { vendingmachine, mooringpost, toriigate, hollowstump, gate, shopdoor, cashregister, prayerwheels, bellshapeddevice, glassbox };
+import trashbag from './trashbag.png'
+
+export {
+  vendingmachine,
+  mooringpost,
+  toriigate,
+  hollowstump,
+  gate,
+  shopdoor,
+  cashregister,
+  prayerwheels,
+  bellshapeddevice,
+  glassbox,
+  trashbag
+};

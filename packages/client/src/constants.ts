@@ -8,7 +8,8 @@ import {
   cashregister,
   prayerwheels,
   bellshapeddevice,
-  glassbox
+  glassbox,
+  trashbag
 } from 'assets/images/objects';
 
 import {
@@ -211,7 +212,14 @@ export const rooms: Room[] = [
       key: 'm_room005',
       path: room5Music,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'trashbag',
+        path: trashbag,
+        offset: { x: -55.5, y: 50 },
+        onClick: () => triggerDialogueModal(["A bag of trash."]),
+      },
+    ],
   },
   {
     location: 6,

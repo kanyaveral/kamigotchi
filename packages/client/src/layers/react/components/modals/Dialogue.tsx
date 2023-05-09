@@ -14,8 +14,8 @@ export function registerDialogueModal() {
     {
       colStart: 2,
       colEnd: 60,
-      rowStart: 65,
-      rowEnd: 100,
+      rowStart: 67,
+      rowEnd: 92,
     },
     (layers) => of(layers),
     () => {
