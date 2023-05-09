@@ -1,26 +1,26 @@
 import React from 'react';
 import { of } from 'rxjs';
-import chatImage from '../../../../assets/images/chat_native.png';
+import settingsImage from '../../../../assets/images/settings_native.png';
 
 import { MenuButton } from 'layers/react/components/library/MenuButton';
 import { registerUIComponent } from 'layers/react/engine/store';
 
-export function registerChatButton() {
+export function registerHelpButton() {
   registerUIComponent(
-    'ChatButton',
+    'HelpButton',
     {
-      colStart: 86,
-      colEnd: 89,
+      colStart: 98,
+      colEnd: 101,
       rowStart: 2,
       rowEnd: 10,
     },
     (layers) => of(layers),
     () => {
       return (
-        <MenuButton id="chat_button" targetDiv="chat" text="Chat">
+        <MenuButton id="settings_button" targetDiv="help" text="Help">
           <img style={{height: '100%', width: 'auto' }}
-            src={chatImage}
-            alt='chat_icon'
+            src={settingsImage}
+            alt='help_icon'
           />
         </MenuButton>
       );
