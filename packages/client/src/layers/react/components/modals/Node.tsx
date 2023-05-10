@@ -497,7 +497,7 @@ export function registerNodeModal() {
 
       if (data.node.id) {
         return (
-          <ModalWrapperFull id='node' divName='node' fill={true}>
+          <ModalWrapperFull id='node' divName='node'>
             <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
               X
             </TopButton>

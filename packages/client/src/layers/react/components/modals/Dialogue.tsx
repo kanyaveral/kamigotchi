@@ -12,10 +12,10 @@ export function registerDialogueModal() {
   registerUIComponent(
     'DialogueModal',
     {
-      colStart: 2,
-      colEnd: 60,
+      colStart: 34,
+      colEnd: 68,
       rowStart: 63,
-      rowEnd: 92,
+      rowEnd: 91,
     },
     (layers) => of(layers),
     () => {

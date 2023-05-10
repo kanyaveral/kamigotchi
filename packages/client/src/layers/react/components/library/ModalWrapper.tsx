@@ -65,7 +65,7 @@ const Content = styled.div`
   background-color: white;
   padding: 8px;
   width: 99%;
-
+  height: 100%;
   display: flex;
   flex-flow: column nowrap;
   font-family: Pixel;
