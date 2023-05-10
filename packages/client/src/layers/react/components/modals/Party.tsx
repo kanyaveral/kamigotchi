@@ -36,8 +36,8 @@ export function registerPartyModal() {
     {
       colStart: 2,
       colEnd: 33,
-      rowStart: 15,
-      rowEnd: 76,
+      rowStart: 16,
+      rowEnd: 98,
     },
 
     // Requirement (Data Manangement)
@@ -505,7 +505,7 @@ export function registerPartyModal() {
       const [showTooltip, setShowTooltip] = useState(-1);
 
       return (
-        <ModalWrapperFull id='party_modal' divName='party' fill={true}>
+        <ModalWrapperFull id='party_modal' divName='party'>
           <ConsumableGrid>
             {ConsumableCells(data.account.inventories, showTooltip, setShowTooltip)}
           </ConsumableGrid>

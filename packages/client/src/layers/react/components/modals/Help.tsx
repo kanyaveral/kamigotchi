@@ -25,7 +25,7 @@ export function registerHelpModal() {
       colStart: 69,
       colEnd: 100,
       rowStart: 10,
-      rowEnd: 75,
+      rowEnd: 62,
     },
 
     (layers) => {

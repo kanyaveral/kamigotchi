@@ -24,8 +24,8 @@ export function registerSettingsModal() {
     {
       colStart: 2,
       colEnd: 33,
-      rowStart: 10,
-      rowEnd: 40,
+      rowStart: 16,
+      rowEnd: 62,
     },
 
     (layers) => {

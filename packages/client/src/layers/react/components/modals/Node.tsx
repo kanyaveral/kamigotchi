@@ -33,10 +33,10 @@ export function registerNodeModal() {
 
     // Grid Config
     {
-      colStart: 33,
-      colEnd: 65,
-      rowStart: 2,
-      rowEnd: 99,
+      colStart: 34,
+      colEnd: 68,
+      rowStart: 10,
+      rowEnd: 98,
     },
 
     // Requirement (Data Manangement)

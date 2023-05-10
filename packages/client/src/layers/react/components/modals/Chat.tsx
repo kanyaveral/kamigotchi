@@ -22,10 +22,10 @@ export function registerChatModal() {
   registerUIComponent(
     'Chat',
     {
-      colStart: 65,
+      colStart: 69,
       colEnd: 100,
-      rowStart: 9,
-      rowEnd: 40,
+      rowStart: 10,
+      rowEnd: 62,
     },
 
     (layers) => {
