@@ -9,9 +9,9 @@ export function registerPartyButton() {
   registerUIComponent(
     'PartyButton',
     {
-      colStart: 92,
-      colEnd: 95,
-      rowStart: 2,
+      colStart: 91,
+      colEnd: 93,
+      rowStart: 3,
       rowEnd: 10,
     },
     (layers) => of(layers),

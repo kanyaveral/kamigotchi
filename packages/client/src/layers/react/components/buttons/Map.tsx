@@ -9,9 +9,9 @@ export function registerMapButton() {
   registerUIComponent(
     'MapButton',
     {
-      colStart: 89,
-      colEnd: 92,
-      rowStart: 2,
+      colStart: 88,
+      colEnd: 91,
+      rowStart: 3,
       rowEnd: 10,
     },
     (layers) => of(layers),

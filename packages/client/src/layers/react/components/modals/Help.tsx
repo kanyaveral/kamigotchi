@@ -22,10 +22,10 @@ export function registerHelpModal() {
   registerUIComponent(
     'Help',
     {
-      colStart: 35,
-      colEnd: 60,
-      rowStart: 8,
-      rowEnd: 40,
+      colStart: 69,
+      colEnd: 100,
+      rowStart: 10,
+      rowEnd: 75,
     },
 
     (layers) => {
@@ -70,7 +70,12 @@ export function registerHelpModal() {
 
       return (
         <ModalWrapperFull divName="help" id="help_modal">
-          <div/>
+          <Description>
+            Kamigotchi World exists entirely on-chain.
+            <br />
+            <br />
+            It currently uses a burner wallet in your LocalStorage for testing.
+            </Description>
         </ModalWrapperFull>
       );
     }
@@ -88,7 +93,7 @@ const rangeInputStyle = {
 };
 
 const Header = styled.p`
-  font-size: 20px;
+  font-size: 24px;
   color: #333;
   text-align: left;
   padding: 2px;
@@ -100,5 +105,12 @@ const SubHeader = styled.p`
   color: #333;
   text-align: left;
   padding: 2px;
+  font-family: Pixel;
+`;
+
+const Description = styled.p`
+  font-size: 18px;
+  color: #333;
+  text-align: center;
   font-family: Pixel;
 `;

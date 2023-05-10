@@ -9,9 +9,9 @@ export function registerChatButton() {
   registerUIComponent(
     'ChatButton',
     {
-      colStart: 86,
-      colEnd: 89,
-      rowStart: 2,
+      colStart: 85,
+      colEnd: 88,
+      rowStart: 3,
       rowEnd: 10,
     },
     (layers) => of(layers),

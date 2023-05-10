@@ -22,9 +22,9 @@ export function registerSettingsModal() {
   registerUIComponent(
     'Settings',
     {
-      colStart: 35,
-      colEnd: 60,
-      rowStart: 8,
+      colStart: 2,
+      colEnd: 33,
+      rowStart: 10,
       rowEnd: 40,
     },
 

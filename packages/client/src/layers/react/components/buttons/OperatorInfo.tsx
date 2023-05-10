@@ -18,7 +18,7 @@ export function registerOperatorHealthButton() {
     {
       colStart: 2,
       colEnd: 17,
-      rowStart: 2,
+      rowStart: 3,
       rowEnd: 30,
     },
     (layers) => {

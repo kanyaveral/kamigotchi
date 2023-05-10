@@ -14,8 +14,8 @@ export function registerDetectAccountModal() {
   registerUIComponent(
     'DetectMint',
     {
-      colStart: 40,
-      colEnd: 70,
+      colStart: 34,
+      colEnd: 68,
       rowStart: 20,
       rowEnd: 60,
     },
@@ -185,14 +185,7 @@ const Button = styled.button`
 
 const StepOne = () => (
   <ModalContent>
-    <Description>
-      <Header style={{ color: 'black' }}>Welcome!</Header>
-      <br />
-      Kamigotchi World exists entirely on-chain.
-      <br />
-      <br />
-      It currently uses a burner wallet in your LocalStorage for testing.
-    </Description>
+    <Header style={{ color: 'black' }}>Welcome!</Header>
   </ModalContent>
 );
 

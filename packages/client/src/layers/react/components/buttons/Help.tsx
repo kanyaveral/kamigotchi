@@ -9,9 +9,9 @@ export function registerHelpButton() {
   registerUIComponent(
     'HelpButton',
     {
-      colStart: 98,
-      colEnd: 101,
-      rowStart: 2,
+      colStart: 97,
+      colEnd: 100,
+      rowStart: 3,
       rowEnd: 10,
     },
     (layers) => of(layers),

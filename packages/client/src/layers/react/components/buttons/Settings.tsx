@@ -9,9 +9,9 @@ export function registerSettingsButton() {
   registerUIComponent(
     'SettingsButton',
     {
-      colStart: 95,
-      colEnd: 98,
-      rowStart: 2,
+      colStart: 94,
+      colEnd: 97,
+      rowStart: 3,
       rowEnd: 10,
     },
     (layers) => of(layers),
