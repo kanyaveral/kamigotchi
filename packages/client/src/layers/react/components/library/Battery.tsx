@@ -10,13 +10,13 @@ type BatteryLevelProps = {
 const Battery = styled.div`
   border: 3px solid #333;
   width: 18px;
-  height: 28px;
+  height: 25px;
   padding: 2px;
   border-radius: 4px;
   position: relative;
   margin-right: 2px;
   transform: rotate(90deg);
-
+  font-family: Pixel;
   &:before {
     content: '';
     height: 3px;

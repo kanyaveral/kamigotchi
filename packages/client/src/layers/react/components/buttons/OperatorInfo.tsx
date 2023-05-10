@@ -17,7 +17,7 @@ export function registerOperatorHealthButton() {
     'OperatorHealth',
     {
       colStart: 2,
-      colEnd: 17,
+      colEnd: 33,
       rowStart: 3,
       rowEnd: 30,
     },
@@ -87,15 +87,14 @@ export function registerOperatorHealthButton() {
 const Button = styled.button`
   cursor: pointer;
   &:active {
-    background-color: #c4c4c4;
+    background-color: #ffffff;
   }
   border-color: black;
   border-width: 2px;
   border-radius: 10px;
   border-style: solid;
   background-color: white;
-  padding: 8px;
-  width: 99%;
+  width: 100%;
 
   display: flex;
   flex-flow: column nowrap;
@@ -116,38 +115,40 @@ const Text = styled.p`
 `;
 
 const BatteryCell = styled.div`
-  grid-column: 2;
-  grid-row: 2;
+  grid-column: 3;
+  grid-row: 1;
   border-color: black;
-  border-width: 0px 2px 2px 0px;
+  border-width: 0px 0px 0px 0px;
   border-style: solid;
-  padding: 5px;
   height: 100%;
   width: 100%;
   display: flex;
+  align-items: center;
   justify-content: center;
 `;
 
 const KamiCell = styled.div`
-  grid-column: 1;
-  grid-row: 2;
+  grid-column: 2;
+  grid-row: 1;
   border-color: black;
-  border-width: 0px 2px 2px 2px;
+  border-width: 0px 2px 0px 0px;
   border-style: solid;
-  padding: 5px;
-  display: flex;
-  align-items: center;
   height: 100%;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const NameCell = styled.div`
-  grid-column: 1 / 3;
+  grid-column: 1;
   grid-row: 1;
   border-color: black;
-  border-width: 2px;
+  border-width: 0px 2px 0px 0px;
   border-style: solid;
-  padding: 5px;
   height: 100%;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;

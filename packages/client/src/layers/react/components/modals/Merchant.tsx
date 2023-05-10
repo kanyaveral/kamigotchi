@@ -40,9 +40,9 @@ export function registerMerchantModal() {
 
     // Grid Config
     {
-      colStart: 33,
-      colEnd: 65,
-      rowStart: 2,
+      colStart: 34,
+      colEnd: 68,
+      rowStart: 10,
       rowEnd: 60,
     },
 
@@ -260,4 +260,3 @@ const ShopList = styled.ul`
   margin: 2px 0px 0px 0px;
   border-radius: 5px;
 `;
-
