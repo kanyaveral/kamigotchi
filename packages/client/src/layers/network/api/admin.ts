@@ -26,7 +26,7 @@ export function createAdminAPI(systems: any) {
       'Torii Gate',
       3,
       'HARVEST',
-      `It's a Torii Gate.`
+      `These gates usually indicate sacred areas. If you have Kamigotchi, this might be a good place to have them gather $KAMI....`
     );
     setNodeAffinity('Torii Gate', 'NORMAL');
 

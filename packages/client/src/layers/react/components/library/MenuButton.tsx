@@ -85,4 +85,5 @@ const Button = styled.button`
       display: block;
     }
   }
+  border-radius: 10px;
 `;
