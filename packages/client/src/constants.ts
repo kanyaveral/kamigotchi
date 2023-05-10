@@ -15,6 +15,7 @@ import {
   foxstatues,
   chair,
   cabinet,
+  occultcircle
 } from 'assets/images/objects';
 
 import {
@@ -389,7 +390,14 @@ export const rooms: Room[] = [
       key: 'm_room014',
       path: room14Music,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'occultcircle',
+        path: occultcircle,
+        offset: { x: 37, y: 40 },
+        onClick: triggerNodeModal,
+      },
+    ],
   },
 ];
 

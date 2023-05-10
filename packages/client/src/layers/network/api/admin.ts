@@ -47,12 +47,12 @@ export function createAdminAPI(systems: any) {
     setNodeAffinity('Pristine Couch', 'SCRAP');
 
     createNode(
-      'Sacred Shrine',
-      11,
+      'Occult Circle',
+      14,
       'HARVEST',
-      'The sacred shrine exudes a revitalizing energy. It reflects the intent of restless spirits.'
+      'The energy invested here calls out to EERIE Kamigotchi.'
     );
-    setNodeAffinity('Sacred Shrine', 'EERIE');
+    setNodeAffinity('Occult Circle', 'EERIE');
 
     createNode(
       'Danger Zone',

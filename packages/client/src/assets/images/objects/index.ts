@@ -14,6 +14,7 @@ import abuildinglogo from './abuildinglogo.png'
 import foxstatues from './foxstatues.png'
 import chair from './chair.png'
 import cabinet from './cabinet.png'
+import occultcircle from './occultcircle.png'
 
 export {
   vendingmachine,
@@ -31,5 +32,6 @@ export {
   abuildinglogo,
   foxstatues,
   chair,
-  cabinet
+  cabinet,
+  occultcircle
 };
