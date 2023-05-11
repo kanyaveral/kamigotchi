@@ -26,10 +26,10 @@ export function registerOperatorHealthButton() {
       const {
         network: {
           network: { connectedAddress },
-          components: { IsAccount, OperatorAddress, StaminaCurrent, Name },
+          components: { IsAccount, OperatorAddress, StaminaCurrent, Name, Coin },
         },
       } = layers;
-      return merge(StaminaCurrent.update$, Name.update$).pipe(
+      return merge(StaminaCurrent.update$, Name.update$, Coin.update$).pipe(
         map(() => {
           // get the account entity of the controlling wallet
           const accountEntityIndex = Array.from(
