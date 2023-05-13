@@ -48,21 +48,8 @@ contract PetFeedSystem is System {
     uint256 healAmt = LibStat.getHealth(components, registryID);
     LibPet.heal(components, id, healAmt);
 
-    // update score
-    if (
-      LibScore.get(components, accountID, LibScore.getLeaderboardEpoch(components), "FEED") == 0
-    ) {
-      LibScore.create(
-        world,
-        components,
-        accountID,
-        LibScore.getLeaderboardEpoch(components),
-        "FEED"
-      );
-    }
+    // logging and tracking
     LibScore.incBy(world, components, accountID, "FEED", 1);
-
-    // update block activity
     LibAccount.updateLastBlock(components, accountID); // gas limit :|
     return "";
   }

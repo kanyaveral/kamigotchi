@@ -57,21 +57,8 @@ contract ProductionLiquidateSystem is System {
     LibProduction.stop(components, targetProductionID);
     LibKill.create(world, components, petID, targetPetID, nodeID);
 
-    // update score
-    if (
-      LibScore.get(components, accountID, LibScore.getLeaderboardEpoch(components), "LIQUIDATE") ==
-      0
-    ) {
-      LibScore.create(
-        world,
-        components,
-        accountID,
-        LibScore.getLeaderboardEpoch(components),
-        "LIQUIDATE"
-      );
-    }
-    LibScore.incBy(world, components, accountID, "LIQUIDATE", 1);
-
+    // logging and tracking
+    LibScore.incBy(world, components, accountID, "LIQUIDATE", amt);
     LibAccount.updateLastBlock(components, accountID);
     return "";
   }

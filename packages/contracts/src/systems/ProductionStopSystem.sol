@@ -34,26 +34,16 @@ contract ProductionStopSystem is System {
       "Pet: too far"
     );
 
+    // collect production output
     uint256 amt = LibProduction.calcOutput(components, id);
     LibCoin.inc(components, accountID, amt);
-    LibProduction.stop(components, id);
 
+    // stop production and set pet to resting
+    LibProduction.stop(components, id);
     LibPet.setState(components, petID, "RESTING");
 
-    // update score, possible finetuning to accomodate node types and affinities
-    if (
-      LibScore.get(components, accountID, LibScore.getLeaderboardEpoch(components), "FEED") == 0
-    ) {
-      LibScore.create(
-        world,
-        components,
-        accountID,
-        LibScore.getLeaderboardEpoch(components),
-        "COLLECT"
-      );
-    }
-    LibScore.incBy(world, components, accountID, "COLLECT", 1);
-
+    // logging and tracking
+    LibScore.incBy(world, components, accountID, "COLLECT", amt);
     LibAccount.updateLastBlock(components, accountID);
     return abi.encode(amt);
   }
