@@ -74,8 +74,9 @@ export function registerSettingsModal() {
           >
             <div style={{ display: 'grid', height: '100%', pointerEvents: 'auto' }}>
               <Header style={{ gridRow: 1, gridColumn: 1 }}>Settings</Header>
-              <SubHeader style={{ gridRow: 2, gridColumn: 1 }}>Sound</SubHeader>
-              <div style={{ gridColumn: 1, gridRow: 4 }}>
+              <Divider style={{ gridRow: 2, gridColumn: 1 }}/>
+              <SubHeader style={{ gridRow: 3, gridColumn: 1 }}>Sound</SubHeader>
+              <div style={{ gridColumn: 1, gridRow: 5 }}>
                 <input
                   type='range'
                   min='0'
@@ -89,10 +90,12 @@ export function registerSettingsModal() {
               <div
                 className='window'
                 onClick={toggleSound}
-                style={{ pointerEvents: 'auto', gridColumn: 1, gridRow: 3 }}
+                style={{ pointerEvents: 'auto', gridColumn: 1, gridRow: 4 }}
               >
                 <img src={!muted ? soundImage : mutedSoundImage} alt='sound_icon' />
               </div>
+              <Divider style={{ gridRow: 7, gridColumn: 1 }}/>
+              <Text style={{ gridRow: 8, gridColumn: 1 }}> Currently there are no other settings. Suggestions appreciated. </Text>
             </div>
           </div>
         </ModalWrapperFull>
@@ -112,7 +115,7 @@ const rangeInputStyle = {
 };
 
 const Header = styled.p`
-  font-size: 20px;
+  font-size: 24px;
   color: #333;
   text-align: left;
   padding: 2px;
@@ -120,9 +123,21 @@ const Header = styled.p`
 `;
 
 const SubHeader = styled.p`
-  font-size: 14px;
+  font-size: 18px;
   color: #333;
   text-align: left;
   padding: 2px;
   font-family: Pixel;
+`;
+
+const Text = styled.p`
+  font-size: 12px;
+  color: #333;
+  text-align: left;
+  padding: 2px;
+  font-family: Pixel;
+`;
+
+const Divider = styled.hr`
+  color: #333;
 `;
