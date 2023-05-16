@@ -63,6 +63,7 @@ export function registerHelpModal() {
 
       return (
         <ModalWrapperFull divName='help' id='help_modal'>
+        <Header> Help/Docs </Header>
           <Description>
             Kamigotchi World exists entirely on-chain.
             <br />
@@ -102,8 +103,9 @@ const SubHeader = styled.p`
 `;
 
 const Description = styled.p`
-  font-size: 18px;
+  font-size: 14px;
   color: #333;
   text-align: center;
   font-family: Pixel;
+  margin-top: 5px;
 `;
