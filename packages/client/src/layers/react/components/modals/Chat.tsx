@@ -176,7 +176,7 @@ const ChatWrapper = styled.div`
 `;
 
 const ChatBox = styled.div`
-  height: 295px;
+  height: 300px;
   width: 100%;
   overflow: scroll;
   white-space: normal;
