@@ -80,28 +80,28 @@ export function registerPartyModal() {
             itemIndex: 1,
             image: gum,
             balance: 0,
-            text: 'Marina - Bubblegum Bitch',
+            text: 'Gum - Restores a small amount of health.',
           },
           {
             id: 2,
             itemIndex: 2,
             image: pompom,
             balance: 0,
-            text: 'pom pom cheerleader',
+            text: 'PomPom - Restores an average amount of health.',
           },
           {
             id: 3,
             itemIndex: 3,
             image: gakki,
             balance: 0,
-            text: 'Django unchained',
+            text: 'Gakki - Restores a large amount of health.',
           },
           {
             id: 4,
             itemIndex: 4,
             image: ribbon,
             balance: 0,
-            text: 'Cry me a river',
+            text: 'Ribbon - Revives a fallen Kami.',
           },
         ];
       };
