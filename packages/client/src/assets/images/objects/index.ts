@@ -19,6 +19,8 @@ import monolith from './monolith.png'
 import junkmonitors from './junkmonitors.png'
 import junkvendingwall from './junkvendingwall_left.png'
 import warningsign from './warningsign.png'
+import beetle1 from './beetle1_9forest.png'
+import beetle2 from './beetle2_9forest.png'
 
 export {
   vendingmachine,
@@ -41,5 +43,7 @@ export {
   monolith,
   junkmonitors,
   junkvendingwall,
-  warningsign
+  warningsign,
+  beetle1,
+  beetle2
 };

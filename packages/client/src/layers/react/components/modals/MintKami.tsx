@@ -20,7 +20,7 @@ export function registerKamiMintModal() {
       colStart: 33,
       colEnd: 65,
       rowStart: 37,
-      rowEnd: 70,
+      rowEnd: 76,
     },
     (layers) => {
       const {

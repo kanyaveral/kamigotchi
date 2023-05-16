@@ -19,7 +19,9 @@ import {
   monolith,
   junkmonitors,
   junkvendingwall,
-  warningsign
+  warningsign,
+  beetle1,
+  beetle2
 } from 'assets/images/objects';
 
 import {

@@ -15,7 +15,7 @@ export function registerMintAfterModal() {
       colStart: 35,
       colEnd: 60,
       rowStart: 40,
-      rowEnd: 60,
+      rowEnd: 65,
     },
     (layers) => of(layers),
     () => {
