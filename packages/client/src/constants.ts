@@ -16,7 +16,10 @@ import {
   chair,
   cabinet,
   occultcircle,
-  monolith
+  monolith,
+  junkmonitors,
+  junkvendingwall,
+  warningsign
 } from 'assets/images/objects';
 
 import {
@@ -225,6 +228,12 @@ export const rooms: Room[] = [
         onClick: () =>
           triggerDialogueModal(["There's a huge office building here for some reason."]),
       },
+      {
+        key: 'warningsign',
+        path: warningsign,
+        offset: { x: 10.5, y: 39.6 },
+        onClick: () => triggerDialogueModal(["Stay out."]),
+      },
     ],
   },
   {
@@ -288,7 +297,20 @@ export const rooms: Room[] = [
       key: 'm_room008',
       path: room14Music,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'junkmonitors',
+        path: junkmonitors,
+        offset: { x: 54, y: 17 },
+        onClick: () => triggerDialogueModal(['Junk monitors.']),
+      },
+      {
+        key: 'junkvendingwall',
+        path: junkvendingwall,
+        offset: { x: -47.5, y: -4.5 },
+        onClick: () => triggerDialogueModal(['A wall that vends junk.']),
+      },
+    ],
   },
   {
     location: 9,

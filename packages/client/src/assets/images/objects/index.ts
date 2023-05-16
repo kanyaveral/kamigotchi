@@ -16,6 +16,9 @@ import chair from './chair.png'
 import cabinet from './cabinet.png'
 import occultcircle from './occultcircle.png'
 import monolith from './monolith.png'
+import junkmonitors from './junkmonitors.png'
+import junkvendingwall from './junkvendingwall_left.png'
+import warningsign from './warningsign.png'
 
 export {
   vendingmachine,
@@ -35,5 +38,8 @@ export {
   chair,
   cabinet,
   occultcircle,
-  monolith
+  monolith,
+  junkmonitors,
+  junkvendingwall,
+  warningsign
 };
