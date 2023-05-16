@@ -63,7 +63,7 @@ const Content = styled.div`
   border-radius: 10px;
   border-style: solid;
   background-color: white;
-  padding: 4px;
+  padding: 8px;
   width: 99%;
   height: 100%;
   display: flex;
