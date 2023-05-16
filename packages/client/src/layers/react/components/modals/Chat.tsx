@@ -168,17 +168,15 @@ export function registerChatModal() {
 const ChatWrapper = styled.div`
   background-color: #ffffff;
   color: black;
-  padding: 5px 12px;
   text-align: left;
   font-size: 12px;
   cursor: pointer;
   border-radius: 5px;
   font-family: Pixel;
-  margin: 0px;
 `;
 
 const ChatBox = styled.div`
-  height: 200px;
+  height: 295px;
   width: 100%;
   overflow: scroll;
   white-space: normal;
