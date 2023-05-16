@@ -15,6 +15,7 @@ import foxstatues from './foxstatues.png'
 import chair from './chair.png'
 import cabinet from './cabinet.png'
 import occultcircle from './occultcircle.png'
+import monolith from './monolith.png'
 
 export {
   vendingmachine,
@@ -33,5 +34,6 @@ export {
   foxstatues,
   chair,
   cabinet,
-  occultcircle
+  occultcircle,
+  monolith
 };

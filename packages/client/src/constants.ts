@@ -15,7 +15,8 @@ import {
   foxstatues,
   chair,
   cabinet,
-  occultcircle
+  occultcircle,
+  monolith
 } from 'assets/images/objects';
 
 import {
@@ -358,6 +359,13 @@ export const rooms: Room[] = [
         offset: { x: -9, y: -3.92 },
         onClick: () =>
           triggerDialogueModal(['This device will allow you to view information about balances.']),
+      },
+      {
+        key: 'monolith',
+        path: monolith,
+        offset: { x: -48, y: -27.1 },
+        onClick: () =>
+          triggerDialogueModal(['A huge, rather disconcerting black monolith.']),
       },
     ],
   },
