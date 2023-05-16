@@ -21,6 +21,8 @@ import junkvendingwall from './junkvendingwall_left.png'
 import warningsign from './warningsign.png'
 import beetle1 from './beetle1_9forest.png'
 import beetle2 from './beetle2_9forest.png'
+import smallmushrooms from './mushrooms_9forest.png'
+import beetle3 from './halfbeetle_9forest.png'
 
 export {
   vendingmachine,
@@ -45,5 +47,7 @@ export {
   junkvendingwall,
   warningsign,
   beetle1,
-  beetle2
+  beetle2,
+  beetle3,
+  smallmushrooms
 };

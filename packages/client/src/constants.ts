@@ -21,7 +21,9 @@ import {
   junkvendingwall,
   warningsign,
   beetle1,
-  beetle2
+  beetle2,
+  beetle3,
+  smallmushrooms
 } from 'assets/images/objects';
 
 import {
@@ -324,7 +326,32 @@ export const rooms: Room[] = [
       key: 'm_room009',
       path: forest,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'beetle1',
+        path: beetle1,
+        offset: { x: 53.5, y: -53.35 },
+        onClick: () => triggerDialogueModal(['Beetle one.']),
+      },
+      {
+        key: 'beetle2',
+        path: beetle2,
+        offset: { x: 11.5, y: -7 },
+        onClick: () => triggerDialogueModal(['Beetle two.']),
+      },
+      {
+        key: 'beetle3',
+        path: beetle3,
+        offset: { x: -59.5, y: -15.5 },
+        onClick: () => triggerDialogueModal(['Beetle three.']),
+      },
+      {
+        key: 'smallmushrooms',
+        path: smallmushrooms,
+        offset: { x: -52, y: 58 },
+        onClick: () => triggerDialogueModal(['Small mushrooms.']),
+      },
+    ],
   },
   {
     location: 10,
