@@ -55,12 +55,12 @@ export function createAdminAPI(systems: any) {
     setNodeAffinity('Occult Circle', 'EERIE');
 
     createNode(
-      'Danger Zone',
+      'Monolith',
       12,
       'HARVEST',
-      'Danger Zone'
+      'This huge black monolith seems to draw in energy from the rest of the junkyard.'
     );
-    setNodeAffinity('Danger Zone', 'SCRAP');
+    setNodeAffinity('Monolith', 'SCRAP');
 
 
     // create food registry items

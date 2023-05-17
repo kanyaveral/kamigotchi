@@ -455,8 +455,7 @@ export const rooms: Room[] = [
         key: 'monolith',
         path: monolith,
         offset: { x: -48, y: -27.1 },
-        onClick: () =>
-          triggerDialogueModal(['A huge, rather disconcerting black monolith.']),
+        onClick: triggerNodeModal,
       },
     ],
   },
