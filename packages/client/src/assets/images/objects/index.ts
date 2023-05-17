@@ -23,6 +23,10 @@ import beetle1 from './beetle1_9forest.png'
 import beetle2 from './beetle2_9forest.png'
 import smallmushrooms from './mushrooms_9forest.png'
 import beetle3 from './halfbeetle_9forest.png'
+import beetle4 from './beetle_10forest.png'
+import centipedeandgrub from './centipedeandgrub.png'
+import foresttrunk from './hollowtrunk_10forest.png'
+import termitemound from './termitemound.png'
 
 export {
   vendingmachine,
@@ -49,5 +53,9 @@ export {
   beetle1,
   beetle2,
   beetle3,
-  smallmushrooms
+  smallmushrooms,
+  beetle4,
+  centipedeandgrub,
+  foresttrunk,
+  termitemound
 };

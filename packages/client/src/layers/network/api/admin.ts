@@ -39,12 +39,12 @@ export function createAdminAPI(systems: any) {
     setNodeAffinity('Trash Compactor', 'SCRAP');
 
     createNode(
-      'Pristine Couch',
+      'Termite Mound',
       10,
       'HARVEST',
-      'Pristine couch is very pristine. It gives off a peculiar aura.'
+      'A huge termite mound. Apparently, this is sacred to the local insects.'
     );
-    setNodeAffinity('Pristine Couch', 'SCRAP');
+    setNodeAffinity('Termite Mound', 'INSECT');
 
     createNode(
       'Occult Circle',

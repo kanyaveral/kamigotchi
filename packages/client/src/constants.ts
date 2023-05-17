@@ -23,7 +23,11 @@ import {
   beetle1,
   beetle2,
   beetle3,
-  smallmushrooms
+  smallmushrooms,
+  beetle4,
+  centipedeandgrub,
+  foresttrunk,
+  termitemound
 } from 'assets/images/objects';
 
 import {
@@ -363,7 +367,32 @@ export const rooms: Room[] = [
       key: 'm_room010',
       path: forest,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'beetle4',
+        path: beetle4,
+        offset: { x: -42.55, y: 38.6 },
+        onClick: () => triggerDialogueModal(['Beetle four.']),
+      },
+      {
+        key: 'centipedeandgrub',
+        path: centipedeandgrub,
+        offset: { x: 41.6, y: 52.5 },
+        onClick: () => triggerDialogueModal(['A centipede and a grub.']),
+      },
+      {
+        key: 'foresttrunk',
+        path: foresttrunk,
+        offset: { x: -53, y: -7 },
+        onClick: () => triggerDialogueModal(['A hollow tree-trunk.']),
+      },
+      {
+        key: 'termitemound',
+        path: termitemound,
+        offset: { x: 5.4, y: 1.5 },
+        onClick: triggerNodeModal,
+      },
+    ],
   },
   {
     location: 11,
