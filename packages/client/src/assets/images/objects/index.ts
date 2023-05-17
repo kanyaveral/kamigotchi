@@ -28,6 +28,9 @@ import centipedeandgrub from './centipedeandgrub.png'
 import foresttrunk from './hollowtrunk_10forest.png'
 import termitemound from './termitemound.png'
 import poster from './poster.png'
+import appleimac from './appleimac.png'
+import businesspaperwork from './businesspaperwork.png'
+import smallwaterfall from './waterfall_14ceo.png'
 
 export {
   vendingmachine,
@@ -59,5 +62,8 @@ export {
   centipedeandgrub,
   foresttrunk,
   termitemound,
-  poster
+  poster,
+  appleimac,
+  businesspaperwork,
+  smallwaterfall
 };

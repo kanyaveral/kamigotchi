@@ -28,7 +28,10 @@ import {
   centipedeandgrub,
   foresttrunk,
   termitemound,
-  poster
+  poster,
+  appleimac,
+  businesspaperwork,
+  smallwaterfall
 } from 'assets/images/objects';
 
 import {
@@ -491,6 +494,27 @@ export const rooms: Room[] = [
         path: occultcircle,
         offset: { x: 37, y: 40 },
         onClick: triggerNodeModal,
+      },
+      {
+        key: 'appleimac',
+        path: appleimac,
+        offset: { x: -12.4, y: 9.5 },
+        onClick: () =>
+          triggerDialogueModal(['An apple Imac.']),
+      },
+      {
+        key: 'businesspaperwork',
+        path: businesspaperwork,
+        offset: { x: 7, y: 3.6 },
+        onClick: () =>
+          triggerDialogueModal(['A pile of documents.']),
+      },
+      {
+        key: 'smallwaterfall',
+        path: smallwaterfall,
+        offset: { x: -53.9, y: 5.6 },
+        onClick: () =>
+          triggerDialogueModal(['A waterfall in the distance.']),
       },
     ],
   },
