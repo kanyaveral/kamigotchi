@@ -27,7 +27,8 @@ import {
   beetle4,
   centipedeandgrub,
   foresttrunk,
-  termitemound
+  termitemound,
+  poster
 } from 'assets/images/objects';
 
 import {
@@ -317,6 +318,12 @@ export const rooms: Room[] = [
         path: junkvendingwall,
         offset: { x: -47.5, y: -4.5 },
         onClick: () => triggerDialogueModal(['A wall that vends junk.']),
+      },
+      {
+        key: 'poster',
+        path: poster,
+        offset: { x: 35.5, y: -1.4 },
+        onClick: () => triggerDialogueModal(['A poster of no particular importance.']),
       },
     ],
   },

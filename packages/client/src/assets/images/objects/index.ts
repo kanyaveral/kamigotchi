@@ -27,6 +27,7 @@ import beetle4 from './beetle_10forest.png'
 import centipedeandgrub from './centipedeandgrub.png'
 import foresttrunk from './hollowtrunk_10forest.png'
 import termitemound from './termitemound.png'
+import poster from './poster.png'
 
 export {
   vendingmachine,
@@ -57,5 +58,6 @@ export {
   beetle4,
   centipedeandgrub,
   foresttrunk,
-  termitemound
+  termitemound,
+  poster
 };
