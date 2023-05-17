@@ -10,7 +10,7 @@ import room9 from './9_forest.png';
 import room10 from './10_insectforest.png';
 import room11 from './11_temple.png';
 import room12 from './12_machine.png';
-import room13 from './13_giftshop.png';
+import room13 from './minashop.png';
 import room14 from './14_ceo.png';
 
 export {
