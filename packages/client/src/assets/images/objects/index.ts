@@ -31,6 +31,7 @@ import poster from './poster.png'
 import appleimac from './appleimac.png'
 import businesspaperwork from './businesspaperwork.png'
 import smallwaterfall from './waterfall_14ceo.png'
+import mina from './mina.png'
 
 export {
   vendingmachine,
@@ -65,5 +66,6 @@ export {
   poster,
   appleimac,
   businesspaperwork,
-  smallwaterfall
+  smallwaterfall,
+  mina
 };

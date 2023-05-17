@@ -31,7 +31,8 @@ import {
   poster,
   appleimac,
   businesspaperwork,
-  smallwaterfall
+  smallwaterfall,
+  mina
 } from 'assets/images/objects';
 
 import {
@@ -475,6 +476,13 @@ export const rooms: Room[] = [
         path: cashregister,
         offset: { x: -50.5, y: -8.02 },
         onClick: triggerShopModal,
+      },
+      {
+        key: 'mina',
+        path: mina,
+        offset: { x: -15, y: -24.6 },
+        onClick: () =>
+          triggerDialogueModal(["Mina doesn't want to talk to you. Perhaps her dialogue will be implemented soon."]),
       },
     ],
   },
