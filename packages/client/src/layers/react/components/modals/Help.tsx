@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import 'layers/react/styles/font.css';
+import homeImage from '../../../../assets/images/home_native.png';
 
 export enum HelpComponentState {
   HOME_PAGE,
@@ -52,7 +53,7 @@ export function registerHelpModal() {
           helpContent = (
             <div>
               <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
-                Home Page
+                <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
               </Button>
               <Header>Stats</Header>
               {/* Kami Stats specific content */}
@@ -62,9 +63,9 @@ export function registerHelpModal() {
         case HelpComponentState.KAMI_INFO:
           helpContent = (
             <div>
-              <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
-                Home Page
-              </Button>
+            <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
+              <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
+            </Button>
               <Header>Kami</Header>
               {/* Kami Info specific content */}
             </div>
@@ -73,9 +74,9 @@ export function registerHelpModal() {
         case HelpComponentState.OVERALL_HELP:
           helpContent = (
             <div>
-              <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
-                Home Page
-              </Button>
+            <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
+              <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
+            </Button>
               <Header>World</Header>
               {/* Overall Help specific content */}
             </div>
@@ -84,9 +85,9 @@ export function registerHelpModal() {
         default:
           helpContent = (
             <div>
-              <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
-                Home Page
-              </Button>
+            <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
+              <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
+            </Button>
               <Header>Help/Docs</Header>
               {/* Default content */}
             </div>
@@ -109,17 +110,15 @@ const Button = styled.button`
   border-width: 2px;
   border-color: black;
   color: black;
-  padding: 5px;
   font-size: 14px;
   cursor: pointer;
   pointer-events: auto;
   border-radius: 5px;
   font-family: Pixel;
-  width: 30px;
   &:active {
     background-color: #c4c4c4;
   }
-  margin: 0px;
+  margin-bottom: 5px;
 `;
 
 // Styled link component
