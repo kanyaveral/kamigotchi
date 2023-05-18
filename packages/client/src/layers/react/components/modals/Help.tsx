@@ -36,7 +36,7 @@ export function registerHelpModal() {
           helpContent = (
             <div>
               <Header>Help/Docs</Header>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>
                 <Link onClick={() => handleLinkClick(HelpComponentState.KAMI_STATS)}>
                   Kami Stats
                 </Link>
@@ -54,7 +54,7 @@ export function registerHelpModal() {
               <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
                 Home Page
               </Button>
-              <Header>Kami Stats Help</Header>
+              <Header>Stats</Header>
               {/* Kami Stats specific content */}
             </div>
           );
@@ -65,7 +65,7 @@ export function registerHelpModal() {
               <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
                 Home Page
               </Button>
-              <Header>Kami Info Help</Header>
+              <Header>Kami</Header>
               {/* Kami Info specific content */}
             </div>
           );
@@ -76,7 +76,7 @@ export function registerHelpModal() {
               <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
                 Home Page
               </Button>
-              <Header>Overall Help</Header>
+              <Header>World</Header>
               {/* Overall Help specific content */}
             </div>
           );
@@ -104,12 +104,22 @@ export function registerHelpModal() {
 }
 
 const Button = styled.button`
-  background-color: #222;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 5px;
+  font-size: 14px;
   cursor: pointer;
+  pointer-events: auto;
+  border-radius: 5px;
+  font-family: Pixel;
+  width: 30px;
+  &:active {
+    background-color: #c4c4c4;
+  }
+  margin: 0px;
 `;
 
 // Styled link component
@@ -117,6 +127,10 @@ const Link = styled.a`
   color: #222;
   text-decoration: underline;
   cursor: pointer;
+  font-family: Pixel;
+  padding: 2px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 `;
 
 const rangeInputStyle = {
