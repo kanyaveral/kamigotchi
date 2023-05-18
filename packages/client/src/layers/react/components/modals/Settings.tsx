@@ -18,7 +18,7 @@ export function registerSettingsModal() {
     {
       colStart: 2,
       colEnd: 33,
-      rowStart: 10,
+      rowStart: 3,
       rowEnd: 62,
     },
 
