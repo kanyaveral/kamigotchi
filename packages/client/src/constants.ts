@@ -114,8 +114,7 @@ export const rooms: Room[] = [
       path: room1,
     },
     music: {
-      key: 'm_room001',
-      path: room1Music,
+
     },
     objects: [],
   },
@@ -127,7 +126,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room001',
-      path: room1Music,
+      path: forest,
     },
     objects: [
       {
@@ -149,7 +148,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room002',
-      path: room3Music,
+      path: forest,
     },
     objects: [
       {
@@ -187,7 +186,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room003',
-      path: room3Music,
+      path: forest,
     },
     objects: [
       {
@@ -206,7 +205,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room004',
-      path: room4Music,
+      path: forest,
     },
     objects: [
       {
@@ -225,7 +224,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room005',
-      path: room5Music,
+      path: forest,
     },
     objects: [
       {
@@ -257,7 +256,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room006',
-      path: room5Music,
+      path: forest,
     },
     objects: [
       {
@@ -283,7 +282,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room007',
-      path: room14Music,
+      path: forest,
     },
     objects: [
       {
@@ -308,7 +307,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room008',
-      path: room14Music,
+      path: forest,
     },
     objects: [
       {
@@ -413,7 +412,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room011',
-      path: room11Music,
+      path: forest,
     },
     objects: [],
   },
@@ -425,7 +424,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room012',
-      path: room12Music,
+      path: forest,
     },
     objects: [
       {
@@ -467,7 +466,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room013',
-      path: room13Music,
+      path: forest,
     },
     objects: [
       {
@@ -493,7 +492,7 @@ export const rooms: Room[] = [
     },
     music: {
       key: 'm_room014',
-      path: room14Music,
+      path: forest,
     },
     objects: [
       {
