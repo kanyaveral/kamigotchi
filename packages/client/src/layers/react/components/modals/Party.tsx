@@ -37,7 +37,7 @@ export function registerPartyModal() {
       colStart: 2,
       colEnd: 33,
       rowStart: 3,
-      rowEnd: 71,
+      rowEnd: 99,
     },
 
     // Requirement (Data Manangement)
