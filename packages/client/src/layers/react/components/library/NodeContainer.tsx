@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { dataStore } from 'layers/react/store/createStore';
 
 type NodeInfoProps = {
   node: Node;
@@ -48,17 +50,22 @@ const NodeInfoContainer = styled.div`
 `;
 
 export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
+
+  const { selectedEntities: { kami }, visibleModals, setVisibleModals } = dataStore();
+
+  const hideModal = useCallback(() => {
+    setVisibleModals({ ...visibleModals, node: false });
+  }, [setVisibleModals, visibleModals]);
+
   return (
     <NodeInfoContainer>
-      <img
-        src={
-          node.uri ??
-          'https://t3.ftcdn.net/jpg/00/99/48/12/360_F_99481297_bbpqwxB7T0xL5DZHpwzrkWVd0vlT2GrT.jpg'
-        }
-        alt={node.name}
-      />
       <div className="text-container">
-        <Header>{node.name}</Header>
+      <div style={{display: 'grid'}}>
+      <TopButton style={{ pointerEvents: 'auto', gridColumn: 2 }} onClick={hideModal}>
+        X
+      </TopButton>
+        <Header style={{gridColumn: 1}}>{node.name}</Header>
+        </div>
         <BoldKamiText className="text1">{node.affinity}</BoldKamiText>
         <KamiText className="text2">
           {node.description}
@@ -94,4 +101,23 @@ const Header = styled.p`
   grid-row: 1;
   font-weight: 600;
   padding-top: 10px;
+`;
+
+const TopButton = styled.button`
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 5px;
+  font-family: Pixel;
+  width: 30px;
+  &:active {
+    background-color: #c4c4c4;
+  }
+  margin: 0px;
 `;

@@ -35,8 +35,8 @@ export function registerNodeModal() {
     {
       colStart: 34,
       colEnd: 68,
-      rowStart: 10,
-      rowEnd: 98,
+      rowStart: 9,
+      rowEnd: 99,
     },
 
     // Requirement (Data Manangement)
@@ -498,9 +498,6 @@ export function registerNodeModal() {
       if (data.node.id) {
         return (
           <ModalWrapperFull id='node' divName='node'>
-            <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
-              X
-            </TopButton>
             <NodeInfo node={data.node} />
             {MyTabButton()}
             {EnemyTabButton()}
