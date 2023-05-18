@@ -136,7 +136,7 @@ export const rooms: Room[] = [
         offset: { x: -19, y: 38 },
         onClick: () =>
           triggerDialogueModal([
-            "This looks like a post for mooring boats. But there's no boats here.",
+            "This looks like a mooring post. There's enough rope attached to secure a boat. Somehow, you know the spot is taken.",
           ]),
       },
     ],

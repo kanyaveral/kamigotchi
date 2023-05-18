@@ -91,7 +91,7 @@ const ModalContent = styled.div`
 `;
 
 const Description = styled.p`
-  font-size: 20px;
+  font-size: 24px;
   color: #333;
   text-align: center;
   padding: 20px;
