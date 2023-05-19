@@ -32,7 +32,8 @@ import {
   appleimac,
   businesspaperwork,
   smallwaterfall,
-  mina
+  mina,
+  emaboard,
 } from 'assets/images/objects';
 
 import {
@@ -53,25 +54,13 @@ import {
 } from 'assets/images/rooms';
 
 import {
-  room1Music,
   forest,
-  room3Music,
-  room4Music,
-  room5Music,
-  room6Music,
-  room7Music,
-  room8Music,
-  room9Music,
-  room10Music,
-  room11Music,
-  room12Music,
-  room13Music,
-  room14Music,
 } from 'assets/sound/ost';
 import { triggerPetMintModal } from 'layers/phaser/utils/triggerPetMintModal';
 import { triggerDialogueModal } from 'layers/phaser/utils/triggerDialogueModal';
 import { triggerNodeModal } from 'layers/phaser/utils/triggerNodeModal';
 import { triggerShopModal } from 'layers/phaser/utils/triggerShopModal';
+import { triggerPetNamingModal } from 'layers/phaser/utils/triggerPetNamingModal';
 
 // NOTE: This is the most horrendous, hardcoded known to mankind. We should
 // move most things here to the store and populate the information from onchain.
@@ -108,17 +97,7 @@ export const duplicateRoomMusic = [
 
 // all our lovely, hardcoded room details
 export const rooms: Room[] = [
-  {
-    location: 0,
-    background: {
-      key: 'bg_room001',
-      path: room1,
-    },
-    music: {
-
-    },
-    objects: [],
-  },
+  { location: 0 },
   {
     location: 1,
     background: {
@@ -245,7 +224,7 @@ export const rooms: Room[] = [
         key: 'warningsign',
         path: warningsign,
         offset: { x: 10.5, y: 39.6 },
-        onClick: () => triggerDialogueModal(["Stay out."]),
+        onClick: () => triggerDialogueModal(['Stay out.']),
       },
     ],
   },
@@ -415,7 +394,14 @@ export const rooms: Room[] = [
       key: 'forest',
       path: forest,
     },
-    objects: [],
+    objects: [
+      {
+        key: 'emaboard',
+        path: emaboard,
+        offset: { x: 45.5, y: 31 },
+        onClick: triggerPetNamingModal,
+      },
+    ],
   },
   {
     location: 12,
