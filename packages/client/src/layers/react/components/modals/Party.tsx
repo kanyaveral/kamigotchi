@@ -52,7 +52,6 @@ export function registerPartyModal() {
             HealthCurrent,
             Coin,
             HolderID,
-            Name,
             IsAccount,
             IsInventory,
             IsNode,
@@ -60,6 +59,7 @@ export function registerPartyModal() {
             ItemIndex,
             Location,
             MediaURI,
+            Name,
             OperatorAddress,
             OwnerID,
             Rate,
@@ -117,8 +117,8 @@ export function registerPartyModal() {
         Rate.update$,
         StartTime.update$,
         State.update$,
-        Name.update$,
-        MediaURI.update$
+        MediaURI.update$,
+        Name.update$
       ).pipe(
         map(() => {
           /////////////////

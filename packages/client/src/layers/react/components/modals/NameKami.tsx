@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useEffect, useState, useCallback } from 'react';
 import 'layers/react/styles/font.css';
-import { map } from 'rxjs';
+import { map, merge } from 'rxjs';
 import { registerUIComponent } from 'layers/react/engine/store';
 import styled, { keyframes } from 'styled-components';
 import { EntityID } from '@latticexyz/recs';
@@ -23,13 +23,21 @@ export function registerNameKamiModal() {
       const {
         network: {
           api: { player },
-          components: { OperatorAddress },
+          components: {
+            CanName,
+            OperatorAddress,
+            Name
+          },
           world: { entities },
           actions,
         },
       } = layers;
 
-      return OperatorAddress.update$.pipe(
+      return merge(
+        OperatorAddress.update$,
+        CanName.update$,
+        Name.update$
+      ).pipe(
         map(() => {
           return {
             layers,
@@ -67,7 +75,7 @@ export function registerNameKamiModal() {
       };
 
       // handle naming action response (need to modify for error handling)
-      const NameKami = async (name: string) => {
+      const NameKami = async () => {
         try {
           nameTx(kami, name);
           setVisibleModals({ ...visibleModals, nameKami: false });
@@ -79,7 +87,7 @@ export function registerNameKamiModal() {
 
       const catchKeys = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-          NameKami(name);
+          NameKami();
         }
         // This is for input ---
         // if (event.key === 'Escape') {
