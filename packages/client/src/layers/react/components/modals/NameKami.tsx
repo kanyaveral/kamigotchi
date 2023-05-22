@@ -14,10 +14,10 @@ export function registerNameKamiModal() {
   registerUIComponent(
     'NameKami',
     {
-      colStart: 40,
-      colEnd: 70,
+      colStart: 34,
+      colEnd: 68,
       rowStart: 20,
-      rowEnd: 43,
+      rowEnd: 50,
     },
     (layers) => {
       const {
@@ -149,14 +149,7 @@ const Input = styled.input`
 const ModalContent = styled.div`
   display: grid;
   justify-content: center;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  padding: 20px;
   width: 99%;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
 `;
 
 const Description = styled.p`
@@ -204,11 +197,22 @@ const StepOne = () => (
 const StepTwo = (props: any) => {
   const { catchKeys, handleChange, name } = props;
 
+  const { selectedEntities: { kami }, visibleModals, setVisibleModals } = dataStore();
+
+  const hideModal = useCallback(() => {
+    setVisibleModals({ ...visibleModals, node: false });
+  }, [setVisibleModals, visibleModals]);
+
   return (
     <ModalContent>
-      <Description style={{ gridRow: 1 }}>Now, give kami a name.</Description>
+      <AlignRight style={{ gridRow: 1, marginBottom: '10px'}}>
+        <TopButton  style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+          X
+        </TopButton>
+      </AlignRight>
+      <Description style={{ gridRow: 2 }}>A Kami can only be named once. Choose carefully.</Description>
       <Input
-        style={{ gridRow: 2, pointerEvents: 'auto' }}
+        style={{ gridRow: 3, pointerEvents: 'auto' }}
         type='text'
         onKeyDown={(e) => catchKeys(e)}
         placeholder='username'
@@ -222,13 +226,33 @@ const StepTwo = (props: any) => {
 const steps = (props: any) => [
   {
     title: 'One',
-    content: <StepOne />,
-  },
-  {
-    title: 'Two',
     content: (
       <StepTwo catchKeys={props.catchKeys} handleChange={props.handleChange} name={props.name} />
     ),
     modalContent: true,
   },
 ];
+
+const TopButton = styled.button`
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 5px;
+  font-family: Pixel;
+  width: 30px;
+  &:active {
+    background-color: #c4c4c4;
+  }
+  margin: 0px;
+`;
+
+const AlignRight = styled.div`
+  text-align: left;
+  margin: 0px;
+`;

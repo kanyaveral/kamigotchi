@@ -12,9 +12,9 @@ export function registerKamisNamingModal() {
   registerUIComponent(
     'KamisNaming',
     {
-      colStart: 35,
-      colEnd: 65,
-      rowStart: 8,
+      colStart: 34,
+      colEnd: 68,
+      rowStart: 9,
       rowEnd: 76,
     },
 
@@ -284,4 +284,5 @@ const TopButton = styled.button`
     background-color: #c4c4c4;
   }
   margin: 0px;
+  margin-bottom: 5px;
 `;
