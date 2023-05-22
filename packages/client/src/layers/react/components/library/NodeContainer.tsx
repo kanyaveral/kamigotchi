@@ -60,11 +60,13 @@ export const NodeInfo: React.FC<NodeInfoProps> = ({ node }) => {
   return (
     <NodeInfoContainer>
       <div className="text-container">
-      <div style={{display: 'grid'}}>
-      <TopButton style={{ pointerEvents: 'auto', gridColumn: 2 }} onClick={hideModal}>
+      <div>
+      <AlignRight>
+      <TopButton  style={{ pointerEvents: 'auto'}} onClick={hideModal}>
         X
       </TopButton>
-        <Header style={{gridColumn: 1}}>{node.name}</Header>
+      </AlignRight>
+        <Header>{node.name}</Header>
         </div>
         <BoldKamiText className="text1">{node.affinity}</BoldKamiText>
         <KamiText className="text2">
@@ -119,5 +121,10 @@ const TopButton = styled.button`
   &:active {
     background-color: #c4c4c4;
   }
+  margin: 0px;
+`;
+
+const AlignRight = styled.div`
+  text-align: left;
   margin: 0px;
 `;
