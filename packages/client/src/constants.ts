@@ -53,7 +53,7 @@ import {
   room14,
 } from 'assets/images/rooms';
 
-import { forest } from 'assets/sound/ost';
+import { forest, opening } from 'assets/sound/ost';
 import { triggerPetMintModal } from 'layers/phaser/utils/triggerPetMintModal';
 import { triggerDialogueModal } from 'layers/phaser/utils/triggerDialogueModal';
 import { triggerNodeModal } from 'layers/phaser/utils/triggerNodeModal';
@@ -86,11 +86,11 @@ interface RoomMusic {
 }
 
 export const duplicateRoomMusic = [
-  [2, 3],
+  [1, 2, 3],
   [5, 6],
   [9, 10],
   [7, 8, 14],
-  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
 ];
 
 // all our lovely, hardcoded room details
@@ -103,8 +103,8 @@ export const rooms: Room[] = [
       path: room1,
     },
     music: {
-      key: 'forest',
-      path: forest,
+      key: 'opening',
+      path: opening,
     },
     objects: [
       {
@@ -125,8 +125,8 @@ export const rooms: Room[] = [
       path: room2,
     },
     music: {
-      key: 'forest',
-      path: forest,
+      key: 'opening',
+      path: opening,
     },
     objects: [
       {
@@ -165,8 +165,8 @@ export const rooms: Room[] = [
       path: room3,
     },
     music: {
-      key: 'forest',
-      path: forest,
+      key: 'opening',
+      path: opening,
     },
     objects: [
       {
