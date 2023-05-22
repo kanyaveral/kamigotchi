@@ -200,7 +200,7 @@ const StepTwo = (props: any) => {
   const { selectedEntities: { kami }, visibleModals, setVisibleModals } = dataStore();
 
   const hideModal = useCallback(() => {
-    setVisibleModals({ ...visibleModals, node: false });
+    setVisibleModals({ ...visibleModals, nameKami: false });
   }, [setVisibleModals, visibleModals]);
 
   return (
