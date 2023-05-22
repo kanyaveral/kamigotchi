@@ -33,6 +33,9 @@ import businesspaperwork from './businesspaperwork.png'
 import smallwaterfall from './waterfall_14ceo.png'
 import mina from './mina.png'
 import emaboard from './emaboard.png';
+import stonelantern from './stonelantern.png';
+import waterfall from './waterfall.png';
+import smallshrine from './smallshrine.png';
 
 export {
   emaboard,
@@ -69,5 +72,8 @@ export {
   appleimac,
   businesspaperwork,
   smallwaterfall,
-  mina
+  mina,
+  stonelantern,
+  waterfall,
+  smallshrine
 };

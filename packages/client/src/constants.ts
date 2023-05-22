@@ -34,6 +34,9 @@ import {
   smallwaterfall,
   mina,
   emaboard,
+  stonelantern,
+  waterfall,
+  smallshrine
 } from 'assets/images/objects';
 
 import {
@@ -400,6 +403,24 @@ export const rooms: Room[] = [
         path: emaboard,
         offset: { x: 45.5, y: 31 },
         onClick: triggerPetNamingModal,
+      },
+      {
+        key: 'stonelantern',
+        path: stonelantern,
+        offset: { x: -50.4, y: 34.6 },
+        onClick: () => triggerDialogueModal(['A stone lantern.']),
+      },
+      {
+        key: 'waterfall',
+        path: waterfall,
+        offset: { x: 22.6, y: -33.5 },
+        onClick: () => triggerDialogueModal(['A waterfall.']),
+      },
+      {
+        key: 'smallshrine',
+        path: smallshrine,
+        offset: { x: -5.48, y: 16.1 },
+        onClick: () => triggerDialogueModal(['A small shrine.']),
       },
     ],
   },
