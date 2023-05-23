@@ -199,19 +199,18 @@ const Button = styled.button`
 const StepOne = () => (
   <ModalContent>
     <Header style={{ color: 'black' }}>Welcome!</Header>
+    <Description>
+      This is a completely on-chain world. Some setup is needed.
+    </Description>
   </ModalContent>
 );
 
 const StepTwo = () => (
   <ModalContent>
-    <Description>
-      <Header style={{ color: 'black' }}>Tips</Header>
-      <br />
-      You can move using the map.
-      <br />
-      <br />
-      Look for a vending machine and for Nodes scattered throughout the world.
-    </Description>
+      <Header style={{ color: 'black' }}>Wallet connection</Header>
+      <Description>
+        Any wallet connect content can go here!
+      </Description>
   </ModalContent>
 );
 
