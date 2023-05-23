@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
@@ -32,6 +32,8 @@ export function registerHelpModal() {
         setHelpState(state);
       }
 
+      const scrollableRef = useRef<HTMLDivElement>(null);
+
       switch (helpState) {
         case HelpComponentState.HOME_PAGE:
           helpContent = (
@@ -45,6 +47,14 @@ export function registerHelpModal() {
                 <Link onClick={() => handleLinkClick(HelpComponentState.OVERALL_HELP)}>
                   Overall Help
                 </Link>
+                <Description>
+                Welcome to Kamigotchi World.
+                <br />
+                You can move using the map.
+                <br />
+                <br />
+                Look for a vending machine and for Nodes scattered throughout the world.
+                </Description>
               </div>
             </div>
           );
@@ -97,7 +107,9 @@ export function registerHelpModal() {
 
       return (
         <ModalWrapperFull divName='help' id='help_modal'>
-          {helpContent}
+          <Scrollable ref={scrollableRef}>
+            {helpContent}
+          </Scrollable>
         </ModalWrapperFull>
       );
     }
@@ -128,8 +140,7 @@ const Link = styled.a`
   cursor: pointer;
   font-family: Pixel;
   padding: 2px;
-  margin-top: 2px;
-  margin-bottom: 2px;
+  margin: 5px;
 `;
 
 const rangeInputStyle = {
@@ -159,9 +170,15 @@ const SubHeader = styled.p`
 `;
 
 const Description = styled.p`
-  font-size: 14px;
+  font-size: 15px;
   color: #333;
-  text-align: center;
+  text-align: left;
   font-family: Pixel;
-  margin-top: 5px;
+  margin: 5px;
+`;
+
+const Scrollable = styled.div`
+  overflow-y: scroll;
+  height: 100%;
+  max-height: 100%;
 `;
