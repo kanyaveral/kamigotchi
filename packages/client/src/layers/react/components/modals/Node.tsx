@@ -552,8 +552,8 @@ const Header = styled.p`
   font-size: 24px;
   color: #333;
   text-align: left;
-  padding: 2px;
   font-family: Pixel;
+  margin: 5px;
 `;
 
 
