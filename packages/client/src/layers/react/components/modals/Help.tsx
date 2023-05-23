@@ -5,6 +5,7 @@ import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import 'layers/react/styles/font.css';
 import homeImage from '../../../../assets/images/home_native.png';
+import kamiHello from '../../../../assets/images/welcome1.png';
 
 export enum HelpComponentState {
   HOME,
@@ -42,6 +43,7 @@ export function registerHelpModal() {
           helpContent = (
             <div>
               <Header>Help/Docs</Header>
+              <img style={{ height: 'auto', width: '100%' }} src={kamiHello} alt='help_icon' />
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>
               <Link onClick={() => handleLinkClick(HelpComponentState.START)}>
                 Getting Started
