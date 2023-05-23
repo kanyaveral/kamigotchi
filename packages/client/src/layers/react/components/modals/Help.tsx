@@ -10,7 +10,8 @@ export enum HelpComponentState {
   HOME_PAGE,
   KAMI_STATS,
   KAMI_INFO,
-  OVERALL_HELP,
+  NODES,
+  START
 }
 
 export function registerHelpModal() {
@@ -40,21 +41,13 @@ export function registerHelpModal() {
             <div>
               <Header>Help/Docs</Header>
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>
-                <Link onClick={() => handleLinkClick(HelpComponentState.KAMI_STATS)}>
-                  Kami Stats
+              <Link onClick={() => handleLinkClick(HelpComponentState.START)}>
+                Getting Started
+              </Link>
+                <Link onClick={() => handleLinkClick(HelpComponentState.KAMI_INFO)}>Kamigotchi</Link>
+                <Link onClick={() => handleLinkClick(HelpComponentState.NODES)}>
+                  Nodes
                 </Link>
-                <Link onClick={() => handleLinkClick(HelpComponentState.KAMI_INFO)}>Kami Info</Link>
-                <Link onClick={() => handleLinkClick(HelpComponentState.OVERALL_HELP)}>
-                  Overall Help
-                </Link>
-                <Description>
-                Welcome to Kamigotchi World.
-                <br />
-                You can move using the map.
-                <br />
-                <br />
-                Look for a vending machine and for Nodes scattered throughout the world.
-                </Description>
               </div>
             </div>
           );
@@ -65,8 +58,31 @@ export function registerHelpModal() {
               <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
                 <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
               </Button>
-              <Header>Stats</Header>
-              {/* Kami Stats specific content */}
+              <Header>
+                Stats
+              </Header>
+              <Description>
+                Kamigotchi have several different statistics that determine their abilities. Base statistics are determined by a Kami's Traits.
+              </Description>
+            </div>
+          );
+          break;
+        case HelpComponentState.START:
+          helpContent = (
+            <div>
+              <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
+                  <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
+              </Button>
+              <Header>Start</Header>
+              <Description>
+
+              Welcome to Kamigotchi World.
+              <br />
+              You can move using the map.
+              <br />
+              <br />
+              Look for a vending machine and for Nodes scattered throughout the world.
+              </Description>
             </div>
           );
           break;
@@ -76,19 +92,36 @@ export function registerHelpModal() {
             <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
               <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
             </Button>
-              <Header>Kami</Header>
-              {/* Kami Info specific content */}
+              <Header>Kamigotchi</Header>
+              <Description>
+                Kamigotchi are vibrant individuals who exist to provide you with
+                emotional support and value. You can convert their health and
+                well-being into $KAMI by sending them to work at Nodes.
+                <br/>
+                <br/>
+                Your Kamigotchi are fiercely
+                independent and will gradually regenerate health if left to
+                their own devices, but can be fed to speed this process.
+              </Description>
+              <Link onClick={() => handleLinkClick(HelpComponentState.KAMI_STATS)}>
+                Kami Stats
+              </Link>
             </div>
           );
           break;
-        case HelpComponentState.OVERALL_HELP:
+        case HelpComponentState.NODES:
           helpContent = (
             <div>
             <Button onClick={() => handleLinkClick(HelpComponentState.HOME_PAGE)}>
               <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
             </Button>
-              <Header>World</Header>
-              {/* Overall Help specific content */}
+              <Header>Nodes</Header>
+              <Description>
+                Nodes are sites of spiritual significance within Kamigotchi
+                World. Kamigotchi, and only Kamigotchi, can generate $KAMI
+                by gathering energy at Nodes. This costs Kamigotchi health,
+                and can leave them vulnerable to attack from other Kamigotchi.
+              </Description>
             </div>
           );
           break;
@@ -157,20 +190,20 @@ const Header = styled.p`
   font-size: 24px;
   color: #333;
   text-align: left;
-  padding: 2px;
   font-family: Pixel;
+  margin: 5px;
 `;
 
 const SubHeader = styled.p`
   font-size: 14px;
   color: #333;
   text-align: left;
-  padding: 2px;
   font-family: Pixel;
+  margin: 5px;
 `;
 
 const Description = styled.p`
-  font-size: 15px;
+  font-size: 16px;
   color: #333;
   text-align: left;
   font-family: Pixel;
