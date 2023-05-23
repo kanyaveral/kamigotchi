@@ -490,7 +490,12 @@ export function registerNodeModal() {
       if (data.node.kamis.mine.length < 1) {
         return (
           <ModalWrapperFull id='node' divName='node'>
-            <h1 style={{ color: 'black' }}>You don't have any Kamigotchi.</h1>
+          <AlignRight>
+          <TopButton  style={{ pointerEvents: 'auto'}} onClick={hideModal}>
+            X
+          </TopButton>
+          </AlignRight>
+            <Header >Nodes reject those who do not travel with Kamigotchi.</Header>
           </ModalWrapperFull>
         );
       }
@@ -540,5 +545,19 @@ const TopButton = styled.button`
   &:active {
     background-color: #c4c4c4;
   }
+  margin: 0px;
+`;
+
+const Header = styled.p`
+  font-size: 24px;
+  color: #333;
+  text-align: left;
+  padding: 2px;
+  font-family: Pixel;
+`;
+
+
+const AlignRight = styled.div`
+  text-align: left;
   margin: 0px;
 `;
