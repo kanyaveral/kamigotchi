@@ -133,6 +133,11 @@ export function registerHelpModal() {
                 Rarer traits usually give more stat points.
                 <br/>
                 <br/>
+                Kamigotchi also have Types, determined by their Arm and Body traits. Kamigotchi
+                can be Normal, Eerie, Scrap, or Insect types, and the Arm and Body can have different
+                Types - leading to a dual-type Kami, for example Normal/Insect.
+                <br/>
+                <br/>
                 Health determines a Kami's well being. The lower a Kami's health,
                 the easier it is for them to be Liquidated for other Kamigotchi,
                 will kills them. Dead Kamigotchi are not destroyed, but must be
