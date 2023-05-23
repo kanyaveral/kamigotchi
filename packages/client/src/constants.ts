@@ -367,7 +367,7 @@ export const rooms: Room[] = [
         key: 'centipedeandgrub',
         path: centipedeandgrub,
         offset: { x: 41.6, y: 52.5 },
-        onClick: () => triggerDialogueModal(['A centipede and a grub. The relationship between them is ambiguous.']),
+        onClick: () => triggerDialogueModal(['A centipede and a grub. The relationship between them is ambiguous and of great interest to the beetles nearby.']),
       },
       {
         key: 'foresttrunk',
