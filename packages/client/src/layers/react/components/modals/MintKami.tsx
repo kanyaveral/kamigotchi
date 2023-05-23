@@ -7,7 +7,7 @@ import { registerUIComponent } from 'layers/react/engine/store';
 import { EntityID, EntityIndex, getComponentValue } from '@latticexyz/recs';
 import { waitForActionCompletion } from '@latticexyz/std-client';
 
-import mintSound from 'assets/sound/fx/tami_mint_vending_sound.mp3';
+import mintSound from 'assets/sound/fx/vending_machine.mp3';
 import { dataStore } from 'layers/react/store/createStore';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
@@ -102,9 +102,9 @@ export function registerKamiMintModal() {
 
       return (
         <ModalWrapperFull divName='kamiMint' id='kamiMintModal'>
-        <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
-          X
-        </TopButton>
+          <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
+            X
+          </TopButton>
           <Stepper steps={steps} MintButton={MintButton} />
         </ModalWrapperFull>
       );
@@ -162,7 +162,7 @@ const CenterBox = styled.div`
   padding: 10px;
 `;
 
-const Description = styled.p`
+const Description = styled.div`
   font-size: 20px;
   color: #333;
   text-align: center;

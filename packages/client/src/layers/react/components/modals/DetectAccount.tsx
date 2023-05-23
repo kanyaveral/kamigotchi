@@ -5,9 +5,8 @@ import { map } from 'rxjs';
 import { registerUIComponent } from 'layers/react/engine/store';
 import styled, { keyframes } from 'styled-components';
 import { HasValue, runQuery } from '@latticexyz/recs';
-import mintSound from 'assets/sound/fx/tami_mint_vending_sound.mp3';
+import mintSound from 'assets/sound/fx/vending_machine.mp3';
 import { dataStore } from 'layers/react/store/createStore';
-import { Modal } from 'antd';
 import { Stepper } from '../library/Stepper';
 
 export function registerDetectAccountModal() {
@@ -22,11 +21,11 @@ export function registerDetectAccountModal() {
     (layers) => {
       const {
         network: {
-          components: { OperatorAddress },
+          components: { IsAccount },
         },
       } = layers;
 
-      return OperatorAddress.update$.pipe(
+      return IsAccount.update$.pipe(
         map(() => {
           return {
             layers,
@@ -47,7 +46,7 @@ export function registerDetectAccountModal() {
       const [isDivVisible, setIsDivVisible] = useState(false);
       const [name, setName] = useState('');
       const { volume } = dataStore((state) => state.sound);
-      const { visibleModals, setVisibleModals } = dataStore();
+      const { visibleButtons, toggleVisibleButtons } = dataStore();
 
       const hasAccount = Array.from(
         runQuery([HasValue(OperatorAddress, { value: connectedAddress.get() })])
@@ -60,7 +59,7 @@ export function registerDetectAccountModal() {
           mintFX.volume = volume;
           mintFX.play();
 
-          await player.account.set(connectedAddress.get()!, name);
+          await player.account.register(connectedAddress.get()!, name);
 
           document.getElementById('detectAccount')!.style.display = 'none';
           document.getElementById('mint_process')!.style.display = 'block';
@@ -83,18 +82,10 @@ export function registerDetectAccountModal() {
       useEffect(() => {
         if (hasAccount != undefined) {
           setIsDivVisible(false);
-          return setVisibleModals({
-            ...visibleModals,
-            operatorInfo: true,
-            partButton: true,
-            settingsButton: true,
-            chatButton: true,
-            helpButton: true,
-            nodeButton: true,
-            mapButton: true,
-          });
+          toggleVisibleButtons(true);
+        } else {
+          setIsDivVisible(true);
         }
-        return setIsDivVisible(true);
       }, [setIsDivVisible, hasAccount]);
 
       return (

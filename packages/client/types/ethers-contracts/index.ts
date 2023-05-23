@@ -2,10 +2,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { AccountMoveSystem } from "./AccountMoveSystem";
-export type { AccountNameSystem } from "./AccountNameSystem";
-export type { AccountSetSystem } from "./AccountSetSystem";
+export type { AccountRegisterSystem } from "./AccountRegisterSystem";
+export type { AccountSetNameSystem } from "./AccountSetNameSystem";
+export type { AccountSetOperatorSystem } from "./AccountSetOperatorSystem";
 export type { AddressComponent } from "./AddressComponent";
 export type { AddressOperatorComponent } from "./AddressOperatorComponent";
+export type { AddressOwnerComponent } from "./AddressOwnerComponent";
 export type { AffinityComponent } from "./AffinityComponent";
 export type { BalanceComponent } from "./BalanceComponent";
 export type { BlockLastComponent } from "./BlockLastComponent";
@@ -34,7 +36,6 @@ export type { IdDelegatorComponent } from "./IdDelegatorComponent";
 export type { IdHolderComponent } from "./IdHolderComponent";
 export type { IdMerchantComponent } from "./IdMerchantComponent";
 export type { IdNodeComponent } from "./IdNodeComponent";
-export type { IdOwnerComponent } from "./IdOwnerComponent";
 export type { IdPetComponent } from "./IdPetComponent";
 export type { IdRequesteeComponent } from "./IdRequesteeComponent";
 export type { IdRequesterComponent } from "./IdRequesterComponent";
@@ -127,10 +128,12 @@ export type { _SetLeaderboardEpochSystem } from "./_SetLeaderboardEpochSystem";
 export type { _devGiveTokensSystem } from "./_devGiveTokensSystem";
 export * as factories from "./factories";
 export { AccountMoveSystem__factory } from "./factories/AccountMoveSystem__factory";
-export { AccountNameSystem__factory } from "./factories/AccountNameSystem__factory";
-export { AccountSetSystem__factory } from "./factories/AccountSetSystem__factory";
+export { AccountRegisterSystem__factory } from "./factories/AccountRegisterSystem__factory";
+export { AccountSetNameSystem__factory } from "./factories/AccountSetNameSystem__factory";
+export { AccountSetOperatorSystem__factory } from "./factories/AccountSetOperatorSystem__factory";
 export { AddressComponent__factory } from "./factories/AddressComponent__factory";
 export { AddressOperatorComponent__factory } from "./factories/AddressOperatorComponent__factory";
+export { AddressOwnerComponent__factory } from "./factories/AddressOwnerComponent__factory";
 export { AffinityComponent__factory } from "./factories/AffinityComponent__factory";
 export { BalanceComponent__factory } from "./factories/BalanceComponent__factory";
 export { BlockLastComponent__factory } from "./factories/BlockLastComponent__factory";
@@ -159,7 +162,6 @@ export { IdDelegatorComponent__factory } from "./factories/IdDelegatorComponent_
 export { IdHolderComponent__factory } from "./factories/IdHolderComponent__factory";
 export { IdMerchantComponent__factory } from "./factories/IdMerchantComponent__factory";
 export { IdNodeComponent__factory } from "./factories/IdNodeComponent__factory";
-export { IdOwnerComponent__factory } from "./factories/IdOwnerComponent__factory";
 export { IdPetComponent__factory } from "./factories/IdPetComponent__factory";
 export { IdRequesteeComponent__factory } from "./factories/IdRequesteeComponent__factory";
 export { IdRequesterComponent__factory } from "./factories/IdRequesterComponent__factory";

@@ -3,11 +3,12 @@ import { registerLoadingState } from './LoadingState';
 import { registerDialogueModal } from './modals/Dialogue';
 
 import { registerChatButton } from './buttons/Chat';
+import { registerHelpButton } from './buttons/Help';
 import { registerMapButton } from './buttons/Map';
+import { registerOperatorInfoButton } from './buttons/OperatorInfo';
 import { registerPartyButton } from './buttons/Party';
 import { registerSettingsButton } from './buttons/Settings';
-import { registerHelpButton } from './buttons/Help';
-import { registerOperatorHealthButton } from './buttons/OperatorInfo';
+import { registerWalletButton } from './buttons/Wallet';
 
 import { registerChatModal } from './modals/Chat';
 import { registerDetectAccountModal } from './modals/DetectAccount';
@@ -23,20 +24,24 @@ import { registerHelpModal } from './modals/Help';
 import { registerKamisNamingModal } from './modals/KamisNaming';
 import { registerNameKamiModal } from './modals/NameKami';
 
+import { registerConnectModal } from './modals/Connect';
+import { registerAccountRegistrationModal } from './modals/AccountRegistration';
+
 export function registerUIComponents() {
   registerActionQueue();
   registerLoadingState();
   registerDialogueModal();
 
-  registerOperatorHealthButton();
   registerChatButton();
+  registerHelpButton();
   registerMapButton();
+  registerOperatorInfoButton();
   registerPartyButton();
   registerSettingsButton();
-  registerHelpButton();
+  registerWalletButton();
 
   registerChatModal();
-  registerDetectAccountModal();
+  // registerDetectAccountModal();
   registerKamiMintModal();
   registerMintAfterModal();
   registerMapModal();
@@ -48,4 +53,7 @@ export function registerUIComponents() {
   registerKamisNamingModal();
   registerNameKamiModal();
   registerHelpModal();
+
+  registerConnectModal();
+  registerAccountRegistrationModal();
 }
