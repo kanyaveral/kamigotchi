@@ -1,22 +1,24 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { EntityID, EntityIndex, HasValue, runQuery } from '@latticexyz/recs';
 import { waitForActionCompletion } from '@latticexyz/std-client';
+import { Wallet } from 'ethers';
 import React, { useEffect, useState, useCallback } from 'react';
 import { map, merge, of } from 'rxjs';
 import styled, { keyframes } from 'styled-components';
 import { useAccount } from 'wagmi';
 
 import { registerUIComponent } from 'layers/react/engine/store';
-
-import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { dataStore } from 'layers/react/store/createStore';
 import { useKamiAccount } from 'layers/react/store/kamiAccount';
-import 'layers/react/styles/font.css';
+import { SingleInputTextForm } from 'layers/react/components/library/SingleInputTextForm';
+
 import mintSound from 'assets/sound/fx/vending_machine.mp3';
 import scribbleSound from 'assets/sound/fx/scribbling.mp3';
 import successSound from 'assets/sound/fx/bubble_success.mp3';
+import 'layers/react/styles/font.css';
 
-export function registerAccountRegistrationModal() {
+// TODO: check for whether an account with the burner address already exists
+export function registerAccountRegistrar() {
   registerUIComponent(
     'AccountRegistration',
     {
@@ -42,17 +44,19 @@ export function registerAccountRegistrationModal() {
     },
 
     ({ network }) => {
-      const burnerAddress = network.connectedAddress.get();
+      const connectedBurnerAddress = network.connectedAddress.get();
       const { isConnected } = useAccount();
       const { details: accountDetails } = useKamiAccount();
-      const { sound: { volume }, networks, selectedAddress, toggleVisibleButtons } = dataStore();
-      const [name, setName] = useState('');
+      const { networks, selectedAddress, sound: { volume } } = dataStore();
+      const [isVisible, setIsVisible] = useState(false);
 
-      // toggle buttons based on whether account is detected
+      // toggle buttons and modals based on whether account is detected
       useEffect(() => {
-        if (accountDetails.id) toggleVisibleButtons(true);
-        else toggleVisibleButtons(false);
-      }, [accountDetails]);
+        setIsVisible(isConnected && !accountDetails.id);
+      }, [accountDetails, isConnected]);
+
+      /////////////////
+      // ACTIONS
 
       const playSound = (sound: any) => {
         const soundFx = new Audio(sound);
@@ -60,17 +64,18 @@ export function registerAccountRegistrationModal() {
         soundFx.play();
       }
 
-      const createAccount = async (
-        ownerAddress: string,
-        operatorAddress: string,
-        name: string
-      ) => {
-        console.log(networks);
+      const createAccountWithFx = async (username: string) => {
+        playSound(scribbleSound);
+        await createAccount(username);
+        playSound(successSound);
+      }
+
+      const createAccount = async (username: string) => {
         const {
           actions,
           api: { player },
           world,
-        } = networks.get(ownerAddress);
+        } = networks.get(selectedAddress);
 
         const actionID = `Creating Account` as EntityID;
         actions.add({
@@ -79,68 +84,30 @@ export function registerAccountRegistrationModal() {
           requirement: () => true,
           updates: () => [],
           execute: async () => {
-            return player.account.register(operatorAddress, name);
+            return player.account.register(connectedBurnerAddress, username);
           },
         });
-
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;
-        const actionCompletion = await waitForActionCompletion(actions.Action, actionIndex);
-        console.log('action return value', actionCompletion);
-
-        // openKamiModal(pet.entityIndex);
+        await waitForActionCompletion(actions.Action, actionIndex);
       }
-
-      const createAccountWithFx = async (
-        ownerAddr: string,
-        operatorAddr: string,
-        name: string
-      ) => {
-        playSound(scribbleSound);
-        await createAccount(ownerAddr, operatorAddr, name);
-        playSound(successSound);
-      }
-
-      const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setName(event.target.value);
-      };
-
-      const catchKeys = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-          console.log(burnerAddress);
-          createAccountWithFx(selectedAddress, burnerAddress!, name);
-        }
-      };
-
 
       /////////////////
       // DISPLAY
 
-      // how to render the modal
-      const modalDisplay = () => (
-        (isConnected && !accountDetails.index) ? 'block' : 'none'
-      );
-
       return (
-        <ModalWrapper id='accountRegistration' style={{ display: modalDisplay() }}>
+        <ModalWrapper id='accountRegistration' style={{ display: isVisible ? 'block' : 'none' }}>
           <ModalContent style={{ pointerEvents: 'auto' }}>
             <Title>Register Your Account</Title>
-            <br />
-            <Description>Owner Address: {selectedAddress}</Description>
-            <br />
-            <Description>Operator Address: {burnerAddress}</Description>
-            <Description>Operator PrivKey: (should make this copyable)</Description>
-            <Description>Note: we also want tooltips here on hover</Description>
-            <NameInput
-              type='text'
+            <Description>(no registered account for connected address)</Description>
+            <Header>Detected Addresses</Header>
+            <Description>Owner: {selectedAddress}</Description>
+            <Description>Operator: {connectedBurnerAddress}</Description>
+            <SingleInputTextForm
+              id={`username`}
+              label='username'
               placeholder='username'
-              value={name}
-              onKeyDown={(e) => catchKeys(e)}
-              onChange={(e) => handleNameChange(e)}
-            />
-            <ActionButton
-              id={`create-account`}
-              onClick={() => createAccountWithFx(selectedAddress!, burnerAddress!, name)}
-              text='Submit'
+              hasButton={true}
+              onSubmit={(v: string) => createAccountWithFx(v)}
             />
           </ModalContent>
         </ModalWrapper>
@@ -204,6 +171,15 @@ const Title = styled.p`
   color: #333;
   text-align: center;
   font-family: Pixel;
+  padding: 5px 0px;
+`;
+
+const Header = styled.p`
+  font-size: 14px;
+  color: #333;
+  text-align: center;
+  font-family: Pixel;
+  padding: 15px 0px 5px 0px;
 `;
 
 const Description = styled.p`
@@ -211,4 +187,5 @@ const Description = styled.p`
   color: #333;
   text-align: center;
   font-family: Pixel;
+  padding: 5px 0px;
 `;

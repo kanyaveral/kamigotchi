@@ -4,7 +4,6 @@ import styled, { keyframes } from 'styled-components';
 import { useAccount } from 'wagmi';
 import {
   EntityIndex,
-  EntityID,
   Has,
   HasValue,
   getComponentValue,
@@ -40,13 +39,13 @@ import 'layers/react/styles/font.css';
  * abomination birthed out of necessity and should be treated as such.
  */
 
-export function registerConnectModal() {
+export function registerWalletConnecter() {
   registerUIComponent(
-    'Connect',
+    'Connecter',
     {
       colStart: 20,
       colEnd: 80,
-      rowStart: 20,
+      rowStart: 40,
       rowEnd: 60,
     },
     (layers) => {
@@ -114,14 +113,25 @@ export function registerConnectModal() {
       getAccountDetails,
     }) => {
       const { isConnected } = useAccount();
-      const { details, setDetails } = useKamiAccount();
-      const { selectedAddress } = dataStore();
+      const { setDetails } = useKamiAccount();
+      const {
+        selectedAddress,
+        toggleVisibleButtons,
+        toggleVisibleModals,
+      } = dataStore();
 
       // track the account details in store for easy access
+      // also expose/hide components accordingly
       useEffect(() => {
         const accountIndex = getAccountIndexFromOwner(selectedAddress);
         const accountDetails = getAccountDetails(accountIndex);
         setDetails(accountDetails);
+        if (accountDetails.id) {
+          toggleVisibleButtons(true);
+        } else {
+          toggleVisibleButtons(false);
+          toggleVisibleModals(false);
+        }
       }, [selectedAddress, isConnected, accountIndexUpdatedByWorld]);
 
       // how to render the modal
@@ -134,8 +144,6 @@ export function registerConnectModal() {
           <ModalContent style={{ pointerEvents: 'auto' }}>
             <Title>Connect a Wallet</Title>
             <Description>{(isConnected) ? '(Connected)' : '(Disconnected)'} </Description>
-            <br />
-            <Description>Account ID: {details.id}</Description>
             <br />
             <Description>Connector Address: {selectedAddress}</Description>
             <br />
