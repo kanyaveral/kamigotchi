@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { location, road, coreSprites, water } from 'assets/newmap';
+import { location, road, coreSprites, water } from 'assets/map';
 
 interface MapProps {
   highlightedRoom?: number;
