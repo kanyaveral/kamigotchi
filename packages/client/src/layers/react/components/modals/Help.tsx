@@ -6,10 +6,14 @@ import { registerUIComponent } from 'layers/react/engine/store';
 import 'layers/react/styles/font.css';
 import homeImage from '../../../../assets/images/home_native.png';
 import kamiHello from '../../../../assets/images/welcome1.png';
+import nodes from '../../../../assets/images/nodes.png';
+import world from '../../../../assets/images/world.png';
+import gettingStarted from '../../../../assets/images/gettingstarted1.png';
+import whatKami from '../../../../assets/images/whatkami.png';
+
 
 export enum HelpComponentState {
   HOME,
-  KAMI_STATS,
   KAMI_INFO,
   NODES,
   START,
@@ -42,8 +46,7 @@ export function registerHelpModal() {
         case HelpComponentState.HOME:
           helpContent = (
             <div>
-              <Header>Help/Docs</Header>
-              <img style={{ height: 'auto', width: '100%' }} src={kamiHello} alt='help_icon' />
+              <img style={{ height: 'auto', width: '100%' }} src={kamiHello} alt='welcome to kamigotchi' />
               <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>
               <Link onClick={() => handleLinkClick(HelpComponentState.START)}>
                 Getting Started
@@ -61,44 +64,13 @@ export function registerHelpModal() {
             </div>
           );
           break;
-        case HelpComponentState.KAMI_STATS:
-          helpContent = (
-            <div>
-              <Button onClick={() => handleLinkClick(HelpComponentState.HOME)}>
-                <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
-              </Button>
-              <Header>
-                Stats
-              </Header>
-              <Description>
-                Kamigotchi have several different statistics that determine
-                their abilities. Base statistics are determined by a Kami's Traits.
-                <br/>
-                <br/>
-                Health determines a Kami's well being. The lower a Kami's health,
-                the easier it is for them to be Liquidated for other Kamigotchi,
-                will kills them. Dead Kamigotchi are not destroyed, but must be
-                resurrected using a Ribbon.
-                <br/>
-                Health drains slowly when harvesting on a node. As Health drains, Kamigotchi
-                produce $KAMI based on their Power stat. More Power increases both Health drain rate
-                and the level of $KAMI generated.
-                <br/>
-                <br/>
-                Violence and Harmony determine a Kami's capacity for attack and
-                defense. The Health threshold for liquidating a Kami on a Node is determined
-                by the difference between the attacker's Violence and the defender's Harmony.
-              </Description>
-            </div>
-          );
-          break;
         case HelpComponentState.START:
           helpContent = (
             <div>
               <Button onClick={() => handleLinkClick(HelpComponentState.HOME)}>
                   <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
               </Button>
-              <Header>Start</Header>
+              <img style={{ height: 'auto', width: '100%' }} src={gettingStarted} alt='getting started' />
               <Description>
               Welcome to Kamigotchi World.
               <br />
@@ -122,7 +94,7 @@ export function registerHelpModal() {
             <Button onClick={() => handleLinkClick(HelpComponentState.HOME)}>
               <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
             </Button>
-              <Header>Kamigotchi</Header>
+            <img style={{ height: 'auto', width: '100%' }} src={whatKami} alt='what kami' />
               <Description>
                 Kamigotchi are vibrant individuals who exist to provide you with
                 emotional support and value. You can convert their health and
@@ -172,7 +144,7 @@ export function registerHelpModal() {
             <Button onClick={() => handleLinkClick(HelpComponentState.HOME)}>
               <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
             </Button>
-              <Header>Nodes</Header>
+            <img style={{ height: 'auto', width: '100%' }} src={nodes} alt='nodes' />
               <Description>
                 Nodes are sites of spiritual significance within Kamigotchi
                 World. Kamigotchi, and only Kamigotchi, can generate $KAMI
@@ -193,7 +165,7 @@ export function registerHelpModal() {
             <Button onClick={() => handleLinkClick(HelpComponentState.HOME)}>
               <img style={{ height: '100%', width: 'auto' }} src={homeImage} alt='home_icon' />
             </Button>
-              <Header>World</Header>
+            <img style={{ height: 'auto', width: '100%' }} src={world} alt='world' />
               <Description>
                 Kamigotchi World is an Autonomous World that exists entirely on-chain.
                 <br/>
