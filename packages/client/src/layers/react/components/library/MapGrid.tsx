@@ -220,8 +220,8 @@ const Tile = ({ img, highlightedRoom, move, rowIndex, colIndex }: any) => {
       onClick={
         room
           ? () => {
-              move(room);
-            }
+            move(room);
+          }
           : undefined
       }
       style={{ width: '100%', height: '100%', ...highlight }}
