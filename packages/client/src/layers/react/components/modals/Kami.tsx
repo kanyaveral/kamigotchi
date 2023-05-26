@@ -15,9 +15,9 @@ export function registerKamiModal() {
     'KamiDetails',
     {
       colStart: 23,
-      colEnd: 80,
-      rowStart: 5,
-      rowEnd: 90,
+      colEnd: 81,
+      rowStart: 3,
+      rowEnd: 99,
     },
     (layers) => {
       const {
@@ -95,59 +95,59 @@ export function registerKamiModal() {
 
           if (stats && stats.health !== 0) {
             statBoxes.push(
-              <StatBox style={{ gridRow: 2, gridColumn }}>
+              <TraitStatBox style={{ gridRow: 2, gridColumn }}>
                 <KamiText>Health</KamiText>
                 <KamiFacts>{stats.health * 1}</KamiFacts>
-              </StatBox>
+              </TraitStatBox>
             );
             gridColumn++;
           }
 
           if (stats && stats.harmony !== 0) {
             statBoxes.push(
-              <StatBox style={{ gridRow: 2, gridColumn }}>
+              <TraitStatBox style={{ gridRow: 2, gridColumn }}>
                 <KamiText>Harmony</KamiText>
                 <KamiFacts>{stats.harmony * 1}</KamiFacts>
-              </StatBox>
+              </TraitStatBox>
             );
             gridColumn++;
           }
 
           if (stats && stats.power !== 0) {
             statBoxes.push(
-              <StatBox style={{ gridRow: 2, gridColumn }}>
+              <TraitStatBox style={{ gridRow: 2, gridColumn }}>
                 <KamiText>Power</KamiText>
                 <KamiFacts>{stats.power * 1}</KamiFacts>
-              </StatBox>
+              </TraitStatBox>
             );
             gridColumn++;
           }
 
           if (stats && stats.slots !== 0) {
             statBoxes.push(
-              <StatBox style={{ gridRow: 2, gridColumn }}>
+              <TraitStatBox style={{ gridRow: 2, gridColumn }}>
                 <KamiText>Slots</KamiText>
                 <KamiFacts>{stats.slots * 1}</KamiFacts>
-              </StatBox>
+              </TraitStatBox>
             );
             gridColumn++;
           }
 
           if (stats && stats.violence !== 0) {
             statBoxes.push(
-              <StatBox style={{ gridRow: 2, gridColumn }}>
+              <TraitStatBox style={{ gridRow: 2, gridColumn }}>
                 <KamiText>Violence</KamiText>
                 <KamiFacts>{stats.violence * 1}</KamiFacts>
-              </StatBox>
+              </TraitStatBox>
             );
             gridColumn++;
           }
 
           return (
             <TraitBox style={{ gridTemplateColumns: `repeat(${gridColumn}, 1fr)` }}>
-              <KamiHeader style={{ gridRow: 1, gridColumn: 1 }}>
+              <TraitsHeader style={{ gridRow: 1, gridColumn: 1 }}>
                 {key.charAt(0).toUpperCase() + key.slice(1) + ' - ' + dets.traits[key].name}
-              </KamiHeader>
+              </TraitsHeader>
               {statBoxes}
             </TraitBox>
           );
@@ -254,11 +254,9 @@ const KamiFacts = styled.div`
 const TraitsHeader = styled.div`
   background-color: #ffffff;
   color: black;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   font-family: Pixel;
-  margin: auto;
-  margin: 5px;
 `;
 
 const KamiHeader = styled.div`
@@ -309,6 +307,7 @@ const TopDiv = styled.div`
   display: flex;
   padding: 0px;
   margin: 0px;
+  margin-top: 5px;
 `;
 
 const StatBox = styled.div`
@@ -318,6 +317,16 @@ const StatBox = styled.div`
   padding: 5px;
   display: grid;
   margin: 2px;
+`;
+
+const TraitStatBox = styled.div`
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  padding: 5px;
+  display: grid;
+  margin: 2px;
+  width: 100px;
 `;
 
 const TopButton = styled.button`
