@@ -10,8 +10,8 @@ export function registerHelpButton() {
   registerUIComponent(
     'HelpButton',
     {
-      colStart: 97,
-      colEnd: 100,
+      colStart: 88,
+      colEnd: 91,
       rowStart: 3,
       rowEnd: 10,
     },

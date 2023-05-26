@@ -10,10 +10,10 @@ export function registerWalletButton() {
   registerUIComponent(
     'WalletButton',
     {
-      colStart: 80,
-      colEnd: 99,
-      rowStart: 10,
-      rowEnd: 20,
+      colStart: 91,
+      colEnd: 100,
+      rowStart: 3,
+      rowEnd: 12,
     },
     (layers) => of(layers),
     () => {
@@ -22,6 +22,8 @@ export function registerWalletButton() {
           <ConnectButton
             label="Connect Wallet"
             showBalance={false}
+            chainStatus="none"
+            accountStatus="address"
           />
         </div>
       );

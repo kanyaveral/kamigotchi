@@ -1,7 +1,7 @@
 // src/layers/react/engine/Engine.tsx:
 import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { getDefaultWallets, RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig, useAccount, Connector, WagmiConfig } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 
@@ -100,7 +100,11 @@ export const Engine: React.FC<{
   if (!mounted || !layers) return customBootScreen || <BootScreen />;
   return (
     <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider chains={chains}>
+      <RainbowKitProvider theme={lightTheme({
+        accentColor: '#ffffff',
+        accentColorForeground: '#000000',
+        fontStack: 'system'
+      })} chains={chains}>
         <LayerContext.Provider value={layers}>
           <EngineContext.Provider value={EngineStore}>
             <MainWindow />
