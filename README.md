@@ -38,6 +38,7 @@ from this window you should..
 
 ## Guts and Glory
 _built with love, powered by \[redacted\]_
+
 **Actually Built With**
 - [MUD](https://mud.dev/)
 - Phaser
