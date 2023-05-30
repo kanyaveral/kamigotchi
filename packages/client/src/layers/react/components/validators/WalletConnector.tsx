@@ -11,6 +11,7 @@ import {
 } from '@latticexyz/recs';
 
 import { dataStore } from 'layers/react/store/createStore';
+import { useNetworkSettings } from 'layers/react/store/networkSettings';
 import { registerUIComponent } from 'layers/react/engine/store';
 import {
   AccountDetails,
@@ -92,33 +93,26 @@ export function registerWalletConnecter() {
         OwnerAddress.update$,
       ).pipe(
         map(() => {
-          const burnerAddress = connectedAddress.get();
-          const { selectedAddress } = dataStore.getState();
+          const { selectedAddress } = useNetworkSettings.getState();
           const accountIndexUpdatedByWorld = getAccountIndexFromOwner(selectedAddress);
-
+          const accountDetailsFromWorld = getAccountDetails(accountIndexUpdatedByWorld);
           return {
-            burnerAddress,
-            accountIndexUpdatedByWorld,
+            accountDetailsFromWorld,
             getAccountIndexFromOwner,
             getAccountDetails,
           };
         })
       );
     },
-
     ({
-      burnerAddress,
-      accountIndexUpdatedByWorld,
+      accountDetailsFromWorld,
       getAccountIndexFromOwner,
       getAccountDetails,
     }) => {
       const { isConnected, status } = useAccount();
+      const { selectedAddress } = useNetworkSettings();
       const { setDetails } = useKamiAccount();
-      const {
-        selectedAddress,
-        toggleVisibleButtons,
-        toggleVisibleModals,
-      } = dataStore();
+      const { toggleVisibleButtons, toggleVisibleModals } = dataStore();
 
       // track the account details in store for easy access
       // also expose/hide components accordingly
@@ -127,13 +121,14 @@ export function registerWalletConnecter() {
         const accountIndex = getAccountIndexFromOwner(selectedAddress);
         const accountDetails = getAccountDetails(accountIndex);
         setDetails(accountDetails);
+
         if (accountDetails.id) {
           toggleVisibleButtons(true);
         } else {
           toggleVisibleButtons(false);
           toggleVisibleModals(false);
         }
-      }, [selectedAddress, isConnected, accountIndexUpdatedByWorld]);
+      }, [selectedAddress, isConnected, accountDetailsFromWorld]);
 
       // how to render the modal
       const modalDisplay = () => (
@@ -147,8 +142,6 @@ export function registerWalletConnecter() {
             <Description>({status})</Description>
             <br />
             <Description>Connector Address: {selectedAddress}</Description>
-            <br />
-            <Description>Burner Address: {burnerAddress}</Description>
           </ModalContent>
         </ModalWrapper>
       );
