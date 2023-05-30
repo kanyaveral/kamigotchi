@@ -155,7 +155,7 @@ export const rooms: Room[] = [
         offset: { x: 5, y: -7 },
         onClick: () =>
           triggerDialogueModal([
-            "There's what appears to be a door hanging in mid-air."]),
+            "There's what appears to be a door hanging in mid-air!"]),
       },
     ],
   },
