@@ -10,7 +10,8 @@ import { ID as TransferSystemID } from "systems/ERC721TransferSystem.sol";
 
 import { LibPet } from "libraries/LibPet.sol";
 
-import { ERC721 } from "solmate/tokens/ERC721.sol";
+import { ERC721 } from "openzeppelin/token/ERC721/ERC721.sol";
+import { ERC721Enumerable } from "openzeppelin/token/ERC721/extensions/ERC721Enumerable.sol";
 
 string constant NAME = "Kamigotchi";
 string constant SYMBOL = "KAMI";
@@ -35,8 +36,8 @@ string constant SYMBOL = "KAMI";
   Metadata is linked to a system for easier MUD compatibility. However, any view function on a contract can be used. 
 */
 
-contract KamiERC721 is ERC721 {
-  IWorld immutable World;
+contract KamiERC721 is ERC721Enumerable {
+  IWorld internal immutable World;
 
   modifier onlySystem(uint256 systemID) {
     IUintComp Systems = World.systems();
@@ -79,35 +80,24 @@ contract KamiERC721 is ERC721 {
 
   // disables transfer if token is in game world
   // transfers work as per usual, save for the in-game check
-  function transferFrom(address from, address to, uint256 id) public override isOutOfWorld(id) {
-    super.transferFrom(from, to, id);
+  function _transfer(address from, address to, uint256 id) internal override isOutOfWorld(id) {
+    super._transfer(from, to, id);
   }
 
   // retrives token metadata from ERC721MetadataSystem.
   function tokenURI(uint256 id) public view override returns (string memory) {
     return MetadataSystem(getAddressById(World.systems(), MetadataSystemID)).tokenURI(id);
   }
-}
 
-// archived notes:
-// a non upgradable implementation of ERC721 with an in/out of game world ownership structure
-// in game and outside ownership have two distinct shapes
-/* ownership structure:
-  in game [Source of truth: MUD Account Entity] (NOTE: unimplemented! these are future goals): 
-    1) Kami is owned by Account. ownerOf() points to owner of Account
-    2) transferring between accounts in game is supported by emitting the event in this contract
-    3) ERC721 ownership mapping still exists, but is not the source of truth when kamis are in game
-  out of game [Source of truth: ERC721 ownership mapping]:
-    1) Kami is owned by EOA. ownerOf() points to EOA
-    2) Functions like a regular ERC721
-  the bridge between these states are withdraw/deposit systems
-  states are handled by the StateComponent on each kami 
-   - '721_EXTERNAL' represents the out of game state, any other state is internal.
-   only revealed contracts can be bridged out of game
-*/
-/* BRIDGING:
-  no need to support bridging systems in this contract;
-  state is ref externally via StateComponent
-*/
-// NOTE: in game ownership structures are currently implemented. not needed unless
-//      we're supporting in-game transfers, which is a stretch goal as of now
+  ////////////////////
+  // ENUMERABLE
+
+  // returns ERC721Enum result in an array
+  function getAllTokens(address owner) external view returns (uint256[] memory) {
+    uint256[] memory tokens = new uint256[](balanceOf(owner));
+    for (uint256 i = 0; i < tokens.length; i++) {
+      tokens[i] = tokenOfOwnerByIndex(owner, i);
+    }
+    return tokens;
+  }
+}
