@@ -1,24 +1,27 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
+import { EntityIndex } from '@latticexyz/recs';
 
 import clickSoundUrl from 'assets/sound/fx/mouseclick.wav';
+import { Kami, getKami } from 'layers/react/components/shapes/Kami';
 import { dataStore } from 'layers/react/store/createStore';
 
 interface Props {
-  title: string;
-  image: string;
-  subtext: string;
+  kami: Kami;
   description: string[];
-  action: React.ReactNode;
+  subtext?: string;
+  action?: React.ReactNode;
   cornerContent?: React.ReactNode;
-  imageOnClick?: Function;
-  titleOnClick?: Function;
 }
 
-// KamiC  rd is a card that displays information about a Kami. It is designed to display
+// KamiCard is a card that displays information about a Kami. It is designed to display
 // information ranging from current production or death as well as support common actions.
 export const KamiCard = (props: Props) => {
   const {
+    visibleModals,
+    setVisibleModals,
+    selectedEntities,
+    setSelectedEntities,
     sound: { volume },
   } = dataStore();
 
@@ -29,19 +32,22 @@ export const KamiCard = (props: Props) => {
     clickSound.play();
   };
 
-  const imageOnClick = () => {
-    if (props.imageOnClick) {
-      playClickAudio();
-      props.imageOnClick();
+  // toggle the kami modal settings depending on current its current state
+  const kamiOnClick = () => {
+    const modalIsOpen = visibleModals.kami;
+    const sameKami = selectedEntities.kami === props.kami.entityIndex;
+    if (modalIsOpen) {
+      if (sameKami) {
+        setVisibleModals({ ...visibleModals, kami: false });
+      } else {
+        setSelectedEntities({ ...selectedEntities, kami: props.kami.entityIndex });
+      }
+    } else {
+      setSelectedEntities({ ...selectedEntities, kami: props.kami.entityIndex });
+      setVisibleModals({ ...visibleModals, kami: true });
     }
-  };
-
-  const titleOnClick = () => {
-    if (props.titleOnClick) {
-      playClickAudio();
-      props.titleOnClick();
-    }
-  };
+    playClickAudio();
+  }
 
   // generate the styled text divs for the description
   const Description = () => {
@@ -54,11 +60,11 @@ export const KamiCard = (props: Props) => {
   };
 
   return (
-    <Card>
-      <Image onClick={() => imageOnClick()} src={props.image} />
+    <Card key={props.kami.id}>
+      <Image onClick={() => kamiOnClick()} src={props.kami.uri} />
       <Container>
         <TitleBar>
-          <TitleText onClick={() => titleOnClick()}>{props.title}</TitleText>
+          <TitleText onClick={() => kamiOnClick()}>{props.kami.name}</TitleText>
           <TitleCorner>{props.cornerContent}</TitleCorner>
         </TitleBar>
         <Content>
