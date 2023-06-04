@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { map, merge } from 'rxjs';
 import { EntityID, Has, HasValue, runQuery } from '@latticexyz/recs';
+import styled from 'styled-components';
 
 import { getCurrentRoom } from 'layers/phaser/utils';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
@@ -12,9 +13,9 @@ export function registerMapModal() {
   registerUIComponent(
     'WorldMap',
     {
-      colStart: 55,
-      colEnd: 100,
-      rowStart: 50,
+      colStart: 33,
+      colEnd: 69,
+      rowStart: 30,
       rowEnd: 99,
     },
     (layers) => {
@@ -78,9 +79,52 @@ export function registerMapModal() {
 
       return (
         <ModalWrapperFull id='world_map' divName='map'>
-          <MapGrid highlightedRoom={data.currentRoom} move={move} />
+        <div style={{display: 'grid', height: '100%'}}>
+          <RoomDetailsBox>
+            <RoomName>Room Name </RoomName>
+            <Description>This is where short descriptive text on the room goes.</Description>
+            <Description>Room Owner: None</Description>
+            <Description>Exits: List of room names.</Description>
+            <Description>You see [array of all operator names in room separated by commas] here</Description>
+          </RoomDetailsBox>
+          <MapBox>
+            <MapGrid highlightedRoom={data.currentRoom} move={move} />
+          </MapBox>
+        </div>
         </ModalWrapperFull>
       );
     }
   );
 }
+
+const RoomName = styled.p`
+  font-size: 16px;
+  color: #333;
+  text-align: left;
+  font-family: Pixel;
+  margin: 5px;
+`;
+
+const Description = styled.p`
+  font-size: 12px;
+  color: #333;
+  text-align: left;
+  font-family: Pixel;
+  margin: 5px;
+`;
+
+const RoomDetailsBox = styled.div`
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  grid-column: 1;
+  grid-row: 2;
+  `;
+
+const MapBox = styled.div`
+  border-style: solid;
+  border-width: 2px 2px 0px 2px;
+  border-color: black;
+  grid-column: 1;
+  grid-row: 1;
+`;
