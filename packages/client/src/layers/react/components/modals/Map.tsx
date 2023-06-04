@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { map, merge } from 'rxjs';
 import { EntityID, Has, HasValue, runQuery } from '@latticexyz/recs';
 import styled from 'styled-components';
@@ -76,17 +76,18 @@ export function registerMapModal() {
 
       ///////////////////
       // DISPLAY
+      const scrollableRef = useRef<HTMLDivElement>(null);
 
       return (
         <ModalWrapperFull id='world_map' divName='map'>
         <div style={{display: 'grid', height: '100%'}}>
-          <RoomDetailsBox>
+          <Scrollable ref={scrollableRef}>
             <RoomName>Room Name </RoomName>
-            <Description>This is where short descriptive text on the room goes.</Description>
+            <Description>This is where short descriptive text on the room goes. Brave tester, you have caught me doing UX design in prod.</Description>
             <Description>Room Owner: None</Description>
             <Description>Exits: List of room names.</Description>
             <Description>You see [array of all operator names in room separated by commas] here</Description>
-          </RoomDetailsBox>
+          </Scrollable>
           <MapBox>
             <MapGrid highlightedRoom={data.currentRoom} move={move} />
           </MapBox>
@@ -113,18 +114,21 @@ const Description = styled.p`
   margin: 5px;
 `;
 
-const RoomDetailsBox = styled.div`
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  grid-column: 1;
-  grid-row: 2;
-  `;
-
 const MapBox = styled.div`
   border-style: solid;
   border-width: 2px 2px 0px 2px;
   border-color: black;
   grid-column: 1;
   grid-row: 1;
+`;
+
+const Scrollable = styled.div`
+  overflow-y: scroll;
+  height: 100%;
+  max-height: 100%;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  grid-column: 1;
+  grid-row: 2;
 `;
