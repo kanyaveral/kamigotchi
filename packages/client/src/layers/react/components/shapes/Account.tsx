@@ -37,7 +37,7 @@ export interface AccountOptions {
 }
 
 // bucketed inventory slots
-interface AccountInventories {
+export interface AccountInventories {
   food: Inventory[];
   revives: Inventory[];
   gear: Inventory[];
@@ -54,9 +54,11 @@ export const getAccount = (
     network: {
       world,
       components: {
+        AccountID,
         Coin,
         HolderID,
         IsInventory,
+        IsPet,
         LastBlock,
         LastTime,
         Location,
@@ -116,33 +118,53 @@ export const getAccount = (
     account.inventories = inventories;
   }
 
+  // populate inventories
+  if (options?.inventory) {
+    const inventoryResults = Array.from(
+      runQuery([
+        Has(IsInventory),
+        HasValue(HolderID, { value: account.id })
+      ])
+    );
+
+    let inventory: Inventory;
+    let inventories: AccountInventories = {
+      food: [],
+      revives: [],
+      gear: [],
+      mods: [],
+    };
+    for (let i = 0; i < inventoryResults.length; i++) {
+      inventory = getInventory(layers, inventoryResults[i]);
+      if (inventory.item.type === 'FOOD') inventories.food.push(inventory);
+      if (inventory.item.type === 'REVIVE') inventories.revives.push(inventory);
+      if (inventory.item.type === 'GEAR') inventories.gear.push(inventory);
+      if (inventory.item.type === 'MOD') inventories.mods.push(inventory);
+    }
+
+    sortInventories(inventories.food);
+    sortInventories(inventories.revives);
+    sortInventories(inventories.gear);
+    sortInventories(inventories.mods);
+    account.inventories = inventories;
+  }
 
   // populate Kamis
-  // NOTE: we can't rely on this function. oddly, there's an eager return of the object
-  // prior to the kamis field being set. spreading the {...account, kamis} doesn't work.
-  // neither does returning within this if-block or setting the kamis array explicitly
-  // attempting to set the whole object at once also fails. suspecting it has something
-  // to do with how runQuery operates.
-  // if (options.kamis) {
-  //   const kamiIndices = Array.from(
-  //     runQuery([Has(IsPet), HasValue(AccountID, { value: account.id })])
-  //   );
+  if (options?.kamis) {
+    let kamis: Kami[] = [];
 
-  //   account.kamis = kamiIndices.map(
-  //     (index): Kami => getKami(layers, index, { production: true, stats: true })
-  //   );
+    const kamiResults = Array.from(
+      runQuery([
+        Has(IsPet),
+        HasValue(AccountID, { value: account.id })
+      ])
+    );
 
-  //   // // like wtf man.. leaving this here so everyone can witness the absurdity
-  //   // // thanks, enjoyed witnessing this absurdity
-  //   // let kami: Kami;
-  //   // let kamis: Kami[] = [];
-  //   // for (let i = 0; i < account.kamis.length; i++) {
-  //   //   kami = getKami(layers, index, { production: true, stats: true });
-  //   //   kamis.push(kami);
-  //   // }
-  //   // console.log('getAccount(): kamis', kamis);
-  //   // account.kamis = kamis;
-  //   // console.log('getAccount(): account', account);
-  // }
+    kamis = kamiResults.map(
+      (index): Kami => getKami(layers, index, { production: true, traits: true })
+    );
+    account.kamis = kamis;
+  }
+
   return account;
 };
