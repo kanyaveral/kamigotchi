@@ -102,7 +102,7 @@ export function registerPartyModal() {
           const account =
             accountIndex !== undefined ? getAccount(layers, accountIndex, { inventory: true }) : ({} as Account);
 
-          // populate the account with kamis and inventories 
+          // populate the account with kamis and inventories
           let kamis: Kami[] = [];
           if (account) {
             // get the kamis on this account
@@ -431,7 +431,7 @@ export function registerPartyModal() {
                   onMouseLeave={() => setToolTip(-1)}
                 >
                   {!visibleModals.kami && (
-                    <Tooltip show={i === showIndex ? true : false} text={inv.text} />
+                    <Tooltip show={i === showIndex ? true : false} text={i.text} />
                   )}
                   <Icon src={slot.image} />
                   <ItemNumber>{slot.inventory?.balance ?? 0}</ItemNumber>
