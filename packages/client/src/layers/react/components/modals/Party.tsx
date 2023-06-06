@@ -368,7 +368,6 @@ export function registerPartyModal() {
       // NOTE: does not render until player inventories are populated
 
       const ConsumableCells = (inventories: AccountInventories, showIndex: number, setToolTip: any) => {
-              const inventories = data.account.inventories;
 
         const inventorySlots = [
           {
