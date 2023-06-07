@@ -25,10 +25,10 @@ export interface Account {
   location: number;
   stamina: number;
   staminaCurrent: number;
-  inventories?: AccountInventories;
   lastBlock: number;
   lastMoveTs: number;
   kamis?: Kami[];
+  inventories?: AccountInventories;
 }
 
 export interface AccountOptions {
@@ -131,7 +131,11 @@ export const getAccount = (
     );
 
     kamis = kamiResults.map(
-      (index): Kami => getKami(layers, index, { production: true, traits: true })
+      (index): Kami => getKami(
+        layers,
+        index,
+        { deaths: true, production: true, traits: true }
+      )
     );
     account.kamis = kamis;
   }

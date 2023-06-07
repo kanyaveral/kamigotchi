@@ -15,6 +15,7 @@ import { ActionListButton } from 'layers/react/components/library/ActionListButt
 import { dataStore } from 'layers/react/store/createStore';
 import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
+import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { AccountInventories, getAccount } from 'layers/react/components/shapes/Account';
 import { Kami } from 'layers/react/components/shapes/Kami';
 import { Inventory, getInventoryByFamilyIndex } from 'layers/react/components/shapes/Inventory';
@@ -25,7 +26,6 @@ import pompom from 'assets/images/food/pompom.png';
 import gakki from 'assets/images/food/gakki.png';
 import gum from 'assets/images/food/gum.png';
 import ribbon from 'assets/images/food/ribbon.png';
-import { Tooltip } from '../library/Tooltip';
 
 export function registerPartyModal() {
   registerUIComponent(
@@ -49,7 +49,6 @@ export function registerPartyModal() {
             HealthCurrent,
             Coin,
             IsAccount,
-            IsPet,
             Location,
             MediaURI,
             Name,
@@ -340,7 +339,11 @@ export function registerPartyModal() {
         } else if (isResting(kami)) {
           description = ['Resting'];
         } else if (isDead(kami)) {
-          description = [`Murdered in cold blood`];
+          description = [`Murdered`];
+          if (kami.deaths && kami.deaths.length > 0) {
+            description.push(`by ${kami.deaths[0]!.source!.name}`);
+            description.push(`on ${kami.deaths[0]!.node.name} `);
+          }
         } else if (isHarvesting(kami)) {
           if (calcHealth(kami) == 0) {
             description = [
@@ -353,8 +356,8 @@ export function registerPartyModal() {
             description = [
               `Harvesting`,
               `on ${kami.production!.node!.name}`,
-              `+${harvestRate.toFixed(1)} $KAMI/hr`,
-              `-${drainRate.toFixed(1)} HP/hr`,
+              `+${harvestRate.toFixed(2)} $KAMI/hr`,
+              `-${drainRate.toFixed(2)} HP/hr`,
             ];
           }
         }
@@ -365,8 +368,6 @@ export function registerPartyModal() {
       // DISPLAY
 
       // get the row of consumable items to display in the player inventory
-      // NOTE: does not render until player inventories are populated
-
       const ConsumableCells = (inventories: AccountInventories, showIndex: number, setToolTip: any) => {
         const inventorySlots = [
           {
