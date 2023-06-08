@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { BigNumber, utils } from 'ethers';
 import React, { useCallback } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
@@ -51,7 +50,7 @@ export function registerKamiMintModal() {
       } = layers;
 
       const { details } = useKamiAccount();
-      const { visibleModals, setVisibleModals, sound: { volume }, networks } = dataStore();
+      const { visibleModals, setVisibleModals, sound: { volume } } = dataStore();
 
       /////////////////
       // ACTIONS
@@ -78,7 +77,7 @@ export function registerKamiMintModal() {
             actions.Action,
             world.entityToIndex.get(mintActionID) as EntityIndex
           );
-          setVisibleModals({ ...visibleModals, kamiMint: false, kamiMintPost: true });
+          setVisibleModals({ ...visibleModals, kamiMint: false, party: true });
 
           const mintFX = new Audio(mintSound);
           mintFX.volume = volume * 0.6;
