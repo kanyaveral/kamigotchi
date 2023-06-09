@@ -14,58 +14,37 @@ import { LibRandom } from "libraries/LibRandom.sol";
 
 uint256 constant ID = uint256(keccak256("system.ERC721.Mint"));
 
-// unrevealed URI is set as the placeholder
-string constant UNREVEALED_URI = "https://kamigotchi.nyc3.cdn.digitaloceanspaces.com/placeholder.gif";
-
 contract ERC721MintSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
-    address to = abi.decode(arguments, (address));
-    uint256 nextMint = nextMintID();
+    (address to, uint256 amount) = abi.decode(arguments, (address, uint256));
+    uint256 index = LibERC721.getCurrentSupply(world) + 1;
 
-    // Get the account for this owner(to). Create one if it doesn't exist.
+    // Get the account for this owner(to). fails if doesnt exist
     uint256 accountID = LibAccount.getByOwner(components, to);
-    if (accountID == 0) {
-      accountID = LibAccount.create(world, components, to, to);
+    require(accountID != 0, "ERC721MintSystem: no account");
+
+    // set return array
+    uint256[] memory petIDs = new uint256[](amount);
+
+    // loop to mint for amount
+    for (uint256 i; i < amount; i++) {
+      // Create the pet, commit random
+      uint256 petID = LibPet.create(world, components, accountID, index + i);
+      LibRandom.setRevealBlock(components, petID, block.number);
+
+      // Mint the token
+      LibERC721.mintInGame(world, index + i);
+
+      // add petID to array
+      petIDs[i] = petID;
     }
 
-    // Create the pet, commit random
-    uint256 petID = LibPet.create(world, components, accountID, nextMint, UNREVEALED_URI);
-    LibRandom.setRevealBlock(components, petID, block.number);
-
-    // Mint the token
-    LibERC721.mintInGame(world, nextMint);
-
-    return abi.encode(petID);
+    return abi.encode(petIDs);
   }
 
-  function executeTyped(address to) public returns (bytes memory) {
-    return execute(abi.encode(to));
-  }
-
-  // uses BalanceComponent to track minted tokens. Uses systemID as entityID
-  function nextMintID() internal returns (uint256 curr) {
-    BalanceComponent bComp = BalanceComponent(getAddressById(components, BalanceCompID));
-
-    if (!bComp.has(ID) || bComp.getValue(ID) == 0) {
-      bComp.set(ID, 1);
-      curr = 1;
-    } else {
-      curr = bComp.getValue(ID) + 1;
-      bComp.set(ID, curr);
-    }
-  }
-
-  // uses MediaURIComponent to track unrevealed URI
-  function unrevealedURI() internal returns (string memory) {
-    MediaURIComponent mComp = MediaURIComponent(getAddressById(components, MediaURICompID));
-
-    if (mComp.has(ID)) {
-      return mComp.getValue(ID);
-    } else {
-      mComp.set(ID, UNREVEALED_URI);
-      return UNREVEALED_URI;
-    }
+  function executeTyped(address to, uint256 amount) public returns (bytes memory) {
+    return execute(abi.encode(to, amount));
   }
 }

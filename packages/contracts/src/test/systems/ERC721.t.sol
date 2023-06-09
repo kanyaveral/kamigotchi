@@ -6,6 +6,7 @@ import "test/utils/SetupTemplate.s.sol";
 contract ERC721PetTest is SetupTemplate {
   function setUp() public override {
     super.setUp();
+    _registerAccounts(3);
   }
 
   function _assertOwnerInGame(uint256 tokenID, address addy) internal {
@@ -57,7 +58,7 @@ contract ERC721PetTest is SetupTemplate {
   function testStates() public {
     // minting
     vm.startPrank(alice);
-    uint256 petID = abi.decode(_ERC721MintSystem.executeTyped(alice), (uint256));
+    uint256 petID = abi.decode(_ERC721MintSystem.executeTyped(alice, 1), (uint256[]))[0];
     vm.roll(block.number + 1);
     _assertPetState(petID, "UNREVEALED");
 
@@ -97,13 +98,13 @@ contract ERC721PetTest is SetupTemplate {
 
   function testForceReveal() public {
     vm.prank(alice);
-    uint256 petID = abi.decode(_ERC721MintSystem.executeTyped(alice), (uint256));
+    uint256 petID = abi.decode(_ERC721MintSystem.executeTyped(alice, 1), (uint256[]))[0];
 
     vm.roll(block.number + 256);
     _assertPetState(petID, "UNREVEALED");
 
     // do something to mine the block
-    _ERC721MintSystem.executeTyped(alice);
+    _ERC721MintSystem.executeTyped(alice, 1);
 
     vm.roll(block.number + 1);
     vm.startPrank(deployer);
