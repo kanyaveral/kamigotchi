@@ -10,6 +10,7 @@ import {
 
 import { Layers } from 'src/types';
 import { Account, getAccount } from './Account';
+import { getConfigFieldValue } from './Config';
 import { Kill, getKill } from './Kill';
 import { Production, getProduction } from './Production';
 import { Stats, getStats } from './Stats';
@@ -23,6 +24,7 @@ export interface Kami {
   name: string;
   uri: string;
   health: number;
+  healthRate: number;
   state: string;
   lastUpdated: number;
   stats: Stats;
@@ -86,6 +88,7 @@ export const getKami = (
     name: getComponentValue(Name, index)?.value as string,
     uri: getComponentValue(MediaURI, index)?.value as string,
     health: getComponentValue(HealthCurrent, index)?.value as number,
+    healthRate: 0,
     state: getComponentValue(State, index)?.value as string,
     lastUpdated: getComponentValue(LastTime, index)?.value as number,
     stats: getStats(layers, index),
@@ -191,6 +194,25 @@ export const getKami = (
       kami.canName = false;
     }
   }
+
+  /////////////////
+  // ADJUSTMENTS
+
+  // harvesting/resting health decrease rate
+  let healthRate = 0;
+  if (kami.state === 'HARVESTING') {
+    let productionRate = 0;
+    if (kami.production) productionRate = kami.production.rate;
+    const drainBase = getConfigFieldValue(layers.network, 'HEALTH_RATE_DRAIN_BASE');
+    const drainBasePrecision = 10 ** getConfigFieldValue(layers.network, 'HEALTH_RATE_DRAIN_BASE_PREC');
+    healthRate = -1 * productionRate * drainBase / drainBasePrecision;
+  } else if (kami.state === 'RESTING') {
+    const harmony = kami.stats.harmony;
+    const healBase = getConfigFieldValue(layers.network, 'HEALTH_RATE_HEAL_BASE');
+    const healBasePrecision = 10 ** getConfigFieldValue(layers.network, 'HEALTH_RATE_HEAL_BASE_PREC');
+    healthRate = harmony * healBase / (3600 * healBasePrecision)
+  }
+  kami.healthRate = healthRate;
 
   return kami;
 };
