@@ -157,7 +157,8 @@ export function registerKamiModal() {
       };
 
       const affinitiesBox = () => {
-        const str = dets?.affinities?.reduce((ac, x) => (ac = ac + ' | ' + x));
+        const strRaw = dets?.affinities?.reduce((ac, x) => (ac = ac + ' | ' + x));
+        const str = strRaw?.slice(0, -2);
         return <KamiText>{str}</KamiText>;
       };
 
