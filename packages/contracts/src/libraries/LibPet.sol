@@ -30,11 +30,6 @@ import { LibRegistryItem } from "libraries/LibRegistryItem.sol";
 import { LibStat } from "libraries/LibStat.sol";
 import { LibTrait } from "libraries/LibTrait.sol";
 
-uint256 constant BURN_RATIO = 50; // energy burned per 100 KAMI produced
-uint256 constant BURN_RATIO_PRECISION = 1e2;
-uint256 constant RECOVERY_RATE_PRECISION = 1e18;
-uint256 constant RECOVERY_RATE_FLAT_MULTIPLIER = 1;
-
 // placeholders for config values
 string constant UNREVEALED_URI = "https://kamigotchi.nyc3.cdn.digitaloceanspaces.com/placeholder.gif";
 
@@ -44,9 +39,7 @@ library LibPet {
   /////////////////
   // INTERACTIONS
 
-  // create a pet entity, set its owner and account for an entity
-  // NOTE: we may need to create an Account/Owner entities here if they dont exist
-  // TODO: include attributes in this generation
+  // create a pet entity and set its base fields
   function create(
     IWorld world,
     IUintComp components,
@@ -174,7 +167,7 @@ library LibPet {
   ) internal view returns (uint256) {
     string memory targetAff = getAffinities(components, targetID)[0];
     string memory sourceAff = getAffinities(components, sourceID)[1];
-    return LibRegistryAffinity.getAttackMultiplier(sourceAff, targetAff);
+    return LibRegistryAffinity.getAttackMultiplier(components, sourceAff, targetAff);
   }
 
   // Calculate the total health drain from harvesting (rounded up) since the last check. This is
@@ -221,7 +214,9 @@ library LibPet {
   ) internal view returns (uint256) {
     uint256 baseThreshold = calcThresholdBase(components, sourceID, targetID);
     uint256 affinityMultiplier = calcAttackAffinityMultiplier(components, sourceID, targetID);
-    return (affinityMultiplier * baseThreshold) / 100; // adjust for affinity multiplier precision
+    uint256 affinityMultiplierPrecision = 10 **
+      LibConfig.getValueOf(components, "LIQ_THRESH_MULT_AFF_PREC");
+    return (affinityMultiplier * baseThreshold) / affinityMultiplierPrecision; // adjust for affinity multiplier precision
   }
 
   // Calculate the base liquidation threshold for target pet, attacked by the source pet.
@@ -231,11 +226,13 @@ library LibPet {
     uint256 sourceID,
     uint256 targetID
   ) internal view returns (uint256) {
+    uint256 base = LibConfig.getValueOf(components, "LIQ_THRESH_BASE");
+    uint256 basePrecision = 10 ** LibConfig.getValueOf(components, "LIQ_THRESH_BASE_PREC");
     uint256 sourceViolence = calcTotalViolence(components, sourceID);
     uint256 targetHarmony = calcTotalHarmony(components, targetID);
     int256 ratio = int256((1e18 * sourceViolence) / targetHarmony);
     int256 weight = Gaussian.cdf(LibFPMath.lnWad(ratio));
-    return (uint256(weight) * 20) / 100;
+    return (uint256(weight) * base) / basePrecision;
   }
 
   // Calculate and return the total health of a pet (including mods and equips)
@@ -280,6 +277,11 @@ library LibPet {
 
   /////////////////
   // CHECKERS
+  function canLiquidate(IUintComp components, uint256 id) internal view returns (bool) {
+    uint256 idleTime = block.timestamp - getLastTs(components, id);
+    uint256 idleRequirement = LibConfig.getValueOf(components, "LIQ_IDLE_REQ");
+    return idleTime > idleRequirement;
+  }
 
   // Check wether a pet can be named
   function canName(IUintComp components, uint256 id) internal view returns (bool) {
