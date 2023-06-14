@@ -476,16 +476,15 @@
     "LibInventory",
     "LibListing",
     "LibMerchant",
-    "LibTrait",
     "LibNode",
     "LibERC721",
     "LibPet",
     "LibProduction",
     "LibPrototype",
-    "LibRegister",
+    "LibRegistryAffinity",
+    "LibRegistryTrait",
     "LibRegistryItem",
     "LibRoom",
-    "LibRarity",
     "LibStat"
   ]
 }
