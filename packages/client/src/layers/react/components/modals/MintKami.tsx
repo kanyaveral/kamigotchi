@@ -8,7 +8,7 @@ import { waitForActionCompletion } from '@latticexyz/std-client';
 
 import mintSound from 'assets/sound/fx/vending_machine.mp3';
 import { dataStore } from 'layers/react/store/createStore';
-import { useKamiAccount } from 'layers/react/store/kamiAccount';
+import { useNetworkSettings } from 'layers/react/store/networkSettings';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { Stepper } from '../library/Stepper';
@@ -17,10 +17,10 @@ export function registerKamiMintModal() {
   registerUIComponent(
     'KamiMint',
     {
-      colStart: 33,
-      colEnd: 65,
-      rowStart: 37,
-      rowEnd: 76,
+      colStart: 38,
+      colEnd: 64,
+      rowStart: 20,
+      rowEnd: 78,
     },
     (layers) => {
       const {
@@ -42,20 +42,20 @@ export function registerKamiMintModal() {
     ({ layers }) => {
       const {
         network: {
-          api: { player },
-          network: { connectedAddress },
           actions,
           world,
         },
       } = layers;
 
-      const { details } = useKamiAccount();
       const { visibleModals, setVisibleModals, sound: { volume } } = dataStore();
+      const { selectedAddress, networks } = useNetworkSettings();
 
       /////////////////
       // ACTIONS
 
-      const mintTx = (address: string) => {
+      const mintTx = (amount: number, value: number) => {
+        const network = networks.get(selectedAddress);
+        const api = network!.api.player;
 
         const actionID = `Minting Kami` as EntityID;
         actions.add({
@@ -64,15 +64,16 @@ export function registerKamiMintModal() {
           requirement: () => true,
           updates: () => [],
           execute: async () => {
-            return player.ERC721.mint(address, 1); // hardcoded to mint 1 for now
+            // try whitelist mint if no ether is sent
+            return (value == 0) ? api.ERC721.whitelistMint() : api.ERC721.mint(amount, value);
           },
         });
         return actionID;
       };
 
-      const handleMinting = async () => {
+      const handleMinting = (amount: number, value: number) => async () => {
         try {
-          const mintActionID = mintTx(details.ownerAddress);
+          const mintActionID = mintTx(amount, value);
           await waitForActionCompletion(
             actions.Action,
             world.entityToIndex.get(mintActionID) as EntityIndex
@@ -90,9 +91,11 @@ export function registerKamiMintModal() {
       ///////////////
       // DISPLAY
 
-      const MintButton = (
-        <ActionButton id='button-mint' onClick={handleMinting} size='large' text='Mint' />
-      );
+      const MintButton = (text: string, amount: number, cost: number) => {
+        return (
+          <ActionButton id='button-mint' onClick={handleMinting(amount, cost)} size='vending' text={text} inverted />
+        );
+      }
 
       const hideModal = useCallback(() => {
         setVisibleModals({ ...visibleModals, kamiMint: false });
@@ -112,7 +115,7 @@ export function registerKamiMintModal() {
 
 const StepOne = () => (
   <>
-    <Description>
+    <Description style={{ display: 'grid', height: '100%', alignContent: 'center' }}>
       <Header style={{ color: 'black' }}>Vending Machine</Header>
       <br />
       There's some sort of vending machine here. A machine for NFTs. You hope it can be trusted.
@@ -125,11 +128,29 @@ const StepTwo = (props: any) => {
 
   return (
     <>
-      <CenterBox>
-        <KamiImage src='https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif' />
-        <Description>Kamigotchi?</Description>
-      </CenterBox>
-      {MintButton}
+      <Header style={{ color: 'black' }}>Vending Machine</Header>
+      <Grid>
+        <ProductBox style={{ gridRow: 2, gridColumn: 1 }}>
+          <KamiImage src='https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif' />
+          <VendingText>WL Kami</VendingText>
+          {MintButton("0.000Ξ", 1, 0)}
+        </ProductBox>
+        <ProductBox style={{ gridRow: 2, gridColumn: 2 }}>
+          <KamiImage src='https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif' />
+          <VendingText>1 Kami</VendingText>
+          {MintButton("0.015Ξ", 1, 0.015)}
+        </ProductBox>
+        <ProductBox style={{ gridRow: 3, gridColumn: 1 }}>
+          <KamiImage src='https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif' />
+          <VendingText>3 Kamis</VendingText>
+          {MintButton("0.045Ξ", 3, 0.045)}
+        </ProductBox>
+        <ProductBox style={{ gridRow: 3, gridColumn: 2 }}>
+          <KamiImage src='https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif' />
+          <VendingText>5 Kamis</VendingText>
+          {MintButton("0.075Ξ", 5, 0.075)}
+        </ProductBox>
+      </Grid>
     </>
   );
 };
@@ -146,19 +167,6 @@ const steps = (props: any) => [
   },
 ];
 
-const Header = styled.p`
-  font-size: 24px;
-  color: #333;
-  text-align: center;
-  font-family: Pixel;
-`;
-
-const CenterBox = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-`;
 
 const Description = styled.div`
   font-size: 20px;
@@ -166,6 +174,22 @@ const Description = styled.div`
   text-align: center;
   padding: 10px;
   font-family: Pixel;
+`;
+
+const Header = styled.p`
+  font-size: 24px;
+  color: #333;
+  text-align: center;
+  font-family: Pixel;
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-row-gap: 6px;
+  grid-column-gap: 12px;
+  justify-items: center;
+  justify-content: center;
+  padding: 24px 6px;
 `;
 
 const KamiImage = styled.img`
@@ -194,4 +218,24 @@ const TopButton = styled.button`
     background-color: #c4c4c4;
   }
   margin: 0px;
+`;
+
+const ProductBox = styled.div`
+  border-color: black;
+  border-radius: 2px;
+  border-style: solid;
+  border-width: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 5px;
+`;
+
+const VendingText = styled.p`
+  font-size: 12px;
+  color: #333;
+  text-align: center;
+
+  font-family: Pixel;
 `;

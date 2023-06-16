@@ -1,3 +1,4 @@
+import { utils, BigNumberish } from 'ethers';
 import { createPlayerAPI } from './player';
 import { setUpWorldAPI } from './world';
 
@@ -14,6 +15,11 @@ export function createAdminAPI(systems: any) {
     setConfig('ACCOUNT_STAMINA_RECOVERY_PERIOD', 300);
 
     // Kami Base Stats
+    // to be 5, set at 500 for testing
+    setConfig('MINT_MAX', 500);
+    setConfig('MINT_PRICE', utils.parseEther('0.015'));
+
+    // set global config fields for Kami Stats
     setConfig('KAMI_BASE_HEALTH', 50);
     setConfig('KAMI_BASE_POWER', 10);
     setConfig('KAMI_BASE_VIOLENCE', 10);
@@ -172,7 +178,7 @@ export function createAdminAPI(systems: any) {
   /////////////////
   //  CONFIG
 
-  function setConfig(field: string, value: number) {
+  function setConfig(field: string, value: BigNumberish) {
     return systems['system._Config.Set'].executeTyped(field, value);
   }
 

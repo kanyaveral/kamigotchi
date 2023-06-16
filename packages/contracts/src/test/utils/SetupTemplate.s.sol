@@ -55,7 +55,7 @@ abstract contract SetupTemplate is TestSetupImports {
       _registerAccount(addy, addy);
     }
     vm.startPrank(addy, addy);
-    entityID = abi.decode(_ERC721MintSystem.executeTyped(addy, 1), (uint256[]))[0];
+    entityID = abi.decode(_ERC721MintSystem.whitelistMint(), (uint256[]))[0];
     vm.roll(block.number + 1);
     _ERC721RevealSystem.executeTyped(LibPet.idToIndex(components, entityID));
     vm.stopPrank();
@@ -268,5 +268,8 @@ abstract contract SetupTemplate is TestSetupImports {
     // Liquidation Bounty
     _setConfig("LIQ_BOUNTY_BASE", 50);
     _setConfig("LIQ_BOUNTY_BASE_PREC", 3);
+
+    _setConfig("MINT_MAX", 500);
+    _setConfig("MINT_PRICE", 500);
   }
 }
