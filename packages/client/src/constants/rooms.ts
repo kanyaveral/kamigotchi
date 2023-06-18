@@ -57,6 +57,8 @@ import {
   room15,
   room16,
   room17,
+  room18,
+  room19,
 } from 'assets/images/rooms';
 
 import { forest, opening, ost1, ost2, ost3 } from 'assets/sound/ost';
@@ -67,6 +69,8 @@ import { triggerShopModal } from 'layers/phaser/utils/triggerShopModal';
 import { triggerPetMintModal } from 'layers/phaser/utils/triggerPetMintModal';
 import { triggerPetNamingModal } from 'layers/phaser/utils/triggerPetNamingModal';
 import { triggerNodeModal } from 'layers/phaser/utils/triggerNodeModal';
+import { triggerRoomMovementModal } from 'layers/phaser/utils/triggerRoomMovmentModal';
+import { roomObjectsWorld1, roomObjectsWorld2 } from 'assets/images/room objects';
 
 // NOTE: This is the most horrendous, hardcoded known to mankind. We should
 // move most things here to the store and populate the information from onchain.
@@ -446,8 +450,7 @@ export const rooms: Room[] = [
         key: 'waterfall',
         path: waterfall,
         offset: { x: 22.6, y: -33.5 },
-        onClick: () =>
-          triggerDialogueModal(['The base of the waterfall. It feels very peaceful here.']),
+        onClick: () => triggerRoomMovementModal(15),
       },
       {
         key: 'smallshrine',
@@ -577,6 +580,20 @@ export const rooms: Room[] = [
       key: 'ost3',
       path: ost3,
     },
+    objects: [
+      {
+        key: 'templecave',
+        path: roomObjectsWorld2.path15to18,
+        offset: { x: -18, y: -15 },
+        onClick: () => triggerRoomMovementModal(18),
+      },
+      {
+        key: 'templedoor',
+        path: roomObjectsWorld2.path15to16,
+        offset: { x: 41.3, y: -8.7 },
+        onClick: () => triggerRoomMovementModal(16),
+      },
+    ],
   },
   {
     location: 16,
@@ -594,6 +611,42 @@ export const rooms: Room[] = [
     background: {
       key: 'bg_room17',
       path: room17,
+    },
+    music: {
+      key: 'ost3',
+      path: ost3,
+    },
+  },
+  {
+    location: 18,
+    background: {
+      key: 'bg_room18',
+      path: room18,
+    },
+    music: {
+      key: 'ost3',
+      path: ost3,
+    },
+    objects: [
+      {
+        key: 'cavecrossleft',
+        path: roomObjectsWorld2.path18to19,
+        offset: { x: -46, y: -5.8 },
+        onClick: () => triggerRoomMovementModal(19),
+      },
+      {
+        key: 'cavecrossright',
+        path: roomObjectsWorld2.path18to20,
+        offset: { x: 18.5, y: -19.7 },
+        onClick: () => triggerRoomMovementModal(20),
+      },
+    ],
+  },
+  {
+    location: 19,
+    background: {
+      key: 'bg_room19',
+      path: room19,
     },
     music: {
       key: 'ost3',
