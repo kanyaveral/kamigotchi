@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { LibString } from "solady/utils/LibString.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
+
+import { Base64 } from "solady/utils/Base64.sol";
+import { LibString } from "solady/utils/LibString.sol";
 
 import { AffinityComponent, ID as AffinityCompID } from "components/AffinityComponent.sol";
 import { IdHolderComponent, ID as IdHolderComponentID } from "components/IdHolderComponent.sol";
@@ -34,6 +36,27 @@ library LibERC721 {
   ////////////////////////
   // INTERACTIONS
 
+  // reveals kami
+  // returns packed traits
+  function reveal(
+    IWorld world,
+    IUintComp components,
+    uint256 petID,
+    uint256 seed
+  ) internal returns (uint256 packed) {
+    // generates array of traits with weighted random
+    uint256[] memory traits = genRandTraits(components, petID, seed);
+
+    // setting metadata
+    assignTraits(components, petID, traits);
+
+    // emit update event
+    updateEvent(world, LibPet.idToIndex(components, petID));
+
+    // returns packed traits
+    packed = LibRandom.packArray(traits, 8);
+  }
+
   // minting a new kami in game. the default
   // mints to KamiERC721 contract as owner
   // does not interact with other mud systems
@@ -60,6 +83,12 @@ library LibERC721 {
   function unstake(IWorld world, address to, uint256 index) internal {
     KamiERC721 token = getContract(world);
     token.unstakeToken(to, index);
+  }
+
+  // emits a metadata update event. to be called whenever metadata changes
+  function updateEvent(IWorld world, uint256 index) internal {
+    KamiERC721 token = getContract(world);
+    token.emitMetadataUpdate(index);
   }
 
   /////////////////////////
@@ -159,26 +188,39 @@ library LibERC721 {
   //////////////////
   // JSON STRINGIFY
 
-  function getJson(IUintComp components, uint256 petIndex) public view returns (string memory) {
+  // gets json in base64 format
+  function getJsonBase64(
+    IUintComp components,
+    uint256 petIndex
+  ) public view returns (string memory) {
+    return
+      LibString.concat(
+        "data:application/json;base64,",
+        Base64.encode(abi.encodePacked(getJsonUtf(components, petIndex)), false, false)
+      );
+  }
+
+  // gets json in UTF-8 format
+  function getJsonUtf(IUintComp components, uint256 petIndex) public view returns (string memory) {
     uint256 petID = LibPet.indexToID(components, petIndex);
 
     return
       string(
         abi.encodePacked(
-          "{ \n",
-          '"external_url": "https://kamigotchi.io",\n',
+          "{",
+          '"external_url": "https://kamigotchi.io", ',
           '"name": "',
           LibPet.getName(components, petID),
-          '",\n',
+          '", ',
           '"description": ',
-          '"a lil network spirit :3",\n',
-          '"attributes": [\n',
+          '"a lil network spirit :3", ',
+          '"attributes": [',
           _getBaseTraits(components, petID),
           _getStats(components, petID),
-          "],\n",
+          "], ",
           '"image": "',
           LibPet.getMediaURI(components, petID),
-          '"\n',
+          '"',
           "}"
         )
       );
@@ -206,7 +248,7 @@ library LibERC721 {
     names[4] = LibRegistryTrait.getBackgroundNameOf(components, petID);
 
     for (uint256 i; i < names.length; i++) {
-      string memory entry = _traitToString(comps[i], names[i]);
+      string memory entry = _traitToString(comps[i], names[i], true);
       result = string(abi.encodePacked(result, entry));
     }
 
@@ -218,16 +260,22 @@ library LibERC721 {
 
     // returns result for Health, Power, Violence, and Harmony
     result = string(
-      abi.encodePacked(result, _traitToString("Health", LibStat.getHealth(components, petID)))
+      abi.encodePacked(result, _traitToString("Health", LibStat.getHealth(components, petID), true))
     );
     result = string(
-      abi.encodePacked(result, _traitToString("Power", LibStat.getPower(components, petID)))
+      abi.encodePacked(result, _traitToString("Power", LibStat.getPower(components, petID), true))
     );
     result = string(
-      abi.encodePacked(result, _traitToString("Violence", LibStat.getViolence(components, petID)))
+      abi.encodePacked(
+        result,
+        _traitToString("Violence", LibStat.getViolence(components, petID), true)
+      )
     );
     result = string(
-      abi.encodePacked(result, _traitToString("Harmony", LibStat.getHarmony(components, petID)))
+      abi.encodePacked(
+        result,
+        _traitToString("Harmony", LibStat.getHarmony(components, petID), false)
+      )
     );
 
     return result;
@@ -236,22 +284,44 @@ library LibERC721 {
   // appends trait and trait type to metadata format
   function _traitToString(
     string memory name,
-    string memory value
+    string memory value,
+    bool comma
   ) internal pure returns (string memory) {
-    return string(abi.encodePacked('{"trait_type": "', name, '", "value": "', value, '"},\n'));
+    if (comma) {
+      return string(abi.encodePacked('{"trait_type": "', name, '", "value": "', value, '"}, '));
+    } else {
+      return string(abi.encodePacked('{"trait_type": "', name, '", "value": "', value, '"} '));
+    }
   }
 
   // appends trait and trait type to metadata format, but with a uint256 value
-  function _traitToString(string memory name, uint256 value) internal pure returns (string memory) {
-    return
-      string(
-        abi.encodePacked(
-          '{"trait_type": "',
-          name,
-          '", "value": "',
-          LibString.toString(value),
-          '"},\n'
-        )
-      );
+  function _traitToString(
+    string memory name,
+    uint256 value,
+    bool comma
+  ) internal pure returns (string memory) {
+    if (comma) {
+      return
+        string(
+          abi.encodePacked(
+            '{"trait_type": "',
+            name,
+            '", "value": ',
+            LibString.toString(value),
+            "}, "
+          )
+        );
+    } else {
+      return
+        string(
+          abi.encodePacked(
+            '{"trait_type": "',
+            name,
+            '", "value": ',
+            LibString.toString(value),
+            "} "
+          )
+        );
+    }
   }
 }
