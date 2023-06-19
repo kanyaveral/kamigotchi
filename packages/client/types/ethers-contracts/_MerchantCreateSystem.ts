@@ -30,7 +30,7 @@ import type {
 export interface _MerchantCreateSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(string,uint256)": FunctionFragment;
+    "executeTyped(uint256,string,uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -49,7 +49,11 @@ export interface _MerchantCreateSystemInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "executeTyped",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>
+    ]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -120,6 +124,7 @@ export interface _MerchantCreateSystem extends BaseContract {
     ): Promise<ContractTransaction>;
 
     executeTyped(
+      index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
       location: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -139,6 +144,7 @@ export interface _MerchantCreateSystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   executeTyped(
+    index: PromiseOrValue<BigNumberish>,
     name: PromiseOrValue<string>,
     location: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -158,6 +164,7 @@ export interface _MerchantCreateSystem extends BaseContract {
     ): Promise<string>;
 
     executeTyped(
+      index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
       location: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -189,6 +196,7 @@ export interface _MerchantCreateSystem extends BaseContract {
     ): Promise<BigNumber>;
 
     executeTyped(
+      index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
       location: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -209,6 +217,7 @@ export interface _MerchantCreateSystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     executeTyped(
+      index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
       location: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }

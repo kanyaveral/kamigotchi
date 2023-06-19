@@ -27,10 +27,10 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export interface _ListingSetSystemInterface extends utils.Interface {
+export interface _MerchantSetNameSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(uint256,uint256,uint256,uint256)": FunctionFragment;
+    "executeTyped(uint256,string)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -49,12 +49,7 @@ export interface _ListingSetSystemInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "executeTyped",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -92,12 +87,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface _ListingSetSystem extends BaseContract {
+export interface _MerchantSetNameSystem extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: _ListingSetSystemInterface;
+  interface: _MerchantSetNameSystemInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -125,10 +120,8 @@ export interface _ListingSetSystem extends BaseContract {
     ): Promise<ContractTransaction>;
 
     executeTyped(
-      merchantIndex: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      buyPrice: PromiseOrValue<BigNumberish>,
-      sellPrice: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -146,10 +139,8 @@ export interface _ListingSetSystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   executeTyped(
-    merchantIndex: PromiseOrValue<BigNumberish>,
-    itemIndex: PromiseOrValue<BigNumberish>,
-    buyPrice: PromiseOrValue<BigNumberish>,
-    sellPrice: PromiseOrValue<BigNumberish>,
+    index: PromiseOrValue<BigNumberish>,
+    name: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -167,10 +158,8 @@ export interface _ListingSetSystem extends BaseContract {
     ): Promise<string>;
 
     executeTyped(
-      merchantIndex: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      buyPrice: PromiseOrValue<BigNumberish>,
-      sellPrice: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -200,10 +189,8 @@ export interface _ListingSetSystem extends BaseContract {
     ): Promise<BigNumber>;
 
     executeTyped(
-      merchantIndex: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      buyPrice: PromiseOrValue<BigNumberish>,
-      sellPrice: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -222,10 +209,8 @@ export interface _ListingSetSystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     executeTyped(
-      merchantIndex: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      buyPrice: PromiseOrValue<BigNumberish>,
-      sellPrice: PromiseOrValue<BigNumberish>,
+      index: PromiseOrValue<BigNumberish>,
+      name: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
