@@ -6,13 +6,6 @@ import { LibString } from "solady/utils/LibString.sol";
 import "test/utils/SetupTemplate.s.sol";
 
 contract MerchantTest is SetupTemplate {
-  // structure of Merchant data for test purposes
-  struct TestMerchantData {
-    uint256 index;
-    uint256 location;
-    string name;
-  }
-
   // structure of Listing data for test purposes
   struct TestListingData {
     uint256 merchantIndex;
@@ -38,26 +31,6 @@ contract MerchantTest is SetupTemplate {
 
   /////////////////
   // HELPER FUNCTIONS
-
-  function _createMerchant(
-    uint256 index,
-    uint256 location,
-    string memory name
-  ) public returns (uint256) {
-    vm.prank(deployer);
-    return abi.decode(__MerchantCreateSystem.executeTyped(index, name, location), (uint256));
-  }
-
-  function _setListing(
-    uint256 index,
-    uint256 itemId,
-    uint256 priceBuy,
-    uint256 priceSell
-  ) public returns (uint256) {
-    vm.prank(deployer);
-    return
-      abi.decode(__ListingSetSystem.executeTyped(index, itemId, priceBuy, priceSell), (uint256));
-  }
 
   function _buyFromListing(uint256 playerIndex, uint256 listingID, uint256 amount) internal {
     vm.prank(_getOperator(playerIndex));
