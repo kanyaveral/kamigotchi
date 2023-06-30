@@ -157,16 +157,16 @@ function createNetworkConfigLattice(externalProvider?: ExternalProvider): Networ
 // Get the network config of a deployment to Optimism testnet
 function createNetworkConfigOpGoerli(externalProvider?: ExternalProvider): NetworkConfig {
   let config: NetworkConfig = <NetworkConfig>{
-    jsonRpc: "https://opt-goerli.g.alchemy.com/v2/8eeIXfv2AQPg3M89e7D1La27gZFE3Hcg",
-    wsRpc: "wss://opt-goerli.g.alchemy.com/v2/8eeIXfv2AQPg3M89e7D1La27gZFE3Hcg",
+    jsonRpc: "https://op.getblock.io/8701728c-f72a-4cab-a95d-56055e738f98/goerli/",
+    wsRpc: "wss://op.getblock.io/8701728c-f72a-4cab-a95d-56055e738f98/goerli/",
     // faucetServiceUrl: "https://faucet.testnet-mud-services.linfra.xyz",
     // relayServiceUrl: "https://ecs-relay.testnet-mud-services.linfra.xyz",
-    snapshotUrl: "https://test-snapshot.asphodel.io",
+    snapshotUrl: "https://ecs-snapshot.asphodel-mud-services.linfra.xyz",
 
     // checkpointUrl: undefined,
     chainId: 420,
-    worldAddress: "0xcbde39129BD681C7A3A73B1B3489f2128c79700c",
-    initialBlockNumber: 10144639,
+    worldAddress: "0xd5251Aaae776b1845b48d54c60325079DAa8E361",
+    initialBlockNumber: 11299496,
   };
 
   // EOAs and privatekey
