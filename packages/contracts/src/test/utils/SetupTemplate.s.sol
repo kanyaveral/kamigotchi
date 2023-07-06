@@ -289,7 +289,7 @@ abstract contract SetupTemplate is TestSetupImports {
     );
   }
 
-  function _initTraits() internal {
+  function _initCommonTraits() internal {
     // Backgrounds
     registerTrait(1, 10, 0, 0, 0, 0, 9, "", "Health BG Basic", "BACKGROUND");
     registerTrait(2, 0, 1, 0, 0, 0, 9, "", "Power BG Basic", "BACKGROUND");
@@ -319,6 +319,99 @@ abstract contract SetupTemplate is TestSetupImports {
     registerTrait(2, 10, 0, 0, 1, 0, 9, "SCRAP", "Scrap Hands Basic", "HAND");
     registerTrait(3, 0, 0, 1, 1, 0, 9, "EERIE", "Eerie Hands Basic", "HAND");
     registerTrait(4, 10, 1, 0, 0, 0, 9, "NORMAL", "Normal Hands Basic", "HAND");
+  }
+
+  function _initUncommonTraits() internal {
+    // Backgrounds
+    registerTrait(5, 20, 0, 0, 0, 0, 8, "", "Health BG Uncommon", "BACKGROUND");
+    registerTrait(6, 0, 0, 2, 0, 0, 8, "", "Violence BG Uncommon", "BACKGROUND");
+    registerTrait(7, 0, 0, 0, 2, 0, 8, "", "Harmony BG Uncommon", "BACKGROUND");
+
+    // Bodies
+    registerTrait(5, 0, 2, 2, 0, 0, 8, "INSECT", "Insect Body Uncommon", "BODY");
+    registerTrait(6, 0, 0, 2, 2, 0, 8, "EERIE", "Eerie Body Uncommon", "BODY");
+    registerTrait(7, 20, 0, 0, 0, 2, 8, "NORMAL", "Normal Body Uncommon", "BODY");
+
+    // Colors
+    registerTrait(5, 20, 0, 0, 0, 0, 8, "", "Health Color Uncommon", "COLOR");
+    registerTrait(6, 0, 2, 0, 0, 0, 8, "", "Power Color Uncommon", "COLOR");
+    registerTrait(7, 0, 0, 0, 2, 0, 8, "", "Harmony Color Uncommon", "COLOR");
+
+    // Faces
+    registerTrait(5, 20, 0, 0, 0, 0, 8, "", "Health Mask Uncommon", "FACE");
+    registerTrait(6, 0, 2, 0, 0, 0, 8, "", "Power Mask Uncommon", "FACE");
+    registerTrait(7, 0, 0, 2, 0, 0, 8, "", "Violence Mask Uncommon", "FACE");
+
+    // Hands
+    registerTrait(5, 20, 0, 0, 2, 0, 8, "SCRAP", "Scrap Hands Uncommon", "HAND");
+    registerTrait(6, 0, 0, 2, 2, 0, 8, "EERIE", "Eerie Hands Uncommon", "HAND");
+    registerTrait(7, 20, 2, 0, 0, 0, 8, "NORMAL", "Normal Hands Uncommon", "HAND");
+  }
+
+  function _initRareTraits() internal {
+    // Backgrounds
+    registerTrait(8, 30, 0, 0, 0, 0, 7, "", "Health BG Rare", "BACKGROUND");
+    registerTrait(9, 0, 0, 3, 0, 0, 7, "", "Violence BG Rare", "BACKGROUND");
+
+    // Bodies
+    registerTrait(8, 0, 3, 3, 0, 0, 7, "INSECT", "Insect Body Rare", "BODY");
+    registerTrait(9, 0, 0, 3, 3, 0, 7, "EERIE", "Eerie Body Rare", "BODY");
+
+    // Colors
+    registerTrait(8, 30, 0, 0, 0, 0, 7, "", "Health Color Rare", "COLOR");
+    registerTrait(9, 0, 3, 0, 0, 0, 7, "", "Power Color Rare", "COLOR");
+
+    // Faces
+    registerTrait(8, 30, 0, 0, 0, 0, 7, "", "Health Mask Rare", "FACE");
+    registerTrait(9, 0, 3, 0, 0, 0, 7, "", "Power Mask Rare", "FACE");
+
+    // Hands
+    registerTrait(8, 30, 0, 0, 3, 0, 7, "SCRAP", "Scrap Hands Rare", "HAND");
+    registerTrait(9, 0, 0, 3, 3, 0, 7, "EERIE", "Eerie Hands Rare", "HAND");
+  }
+
+  function _initEpicTraits() internal {
+    // Backgrounds
+    registerTrait(10, 40, 0, 0, 0, 0, 6, "", "Health BG Epic", "BACKGROUND");
+    registerTrait(11, 0, 0, 4, 0, 0, 6, "", "Violence BG Epic", "BACKGROUND");
+
+    // Bodies
+    registerTrait(10, 0, 4, 4, 0, 0, 6, "INSECT", "Insect Body Epic", "BODY");
+    registerTrait(11, 0, 0, 4, 4, 0, 6, "EERIE", "Eerie Body Epic", "BODY");
+
+    // Colors
+    registerTrait(10, 40, 0, 0, 0, 0, 6, "", "Health Color Epic", "COLOR");
+    registerTrait(11, 0, 4, 0, 0, 0, 6, "", "Power Color Epic", "COLOR");
+
+    // Faces
+    registerTrait(10, 40, 0, 0, 0, 0, 6, "", "Health Mask Epic", "FACE");
+    registerTrait(11, 0, 4, 0, 0, 0, 6, "", "Power Mask Epic", "FACE");
+
+    // Hands
+    registerTrait(10, 40, 0, 0, 4, 0, 6, "SCRAP", "Scrap Hands Epic", "HAND");
+    registerTrait(11, 0, 0, 4, 4, 0, 6, "EERIE", "Eerie Hands Epic", "HAND");
+  }
+
+  function _initMythicTraits() internal {
+    // Backgrounds
+    registerTrait(12, 50, 0, 0, 0, 0, 5, "", "Health BG Mythic", "BACKGROUND");
+    registerTrait(13, 0, 0, 5, 0, 0, 5, "", "Violence BG Mythic", "BACKGROUND");
+
+    // Bodies
+    registerTrait(12, 0, 5, 5, 0, 0, 5, "INSECT", "Insect Body Mythic", "BODY");
+    registerTrait(13, 0, 0, 5, 5, 0, 5, "EERIE", "Eerie Body Mythic", "BODY");
+
+    // Colors
+    registerTrait(12, 50, 0, 0, 0, 0, 5, "", "Health Color Mythic", "COLOR");
+    registerTrait(13, 0, 5, 0, 0, 0, 5, "", "Power Color Mythic", "COLOR");
+
+    // Faces
+    registerTrait(12, 50, 0, 0, 0, 0, 5, "", "Health Mask Mythic", "FACE");
+    registerTrait(13, 0, 5, 0, 0, 0, 5, "", "Power Mask Mythic", "FACE");
+
+    // Hands
+    registerTrait(12, 50, 0, 0, 5, 0, 5, "SCRAP", "Scrap Hands Mythic", "HAND");
+    registerTrait(13, 0, 0, 5, 5, 0, 5, "EERIE", "Eerie Hands Mythic", "HAND");
   }
 
   function _initItems() internal {
