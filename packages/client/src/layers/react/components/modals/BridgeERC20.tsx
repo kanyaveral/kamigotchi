@@ -20,10 +20,10 @@ export function registerERC20BridgeModal() {
   registerUIComponent(
     'ERC20Bridge',
     {
-      colStart: 33,
-      colEnd: 65,
-      rowStart: 37,
-      rowEnd: 68,
+      colStart: 28,
+      colEnd: 70,
+      rowStart: 30,
+      rowEnd: 74,
     },
     (layers) => {
       const {
@@ -58,37 +58,38 @@ export function registerERC20BridgeModal() {
           const { coin } = account;
 
           return {
-            CoinBal: coin,
+            GameBal: coin,
             proxyAddy: systems["system.ERC20.Proxy"].address
           };
         })
       );
     },
 
-    ({ CoinBal, proxyAddy }) => {
+    ({ GameBal, proxyAddy }) => {
       const { details: accountDetails } = useKamiAccount();
       const { visibleModals, setVisibleModals } = dataStore();
       const { selectedAddress, networks } = useNetworkSettings();
 
-      const [depAmount, setDepAmount] = useState(0);
-      const [witAmount, setWitAmount] = useState(0);
+      const [isDepositState, setIsDepositState] = useState(true);
+      const [amount, setAmount] = useState(0);
+      const [statusText, setStatusText] = useState("");
+      const [enableButton, setEnableButton] = useState(true);
+
       // get token balance of controlling account 
       const { data: erc20Addy } = useContractRead({
         address: proxyAddy as `0x${string}`,
         abi: abi,
         functionName: 'getTokenAddy'
       });
-      const { data: EOABalance } = useBalance({
+      const { data: EOABal } = useBalance({
         address: accountDetails.ownerAddress as `0x${string}`,
         token: erc20Addy as `0x${string}`,
-        formatUnits: "wei",
         watch: true
       });
 
       /////////////////
-      // ACTIONS
+      // TRANSACTIONS
 
-      // TODO: get ERC20 balance - blocked by wallet code
       const depositTx = () => {
         const network = networks.get(selectedAddress);
         const actions = network!.actions;
@@ -101,7 +102,7 @@ export function registerERC20BridgeModal() {
           requirement: () => true,
           updates: () => [],
           execute: async () => {
-            return api.ERC20.deposit(depAmount);
+            return api.ERC20.deposit(amount);
           },
         });
         return actionID;
@@ -119,53 +120,79 @@ export function registerERC20BridgeModal() {
           requirement: () => true,
           updates: () => [],
           execute: async () => {
-            return api.ERC20.withdraw(witAmount);
+            return api.ERC20.withdraw(amount);
           },
         });
         return actionID;
       };
+
+
+      ///////////////
+      // DISPLAY LOGIC
+
+      const chooseTx = () => {
+        if (isDepositState) {
+          return depositTx();
+        } else {
+          return withdrawTx();
+        }
+      }
+
+      const catchKeys = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+          chooseTx();
+        }
+      };
+
+      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setAmount(Number(event.target.value));
+      };
+
+      useEffect(() => {
+        if (amount == 0) {
+          setEnableButton(false);
+          setStatusText("");
+        }
+        else if (isDepositState ? amount > Number(EOABal?.formatted) : amount > Number(GameBal)) {
+          setEnableButton(false);
+          setStatusText("Insufficient Balance");
+        }
+        else if (!Number.isInteger(amount)) {
+          setEnableButton(false);
+          setStatusText("Invalid amount (whole numbers only)");
+        }
+        else {
+          setEnableButton(true);
+          setStatusText("");
+        }
+      }, [amount, isDepositState, EOABal, GameBal]);
+
 
       const hideModal = useCallback(() => {
         setVisibleModals({ ...visibleModals, bridgeERC20: false });
       }, [setVisibleModals, visibleModals]);
 
       ///////////////
-      // DISPLAY
+      // COMPONENTS
 
-      const DepositButton = (
-        <ActionButton id='button-deposit' onClick={depositTx} size='medium' text='↵' />
-      );
-
-      const WithdrawButton = (
-        <ActionButton id='button-deposit' onClick={withdrawTx} size='medium' text='↵' />
-      );
-
-      const catchKeysDep = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-          depositTx();
-        }
+      const TxButton = () => {
+        const text = isDepositState ? 'Deposit' : 'Withdraw';
+        return (
+          <ActionButton id='button-deposit' onClick={chooseTx} size='large' text={text} disabled={!enableButton} />
+        )
       };
 
-      const catchKeysWit = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-          withdrawTx();
-        }
-      };
-
-      const setMaxDep = () => {
-        setDepAmount(Number(EOABalance?.formatted));
-      };
-
-      const setMaxWit = () => {
-        setWitAmount(Number(CoinBal));
-      };
-
-      const handleChangeDep = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDepAmount(Number(event.target.value));
-      };
-
-      const handleChangeWit = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setWitAmount(Number(event.target.value));
+      const StateBox = (fundState: boolean) => {
+        const text = fundState ? "Wallet" : "Game";
+        const balance = fundState ? Math.floor(Number(EOABal?.formatted)) : Number(GameBal);
+        const color = (fundState == isDepositState) ? "grey" : "white";
+        const textColor = (fundState == isDepositState) ? "white" : "black";
+        return (
+          <BoxButton style={{ backgroundColor: color }} onClick={() => setIsDepositState(fundState)}>
+            <Description style={{ color: textColor }}> {balance} $KAMI </Description>
+            <SubDescription style={{ color: textColor }}> {text} </SubDescription>
+          </BoxButton>
+        );
       };
 
       return (
@@ -175,43 +202,28 @@ export function registerERC20BridgeModal() {
           </TopButton>
           <Header>Bridge $KAMI</Header>
           <Grid>
-            <Description style={{ gridRow: 1, gridColumn: 1 }}>
-              Withdraw
-            </Description>
-            <div style={{ display: "grid", justifyItems: "end", gridRow: 1, gridColumn: 2 }}>
-              <MaxText style={{ gridRow: 1 }} onClick={setMaxWit}>
-                Game: {Number(CoinBal)} $KAMI
-              </MaxText>
-              <OutlineBox>
-                <Input
-                  style={{ gridRow: 2, pointerEvents: 'auto' }}
-                  type='number'
-                  onKeyDown={(e) => catchKeysWit(e)}
-                  placeholder='0'
-                  value={witAmount}
-                  onChange={(e) => handleChangeWit(e)}
-                ></Input>
-                {WithdrawButton}
-              </OutlineBox>
+            <div style={{ width: '100%', gridRow: 1, gridColumn: 1 }}>
+              {StateBox(true)}
             </div>
-            <Description style={{ gridRow: 2, gridColumn: 1 }}>
-              Deposit
+            <div style={{ width: '100%', gridRow: 1, gridColumn: 2 }}>
+              {StateBox(false)}
+            </div>
+            <Description style={{ gridRow: 2, gridColumnStart: 1, gridColumnEnd: 3 }}>
+              Bridge $KAMI between your wallet (ERC20) and the game world.
             </Description>
-            <div style={{ display: "grid", justifyItems: "end", gridRow: 2, gridColumn: 2 }}>
-              <MaxText style={{ gridRow: 1 }} onClick={setMaxDep}>
-                Wallet: {Number(EOABalance?.formatted)} $KAMI
-              </MaxText>
-              <OutlineBox>
-                <Input
-                  style={{ gridRow: 2, pointerEvents: 'auto' }}
-                  type='number'
-                  onKeyDown={(e) => catchKeysDep(e)}
-                  placeholder='0'
-                  value={depAmount}
-                  onChange={(e) => handleChangeDep(e)}
-                ></Input>
-                {DepositButton}
-              </OutlineBox>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gridRow: 4, gridColumnStart: 1, gridColumnEnd: 3 }}>
+              <Input
+                style={{ pointerEvents: 'auto' }}
+                type='number'
+                step='1'
+                onKeyDown={(e) => catchKeys(e)}
+                placeholder='0'
+                onChange={(e) => handleChange(e)}
+              ></Input>
+              <SubText>{statusText}</SubText>
+            </div>
+            <div style={{ gridRow: 5, gridColumnStart: 1, gridColumnEnd: 3 }}>
+              {TxButton()}
             </div>
           </Grid>
         </ModalWrapperFull>
@@ -219,6 +231,20 @@ export function registerERC20BridgeModal() {
     }
   );
 }
+
+const BoxButton = styled.button`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  background-color: #FFF;
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+  color: black;
+
+  pointerEvents: 'auto';
+`;
 
 const Header = styled.p`
   font-size: 24px;
@@ -229,67 +255,41 @@ const Header = styled.p`
 
 const Grid = styled.div`
   display: grid;
-  justify-items: start;
-  align-items: end;
-  grid-column-gap: 12px;
-  grid-row-gap: 18px;
+  justify-items: center;
+  justify-content: space-around;
+  align-items: center;
+  grid-column-gap: 6px;
+  grid-row-gap: 6px;
   max-height: 80%;
   padding: 32px;
 `;
 
 const Description = styled.p`
-  font-size: 20px;
+  font-size: 14px;
   color: black;
   text-align: center;
-  padding: 10px;
+  padding: 4px;
   font-family: Pixel;
+  width: 100%;
 `;
 
 const Input = styled.input`
   width: 100%;
 
-  text-align: left;
+  text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 12px;
+  font-size: 32px;
   cursor: pointer;
   justify-content: center;
   font-family: Pixel;
 
   border-width: 0px;
-  padding: 16px 6px 16px 16px;
+  padding: 32px;
 
   &:focus {
     outline: none;
   }
-`;
-
-const MaxText = styled.button`
-  font-size: 12px;
-  color: #666;
-  text-align: center;
-  padding: 4px;
-  font-family: Pixel;
-  
-  cursor: pointer;
-  border-width: 0px;
-  background-color: #ffffff;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const OutlineBox = styled.div`
-  display: flex;
-  flex-direction: row;
-
-  background-color: #ffffff;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  border-radius: 5px;
-  color: black;
 `;
 
 const TopButton = styled.button`
@@ -309,4 +309,25 @@ const TopButton = styled.button`
     background-color: #c4c4c4;
   }
   margin: 0px;
+`;
+
+const SubDescription = styled.p`
+  font-size: 12px;
+  color: grey;
+  text-align: center;
+  padding: 4px;
+  font-family: Pixel;
+  width: 100%;
+`;
+
+const SubText = styled.text`
+  font-size: 12px;
+  color: #FF785B;
+  text-align: center;
+  padding: 4px;
+  font-family: Pixel;
+  
+  cursor: pointer;
+  border-width: 0px;
+  background-color: #ffffff;
 `;
