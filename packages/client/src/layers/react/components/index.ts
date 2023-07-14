@@ -23,11 +23,13 @@ import { registerSettingsModal } from './modals/Settings';
 import { registerHelpModal } from './modals/Help';
 import { registerKamisNamingModal } from './modals/KamisNaming';
 import { registerNameKamiModal } from './modals/NameKami';
+import { registerOperatorFund } from "./modals/OperatorFund"
 
 import { registerAccountRegistrar } from './validators/AccountRegistrar';
 import { registerBurnerDetector } from './validators/BurnerDetector';
 import { registerDetectAccountModal } from './validators/DetectAccount';
 import { registerWalletConnecter } from './validators/WalletConnector';
+import { registerOperatorFundNotification } from './validators/OperatorFundNotification';
 import { registerOperatorUpdater } from './validators/OperatorUpdater';
 import { registerOperatorMovementModal } from './modals/OperatorMovement';
 import { registerLeaderboardModal } from './modals/Leaderboard';
@@ -44,6 +46,8 @@ export function registerUIComponents() {
   registerSettingsButton();
   registerWalletButton();
 
+  registerOperatorFundNotification();
+  registerOperatorFund();
   registerChatModal();
   // registerDetectAccountModal();
   registerLeaderboardModal();

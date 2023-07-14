@@ -82,12 +82,6 @@ library LibAccount {
   }
 
   /////////////////
-  // GETTERS
-  function getPetsMinted(IUintComp components, uint256 account) internal view returns (uint256) {
-    return LibDataEntity.getAccountData(components, account, "NUM_MINTED");
-  }
-
-  /////////////////
   // SETTERS
 
   function setOperator(IUintComp components, uint256 id, address addr) internal {
@@ -183,6 +177,10 @@ library LibAccount {
 
   function getCurrStamina(IUintComp components, uint256 id) internal view returns (uint256) {
     return StaminaCurrentComponent(getAddressById(components, StaminaCurrCompID)).getValue(id);
+  }
+
+  function getPetsMinted(IUintComp components, uint256 account) internal view returns (uint256) {
+    return LibDataEntity.getAccountData(components, account, "NUM_MINTED");
   }
 
   /////////////////

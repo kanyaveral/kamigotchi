@@ -256,6 +256,16 @@
       ]
     },
     {
+      "name": "AccountFundSystem",
+      "writeAccess": [
+        "EpochComponent",
+        "IdHolderComponent",
+        "IsScoreComponent",
+        "TypeComponent",
+        "BalanceComponent"
+      ]
+    },
+    {
       "name": "AccountMoveSystem",
       "writeAccess": [
         "BlockLastComponent",
