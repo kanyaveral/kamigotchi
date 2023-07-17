@@ -7,7 +7,7 @@ import { EntityID, EntityIndex, Has, HasValue, runQuery } from '@latticexyz/recs
 import { useBalance } from 'wagmi';
 import { waitForActionCompletion } from '@latticexyz/std-client';
 
-import { Account, getAccount } from '../shapes/Account';
+import { Account, getAccount } from '../../shapes/Account';
 import { dataStore } from 'layers/react/store/createStore';
 import { useKamiAccount } from 'layers/react/store/kamiAccount';
 import { useNetworkSettings } from 'layers/react/store/networkSettings';
@@ -17,9 +17,9 @@ import { ActionButton } from 'layers/react/components/library/ActionButton';
 import scribbleSound from 'assets/sound/fx/scribbling.mp3';
 import successSound from 'assets/sound/fx/bubble_success.mp3';
 
-export function registerOperatorFund() {
+export function registerFundOperatorModal() {
   registerUIComponent(
-    'OperatorFund',
+    'FundOperatorModal',
     {
       colStart: 28,
       colEnd: 70,
