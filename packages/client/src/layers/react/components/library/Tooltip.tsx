@@ -34,6 +34,7 @@ export const Tooltip = (props: Props) => {
           color: 'black',
           fontSize: '12px',
           fontFamily: 'Pixel',
+          lineHeight: '18px',
           whiteSpace: 'pre-line',
         },
       }
