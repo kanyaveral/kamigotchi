@@ -21,9 +21,13 @@ contract ProductionCollectSystem is System {
     uint256 id = abi.decode(arguments, (uint256));
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
     uint256 petID = LibProduction.getPet(components, id);
+
+    // standard checks (ownership, cooldown, state)
     require(LibPet.getAccount(components, petID) == accountID, "Pet: not urs");
+    require(LibPet.canAct(components, petID), "Pet: on cooldown");
     require(LibPet.isHarvesting(components, petID), "Pet: must be harvesting");
 
+    // health check
     LibPet.syncHealth(components, petID);
     require(LibPet.isHealthy(components, petID), "Pet: starving..");
     require(
@@ -31,15 +35,18 @@ contract ProductionCollectSystem is System {
       "Node: too far"
     );
 
-    // collect production output and reset time
+    // add balance and experience
     uint256 amt = LibProduction.calcOutput(components, id);
     LibCoin.inc(components, accountID, amt);
     LibPet.addExperience(components, petID, amt);
+
+    // reset production
     LibProduction.reset(components, id);
 
     // logging and tracking
     LibScore.incBy(world, components, accountID, "COLLECT", amt);
     LibAccount.updateLastBlock(components, accountID);
+
     return abi.encode(amt);
   }
 

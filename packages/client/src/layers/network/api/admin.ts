@@ -7,7 +7,7 @@ export function createAdminAPI(systems: any) {
     /////////////////
     // CONFIG
 
-    await setConfigString('baseURI', 'https://image.asphodel.io/kami/');
+    await setConfigString('BASE_URI', 'https://image.asphodel.io/kami/');
 
     // Leaderboards
     setConfig('LEADERBOARD_EPOCH', 1);
@@ -19,7 +19,7 @@ export function createAdminAPI(systems: any) {
     // Kami Base Stats
     // to be 5, set at 500 for testing
     await setConfig('MINT_MAX', 500);
-    await setConfig('MINT_PRICE', utils.parseEther('0.015'));
+    await setConfig('MINT_PRICE', utils.parseEther('0.0'));
 
     // set global config fields for Kami Stats
     await setConfig('KAMI_BASE_HEALTH', 50);
@@ -30,11 +30,11 @@ export function createAdminAPI(systems: any) {
 
     // Harvest Rates
     // HarvestRate = power * base * multiplier
-    // NOTE: any precisions are represented as powers of 10 (e.g. 3 => 10^3 = 1000)
+    // NOTE: precisions are represented as powers of 10 (e.g. 3 => 10^3 = 1000)
     // so BASE=100 and BASE_PREC=3 means 100/1e3 = 0.1
     await setConfig('HARVEST_RATE_PREC', 9); // ignore this
-    await setConfig('HARVEST_RATE_BASE', 100); // in respect to power
-    await setConfig('HARVEST_RATE_BASE_PREC', 3); // i.e. x/1000
+    await setConfig('HARVEST_RATE_BASE', 1000); // in respect to power
+    await setConfig('HARVEST_RATE_BASE_PREC', 2); // i.e. x/100
     await setConfig('HARVEST_RATE_MULT_PREC', 4); // should be hardcoded to 2x HARVEST_RATE_MULT_AFF_PREC
     await setConfig('HARVEST_RATE_MULT_AFF_BASE', 100);
     await setConfig('HARVEST_RATE_MULT_AFF_UP', 150);
@@ -46,17 +46,17 @@ export function createAdminAPI(systems: any) {
     // DrainBaseRate = HEALTH_RATE_DRAIN_BASE / 10^HEALTH_RATE_DRAIN_BASE_PREC
     // HealRate = Harmony * HealBaseRate
     // HealBaseRate = HEALTH_RATE_HEAL_BASE / 10^HEALTH_RATE_HEAL_BASE_PREC
-    await setConfig('HEALTH_RATE_DRAIN_BASE', 5000); // in respect to harvest rate
-    await setConfig('HEALTH_RATE_DRAIN_BASE_PREC', 3); // i.e. x/1000
+    await setConfig('HEALTH_RATE_DRAIN_BASE', 50); // in respect to harvest rate
+    await setConfig('HEALTH_RATE_DRAIN_BASE_PREC', 2); // i.e. x/100
     await setConfig('HEALTH_RATE_HEAL_PREC', 9); // ignore this, for consistent math on SC
-    await setConfig('HEALTH_RATE_HEAL_BASE', 100); // in respect to harmony
-    await setConfig('HEALTH_RATE_HEAL_BASE_PREC', 3); // i.e. x/1000
+    await setConfig('HEALTH_RATE_HEAL_BASE', 50); // in respect to harmony
+    await setConfig('HEALTH_RATE_HEAL_BASE_PREC', 2); // i.e. x/100
 
     // Liquidation Idle Requirements
-    await setConfig('LIQ_IDLE_REQ', 300);
+    await setConfig('KAMI_IDLE_REQ', 15);
 
     // Liquidation Calcs
-    await setConfig('LIQ_THRESH_BASE', 20);
+    await setConfig('LIQ_THRESH_BASE', 30);
     await setConfig('LIQ_THRESH_BASE_PREC', 2);
     await setConfig('LIQ_THRESH_MULT_AFF_BASE', 100);
     await setConfig('LIQ_THRESH_MULT_AFF_UP', 200);
@@ -460,7 +460,7 @@ export function createAdminAPI(systems: any) {
       set: {
         raw: setConfig,
         uri: {
-          base: (v: string) => setConfigString('baseURI', v),
+          base: (v: string) => setConfigString('BASE_URI', v),
         },
         leaderboard: {
           epoch: (v: number) => setConfig('LEADERBOARD_EPOCH', v),
@@ -517,7 +517,7 @@ export function createAdminAPI(systems: any) {
                 },
               },
               idleRequirement: {
-                value: (v: number) => setConfig('LIQ_IDLE_REQ', v),
+                value: (v: number) => setConfig('KAMI_IDLE_REQ', v),
               },
             },
           },

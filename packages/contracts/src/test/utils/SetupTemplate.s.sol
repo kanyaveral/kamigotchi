@@ -10,6 +10,7 @@ import { LibString } from "solady/utils/LibString.sol";
 import "./TestSetupImports.sol";
 
 abstract contract SetupTemplate is TestSetupImports {
+  uint _currTime;
   address[] internal _owners;
   mapping(address => address) internal _operators; // owner => operator
   uint internal _currBlock;
@@ -20,6 +21,12 @@ abstract contract SetupTemplate is TestSetupImports {
     super.setUp();
     _createOwnerOperatorPairs(10); // create 10 pairs of Owners/Operators
     _initAllConfigs();
+    _currTime = 5 minutes;
+  }
+
+  function _fastForward(uint timeDelta) internal {
+    _currTime += timeDelta;
+    vm.warp(_currTime);
   }
 
   /////////////////
@@ -450,34 +457,34 @@ abstract contract SetupTemplate is TestSetupImports {
     _initBaseConfigs();
     _initLeaderboardConfigs();
     _initMintConfigs();
-    _initRevealConfigs();
-    _initRestingConfigs();
+    _initKamiConfigs();
+    _initHealthConfigs();
     _initHarvestConfigs();
     _initLiquidationConfigs();
   }
 
   function _initBaseConfigs() internal {
-    _setConfigString("baseURI", "https://image.asphodel.io/kami/");
+    _setConfigString("BASE_URI", "https://image.asphodel.io/kami/");
   }
 
   function _initLeaderboardConfigs() internal {
-    // Leaderboard
     _setConfig("LEADERBOARD_EPOCH", 1);
   }
 
   function _initAccountConfigs() internal {
-    // Account Stamina
     _setConfig("ACCOUNT_STAMINA_BASE", 20);
     _setConfig("ACCOUNT_STAMINA_RECOVERY_PERIOD", 300);
   }
 
   function _initMintConfigs() internal {
-    // Mint Settings
     _setConfig("MINT_MAX", 500);
     _setConfig("MINT_PRICE", 0);
   }
 
-  function _initRevealConfigs() internal {
+  function _initKamiConfigs() internal {
+    // Idle Requirements
+    _setConfig("KAMI_IDLE_REQ", 300);
+
     // Kami Stats
     _setConfig("KAMI_BASE_HEALTH", 50);
     _setConfig("KAMI_BASE_POWER", 10);
@@ -486,7 +493,12 @@ abstract contract SetupTemplate is TestSetupImports {
     _setConfig("KAMI_BASE_SLOTS", 0);
   }
 
-  function _initRestingConfigs() internal {
+  function _initHealthConfigs() internal {
+    // Kami Health Drain Rates
+    _setConfig("HEALTH_RATE_DRAIN_BASE", 1000); // in respect to harvest rate
+    _setConfig("HEALTH_RATE_DRAIN_BASE_PREC", 3);
+
+    // Kami Health Heal Rates
     _setConfig("HEALTH_RATE_HEAL_PREC", 6);
     _setConfig("HEALTH_RATE_HEAL_BASE", 100); // in respect to harmony
     _setConfig("HEALTH_RATE_HEAL_BASE_PREC", 3);
@@ -502,16 +514,9 @@ abstract contract SetupTemplate is TestSetupImports {
     _setConfig("HARVEST_RATE_MULT_AFF_UP", 150);
     _setConfig("HARVEST_RATE_MULT_AFF_DOWN", 50);
     _setConfig("HARVEST_RATE_MULT_AFF_PREC", 2);
-
-    // Kami Health Drain/Heal Rates
-    _setConfig("HEALTH_RATE_DRAIN_BASE", 1000); // in respect to harvest rate
-    _setConfig("HEALTH_RATE_DRAIN_BASE_PREC", 3);
   }
 
   function _initLiquidationConfigs() internal {
-    // Liquidation Idle Requirements
-    _setConfig("LIQ_IDLE_REQ", 300);
-
     // Liquidation Calcs
     _setConfig("LIQ_THRESH_BASE", 20);
     _setConfig("LIQ_THRESH_BASE_PREC", 2);
