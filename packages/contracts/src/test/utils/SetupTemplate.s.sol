@@ -110,14 +110,26 @@ abstract contract SetupTemplate is TestSetupImports {
     address operator = _operators[owner];
 
     vm.roll(_currBlock++);
+    _mintMint20(playerIndex, 1);
     vm.startPrank(owner);
-    id = abi.decode(_ERC721MintSystem.publicMint(1), (uint[]))[0];
+    id = abi.decode(_Pet721MintSystem.executeTyped(1), (uint[]))[0];
     vm.stopPrank();
 
     vm.roll(_currBlock++);
     vm.startPrank(operator);
-    _ERC721RevealSystem.executeTyped(LibPet.idToIndex(components, id));
+    _Pet721RevealSystem.executeTyped(LibPet.idToIndex(components, id));
     vm.stopPrank();
+  }
+
+  // mints an mint20 token for user
+  function _mintMint20(uint playerIndex, uint amount) internal {
+    address owner = _owners[playerIndex];
+
+    uint256 price = LibConfig.getValueOf(components, "MINT_PRICE");
+
+    vm.deal(owner, amount * price);
+    vm.prank(owner);
+    _Mint20MintSystem.mint{ value: amount * price }(amount);
   }
 
   /////////////////
@@ -465,6 +477,7 @@ abstract contract SetupTemplate is TestSetupImports {
 
   function _initBaseConfigs() internal {
     _setConfigString("BASE_URI", "https://image.asphodel.io/kami/");
+    _setConfig("MINT_TOTAL_MAX", 4444);
   }
 
   function _initLeaderboardConfigs() internal {
@@ -477,7 +490,8 @@ abstract contract SetupTemplate is TestSetupImports {
   }
 
   function _initMintConfigs() internal {
-    _setConfig("MINT_MAX", 500);
+    _setConfig("MINT_ACCOUNT_MAX", 500);
+    _setConfig("MINT_INITIAL_MAX", 1111);
     _setConfig("MINT_PRICE", 0);
   }
 

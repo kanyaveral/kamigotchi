@@ -62,8 +62,9 @@
     "PriceBuyComponent",
     "PriceSellComponent",
     "PrototypeComponent",
-    "ProxyPermissionsERC20Component",
+    "ProxyPermissionsFarm20Component",
     "ProxyPermissionsERC721Component",
+    "ProxyPermissionsMint20Component",
     "RarityComponent",
     "RateComponent",
     "SlotsComponent",
@@ -309,51 +310,51 @@
       ]
     },
     {
-      "name": "ERC20ProxySystem",
+      "name": "Farm20ProxySystem",
       "writeAccess": []
     },
     {
-      "name": "ERC20WithdrawSystem",
+      "name": "Farm20WithdrawSystem",
       "writeAccess": [
         "CoinComponent",
-        "ProxyPermissionsERC20Component"
+        "ProxyPermissionsFarm20Component"
       ]
     },
     {
-      "name": "ERC20DepositSystem",
+      "name": "Farm20DepositSystem",
       "writeAccess": [
         "CoinComponent",
-        "ProxyPermissionsERC20Component"
+        "ProxyPermissionsFarm20Component"
       ]
     },
     {
-      "name": "ERC721MetadataSystem",
+      "name": "Pet721MetadataSystem",
       "writeAccess": []
     },
     {
-      "name": "ERC721MintSystem",
+      "name": "Pet721MintSystem",
       "writeAccess": [
         "*"
       ]
     },
     {
-      "name": "ERC721RevealSystem",
+      "name": "Pet721RevealSystem",
       "writeAccess": [
         "*"
       ]
     },
     {
-      "name": "ERC721TransferSystem",
+      "name": "Pet721TransferSystem",
       "writeAccess": [
         "ProxyPermissionsERC721Component"
       ]
     },
     {
-      "name": "ERC721ProxySystem",
+      "name": "Pet721ProxySystem",
       "writeAccess": []
     },
     {
-      "name": "ERC721UnstakeSystem",
+      "name": "Pet721UnstakeSystem",
       "writeAccess": [
         "IdAccountComponent",
         "ProxyPermissionsERC721Component",
@@ -361,7 +362,7 @@
       ]
     },
     {
-      "name": "ERC721StakeSystem",
+      "name": "Pet721StakeSystem",
       "writeAccess": [
         "IsAccountComponent",
         "AddressOperatorComponent",
@@ -410,6 +411,21 @@
         "TimeLastActionComponent",
         "TimeStartComponent",
         "TypeComponent"
+      ]
+    },
+    {
+      "name": "Mint20ProxySystem",
+      "writeAccess": []
+    },
+    {
+      "name": "Mint20MintSystem",
+      "writeAccess": [
+        "IdAccountComponent",
+        "IdPetComponent",
+        "IsDataComponent",
+        "TypeComponent",
+        "ValueComponent",
+        "ProxyPermissionsMint20Component"
       ]
     },
     {
@@ -528,8 +544,9 @@
     "LibInventory",
     "LibListing",
     "LibMerchant",
+    "LibMint20",
     "LibNode",
-    "LibERC721",
+    "LibPet721",
     "LibPet",
     "LibProduction",
     "LibPrototype",
