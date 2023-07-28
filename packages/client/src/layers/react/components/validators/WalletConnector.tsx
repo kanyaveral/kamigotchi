@@ -24,7 +24,7 @@ export function registerWalletConnecter() {
       rowEnd: 60,
     },
     (layers) => of(layers),
-    () => {
+    (layers) => {
       const { chain } = useNetwork();
 
       const {
@@ -39,6 +39,14 @@ export function registerWalletConnecter() {
         addNetwork,
         setSelectedAddress,
       } = useNetworkSettings();
+
+      const {
+        network: {
+          updates: {
+            functions: { UpdateNetwork },
+          }
+        }
+      } = layers;
 
       const [isCorrectNetwork, setIsCorrectNetwork] = useState(false);
       const [title, setTitle] = useState('Connect a Wallet');
@@ -55,6 +63,8 @@ export function registerWalletConnecter() {
         } else if (!networksMatch) {
           setTitle('Wrong Network');
           setDescription(`Please connect to ${defaultChainConfig.name}`);
+        } else {
+          UpdateNetwork();
         }
       }, [isConnected, chain]);
 
