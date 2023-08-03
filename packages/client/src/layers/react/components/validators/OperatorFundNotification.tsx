@@ -142,7 +142,6 @@ const Body = styled.p`
   color: black;
   justify-content: center;
   padding: .7vw .2vw;
-
   font-family: Pixel;
   font-size: .8vw;
   text-align: left;
