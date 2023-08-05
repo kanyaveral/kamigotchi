@@ -20,6 +20,7 @@ import { useNetworkSettings } from 'layers/react/store/networkSettings';
 
 import mintSound from 'assets/sound/fx/vending_machine.mp3';
 import { abi } from "abi/Pet721ProxySystem.json"
+import { use } from 'matter';
 import { getConfigFieldValue } from 'layers/react/shapes/Config';
 
 export function registerKamiMintModal() {
@@ -105,6 +106,7 @@ export function registerKamiMintModal() {
           api: { player },
           systems,
           world,
+          network: { blockNumber$ }
         },
       } = layers;
 
@@ -114,17 +116,27 @@ export function registerKamiMintModal() {
       const { selectedAddress, networks } = useNetworkSettings();
 
       const [amountToMint, setAmountToMint] = useState(1);
-
-
-      ///////////////
-      // HOOKS
+      const [triedReveal, setTriedReveal] = useState(false);
+      const [waitingToReveal, setWaitingToReveal] = useState(false);
 
       useEffect(() => {
-        if (isConnected) {
-          data.account.kamis.unrevealed.forEach((kami) => {
-            revealTx(kami);
-          });
+        const tx = async () => {
+          if (isConnected && !triedReveal) {
+            setTriedReveal(true);
+            // wait to give buffer for OP rpc
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            data.account.kamis.unrevealed.forEach((kami) => {
+              revealTx(kami);
+            });
+            if (waitingToReveal) {
+              setWaitingToReveal(false);
+              setVisibleModals({ ...visibleModals, kamiMint: false, party: true });
+            }
+          }
         }
+        tx();
+
+        // settriedReveal(false);
       }, [data.account.kamis.unrevealed]);
 
 
@@ -190,7 +202,6 @@ export function registerKamiMintModal() {
         const network = networks.get(selectedAddress);
         const api = network!.api.player;
 
-        // PLACEHOLDER for mint token name
         const actionID = (amount == 1 ? `Minting Token` : `Minting Tokens`) as EntityID;
         actions.add({
           id: actionID,
@@ -224,12 +235,13 @@ export function registerKamiMintModal() {
 
       const handlePetMinting = (amount: number) => async () => {
         try {
+          setWaitingToReveal(true);
           const mintActionID = mintPetTx(amount);
           await waitForActionCompletion(
             actions.Action,
             world.entityToIndex.get(mintActionID) as EntityIndex
           );
-          setVisibleModals({ ...visibleModals, kamiMint: false, party: true });
+          setTriedReveal(false);
 
           const mintFX = new Audio(mintSound);
           mintFX.volume = volume * 0.6;
@@ -264,13 +276,17 @@ export function registerKamiMintModal() {
       }
 
       const MintPetButton = () => {
-        const enabled = (amountToMint <= Number(accountMint20Bal?.formatted));
-        const warnText = enabled ? '' : 'Insufficient $KAMI';
-        return (
-          <Tooltip text={[warnText]}>
-            <ActionButton id='button-mint' onClick={handlePetMinting(amountToMint)} size='vending' text="Mint" inverted disabled={!enabled} />
-          </Tooltip>
-        );
+        if (waitingToReveal) {
+          return (<div></div>)
+        } else {
+          const enabled = (amountToMint <= Number(accountMint20Bal?.formatted));
+          const warnText = enabled ? '' : 'Insufficient $KAMI';
+          return (
+            <Tooltip text={[warnText]}>
+              <ActionButton id='button-mint' onClick={handlePetMinting(amountToMint)} size='vending' text="Mint" inverted disabled={!enabled} />
+            </Tooltip>
+          );
+        }
       }
 
       const MintTokenButton = (text: string, amount: number, cost: number) => {
@@ -279,29 +295,38 @@ export function registerKamiMintModal() {
         );
       }
 
-      const PetQuantityBox = (
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0px 0px 0px' }}>
-          <div style={{ width: '50%' }}>
-            <SubText style={{ color: '#555', padding: '2px' }}>Qty</SubText>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              {QuantityButton(-1)}
-              <Input
-                style={{ pointerEvents: 'auto' }}
-                type='number'
-                onKeyDown={(e) => catchKeys(e)}
-                placeholder='0'
-                onChange={(e) => handleChange(e)}
-                value={amountToMint}
-              />
-              {QuantityButton(1)}
+      const PetQuantityBox = () => {
+        if (waitingToReveal) {
+          // waiting to reveal - dont leave the page!
+          return (
+            <SubText>Revealing... don't leave this page!</SubText>
+          );
+        } else {
+          return (
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0px 0px 0px' }}>
+              <div style={{ width: '50%' }}>
+                <SubText style={{ color: '#555', padding: '2px' }}>Qty</SubText>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  {QuantityButton(-1)}
+                  <Input
+                    style={{ pointerEvents: 'auto' }}
+                    type='number'
+                    onKeyDown={(e) => catchKeys(e)}
+                    placeholder='0'
+                    onChange={(e) => handleChange(e)}
+                    value={amountToMint}
+                  />
+                  {QuantityButton(1)}
+                </div>
+              </div>
+              <div style={{ width: '50%' }}>
+                <SubText style={{ color: '#555', padding: '2px' }}>Cost</SubText>
+                <SubText>{amountToMint} $KAMI</SubText>
+              </div>
             </div>
-          </div>
-          <div style={{ width: '50%' }}>
-            <SubText style={{ color: '#555', padding: '2px' }}>Cost</SubText>
-            <SubText>{amountToMint} $KAMI</SubText>
-          </div>
-        </div>
-      );
+          );
+        }
+      }
 
       const CoinMachine = (
         <Grid>
@@ -338,7 +363,7 @@ export function registerKamiMintModal() {
             <KamiImage src='https://kamigotchi.nyc3.digitaloceanspaces.com/placeholder.gif' />
           </div>
           <ProductBox style={{ gridRow: 3 }}>
-            {PetQuantityBox}
+            {PetQuantityBox()}
             {MintPetButton()}
           </ProductBox>
           <SubText style={{ gridRow: 4 }}>
