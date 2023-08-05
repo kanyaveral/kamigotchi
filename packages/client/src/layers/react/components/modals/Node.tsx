@@ -3,7 +3,6 @@ import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import {
   EntityID,
-  EntityIndex,
   Has,
   HasValue,
   getComponentValue,
@@ -11,22 +10,23 @@ import {
 } from '@latticexyz/recs';
 import cdf from '@stdlib/stats-base-dists-normal-cdf';
 
-import { registerUIComponent } from 'layers/react/engine/store';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import {
   ActionListButton,
   Option as ActionListOption,
 } from 'layers/react/components/library/ActionListButton';
+import { Battery2 } from 'layers/react/components/library/Battery2';
+import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
+import { NodeInfo } from 'layers/react/components/library/NodeContainer';
+import { Tooltip } from 'layers/react/components/library/Tooltip';
+import { registerUIComponent } from 'layers/react/engine/store';
 import { Account, getAccount } from 'layers/react/shapes/Account';
 import { Kami, getKami } from 'layers/react/shapes/Kami';
-import { getLiquidationConfig } from '../../shapes/LiquidationConfig';
+import { getLiquidationConfig } from 'layers/react/shapes/LiquidationConfig';
 import { Node, NodeKamis, getNode } from 'layers/react/shapes/Node';
-import { KamiCard } from '../library/KamiCard';
-import { Tooltip } from '../library/Tooltip';
-import { BatteryComponent } from '../library/Battery';
-import { NodeInfo } from '../library/NodeContainer';
 import { dataStore } from 'layers/react/store/createStore';
+import Countdown from '../library/Countdown';
 
 
 // merchant window with listings. assumes at most 1 merchant per room
@@ -199,7 +199,7 @@ export function registerNodeModal() {
       const [scrollPosition, setScrollPosition] = useState<number>(0);
       const [lastRefresh, setLastRefresh] = useState(Date.now());
       const [tab, setTab] = useState<'allies' | 'enemies'>('allies');
-      const { visibleModals, setVisibleModals } = dataStore();
+
       // scrolling
       useEffect(() => {
         const handleScroll = () => {
@@ -222,7 +222,7 @@ export function registerNodeModal() {
         const refreshClock = () => {
           setLastRefresh(Date.now());
         };
-        const timerId = setInterval(refreshClock, 3000);
+        const timerId = setInterval(refreshClock, 1000);
         return function cleanup() {
           clearInterval(timerId);
         };
@@ -441,8 +441,8 @@ export function registerNodeModal() {
         return (
           <Tooltip text={[tooltipText]}>
             <ActionButton
-              id={`harvest-collect-${kami.id}`}
-              key={`harvest-collect-${kami.id}`}
+              id={`harvest-collect-${kami.index}`}
+              key={`harvest-collect-${kami.index}`}
               onClick={() => collect(kami)}
               text='Collect'
               disabled={kami.production === undefined || tooltipText !== ''}
@@ -467,8 +467,8 @@ export function registerNodeModal() {
         return (
           <Tooltip text={[tooltipText]}>
             <ActionButton
-              id={`harvest-stop-${kami.id}`}
-              key={`harvest-stop-${kami.id}`}
+              id={`harvest-stop-${kami.index}`}
+              key={`harvest-stop-${kami.index}`}
               text='Stop'
               onClick={() => stop(kami)}
               disabled={kami.production === undefined || tooltipText !== ''}
@@ -495,26 +495,43 @@ export function registerNodeModal() {
         );
       };
 
+      // includes the Health Battery and Cooldown Clock
+      const CornerContent = (kami: Kami) => {
+        const health = calcHealth(kami);
+        const healthPercent = Math.round((health / kami.stats.health) * 100);
+        const cooldown = Math.round(Math.max(kami.cooldown - calcIdleTime(kami), 0));
+        const cooldownString = `Cooldown: ${Math.max(cooldown, 0).toFixed(0)}s`;
+        return (
+          <>
+            <Tooltip text={[cooldownString]}>
+              <Countdown total={kami.cooldown} current={cooldown} />
+            </Tooltip>
+            <Tooltip text={[`${healthPercent}%`]}>
+              <Battery2 level={100 * calcHealth(kami) / kami.stats.health} />
+            </Tooltip>
+          </>
+        );
+      };
+
       // rendering of an ally kami on this node
       const MyKard = (kami: Kami) => {
         const health = calcHealth(kami);
-        const healthPercent = Math.round((health / kami.stats.health) * 100);
         const output = calcOutput(kami);
 
         const description = [
           '',
-          `Health: ${calcHealth(kami).toFixed()}/${kami.stats.health * 1}`, // multiply by 1 to interpret hex
+          `Health: ${health.toFixed()}/${kami.stats.health * 1}`, // multiply by 1 to interpret hex
           `Harmony: ${kami.stats.harmony * 1}`,
           `Violence: ${kami.stats.violence * 1}`,
         ];
 
         return (
           <KamiCard
-            key={kami.id}
+            key={kami.index}
             kami={kami}
             subtext={`yours (\$${output})`}
             action={[CollectButton(kami), StopButton(kami)]}
-            cornerContent={<BatteryComponent level={healthPercent} />}
+            cornerContent={CornerContent(kami)}
             description={description}
           />
         );
@@ -523,12 +540,11 @@ export function registerNodeModal() {
       // rendering of an enemy kami on this node
       const EnemyKard = (kami: Kami, myKamis: Kami[]) => {
         const health = calcHealth(kami);
-        const healthPercent = Math.round((health / kami.stats.health) * 100);
         const output = calcOutput(kami);
 
         const description = [
           '',
-          `Health: ${calcHealth(kami).toFixed()}/${kami.stats.health * 1}`, // multiply by 1 to interpret hex
+          `Health: ${health.toFixed()}/${kami.stats.health * 1}`, // multiply by 1 to interpret hex
           `Harmony: ${kami.stats.harmony * 1}`,
           `Violence: ${kami.stats.violence * 1}`,
         ];
@@ -539,11 +555,11 @@ export function registerNodeModal() {
 
         return (
           <KamiCard
-            key={kami.id}
+            key={kami.index}
             kami={kami}
             subtext={`${kami.account!.name} (\$${output})`}
             action={LiquidateButton(kami, validLiquidators)}
-            cornerContent={<BatteryComponent level={healthPercent} />}
+            cornerContent={CornerContent(kami)}
             description={description}
           />
         );
@@ -583,10 +599,6 @@ export function registerNodeModal() {
           />
         </Tabs>
       );
-
-      const hideModal = useCallback(() => {
-        setVisibleModals({ ...visibleModals, node: false });
-      }, [setVisibleModals, visibleModals]);
 
       return (
         <ModalWrapperFull id='node' divName='node'>
@@ -629,36 +641,4 @@ const NodeActions = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-`;
-
-const TopButton = styled.button`
-  background-color: #ffffff;
-  border-style: solid;
-  border-width: 2px;
-  border-color: black;
-  color: black;
-  padding: 5px;
-  font-size: 14px;
-  cursor: pointer;
-  pointer-events: auto;
-  border-radius: 5px;
-  font-family: Pixel;
-  width: 30px;
-  &:active {
-    background-color: #c4c4c4;
-  }
-  margin: 0px;
-`;
-
-const Header = styled.p`
-  font-size: 24px;
-  color: #333;
-  text-align: left;
-  font-family: Pixel;
-  margin: 5px;
-`;
-
-const AlignRight = styled.div`
-  text-align: left;
-  margin: 0px;
 `;
