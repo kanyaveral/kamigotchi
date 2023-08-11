@@ -35,11 +35,14 @@
     "IndexMerchantComponent",
     "IndexModComponent",
     "IndexNodeComponent",
+    "IndexConditionComponent",
     "IndexPetComponent",
     "IndexReviveComponent",
+    "IndexQuestComponent",
     "IndexTraitComponent",
     "IsAccountComponent",
     "IsConfigComponent",
+    "IsConditionComponent",
     "IsDataComponent",
     "IsEquippedComponent",
     "IsFungibleComponent",
@@ -52,10 +55,15 @@
     "IsPetComponent",
     "IsProductionComponent",
     "IsRegistryComponent",
+    "IsRequirementComponent",
+    "IsRewardComponent",
     "IsRoomComponent",
+    "IsObjectiveComponent",
+    "IsQuestComponent",
     "IsScoreComponent",
     "IsTraitComponent",
     "LocationComponent",
+    "LogicTypeComponent",
     "MediaURIComponent",
     "NameComponent",
     "PowerComponent",
@@ -65,6 +73,7 @@
     "ProxyPermissionsFarm20Component",
     "ProxyPermissionsERC721Component",
     "ProxyPermissionsMint20Component",
+    "QuestCompletionComponent",
     "RarityComponent",
     "RateComponent",
     "SlotsComponent",
@@ -176,6 +185,12 @@
       ]
     },
     {
+      "name": "_RegistryCreateConditionSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
       "name": "_RegistryCreateFoodSystem",
       "writeAccess": [
         "*"
@@ -201,6 +216,12 @@
     },
     {
       "name": "_RegistryCreateTraitSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryCreateQuestSystem",
       "writeAccess": [
         "*"
       ]
@@ -534,6 +555,18 @@
         "TimeLastActionComponent",
         "TypeComponent"
       ]
+    },
+    {
+      "name": "QuestAcceptSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "QuestCompleteSystem",
+      "writeAccess": [
+        "*"
+      ]
     }
   ],
   "libraries": [
@@ -553,7 +586,9 @@
     "LibRegistryAffinity",
     "LibRegistryTrait",
     "LibRegistryItem",
+    "LibRegistryQuests",
     "LibRoom",
-    "LibStat"
+    "LibStat",
+    "LibQuests"
   ]
 }

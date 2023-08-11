@@ -213,6 +213,21 @@ abstract contract SetupTemplate is TestSetupImports {
     _ProductionLiquidateSystem.executeTyped(productionID, attackerID);
   }
 
+  function _acceptQuest(
+    uint256 playerIndex,
+    uint256 questIndex
+  ) internal virtual returns (uint256) {
+    address operator = _getOperator(playerIndex);
+    vm.prank(operator);
+    return abi.decode(_QuestAcceptSystem.executeTyped(questIndex), (uint256));
+  }
+
+  function _completeQuest(uint256 playerIndex, uint256 questID) internal virtual {
+    address operator = _getOperator(playerIndex);
+    vm.prank(operator);
+    _QuestCompleteSystem.executeTyped(questID);
+  }
+
   /////////////////
   // GETTERS
 
@@ -286,6 +301,45 @@ abstract contract SetupTemplate is TestSetupImports {
 
   /////////////////
   // REGISTRIES
+
+  function _createCondition(
+    uint256 questIndex,
+    uint256 balance, // can be empty
+    uint256 itemIndex, // can be empty
+    string memory name,
+    string memory logicType,
+    string memory _type,
+    string memory condType
+  ) public {
+    vm.prank(deployer);
+    __RegistryCreateConditionSystem.executeTyped(
+      questIndex,
+      balance,
+      itemIndex,
+      name,
+      logicType,
+      _type,
+      condType
+    );
+  }
+
+  function _createQuest(uint256 index, string memory name) public {
+    vm.prank(deployer);
+    __RegistryCreateQuestSystem.executeTyped(index, name);
+  }
+
+  function _initBasicCoinQuest() internal {
+    // creates a very basic quest, with details:
+    // - requirements: account has 1 COIN
+    // - objectives: account to have 10 COINs
+    // - rewards: account to receive 1 COIN
+
+    _createQuest(1, "BasicCoinQuest");
+
+    _createCondition(1, 1, 0, "Have 1 COIN", "CURR_MIN", "COIN", "REQUIREMENT");
+    _createCondition(1, 10, 0, "Have 10 COINs", "CURR_MIN", "COIN", "OBJECTIVE");
+    _createCondition(1, 1, 0, "Get 1 COIN", "INC", "COIN", "REWARD");
+  }
 
   function registerTrait(
     uint specialIndex,
