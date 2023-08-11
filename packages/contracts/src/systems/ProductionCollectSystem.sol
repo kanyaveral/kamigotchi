@@ -7,6 +7,7 @@ import { getAddressById } from "solecs/utils.sol";
 
 import { LibCoin } from "libraries/LibCoin.sol";
 import { LibAccount } from "libraries/LibAccount.sol";
+import { LibExperience } from "libraries/LibExperience.sol";
 import { LibPet } from "libraries/LibPet.sol";
 import { LibProduction } from "libraries/LibProduction.sol";
 import { LibScore } from "libraries/LibScore.sol";
@@ -36,18 +37,18 @@ contract ProductionCollectSystem is System {
     );
 
     // add balance and experience
-    uint256 amt = LibProduction.calcOutput(components, id);
-    LibCoin.inc(components, accountID, amt);
-    LibPet.addExperience(components, petID, amt);
+    uint256 output = LibProduction.calcOutput(components, id);
+    LibCoin.inc(components, accountID, output);
+    LibExperience.inc(components, petID, output);
 
     // reset production
     LibProduction.reset(components, id);
 
     // logging and tracking
-    LibScore.incBy(world, components, accountID, "COLLECT", amt);
+    LibScore.incBy(world, components, accountID, "COLLECT", output);
     LibAccount.updateLastBlock(components, accountID);
 
-    return abi.encode(amt);
+    return abi.encode(output);
   }
 
   function executeTyped(uint256 id) public returns (bytes memory) {
