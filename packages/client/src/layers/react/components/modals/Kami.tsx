@@ -2,12 +2,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
+import { EntityID } from '@latticexyz/recs';
 import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
+import { ExperienceBar } from 'layers/react/components/library/ExperienceBar';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { Kami, getKami } from 'layers/react/shapes/Kami';
@@ -15,6 +17,7 @@ import { Kill } from 'layers/react/shapes/Kill';
 import { Trait, Traits } from 'layers/react/shapes/Trait';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { dataStore } from 'layers/react/store/createStore';
+import { ActionButton } from '../library/ActionButton';
 
 export function registerKamiModal() {
   registerUIComponent(
@@ -30,8 +33,10 @@ export function registerKamiModal() {
         network: {
           components: {
             Balance,
+            Experience,
             IsPet,
             IsKill,
+            Level,
             MediaURI,
             Name,
             PetID,
@@ -44,6 +49,8 @@ export function registerKamiModal() {
         Balance.update$,
         IsPet.update$,
         IsKill.update$,
+        Experience.update$,
+        Level.update$,
         MediaURI.update$,
         Name.update$,
         PetID.update$,
@@ -53,12 +60,14 @@ export function registerKamiModal() {
         map(() => {
           return {
             layers,
+            actions: layers.network.actions,
+            api: layers.network.api.player,
           };
         })
       );
     },
 
-    ({ layers }) => {
+    ({ layers, actions, api }) => {
       const [selectedKami, setSelectedKami] = useState<Kami>();
       const {
         selectedEntities,
@@ -85,7 +94,24 @@ export function registerKamiModal() {
 
 
       /////////////////
+      // ACTIONS
+
+      const levelUp = (kami: Kami) => {
+        const actionID = `Leveling up ${kami.name}` as EntityID;
+        actions.add({
+          id: actionID,
+          components: {},
+          requirement: () => true,
+          updates: () => [],
+          execute: async () => {
+            return api.pet.level(kami.id);
+          },
+        })
+      }
+
+      /////////////////
       // VISUAL COMPONENTS
+
 
       // Rendering of Kami overview details (name, affinity, stats)
       const OverviewSection = (kami: Kami) => {
@@ -103,8 +129,16 @@ export function registerKamiModal() {
           <SectionContainer style={{ display: 'flex', flexDirection: 'row', padding: '0px' }}>
             <ContainerImage src={kami.uri} />
             <SectionContainer style={{ borderWidth: '0px', margin: '0px' }}>
-              <SectionTitle>{kami.name}</SectionTitle>
-              <SectionSubtitle>{affinities}</SectionSubtitle>
+              <SectionTopContainer>
+                <SectionTitle>{kami.name}</SectionTitle>
+                <SectionSubtitle>{affinities}</SectionSubtitle>
+              </SectionTopContainer>
+              <ExperienceBar
+                level={kami.level * 1}
+                current={kami.experience.current * 1}
+                total={kami.experience.threshold}
+                triggerLevelUp={() => levelUp(kami)}
+              />
               <SectionContent>
                 {statsArray.map((stat: [string, number]) => {
                   return (
@@ -156,7 +190,7 @@ export function registerKamiModal() {
         );
       };
 
-
+      // Rendering of the Kami's Kill/Death Logs
       const KDLogsSection = (kills: Kill[], deaths: Kill[]) => {
         const kdRatio = kills.length / Math.max(deaths.length, 1); // how to best compute this?
         const logs = kills.concat(deaths).sort((a, b) => b.time - a.time);
@@ -165,7 +199,7 @@ export function registerKamiModal() {
         return (
           <SectionContainer style={{ overflowY: 'scroll' }}>
             <SectionTitle>Kill/Death Logs</SectionTitle>
-            <TableContainer >
+            <TableContainer>
               <Table>
                 <TableHead>
                   {logs.map((log, index) => {
@@ -262,9 +296,16 @@ const ContainerInfoText = styled.div`
   margin: 5px;
 `;
 
+const SectionTopContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+  margin: 15px 5px 10px 5px;
+`;
+
 const SectionTitle = styled.div`
   background-color: #ffffff;
-  margin: 15px 5px;
 
   color: black;
   font-family: Pixel;
@@ -273,7 +314,7 @@ const SectionTitle = styled.div`
 `;
 
 const SectionSubtitle = styled.div`
-  margin: 0px 0px 17px 10px;
+  margin: 0px 0px 3px 10px;
   
   color: #666;
   font-size: 14px;
