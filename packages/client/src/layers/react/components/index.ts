@@ -5,6 +5,7 @@ import { registerHelpButton } from './fixtures/buttons/Help';
 import { registerMapButton } from './fixtures/buttons/Map';
 import { registerPartyButton } from './fixtures/buttons/Party';
 import { registerSettingsButton } from './fixtures/buttons/Settings';
+import { registerQuestsButton } from './fixtures/buttons/Quests';
 import { registerAccountInfoFixture } from './fixtures/AccountInfo';
 import { registerActionQueue } from './fixtures/ActionQueue';
 import { registerWalletFixture } from './fixtures/Wallet';
@@ -21,6 +22,7 @@ import { registerMerchantModal } from './modals/Merchant';
 import { registerPartyModal } from './modals/Party';
 import { registerNodeModal } from './modals/Node';
 import { registerSettingsModal } from './modals/Settings';
+import { registerQuestsModal } from './modals/Quests';
 import { registerHelpModal } from './modals/Help';
 import { registerKamisNamingModal } from './modals/KamisNaming';
 import { registerNameKamiModal } from './modals/NameKami';
@@ -37,12 +39,15 @@ import { registerOperatorUpdater } from './validators/OperatorUpdater';
 export function registerUIComponents() {
   registerLoadingState();
 
-  // fixtures
-  registerChatButton();
+  // buttons
+  // registerChatButton();
   registerHelpButton();
   registerMapButton();
   registerPartyButton();
+  registerQuestsButton();
   registerSettingsButton();
+
+  // other fixtures
   registerAccountInfoFixture();
   registerWalletFixture();
   registerActionQueue();
@@ -68,6 +73,7 @@ export function registerUIComponents() {
   registerMapModal();
   registerSettingsModal();
   registerPartyModal();
+  registerQuestsModal();
 
   // validators
   registerAccountRegistrar();

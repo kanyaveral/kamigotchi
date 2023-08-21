@@ -23,6 +23,7 @@ export interface VisibleButtons {
   operatorInfo: boolean;
   party: boolean;
   settings: boolean;
+  quests: boolean;
 }
 
 export const visibleButtonsToggled = (isOn: boolean): VisibleButtons => ({
@@ -32,6 +33,7 @@ export const visibleButtonsToggled = (isOn: boolean): VisibleButtons => ({
   operatorInfo: isOn,
   party: isOn,
   settings: isOn,
+  quests: isOn,
 });
 
 export interface VisibleModals {
@@ -53,6 +55,7 @@ export interface VisibleModals {
   settings: boolean;
   roomMovement: boolean;
   operatorFund: boolean;
+  quests: boolean;
   leaderboard: boolean;
 }
 
@@ -75,6 +78,7 @@ export const visibleModalsToggled = (isOn: boolean): VisibleModals => ({
   settings: isOn,
   roomMovement: isOn,
   operatorFund: isOn,
+  quests: isOn,
   leaderboard: isOn,
 });
 
