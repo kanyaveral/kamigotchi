@@ -71,6 +71,12 @@ export function registerQuestsModal() {
       );
     },
 
+    // we want three categories
+    // 1. Available
+    // 2. Ongoing
+    // 3. Completed
+    // NOTE: Completed and Ongoing should be straitforward to pull. we should
+    // be using those + requirements to determine available quests
     ({ layers, actions, api, data }) => {
       const [showCompleted, setShowCompleted] = useState(false);
       // temp: show registry for testing
@@ -130,6 +136,7 @@ export function registerQuestsModal() {
         return 0;
       }
 
+      // TODO: probably move these to Quest Conditions Shapes file
       const checkCurrMin = (condition: Condition): boolean => {
         const accBal = getBalanceOf(data.account.id, condition);
         const conBal = condition.balance ? condition.balance : 0;
@@ -175,6 +182,7 @@ export function registerQuestsModal() {
         return false;
       }
 
+      // check that a quest's requirements are met by this account
       const checkRequirements = (quest: Quest): boolean => {
         for (const condition of quest.requirements) {
           if (!checkCondition(quest, condition)) {
@@ -185,6 +193,7 @@ export function registerQuestsModal() {
         return true;
       }
 
+      // check that a quest's objectives are met by this account
       const checkObjectives = (quest: Quest): boolean => {
         for (const condition of quest.objectives) {
           if (!checkCondition(quest, condition)) {
@@ -252,34 +261,40 @@ export function registerQuestsModal() {
         )
       };
 
-      const ConditionBox = (conditions: Condition[], conType: string) => {
-        const texts = () => {
-          return conditions.map((con) => (
-            <QuestDescription>
-              - {con.name}
-            </QuestDescription>
-          )
-          )
-        }
-
+      const ConditionDisplay = (conditions: Condition[], type: string) => {
+        if (conditions.length == 0) return <div />;
         return (
-          <div>
-            <ConditionName>
-              {conditions.length > 0 ? conType : ''}
-            </ConditionName>
-            {texts()}
-          </div>
+          <ConditionContainer>
+            <ConditionName>{type}</ConditionName>
+            {conditions.map((condition) => (
+              <ConditionDescription>- {condition.name}</ConditionDescription>
+            ))}
+          </ConditionContainer>
         )
       }
 
       const QuestBox = (quest: Quest) => {
         return (
-          <ProductBox>
+          <QuestContainer>
             <QuestName>{quest.name}</QuestName>
-            {ConditionBox(quest.objectives, 'Objectives')}
-            {ConditionBox(quest.rewards, 'Rewards')}
+            <QuestDescription>{quest.description}</QuestDescription>
+            {ConditionDisplay(quest.objectives, 'Objectives')}
+            {ConditionDisplay(quest.rewards, 'Rewards')}
             {CompleteButton(quest)}
-          </ProductBox>
+          </QuestContainer>
+        )
+      }
+
+      const RegistryQuestBox = (quest: Quest) => {
+        return (
+          <QuestContainer>
+            <QuestName>{quest.name}</QuestName>
+            <QuestDescription>{quest.description}</QuestDescription>
+            {ConditionDisplay(quest.requirements, 'Requirements')}
+            {ConditionDisplay(quest.objectives, 'Objectives')}
+            {ConditionDisplay(quest.rewards, 'Rewards')}
+            {AcceptButton(quest)}
+          </QuestContainer>
         )
       }
 
@@ -292,25 +307,13 @@ export function registerQuestsModal() {
         });
       }
 
-      const UncompletedQuests = () => {
+      const OngoingQuests = () => {
         return queryQuestsX(
           layers,
           { account: data.account.id, completed: false }
         ).reverse().map((q: Quest) => {
           return (QuestBox(q))
         });
-      }
-
-      const RegistryQuestBox = (quest: Quest) => {
-        return (
-          <ProductBox>
-            <QuestName>[registry] {quest.name}</QuestName>
-            {ConditionBox(quest.requirements, 'Requirements')}
-            {ConditionBox(quest.objectives, 'Objectives')}
-            {ConditionBox(quest.rewards, 'Rewards')}
-            {AcceptButton(quest)}
-          </ProductBox>
-        )
       }
 
       const RegistryQuestBoxes = () => {
@@ -347,7 +350,7 @@ export function registerQuestsModal() {
             {showRegistry ? RegistryQuestBoxes() : <div />}
             {showCompleted
               ? CompletedQuests()
-              : UncompletedQuests()
+              : OngoingQuests()
             }
           </Scrollable>
           {Footer}
@@ -368,21 +371,21 @@ const Header = styled.p`
 const Scrollable = styled.div`
   overflow-y: scroll;
   height: 100%;
-  max-height: 100 %;
+  max-height: 100%;
 `;
 
-const ProductBox = styled.div`
+const QuestContainer = styled.div`
   border-color: black;
-  border-radius: 2px;
+  border-radius: 10px;
   border-style: solid;
   border-width: 2px;
   display: flex;
   justify-content: start;
   align-items: start;
   flex-direction: column;
-  padding: 1vh 1vw 0.5vh 1vw;
-  margin: 0.8vh 0vw;
-  width: 100%;
+  padding: 1vw;
+  margin: 0.8vw;
+
 `;
 
 const QuestName = styled.div`
@@ -391,7 +394,25 @@ const QuestName = styled.div`
   text-align: left;
   justify-content: flex-start;
   color: #333;
-  padding: 0.4vh 0vw;
+  padding: 0.7vh 0vw;
+`;
+
+const QuestDescription = styled.div`
+  color: #333;
+
+  font-family: Pixel;
+  text-align: left;
+  line-height: 1.2vw;
+  font-size: 0.7vw;
+  padding: 0.4vh 0.5vw;
+`;
+
+const ConditionContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0.4vw 0.5vw;
 `;
 
 const ConditionName = styled.div`
@@ -400,15 +421,14 @@ const ConditionName = styled.div`
   text-align: left;
   justify-content: flex-start;
   color: #333;
-  padding: 0.3vh 0vw;
+  padding: 0vw 0vw 0.3vw 0vw;
 `;
 
-const QuestDescription = styled.div`
+const ConditionDescription = styled.div`
   color: #333;
-  flex-grow: 1;
 
   font-family: Pixel;
   text-align: left;
   font-size: 0.7vw;
-  padding: 0.2vh 0vw;
+  padding: 0.4vh 0.5vw;
 `;
