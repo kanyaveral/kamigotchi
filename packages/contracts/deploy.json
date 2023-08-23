@@ -24,6 +24,7 @@
     "IdPetComponent",
     "IdSourceComponent",
     "IdTargetComponent",
+    "IndexComponent",
     "IndexBackgroundComponent",
     "IndexBodyComponent",
     "IndexColorComponent",
@@ -35,7 +36,7 @@
     "IndexMerchantComponent",
     "IndexModComponent",
     "IndexNodeComponent",
-    "IndexConditionComponent",
+    "IndexObjectiveComponent",
     "IndexPetComponent",
     "IndexReviveComponent",
     "IndexQuestComponent",
@@ -43,7 +44,6 @@
     "IsAccountComponent",
     "IsConfigComponent",
     "IsCompleteComponent",
-    "IsConditionComponent",
     "IsDataComponent",
     "IsEquippedComponent",
     "IsFungibleComponent",
@@ -187,12 +187,6 @@
       ]
     },
     {
-      "name": "_RegistryCreateConditionSystem",
-      "writeAccess": [
-        "*"
-      ]
-    },
-    {
       "name": "_RegistryCreateFoodSystem",
       "writeAccess": [
         "*"
@@ -211,6 +205,30 @@
       ]
     },
     {
+      "name": "_RegistryCreateQuestSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryCreateQuestObjectiveSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryCreateQuestRequirementSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryCreateQuestRewardSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
       "name": "_RegistryCreateReviveSystem",
       "writeAccess": [
         "*"
@@ -218,12 +236,6 @@
     },
     {
       "name": "_RegistryCreateTraitSystem",
-      "writeAccess": [
-        "*"
-      ]
-    },
-    {
-      "name": "_RegistryCreateQuestSystem",
       "writeAccess": [
         "*"
       ]

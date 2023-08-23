@@ -12,10 +12,12 @@ import _NodeSetAffinitySystem from "../abi/_NodeSetAffinitySystem.json";
 import _NodeSetDescriptionSystem from "../abi/_NodeSetDescriptionSystem.json";
 import _NodeSetLocationSystem from "../abi/_NodeSetLocationSystem.json";
 import _NodeSetNameSystem from "../abi/_NodeSetNameSystem.json";
-import _RegistryCreateConditionSystem from "../abi/_RegistryCreateConditionSystem.json";
 import _RegistryCreateFoodSystem from "../abi/_RegistryCreateFoodSystem.json";
 import _RegistryCreateGearSystem from "../abi/_RegistryCreateGearSystem.json";
 import _RegistryCreateModSystem from "../abi/_RegistryCreateModSystem.json";
+import _RegistryCreateQuestObjectiveSystem from "../abi/_RegistryCreateQuestObjectiveSystem.json";
+import _RegistryCreateQuestRequirementSystem from "../abi/_RegistryCreateQuestRequirementSystem.json";
+import _RegistryCreateQuestRewardSystem from "../abi/_RegistryCreateQuestRewardSystem.json";
 import _RegistryCreateQuestSystem from "../abi/_RegistryCreateQuestSystem.json";
 import _RegistryCreateReviveSystem from "../abi/_RegistryCreateReviveSystem.json";
 import _RegistryCreateTraitSystem from "../abi/_RegistryCreateTraitSystem.json";
@@ -79,10 +81,12 @@ export const SystemAbis = {
   "system._Node.Set.Description": _NodeSetDescriptionSystem.abi,
   "system._Node.Set.Location": _NodeSetLocationSystem.abi,
   "system._Node.Set.Name": _NodeSetNameSystem.abi,
-  "system._Registry.Condition.Create": _RegistryCreateConditionSystem.abi,
   "system._Registry.Food.Create": _RegistryCreateFoodSystem.abi,
   "system._Registry.Gear.Create": _RegistryCreateGearSystem.abi,
   "system._Registry.Mod.Create": _RegistryCreateModSystem.abi,
+  "system._Registry.Quest.Create.Objective": _RegistryCreateQuestObjectiveSystem.abi,
+  "system._Registry.Quest.Create.Requirement": _RegistryCreateQuestRequirementSystem.abi,
+  "system._Registry.Quest.Create.Reward": _RegistryCreateQuestRewardSystem.abi,
   "system._Registry.Quest.Create": _RegistryCreateQuestSystem.abi,
   "system._Registry.Revive.Create": _RegistryCreateReviveSystem.abi,
   "system._Registry.Trait.Create": _RegistryCreateTraitSystem.abi,

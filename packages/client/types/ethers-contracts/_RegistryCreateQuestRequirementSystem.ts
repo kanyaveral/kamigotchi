@@ -27,11 +27,11 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export interface _RegistryCreateConditionSystemInterface
+export interface _RegistryCreateQuestRequirementSystemInterface
   extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(uint256,uint256,uint256,string,string,string,string)": FunctionFragment;
+    "executeTyped(uint256,string,uint256,uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -52,12 +52,9 @@ export interface _RegistryCreateConditionSystemInterface
     functionFragment: "executeTyped",
     values: [
       PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
+      PromiseOrValue<BigNumberish>
     ]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -96,12 +93,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface _RegistryCreateConditionSystem extends BaseContract {
+export interface _RegistryCreateQuestRequirementSystem extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: _RegistryCreateConditionSystemInterface;
+  interface: _RegistryCreateQuestRequirementSystemInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -129,13 +126,10 @@ export interface _RegistryCreateConditionSystem extends BaseContract {
     ): Promise<ContractTransaction>;
 
     executeTyped(
+      questIndex: PromiseOrValue<BigNumberish>,
+      type_: PromiseOrValue<string>,
       index: PromiseOrValue<BigNumberish>,
-      balance: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      logicType: PromiseOrValue<string>,
-      _type: PromiseOrValue<string>,
-      conditionType: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -153,13 +147,10 @@ export interface _RegistryCreateConditionSystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   executeTyped(
+    questIndex: PromiseOrValue<BigNumberish>,
+    type_: PromiseOrValue<string>,
     index: PromiseOrValue<BigNumberish>,
-    balance: PromiseOrValue<BigNumberish>,
-    itemIndex: PromiseOrValue<BigNumberish>,
-    name: PromiseOrValue<string>,
-    logicType: PromiseOrValue<string>,
-    _type: PromiseOrValue<string>,
-    conditionType: PromiseOrValue<string>,
+    value: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -177,13 +168,10 @@ export interface _RegistryCreateConditionSystem extends BaseContract {
     ): Promise<string>;
 
     executeTyped(
+      questIndex: PromiseOrValue<BigNumberish>,
+      type_: PromiseOrValue<string>,
       index: PromiseOrValue<BigNumberish>,
-      balance: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      logicType: PromiseOrValue<string>,
-      _type: PromiseOrValue<string>,
-      conditionType: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -213,13 +201,10 @@ export interface _RegistryCreateConditionSystem extends BaseContract {
     ): Promise<BigNumber>;
 
     executeTyped(
+      questIndex: PromiseOrValue<BigNumberish>,
+      type_: PromiseOrValue<string>,
       index: PromiseOrValue<BigNumberish>,
-      balance: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      logicType: PromiseOrValue<string>,
-      _type: PromiseOrValue<string>,
-      conditionType: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -238,13 +223,10 @@ export interface _RegistryCreateConditionSystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     executeTyped(
+      questIndex: PromiseOrValue<BigNumberish>,
+      type_: PromiseOrValue<string>,
       index: PromiseOrValue<BigNumberish>,
-      balance: PromiseOrValue<BigNumberish>,
-      itemIndex: PromiseOrValue<BigNumberish>,
-      name: PromiseOrValue<string>,
-      logicType: PromiseOrValue<string>,
-      _type: PromiseOrValue<string>,
-      conditionType: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
