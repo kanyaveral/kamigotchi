@@ -17,9 +17,9 @@ import {
 } from 'layers/react/components/library/ActionListButton';
 import { Battery } from 'layers/react/components/library/Battery';
 import { Countdown } from 'layers/react/components/library/Countdown';
-import { KamiCard } from 'layers/react/components/library/KamiCard';
+import { KamiCard2 } from 'layers/react/components/library/KamiCard2';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
-import { NodeInfo } from 'layers/react/components/library/NodeContainer';
+import { NodeHeader } from 'layers/react/components/library/NodeHeader';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { Account, getAccount } from 'layers/react/shapes/Account';
@@ -35,9 +35,9 @@ export function registerNodeModal() {
 
     // Grid Config
     {
-      colStart: 34,
-      colEnd: 68,
-      rowStart: 9,
+      colStart: 33,
+      colEnd: 67,
+      rowStart: 13,
       rowEnd: 99,
     },
 
@@ -525,7 +525,7 @@ export function registerNodeModal() {
         ];
 
         return (
-          <KamiCard
+          <KamiCard2
             key={kami.index}
             kami={kami}
             subtext={`yours (\$${output})`}
@@ -553,7 +553,7 @@ export function registerNodeModal() {
         });
 
         return (
-          <KamiCard
+          <KamiCard2
             key={kami.index}
             kami={kami}
             subtext={`${kami.account!.name} (\$${output})`}
@@ -600,8 +600,11 @@ export function registerNodeModal() {
       );
 
       return (
-        <ModalWrapperFull id='node' divName='node'>
-          <NodeInfo key={'node-info'} node={data.node} />
+        <ModalWrapperFull
+          id='node'
+          divName='node'
+          header={<NodeHeader node={data.node} />}
+        >
           {KamiTabs()}
           {KamiList(data.node.kamis)}
           <Underline key='separator' />
@@ -631,6 +634,7 @@ const Underline = styled.div`
 
 const Tabs = styled.div`
   width: 100%;
+  padding: 0.2vw 0vw;
   display: flex;
   flex-flow: row nowrap;
 `;

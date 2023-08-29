@@ -24,10 +24,10 @@ export function registerQuestsModal() {
   registerUIComponent(
     'Quests',
     {
-      colStart: 69,
+      colStart: 67,
       colEnd: 100,
       rowStart: 52,
-      rowEnd: 100,
+      rowEnd: 99,
     },
 
     (layers) => {
