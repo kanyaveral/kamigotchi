@@ -604,6 +604,7 @@ export function registerNodeModal() {
           id='node'
           divName='node'
           header={<NodeHeader node={data.node} />}
+          canExit
         >
           {KamiTabs()}
           {KamiList(data.node.kamis)}
@@ -623,6 +624,7 @@ export function registerNodeModal() {
 const Scrollable = styled.div`
   overflow-y: scroll;
   max-height: 100%;
+  flex-grow: 1;
 `;
 
 const Underline = styled.div`
