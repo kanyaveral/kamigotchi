@@ -3,13 +3,13 @@ import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { EntityID, Has, HasValue, runQuery } from '@latticexyz/recs';
 
-import { getAccount } from 'layers/react/shapes/Account';
+import { Account, getAccount } from 'layers/react/shapes/Account';
 import {
   Quest,
   Objective,
   Reward,
   Requirement,
-  queryQuestsX,
+  getRegistryQuests,
 } from 'layers/react/shapes/Quest';
 import { Inventory, queryInventoryX } from 'layers/react/shapes/Inventory';
 import { getItem, queryFoodRegistry, queryReviveRegistry } from 'layers/react/shapes/Item';
@@ -45,6 +45,7 @@ export function registerQuestsModal() {
             IsReward,
             OperatorAddress,
             QuestIndex,
+            Value,
           },
           network,
         },
@@ -59,6 +60,7 @@ export function registerQuestsModal() {
         IsReward.update$,
         IsObjective.update$,
         QuestIndex.update$,
+        Value.update$,
       ).pipe(
         map(() => {
           // get the account through the account entity of the controlling wallet
@@ -71,13 +73,14 @@ export function registerQuestsModal() {
             ])
           )[0];
 
-          const account = getAccount(layers, accountIndex, { quests: true });
-
           return {
             layers,
             actions,
             api: player,
-            data: { account },
+            data: {
+              account: getAccount(layers, accountIndex, { quests: true }),
+              quests: getRegistryQuests(layers),
+            },
           };
         })
       );
@@ -90,16 +93,15 @@ export function registerQuestsModal() {
     // NOTE: Completed and Ongoing should be straitforward to pull. we should
     // be using those + requirements to determine available quests
     ({ layers, actions, api, data }) => {
-      // console.log('mQuest:', data);
-      const [showCompleted, setShowCompleted] = useState(false);
-      // temp: show registry for testing
-      const [showRegistry, setShowRegistry] = useState(true);
+      console.log('mQuest:', data);
+      const [questFilter, setQuestFilter] = useState('ONGOING');
+
 
       ///////////////////
       // INTERACTIONS
 
       const acceptQuest = async (quest: Quest) => {
-        const actionID = `Accepting Quest ${quest.index}` as EntityID; // Date.now to have the actions ordered in the component browser
+        const actionID = `Accepting Quest ${quest.index * 1}` as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
           components: {},
@@ -112,7 +114,7 @@ export function registerQuestsModal() {
       }
 
       const completeQuest = async (quest: Quest) => {
-        const actionID = `Completing Quest ${quest.index}` as EntityID; // Date.now to have the actions ordered in the component browser
+        const actionID = `Completing Quest ${quest.index * 1}` as EntityID; // Date.now to have the actions ordered in the component browser
         actions.add({
           id: actionID,
           components: {},
@@ -124,12 +126,26 @@ export function registerQuestsModal() {
         });
       }
 
+
       ///////////////////
       // LOGIC
 
-      const isCompleted = (quest: Quest) => {
-        return quest.complete;
+      const isCompleted = (account: Account, questIndex: number) => {
+        let complete = false;
+        account.quests?.completed.forEach((q: Quest) => {
+          if (q.index === questIndex) complete = true;
+        });
+        return complete;
       }
+
+      const isOngoing = (account: Account, questIndex: number): boolean => {
+        let ongoing = false;
+        account.quests?.ongoing.forEach((q: Quest) => {
+          if (q.index === questIndex) ongoing = true;
+        });
+        return ongoing;
+      }
+
 
       // const getBalanceOf = (owner: EntityID, condition: Condition): number => {
       //   const type = condition.type;
@@ -218,10 +234,40 @@ export function registerQuestsModal() {
       }
 
       const canComplete = (quest: Quest): boolean => {
-        if (isCompleted(quest)) {
-          return false;
-        }
         return checkObjectives(quest);
+      }
+
+
+      /////////////////
+      // DATA INTERPRETATION
+
+      const getFoodName = (foodIndex: number): string => {
+        let foodRegistryEntityIndex = queryFoodRegistry(layers, foodIndex);
+        let foodObject = getItem(layers, foodRegistryEntityIndex);
+        return foodObject.name;
+      }
+
+      const getReviveName = (reviveIndex: number): string => {
+        let reviveRegistryEntityIndex = queryReviveRegistry(layers, reviveIndex);
+        let reviveObject = getItem(layers, reviveRegistryEntityIndex);
+        return reviveObject.name;
+      }
+
+      const getRequirementText = (requirement: Requirement): string => {
+        switch (requirement.target.type) {
+          case 'COIN':
+            return `${requirement.target.value! * 1} $MUSU`;
+          case 'LEVEL': // TODO: account for both min/max
+            return `Level ${requirement.target.value! * 1}`;
+          case 'FOOD':
+            return `${requirement.target.value! * 1} ${getFoodName(requirement.target.index!)}`;
+          case 'REVIVE':
+            return `${requirement.target.value! * 1} ${getReviveName(requirement.target.index!)}`;
+          case 'QUEST':
+            return `Complete Quest ${requirement.target.value! * 1}`;
+          default:
+            return '???';
+        }
       }
 
       const getRewardText = (reward: Reward): string => {
@@ -231,15 +277,12 @@ export function registerQuestsModal() {
           case 'EXPERIENCE':
             return `${reward.target.value! * 1} Experience`;
           case 'FOOD':
-            let foodRegistryEntityIndex = queryFoodRegistry(layers, reward.target.index!);
-            let foodObject = getItem(layers, foodRegistryEntityIndex);
-            return `${reward.target.value! * 1} ${foodObject.name}`;
+            return `${reward.target.value! * 1} ${getFoodName(reward.target.index!)}`;
           case 'REVIVE':
-            let reviveRegistryEntityIndex = queryReviveRegistry(layers, reward.target.index!);
-            let reviveObject = getItem(layers, reviveRegistryEntityIndex);
-            return `${reward.target.value! * 1} ${reviveObject.name}`;
+            return `${reward.target.value! * 1} ${getReviveName(reward.target.index!)}`;
+          default:
+            return '';
         }
-        return '';
       }
 
 
@@ -267,9 +310,6 @@ export function registerQuestsModal() {
       };
 
       const CompleteButton = (quest: Quest) => {
-        let buttonText = 'Complete';
-        if (quest.complete) buttonText = 'Completed!';
-
         let tooltipText = '';
         if (!checkObjectives(quest)) {
           tooltipText = 'Unmet objectives';
@@ -281,7 +321,7 @@ export function registerQuestsModal() {
               <ActionButton
                 id={`complete-quest`}
                 onClick={() => completeQuest(quest)}
-                text={buttonText}
+                text='Complete'
                 disabled={!canComplete(quest)}
               />
             </Tooltip >
@@ -296,7 +336,7 @@ export function registerQuestsModal() {
             <ConditionName>Requirements</ConditionName>
             {requirements.map((requirement) => (
               <ConditionDescription key={requirement.id}>
-                - {requirement.target.type} {requirement.logic} {requirement.target.index} {requirement.target.value}
+                - {`${getRequirementText(requirement)}`}
               </ConditionDescription>
             ))}
           </ConditionContainer>
@@ -331,72 +371,84 @@ export function registerQuestsModal() {
         )
       }
 
-      const QuestBox = (quest: Quest) => {
-        return (
-          <QuestContainer key={quest.id}>
-            <QuestName>{quest.name}</QuestName>
-            <QuestDescription>{quest.description}</QuestDescription>
-            {ObjectiveDisplay(quest.objectives)}
-            {RewardDisplay(quest.rewards)}
-            {CompleteButton(quest)}
-          </QuestContainer>
-        )
-      }
+      // TODO: logical support for repeatable quests (e.g. daily quests)
+      const AvailableQuests = () => {
+        // get quest registry. filter out any unavailable quests
+        let quests = data.quests.filter((q: Quest) => {
+          return (
+            canAccept(q)
+            && !isCompleted(data.account, q.index)
+            && !isOngoing(data.account, q.index)
+          );
+        });
 
-      const RegistryQuestBox = (quest: Quest) => {
-        return (
-          <QuestContainer key={quest.id}>
-            <QuestName>{quest.name}</QuestName>
-            <QuestDescription>{quest.description}</QuestDescription>
-            {RequirementDisplay(quest.requirements)}
-            {ObjectiveDisplay(quest.objectives)}
-            {RewardDisplay(quest.rewards)}
-            {AcceptButton(quest)}
+        return quests.map((q: Quest) => (
+          <QuestContainer key={q.id}>
+            <QuestName>{q.name}</QuestName>
+            <QuestDescription>{q.description}</QuestDescription>
+            {RequirementDisplay(q.requirements)}
+            {ObjectiveDisplay(q.objectives)}
+            {RewardDisplay(q.rewards)}
+            {AcceptButton(q)}
           </QuestContainer>
-        )
+        ))
       }
 
       const CompletedQuests = () => {
-        return queryQuestsX(
-          layers,
-          { account: data.account.id, completed: true }
-        ).reverse().map((q: Quest) => {
-          return (QuestBox(q))
-        });
+        return data.account.quests?.completed.reverse().map((q: Quest) => (
+          <QuestContainer key={q.id}>
+            <QuestName>{q.name}</QuestName>
+            <QuestDescription>{q.description}</QuestDescription>
+            {ObjectiveDisplay(q.objectives)}
+            {RewardDisplay(q.rewards)}
+          </QuestContainer>
+        ))
       }
 
       const OngoingQuests = () => {
-        return queryQuestsX(
-          layers,
-          { account: data.account.id, completed: false }
-        ).reverse().map((q: Quest) => {
-          return (QuestBox(q))
-        });
+        return data.account.quests?.ongoing.reverse().map((q: Quest) => (
+          <QuestContainer key={q.id}>
+            <QuestName>{q.name}</QuestName>
+            <QuestDescription>{q.description}</QuestDescription>
+            {ObjectiveDisplay(q.objectives)}
+            {RewardDisplay(q.rewards)}
+            {CompleteButton(q)}
+          </QuestContainer>
+        ));
       }
 
-      const RegistryQuestBoxes = () => {
-        const quests = queryQuestsX(layers, { registry: true });
-        return quests.map((q: Quest) => {
-          return (RegistryQuestBox(q))
-        })
+      const QuestsDisplay = () => {
+        switch (questFilter) {
+          case 'AVAILABLE':
+            return AvailableQuests();
+          case 'ONGOING':
+            return OngoingQuests();
+          case 'COMPLETED':
+            return CompletedQuests();
+          default:
+            return <div />;
+        }
       }
 
       const Footer = (
         <div style={{ padding: '1vh 0.1vw' }}>
           <ActionButton
-            id={`pending-mode`}
-            onClick={() => setShowCompleted(false)}
-            text='Pending'
+            id={`ongoing-mode`}
+            onClick={() => setQuestFilter('ONGOING')}
+            text='Ongoing'
+            disabled={questFilter === 'ONGOING'}
+          />
+          <ActionButton
+            id={`available-mode`}
+            onClick={() => setQuestFilter('AVAILABLE')}
+            text='Available'
+            disabled={questFilter === 'AVAILABLE'}
           />
           <ActionButton
             id={`completed-mode`}
-            onClick={() => setShowCompleted(true)}
+            onClick={() => setQuestFilter('COMPLETED')}
             text='Completed'
-          />
-          <ActionButton
-            id={`registry-mode`}
-            onClick={() => setShowRegistry(!showRegistry)}
-            text='Toggle Registry'
+            disabled={questFilter === 'COMPLETED'}
           />
         </div>
       )
@@ -404,13 +456,7 @@ export function registerQuestsModal() {
       return (
         <ModalWrapperFull divName='quests' id='quest_modal'>
           <Header>Quests</Header>
-          <Scrollable>
-            {showRegistry ? RegistryQuestBoxes() : <div />}
-            {showCompleted
-              ? CompletedQuests()
-              : OngoingQuests()
-            }
-          </Scrollable>
+          <Scrollable>{QuestsDisplay()}</Scrollable>
           {Footer}
         </ModalWrapperFull>
       );
