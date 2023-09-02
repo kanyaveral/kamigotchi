@@ -53,13 +53,12 @@ export const ModalWrapperFull = (props: Props) => {
       style={{ ...zindex }}
     >
       <Content>
-        {(props.canExit)
-          ? <ButtonRow>
+        {props.canExit &&
+          <ButtonRow>
             <ExitButton divName={props.divName} />
           </ButtonRow>
-          : null
         }
-        {(props.header) ? <Header>{props.header}</Header> : null}
+        {props.header && <Header>{props.header}</Header>}
         <Children>{props.children}</Children>
       </Content>
     </Wrapper>
@@ -83,10 +82,8 @@ const Wrapper = styled.div<Wrapper>`
 
 const Content = styled.div`
   position: relative;
-  border-color: black;
-  border-width: 2px;
+  border: solid black 2px;
   border-radius: 10px;
-  border-style: solid;
 
   background-color: white;
   width: 99%;
@@ -108,11 +105,13 @@ const ButtonRow = styled.div`
 
 const Header = styled.div`  
   border-radius: 10px 10px 0px 0px;
+  border-bottom: solid black .15vw;
   display: flex;
+  flex-flow: column nowrap;
 `;
 
 const Children = styled.div`
-  margin: .3vw;
+  padding: .4vw;
   overflow-y: scroll;
   max-height: 100%;
   

@@ -1,17 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { map, merge } from 'rxjs';
-import styled from 'styled-components';
 import { EntityID, EntityIndex } from '@latticexyz/recs';
 import { waitForActionCompletion } from '@latticexyz/std-client';
 
+import { Kards } from './Kards';
 import { Items } from './Items';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
+import { registerUIComponent } from 'layers/react/engine/store';
 import { getAccountFromBurner } from 'layers/react/shapes/Account';
 import { Kami } from 'layers/react/shapes/Kami';
-import { registerUIComponent } from 'layers/react/engine/store';
 import { dataStore } from 'layers/react/store/createStore';
 import 'layers/react/styles/font.css';
-import { Kards } from './Kards';
 
 
 export function registerPartyModal() {
@@ -178,27 +177,22 @@ export function registerPartyModal() {
 
 
       return (
-        <ModalWrapperFull id='party_modal' divName='party'>
-          <Items inventories={data.account.inventories!}></Items>
-          <Scrollable ref={scrollableRef}>
-            <Kards
-              kamis={data.account.kamis!}
-              account={data.account}
-              actions={{
-                feed: feedKami,
-                revive: reviveKami,
-                reveal: revealKami,
-              }}
-            />
-          </Scrollable>
+        <ModalWrapperFull
+          id='party_modal'
+          divName='party'
+          header={[<Items key='items' inventories={data.account.inventories!} />]}
+        >
+          <Kards
+            kamis={data.account.kamis!}
+            account={data.account}
+            actions={{
+              feed: feedKami,
+              revive: reviveKami,
+              reveal: revealKami,
+            }}
+          />
         </ModalWrapperFull>
       );
     }
   );
 }
-
-const Scrollable = styled.div`
-  overflow-y: scroll;
-  height: 100 %;
-  max-height: 100 %;
-`;

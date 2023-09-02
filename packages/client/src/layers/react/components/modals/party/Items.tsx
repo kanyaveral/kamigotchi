@@ -41,7 +41,7 @@ export const Items = (props: Props) => {
   const cells = inventorySlots.map((slot, i) => {
     return (
       <Tooltip key={slot.id} text={slot.text} grow>
-        <CellGrid key={slot.id}>
+        <CellGrid>
           <Icon src={slot.image} />
           <ItemNumber>{slot.inventory?.balance ?? 0}</ItemNumber>
         </CellGrid>
@@ -49,35 +49,30 @@ export const Items = (props: Props) => {
     );
   });
 
-  return <TopGrid>{cells}</TopGrid>;
+  return <TopGrid key='top-grid'>{cells}</TopGrid>;
 };
 
 
 const TopGrid = styled.div`
-  border-color: black;
-  border-style: solid;
+  border: solid black .15vw;
+  border-right: 0;
   border-radius: 5px;
-  border-width: 2px 0px 2px 2px;
-  margin: 5px 2px 5px 2px;
+  margin: .5vw;
 
   display: flex;
-  flex-direction: row;
+  flex-flow: row nowrap;
 `;
 
 const CellGrid = styled.div`
-  border-style: solid;
-  border-width: 0px 2px 0px 0px;
-  border-color: black;
+  border-right: solid black .15vw;
   display: flex;
-  flex-direction: row;
+  flex-flow: row nowrap;
 `;
 
 const Icon = styled.img`
-height: 40px;
-padding: 3px;
-border-style: solid;
-border-width: 0px 2px 0px 0px;
-border-color: black;
+  border-right: solid black .15vw;
+  height: 2.5vw;
+  padding: .2vw;
 `;
 
 const ItemNumber = styled.p`
