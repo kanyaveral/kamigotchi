@@ -10,8 +10,10 @@ import {
   Reward,
   Requirement,
   getRegistryQuests,
+  checkRequirement,
+  checkObjective,
+  parseQuestsStatus
 } from 'layers/react/shapes/Quest';
-import { Inventory, queryInventoryX } from 'layers/react/shapes/Inventory';
 import { getItem, queryFoodRegistry, queryReviveRegistry } from 'layers/react/shapes/Item';
 
 import { ActionButton } from 'layers/react/components/library/ActionButton';
@@ -37,12 +39,14 @@ export function registerQuestsModal() {
           api: { player },
           components: {
             AccountID,
+            Coin,
             IsAccount,
             IsComplete,
             IsObjective,
             IsQuest,
             IsRequirement,
             IsReward,
+            Location,
             OperatorAddress,
             QuestIndex,
             Value,
@@ -53,12 +57,14 @@ export function registerQuestsModal() {
 
       return merge(
         AccountID.update$,
+        Coin.update$,
         IsComplete.update$,
         IsObjective.update$,
         IsQuest.update$,
         IsRequirement.update$,
         IsReward.update$,
         IsObjective.update$,
+        Location.update$,
         QuestIndex.update$,
         Value.update$,
       ).pipe(
@@ -73,13 +79,15 @@ export function registerQuestsModal() {
             ])
           )[0];
 
+          const account = getAccount(layers, accountIndex, { quests: true, kamis: true, inventory: true });
+
           return {
             layers,
             actions,
             api: player,
             data: {
-              account: getAccount(layers, accountIndex, { quests: true }),
-              quests: getRegistryQuests(layers),
+              account: account,
+              quests: parseQuestsStatus(layers, account, getRegistryQuests(layers)),
             },
           };
         })
@@ -146,84 +154,21 @@ export function registerQuestsModal() {
         return ongoing;
       }
 
-
-      // const getBalanceOf = (owner: EntityID, condition: Condition): number => {
-      //   const type = condition.type;
-      //   switch (type) {
-      //     case 'COIN':
-      //       // TODO
-      //       return 0;
-      //       break;
-      //     case 'FUNG_INVENTORY':
-      //       return queryInventoryX(
-      //         layers,
-      //         { owner: owner, itemIndex: condition.itemIndex }
-      //       )[0]?.balance || 0;
-      //       break;
-      //   }
-
-      //   return 0;
-      // }
-
-      // // TODO: probably move these to Quest Conditions Shapes file
-      // const checkCurrMin = (objective: Objective): boolean => {
-      //   const accBal = getBalanceOf(data.account.id, objective);
-      //   const conBal = objective.balance ? objective.balance : 0;
-      //   return accBal <= conBal;
-      // }
-
-      // const checkCurrMax = (objective: Objective): boolean => {
-      //   const accBal = getBalanceOf(data.account.id, objective);
-      //   const conBal = objective.balance ? objective.balance : 0;
-      //   return accBal >= conBal;
-      // }
-
-      // const checkDeltaMin = (quest: Quest, objective: Objective): boolean => {
-      //   const oldBal = getBalanceOf(quest.id, objective);
-      //   const currBal = getBalanceOf(data.account.id, objective);
-      //   const delta = objective.balance ? objective.balance : 0;
-      //   return delta <= currBal - oldBal;
-      // }
-
-      // const checkDeltaMax = (quest: Quest, objective: Objective): boolean => {
-      //   const oldBal = getBalanceOf(quest.id, objective);
-      //   const currBal = getBalanceOf(data.account.id, objective);
-      //   const delta = objective.balance ? objective.balance : 0;
-      //   return delta >= currBal - oldBal;
-      // }
-
-      // const checkCondition = (quest: Quest, objective: Objective): boolean => {
-      //   switch (objective.logic) {
-      //     case 'CURR_MIN':
-      //       return checkCurrMin(objective);
-      //     case 'CURR_MAX':
-      //       return checkCurrMax(objective);
-      //     case 'DELTA_MIN':
-      //       return checkDeltaMin(quest, objective);
-      //     case 'DELTA_MAX':
-      //       return checkDeltaMax(quest, objective);
-      //   }
-
-      //   return false;
-      // }
-
-      // check that a quest's requirements are met by this account
       const checkRequirements = (quest: Quest): boolean => {
-        for (const condition of quest.requirements) {
-          // if (!checkCondition(quest, condition)) {
-          //   return false;
-          // }
+        for (const requirement of quest.requirements) {
+          if (!requirement.status?.completable) {
+            return false;
+          }
         }
 
         return true;
       }
 
-      // check that a quest's objectives are met by this account
       const checkObjectives = (quest: Quest): boolean => {
-        for (const condition of quest.objectives) {
-          // if (!checkCondition(quest, condition)) {
-          //   return false;
-          // }
+        for (const objective of quest.objectives) {
+          if (!objective.status?.completable) {
+            return false;
+          }
         }
 
         return true;
@@ -253,21 +198,38 @@ export function registerQuestsModal() {
         return reviveObject.name;
       }
 
-      const getRequirementText = (requirement: Requirement): string => {
+      const getRequirementText = (requirement: Requirement, status: boolean): string => {
+        let text = '';
+        console.log('req', requirement.target.type)
         switch (requirement.target.type) {
           case 'COIN':
-            return `${requirement.target.value! * 1} $MUSU`;
+            text = `${requirement.target.value! * 1} $MUSU`;
+            break;
           case 'LEVEL': // TODO: account for both min/max
-            return `Level ${requirement.target.value! * 1}`;
+            text = `Level ${requirement.target.value! * 1}`;
+            break;
           case 'FOOD':
-            return `${requirement.target.value! * 1} ${getFoodName(requirement.target.index!)}`;
+            text = `${requirement.target.value! * 1} ${getFoodName(requirement.target.index!)}`;
+            break;
           case 'REVIVE':
-            return `${requirement.target.value! * 1} ${getReviveName(requirement.target.index!)}`;
+            text = `${requirement.target.value! * 1} ${getReviveName(requirement.target.index!)}`;
+            break;
           case 'QUEST':
-            return `Complete Quest ${requirement.target.value! * 1}`;
+            text = `Complete Quest ${requirement.target.value! * 1}`;
+            break;
           default:
-            return '???';
+            text = '???';
         }
+
+        if (status) {
+          if (requirement.status?.completable) {
+            text = text + ' ✅';
+          } else {
+            text = text + ` [${Number(requirement.status?.current)}/${Number(requirement.status?.target)}]`;
+          }
+        }
+
+        return text;
       }
 
       const getRewardText = (reward: Reward): string => {
@@ -283,6 +245,20 @@ export function registerQuestsModal() {
           default:
             return '';
         }
+      }
+
+      const getObjectiveText = (objective: Objective, status: boolean): string => {
+        let text = objective.name;
+
+        if (status) {
+          if (objective.status?.completable) {
+            text = text + ' ✅';
+          } else {
+            text = text + ` [${Number(objective.status?.current)}/${Number(objective.status?.target)}]`;
+          }
+        }
+
+        return text;
       }
 
 
@@ -329,28 +305,28 @@ export function registerQuestsModal() {
         )
       };
 
-      const RequirementDisplay = (requirements: Requirement[]) => {
+      const RequirementDisplay = (requirements: Requirement[], status: boolean) => {
         if (requirements.length == 0) return <div />;
         return (
           <ConditionContainer>
             <ConditionName>Requirements</ConditionName>
             {requirements.map((requirement) => (
               <ConditionDescription key={requirement.id}>
-                - {`${getRequirementText(requirement)}`}
+                - {`${getRequirementText(requirement, true)}`}
               </ConditionDescription>
             ))}
           </ConditionContainer>
         )
       }
 
-      const ObjectiveDisplay = (objectives: Objective[]) => {
+      const ObjectiveDisplay = (objectives: Objective[], status: boolean) => {
         if (objectives.length == 0) return <div />;
         return (
           <ConditionContainer>
             <ConditionName>Objectives</ConditionName>
             {objectives.map((objective) => (
               <ConditionDescription key={objective.id}>
-                - {objective.name}
+                - {`${getObjectiveText(objective, status)}`}
               </ConditionDescription>
             ))}
           </ConditionContainer>
@@ -386,8 +362,8 @@ export function registerQuestsModal() {
           <QuestContainer key={q.id}>
             <QuestName>{q.name}</QuestName>
             <QuestDescription>{q.description}</QuestDescription>
-            {RequirementDisplay(q.requirements)}
-            {ObjectiveDisplay(q.objectives)}
+            {RequirementDisplay(q.requirements, true)}
+            {ObjectiveDisplay(q.objectives, false)}
             {RewardDisplay(q.rewards)}
             {AcceptButton(q)}
           </QuestContainer>
@@ -399,7 +375,7 @@ export function registerQuestsModal() {
           <QuestContainer key={q.id}>
             <QuestName>{q.name}</QuestName>
             <QuestDescription>{q.description}</QuestDescription>
-            {ObjectiveDisplay(q.objectives)}
+            {ObjectiveDisplay(q.objectives, false)}
             {RewardDisplay(q.rewards)}
           </QuestContainer>
         ))
@@ -410,7 +386,7 @@ export function registerQuestsModal() {
           <QuestContainer key={q.id}>
             <QuestName>{q.name}</QuestName>
             <QuestDescription>{q.description}</QuestDescription>
-            {ObjectiveDisplay(q.objectives)}
+            {ObjectiveDisplay(q.objectives, true)}
             {RewardDisplay(q.rewards)}
             {CompleteButton(q)}
           </QuestContainer>

@@ -11,7 +11,8 @@ import {
 } from '@latticexyz/recs';
 
 import { Layers } from 'src/types';
-import { Inventory, queryInventoryX } from './Inventory';
+import { Account } from './Account';
+import { getInventoryByIndex } from './Inventory';
 
 
 /////////////////
@@ -29,6 +30,13 @@ export const getOngoingQuests = (layers: Layers, accountEntityID: EntityID): Que
 // get the completed quests for an account
 export const getCompletedQuests = (layers: Layers, accountEntityID: EntityID): Quest[] => {
   return queryQuestsX(layers, { account: accountEntityID, completed: true });
+}
+
+// parse detailed quest status 
+export const parseQuestsStatus = (layers: Layers, account: Account, quests: Quest[]): Quest[] => {
+  return quests.map((quest: Quest) => {
+    return parseQuestStatus(layers, account, quest);
+  });
 }
 
 
@@ -53,18 +61,26 @@ export interface Target {
   value?: number;
 }
 
+export interface Status {
+  target?: number;
+  current?: number;
+  completable: boolean;
+}
+
 export interface Objective {
   id: EntityID;
   index: number;
   name: string;
   logic: string;
   target: Target;
+  status?: Status;
 }
 
 export interface Requirement {
   id: EntityID;
-  logic?: string;
+  logic: string;
   target: Target;
+  status?: Status;
 }
 
 export interface Reward {
@@ -132,15 +148,11 @@ const getRequirement = (layers: Layers, entityIndex: EntityIndex): Requirement =
     },
   }
 
-  const typesWithIndex = ["QUEST"];
-  if (typesWithIndex.indexOf(requirement.target.type) >= 0) {
-    requirement.target.index = getComponentValue(Index, entityIndex)?.value || 0 as number;
-  }
+  const index = getComponentValue(Index, entityIndex)?.value;
+  if (index) requirement.target.index = index;
 
-  const typesWithValue = ["COIN", "LEVEL", "KAMI", "QUEST", "ROOM"];
-  if (typesWithValue.indexOf(requirement.target.type) >= 0) {
-    requirement.target.value = getComponentValue(Value, entityIndex)?.value || 0 as number;
-  }
+  const value = getComponentValue(Value, entityIndex)?.value
+  if (value) requirement.target.value = value;
 
   return requirement;
 }
@@ -172,15 +184,11 @@ const getObjective = (layers: Layers, entityIndex: EntityIndex): Objective => {
     },
   }
 
-  const typesWithIndex = ["ITEM", "NODE", "NPC", "ROOM"];
-  if (typesWithIndex.indexOf(objective.target.type) >= 0) {
-    objective.target.index = getComponentValue(Index, entityIndex)?.value || 0 as number;
-  }
+  const index = getComponentValue(Index, entityIndex)?.value;
+  if (index) objective.target.index = index;
 
-  const typesWithValue = ["COIN", "ITEM", "NODE", "ROOM"];
-  if (typesWithValue.indexOf(objective.target.type) >= 0) {
-    objective.target.value = getComponentValue(Value, entityIndex)?.value || 0 as number;
-  }
+  const value = getComponentValue(Value, entityIndex)?.value
+  if (value) objective.target.value = value;
 
   return objective;
 }
@@ -206,18 +214,25 @@ const getReward = (layers: Layers, entityIndex: EntityIndex): Reward => {
     },
   }
 
-  const typesWithIndex = ["FOOD", "REVIVE", "MOD", "EQUIP"];
-  if (typesWithIndex.indexOf(reward.target.type) >= 0) {
-    reward.target.index = getComponentValue(Index, entityIndex)?.value || 0 as number;
-  }
+  const index = getComponentValue(Index, entityIndex)?.value;
+  if (index) reward.target.index = index;
 
-  const typesWithValue = ["COIN", "EXPERIENCE", "FOOD", "REVIVE", "MOD", "EQUIP"];
-  if (typesWithValue.indexOf(reward.target.type) >= 0) {
-    reward.target.value = getComponentValue(Value, entityIndex)?.value || 0 as number;
-  }
+  const value = getComponentValue(Value, entityIndex)?.value
+  if (value) reward.target.value = value;
 
   return reward;
+}
 
+const parseQuestStatus = (layers: Layers, account: Account, quest: Quest): Quest => {
+  for (let i = 0; i < quest.requirements.length; i++) {
+    quest.requirements[i].status = checkRequirement(layers, quest.requirements[i], account);
+  }
+
+  for (let i = 0; i < quest.objectives.length; i++) {
+    quest.objectives[i].status = checkObjective(layers, quest.objectives[i], quest, account);
+  }
+
+  return quest;
 }
 
 /////////////////
@@ -338,5 +353,223 @@ const queryQuestRewards = (layers: Layers, questIndex: number): Reward[] => {
     (entityIndex): Reward => getReward(layers, entityIndex)
   );
 }
+
+const querySnapshotObjective = (layers: Layers, questID: EntityID, objectiveIndex: number): Objective => {
+  const {
+    network: {
+      components: { IsObjective, ObjectiveIndex, HolderID },
+    },
+  } = layers;
+
+  const entityIndices = Array.from(
+    runQuery([
+      Has(IsObjective),
+      HasValue(ObjectiveIndex, { value: objectiveIndex }),
+      HasValue(HolderID, { value: questID })
+    ])
+  );
+
+  return getObjective(layers, entityIndices[0]); // should only be one
+}
+
+
+///////////////////////
+// CHECKS
+
+export const checkRequirement = (
+  layers: Layers,
+  requirement: Requirement,
+  account: Account
+): Status => {
+  switch (requirement.logic) {
+    case 'AT':
+      return checkCurrent(requirement.target, account, 'EQUAL');
+    case 'COMPLETE':
+      return checkBoolean(layers, requirement.target, account, 'IS');
+    case 'HAVE':
+      return checkCurrent(requirement.target, account, 'MIN');
+    case 'GREATER':
+      return checkCurrent(requirement.target, account, 'MIN');
+    case 'LESSER':
+      return checkCurrent(requirement.target, account, 'MAX');
+    case 'EQUAL':
+      return checkCurrent(requirement.target, account, 'EQUAL');
+    case 'USE':
+      return checkCurrent(requirement.target, account, 'MIN');
+    default:
+      return { completable: false }; // should not get here
+  }
+}
+
+export const checkObjective = (
+  layers: Layers,
+  objective: Objective,
+  quest: Quest,
+  account: Account
+): Status => {
+  if (quest.complete) {
+    return { completable: true }
+  }
+  switch (objective.logic) {
+    case 'AT':
+      return checkCurrent(objective.target, account, 'EQUAL');
+    case 'BUY':
+      return checkIncrease(layers, objective, quest, account, 'MIN');
+    case 'HAVE':
+      return checkCurrent(objective.target, account, 'MIN');
+    case 'GATHER':
+      return checkIncrease(layers, objective, quest, account, 'MIN');
+    case 'MINT':
+      return checkIncrease(layers, objective, quest, account, 'MIN');
+    case 'USE':
+      return checkDecrease(layers, objective, quest, account, 'MIN');
+    default:
+      return { completable: false }; // should not get here
+  }
+}
+
+
+const checkCurrent = (
+  condition: Target,
+  account: Account,
+  logic: 'MIN' | 'MAX' | 'EQUAL' | 'IS' | 'NOT'
+): Status => {
+  const accVal = getAccBal(account, condition.index, condition.type);
+
+  return {
+    target: condition.value,
+    current: accVal,
+    completable: checkLogicOperator(accVal, condition.value ? condition.value : 0, logic)
+  };
+}
+
+const checkIncrease = (
+  layers: Layers,
+  objective: Objective,
+  quest: Quest,
+  account: Account,
+  logic: 'MIN' | 'MAX' | 'EQUAL' | 'IS' | 'NOT'
+): Status => {
+  const prevVal = querySnapshotObjective(layers, quest.id, objective.index).target.value as number;
+  const currVal = getAccBal(account, objective.target.index, objective.target.type);
+
+  return {
+    target: objective.target.value,
+    current: currVal - prevVal,
+    completable: checkLogicOperator(currVal - prevVal, objective.target.value ? objective.target.value : 0, logic)
+  };
+}
+
+const checkDecrease = (
+  layers: Layers,
+  objective: Objective,
+  quest: Quest,
+  account: Account,
+  logic: 'MIN' | 'MAX' | 'EQUAL' | 'IS' | 'NOT'
+): Status => {
+  const prevVal = querySnapshotObjective(layers, quest.id, objective.index).target.value as number;
+  const currVal = getAccBal(account, objective.target.index, objective.target.type);
+
+  return {
+    target: objective.target.value,
+    current: prevVal - currVal,
+    completable: checkLogicOperator(prevVal - currVal, objective.target.value ? objective.target.value : 0, logic)
+  }
+}
+
+const checkBoolean = (
+  layers: Layers,
+  condition: Target,
+  account: Account,
+  logic: 'MIN' | 'MAX' | 'EQUAL' | 'IS' | 'NOT'
+): Status => {
+  const _type = condition.type;
+
+  let result = false;
+
+  switch (_type) {
+    case 'QUEST':
+      result = checkQuestComplete(layers, condition.value as number, account);
+      break;
+    default:
+      result = false; // should not get here
+  }
+
+  if (logic == 'NOT') result = !result;
+
+  return {
+    completable: result
+  }
+}
+
+const checkQuestComplete = (
+  layers: Layers,
+  questIndex: number,
+  account: Account
+): boolean => {
+  const quests = queryQuestsX(layers, { account: account.id, index: questIndex, completed: true });
+
+  return quests.length > 0;
+}
+
+const getAccBal = (
+  account: Account,
+  index: number | undefined,
+  type: string
+): number => {
+  switch (type) {
+    // inventories
+    case 'EQUIP':
+      return getInventoryBalance(account, index, type);
+    case 'FOOD':
+      return getInventoryBalance(account, index, type);
+    case 'MOD':
+      return getInventoryBalance(account, index, type);
+    case 'REVIVE':
+      return getInventoryBalance(account, index, type);
+    // others
+    case 'COIN':
+      return account.coin;
+    case 'KAMI':
+      return account.kamis?.length || 0;
+    case 'ROOM':
+      return account.location;
+    default:
+      return 0; // should not reach here
+  }
+}
+
+///////////////////////
+// UTILS
+
+const getInventoryBalance = (
+  account: Account,
+  index: number | undefined,
+  type: string
+): number => {
+  if (index === undefined) return 0; // should not reach here 
+  if (account.inventories === undefined) return 0; // should not reach here
+
+  switch (type) {
+    case 'EQUIP':
+      return getInventoryByIndex(account.inventories.gear, index)?.balance || 0;
+    case 'FOOD':
+      return getInventoryByIndex(account.inventories.food, index)?.balance || 0;
+    case 'MOD':
+      return getInventoryByIndex(account.inventories.mods, index)?.balance || 0;
+    case 'REVIVE':
+      return getInventoryByIndex(account.inventories.revives, index)?.balance || 0;
+    default:
+      return 0; // should not reach here
+  }
+}
+
+const checkLogicOperator = (a: number, b: number, logic: 'MIN' | 'MAX' | 'EQUAL' | 'IS' | 'NOT'): boolean => {
+  if (logic == 'MIN') return a >= b;
+  else if (logic == 'MAX') return a <= b;
+  else if (logic == 'EQUAL') return a == b;
+  else return false; // should not reach here
+}
+
 
 
