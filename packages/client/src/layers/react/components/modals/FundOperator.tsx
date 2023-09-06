@@ -17,7 +17,7 @@ import successSound from 'assets/sound/fx/bubble_success.mp3';
 
 export function registerFundOperatorModal() {
   registerUIComponent(
-    'FundOperatorModal',
+    'FundOperator',
     {
       colStart: 30,
       colEnd: 70,

@@ -1,13 +1,15 @@
 import { registerLoadingState } from './LoadingState';
 
-import { registerChatButton } from './fixtures/buttons/Chat';
-import { registerHelpButton } from './fixtures/buttons/Help';
-import { registerMapButton } from './fixtures/buttons/Map';
-import { registerPartyButton } from './fixtures/buttons/Party';
-import { registerSettingsButton } from './fixtures/buttons/Settings';
-import { registerQuestsButton } from './fixtures/buttons/Quests';
+import {
+  registerHelpButton,
+  registerMapButton,
+  registerPartyButton,
+  registerQuestsButton,
+  registerSettingsButton,
+} from './fixtures/buttons';
 import { registerAccountInfoFixture } from './fixtures/AccountInfo';
-import { registerActionQueue } from './fixtures/ActionQueue';
+import { registerActionQueueFixture } from './fixtures/ActionQueue';
+import { registerGasWarningFixture } from './fixtures/GasWarning';
 import { registerWalletFixture } from './fixtures/Wallet';
 
 import { registerKamiModal } from './modals/kami';
@@ -15,25 +17,23 @@ import { registerLeaderboardModal } from './modals/leaderboard';
 import { registerMapModal } from './modals/map';
 import { registerMerchantModal } from './modals/merchant';
 import { registerEMABoardModal, registerNameKamiModal } from './modals/naming';
-import { registerNodeModal } from './modals/node/';
+import { registerNodeModal } from './modals/node';
 import { registerPartyModal } from './modals/party';
+import { registerQuestsModal } from './modals/quests';
 
-import { registerChatModal } from './modals/Chat';
-import { registerDialogueModal } from './modals/Dialogue';
 import { registerERC20BridgeModal } from './modals/BridgeERC20';
 import { registerERC721BridgeModal } from './modals/BridgeERC721';
-import { registerKamiMintModal } from './modals/MintKami';
-import { registerSettingsModal } from './modals/Settings';
-import { registerQuestsModal } from './modals/Quests';
+import { registerDialogueModal } from './modals/Dialogue';
 import { registerHelpModal } from './modals/Help';
 import { registerFundOperatorModal } from "./modals/FundOperator"
+import { registerKamiMintModal } from './modals/MintKami';
 import { registerOperatorMovementModal } from './modals/OperatorMovement';
+import { registerSettingsModal } from './modals/Settings';
 
 import { registerAccountRegistrar } from './validators/AccountRegistrar';
 import { registerBurnerDetector } from './validators/BurnerDetector';
 import { registerDetectAccountModal } from './validators/DetectAccount';
 import { registerWalletConnecter } from './validators/WalletConnector';
-import { registerOperatorFundNotification } from './validators/OperatorFundNotification';
 import { registerOperatorUpdater } from './validators/OperatorUpdater';
 
 export function registerUIComponents() {
@@ -48,9 +48,16 @@ export function registerUIComponents() {
 
   // other fixtures
   registerAccountInfoFixture();
+  registerActionQueueFixture();
+  registerGasWarningFixture();
   registerWalletFixture();
-  registerActionQueue();
-  registerOperatorFundNotification();
+
+  // menu modals
+  registerHelpModal();
+  registerMapModal();
+  registerSettingsModal();
+  registerPartyModal();
+  registerQuestsModal();
 
   // game modals
   registerERC20BridgeModal();
@@ -65,13 +72,6 @@ export function registerUIComponents() {
   registerMerchantModal();
   registerDialogueModal();
   registerOperatorMovementModal();
-
-  // menu modals
-  registerHelpModal();
-  registerMapModal();
-  registerSettingsModal();
-  registerPartyModal();
-  registerQuestsModal();
 
   // validators
   registerAccountRegistrar();
