@@ -17,7 +17,7 @@ export function registerMapModal() {
     {
       colStart: 33,
       colEnd: 67,
-      rowStart: 30,
+      rowStart: 13,
       rowEnd: 99,
     },
     (layers) => {
@@ -103,6 +103,7 @@ export function registerMapModal() {
           id='world_map'
           divName='map'
           header={<MapGrid currentRoom={data.account.location * 1} move={move} />}
+          canExit
         >
           <RoomInfo room={selectedRoom} exits={selectedExits} move={move} />
         </ModalWrapperFull>

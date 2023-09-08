@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { map, merge } from 'rxjs';
-import styled from 'styled-components';
 import {
   EntityID,
   Has,
@@ -9,15 +8,15 @@ import {
   runQuery,
 } from '@latticexyz/recs';
 
+import { Banner } from './Banner';
+import { Kards } from './Kards';
+import { Tabs } from './Tabs';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
-import { Banner } from 'layers/react/components/modals/node/Banner';
-import { registerUIComponent } from 'layers/react/engine/store';
 import { getAccountFromBurner } from 'layers/react/shapes/Account';
 import { Kami, getKami } from 'layers/react/shapes/Kami';
 import { getLiquidationConfig } from 'layers/react/shapes/LiquidationConfig';
 import { Node, getNode } from 'layers/react/shapes/Node';
-import { Tabs } from './Tabs';
-import { Kards } from './Kards';
+import { registerUIComponent } from 'layers/react/engine/store';
 
 
 // merchant window with listings. assumes at most 1 merchant per room
@@ -152,21 +151,6 @@ export function registerNodeModal() {
     ({ actions, api, data }) => {
       // console.log('NodeM: data', data);
       const [tab, setTab] = useState('allies');
-      const [lastRefresh, setLastRefresh] = useState(Date.now());
-
-      /////////////////
-      // TRACKING
-
-      // ticking
-      useEffect(() => {
-        const refreshClock = () => {
-          setLastRefresh(Date.now());
-        };
-        const timerId = setInterval(refreshClock, 1000);
-        return function cleanup() {
-          clearInterval(timerId);
-        };
-      }, []);
 
 
       ///////////////////
@@ -231,28 +215,6 @@ export function registerNodeModal() {
 
 
       /////////////////
-      // INTERPRETATION
-
-      // calculate the time a kami has spent idle (in seconds)
-      const calcIdleTime = (kami: Kami): number => {
-        return lastRefresh / 1000 - kami.lastUpdated;
-      };
-
-      // determine whether the kami is still on cooldown
-      const onCooldown = (kami: Kami): boolean => {
-        return calcIdleTime(kami) < kami.cooldown;
-      };
-
-      const isResting = (kami: Kami): boolean => {
-        return kami.state === 'RESTING';
-      };
-
-      const getKamiOptions = (kamis: Kami[]): Kami[] => {
-        return kamis.filter((kami) => isResting(kami) && !onCooldown(kami));
-      };
-
-
-      /////////////////
       // DISPLAY
 
       return (
@@ -263,7 +225,7 @@ export function registerNodeModal() {
             <Banner
               key='banner'
               node={data.node}
-              availableKamis={getKamiOptions(data.account.kamis || [])}
+              kamis={data.account.kamis || []}
               addKami={(kami) => start(kami, data.node)}
             />,
             <Tabs key='tabs' tab={tab} setTab={setTab} />

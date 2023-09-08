@@ -1,9 +1,9 @@
+import styled from "styled-components";
+
+import { FoodImages, ReviveImages } from 'constants/food';
+import { Tooltip } from "layers/react/components/library/Tooltip";
 import { AccountInventories } from "layers/react/shapes/Account";
 import { getInventoryByFamilyIndex } from "layers/react/shapes/Inventory";
-import { Tooltip } from "../../library/Tooltip";
-import styled from "styled-components";
-import { FoodImages, ReviveImages } from 'constants/food';
-import { Item } from "layers/react/shapes/Item";
 
 interface Props {
   inventories: AccountInventories;
@@ -57,7 +57,9 @@ const TopGrid = styled.div`
   border: solid black .15vw;
   border-right: 0;
   border-radius: 5px;
-  margin: .5vw;
+  
+  width: 86.5%;
+  margin: .7vw;
 
   display: flex;
   flex-flow: row nowrap;
@@ -76,7 +78,7 @@ const Icon = styled.img`
 `;
 
 const ItemNumber = styled.p`
-  font-size: 14px;
+  font-size: 1vw;
   font-family: Pixel;
 
   flex-grow: 1;

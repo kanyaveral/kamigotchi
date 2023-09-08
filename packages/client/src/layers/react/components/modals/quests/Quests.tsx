@@ -18,7 +18,7 @@ export function registerQuestsModal() {
     {
       colStart: 67,
       colEnd: 100,
-      rowStart: 52,
+      rowStart: 50,
       rowEnd: 99,
     },
 
@@ -113,9 +113,10 @@ export function registerQuestsModal() {
           id='quest_modal'
           divName='quests'
           header={[
-            <Header>Quests</Header>,
-            <Tabs tab={tab} setTab={setTab} />
+            <Header key='header'>Quests</Header>,
+            <Tabs key='tabs' tab={tab} setTab={setTab} />
           ]}
+          canExit
         >
           <List
             account={data.account}
@@ -135,9 +136,9 @@ export function registerQuestsModal() {
 }
 
 const Header = styled.div`
-  font-size: 2vw;
+  font-size: 1.5vw;
   color: #333;
   text-align: left;
-  padding: 1vw;
+  padding: 1.2vw 1.8vw;
   font-family: Pixel;
 `;

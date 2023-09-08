@@ -1,36 +1,103 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { NodeImages } from 'constants/nodes';
 import { ActionListButton } from 'layers/react/components/library/ActionListButton';
 import { Node } from 'layers/react/shapes/Node';
 import { Kami } from 'layers/react/shapes/Kami';
+import { Tooltip } from '../../library/Tooltip';
 
 
 interface Props {
   node: Node;
-  availableKamis: Kami[];
+  kamis: Kami[];
   addKami: (kami: Kami) => void;
 }
 
 // KamiCard is a card that displays information about a Kami. It is designed to display
 // information ranging from current production or death as well as support common actions.
 export const Banner = (props: Props) => {
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+
+
+  /////////////////
+  // TRACKING
+
+  // ticking
+  useEffect(() => {
+    const refreshClock = () => {
+      setLastRefresh(Date.now());
+    };
+    const timerId = setInterval(refreshClock, 1000);
+    return function cleanup() {
+      clearInterval(timerId);
+    };
+  }, []);
+
+
+  /////////////////
+  // INTERPRETATION
+
+  // calculate the time a kami has spent idle (in seconds)
+  const calcIdleTime = (kami: Kami): number => {
+    return lastRefresh / 1000 - kami.lastUpdated;
+  };
+
+  // determine whether the kami is still on cooldown
+  const onCooldown = (kami: Kami): boolean => {
+    return calcIdleTime(kami) < kami.cooldown;
+  };
+
+  const isResting = (kami: Kami): boolean => {
+    return kami.state === 'RESTING';
+  };
+
+  const canHarvest = (kami: Kami): boolean => {
+    return !onCooldown(kami) && isResting(kami);
+  };
+
+  const getAddTooltip = (kamis: Kami[]): string => {
+    let reason = '';
+    let available = [...kamis];
+    if (available.length == 0) {
+      reason = 'you have no kamis';
+    }
+
+    available = available.filter((kami) => isResting(kami));
+    if (available.length == 0 && reason === '') {
+      reason = 'you have no resting kami';
+    }
+
+    available = available.filter((kami) => !onCooldown(kami));
+    if (available.length == 0 && reason === '') {
+      reason = 'your kami are on cooldown';
+    }
+
+    return reason;
+  }
+
+
+  /////////////////
+  // RENDERING
 
   // button for adding Kami to node
   const AddButton = (kamis: Kami[]) => {
-    const options = kamis.map((kami) => {
+    const options = kamis.filter((kami) => canHarvest(kami));
+    const actionOptions = options.map((kami) => {
       return { text: `${kami.name}`, onClick: () => props.addKami(kami) };
     });
 
+    let tooltipText = getAddTooltip(kamis);
     return (
-      <ActionListButton
-        id={`harvest-add`}
-        key={`harvest-add`}
-        text='Add Kami'
-        options={options}
-        disabled={kamis.length == 0}
-      />
+      <Tooltip text={[tooltipText]}>
+        <ActionListButton
+          id={`harvest-add`}
+          key={`harvest-add`}
+          text='Add Kami'
+          options={actionOptions}
+          disabled={options.length == 0}
+        />
+      </Tooltip>
     );
   };
 
@@ -45,7 +112,7 @@ export const Banner = (props: Props) => {
           </TitleRow>
           <DescriptionText>{props.node.description}</DescriptionText>
         </ContentTop>
-        <ButtonRow>{AddButton(props.availableKamis)}</ButtonRow>
+        <ButtonRow>{AddButton(props.kamis)}</ButtonRow>
       </Content>
     </Container>
   );
