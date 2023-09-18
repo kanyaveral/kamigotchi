@@ -20,6 +20,10 @@ export function setUpWorldAPI(systems: any) {
     await initQuests(api);
     await initTraits(api);
 
+    if (!process.env.MODE || process.env.MODE == 'DEV') {
+      await initLocalConfig(api);
+    }
+
     createPlayerAPI(systems).account.register(
       '0x000000000000000000000000000000000000dead',
       'load_bearer'
@@ -98,6 +102,13 @@ export function setUpWorldAPI(systems: any) {
     // Liquidation Bounty
     await api.config.set.number('LIQ_BOUNTY_BASE', 50);
     await api.config.set.number('LIQ_BOUNTY_BASE_PREC', 2);
+  }
+
+  // local config settings for faster testing 
+  async function initLocalConfig(api: any) {
+    await api.config.set.number('ACCOUNT_STAMINA_RECOVERY_PERIOD', 10);
+    await api.config.set.number('KAMI_IDLE_REQ', 10);
+    await api.config.set.number('HARVEST_RATE_BASE', 2500); // in respect to power
   }
 
 
@@ -306,11 +317,11 @@ export function setUpWorldAPI(systems: any) {
     await api.quest.create(
       1,
       "Welcome",
-      "Welcome to Kamigotchi World.\n\nYou can move by opening the map menu - try the buttons on the top right. If you can work out how to move to room 2, we'll give you some free gum.",
+      "Welcome to Kamigotchi World.\n\nYou can move by opening the map menu - try the buttons on the top right. If you can work out how to move to room 4, we'll give you something special.",
       1
     );
-    await api.quest.add.objective(1, "Move to room 2", "AT", "ROOM", 0, 2);
-    await api.quest.add.reward(1, "FOOD", 1, 1);
+    await api.quest.add.objective(1, "Move to room 4", "AT", "ROOM", 0, 4);
+    await api.quest.add.reward(1, "MINT20", 0, 5);
 
     // quest 2
     await api.quest.create(
