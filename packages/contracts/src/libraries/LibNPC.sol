@@ -7,16 +7,16 @@ import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
-import { IsMerchantComponent, ID as IsMerchantCompID } from "components/IsMerchantComponent.sol";
-import { IndexMerchantComponent, ID as IndexMerchantCompID } from "components/IndexMerchantComponent.sol";
+import { IsNPCComponent, ID as IsNPCCompID } from "components/IsNPCComponent.sol";
+import { IndexNPCComponent, ID as IndexNPCCompID } from "components/IndexNPCComponent.sol";
 import { LocationComponent, ID as LocationCompID } from "components/LocationComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
 import { Strings } from "utils/Strings.sol";
 
 /*
- * LibMerchant handles all operations interacting with Merchants
+ * LibNPC handles all operations interacting with NPCs
  */
-library LibMerchant {
+library LibNPC {
   // create a merchant entity as specified
   function create(
     IWorld world,
@@ -26,8 +26,8 @@ library LibMerchant {
     uint256 location
   ) internal returns (uint256) {
     uint256 id = world.getUniqueEntityId();
-    IsMerchantComponent(getAddressById(components, IsMerchantCompID)).set(id);
-    IndexMerchantComponent(getAddressById(components, IndexMerchantCompID)).set(id, index);
+    IsNPCComponent(getAddressById(components, IsNPCCompID)).set(id);
+    IndexNPCComponent(getAddressById(components, IndexNPCCompID)).set(id, index);
     setName(components, id, name);
     setLocation(components, id, location);
     return id;
@@ -62,7 +62,7 @@ library LibMerchant {
   // GETTERS
 
   function getIndex(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IndexMerchantComponent(getAddressById(components, IndexMerchantCompID)).getValue(id);
+    return IndexNPCComponent(getAddressById(components, IndexNPCCompID)).getValue(id);
   }
 
   function getLocation(IUintComp components, uint256 id) internal view returns (uint256) {
@@ -80,30 +80,11 @@ library LibMerchant {
   // Return the ID of a Merchant by its index
   function getByIndex(IUintComp components, uint256 index) internal view returns (uint256 result) {
     QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsMerchantCompID), "");
+    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsNPCCompID), "");
     fragments[1] = QueryFragment(
       QueryType.HasValue,
-      getComponentById(components, IndexMerchantCompID),
+      getComponentById(components, IndexNPCCompID),
       abi.encode(index)
-    );
-
-    uint256[] memory results = LibQuery.query(fragments);
-    if (results.length != 0) {
-      result = results[0];
-    }
-  }
-
-  // Return the ID of a Merchant by its name
-  function getByName(
-    IUintComp components,
-    string memory name
-  ) internal view returns (uint256 result) {
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsMerchantCompID), "");
-    fragments[1] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, NameCompID),
-      abi.encode(name)
     );
 
     uint256[] memory results = LibQuery.query(fragments);

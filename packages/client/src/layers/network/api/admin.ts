@@ -29,22 +29,22 @@ export function createAdminAPI(systems: any) {
   }
 
   /////////////////
-  //  MERCHANTS
+  //  NPCs
 
-  // creates a merchant with the name at the specified location
-  async function createMerchant(index: number, name: string, location: number) {
+  // (creates an NPC with the name at the specified location
+  async function createNPC(index: number, name: string, location: number) {
     await sleepIf();
-    return systems['system._Merchant.Create'].executeTyped(index, name, location);
+    return systems['system._NPC.Create'].executeTyped(index, name, location);
   }
 
-  async function setMerchantLocation(index: number, location: number) {
+  async function setNPCLocation(index: number, location: number) {
     await sleepIf();
-    return systems['system._Merchant.Set.Location'].executeTyped(index, location);
+    return systems['system._NPC.Set.Location'].executeTyped(index, location);
   }
 
-  async function setMerchantName(index: number, name: string) {
+  async function setNPCName(index: number, name: string) {
     await sleepIf();
-    return systems['system._Merchant.Set.Name'].executeTyped(index, name);
+    return systems['system._NPC.Set.Name'].executeTyped(index, name);
   }
 
   // sets the prices for the merchant at the specified location
@@ -378,13 +378,6 @@ export function createAdminAPI(systems: any) {
       },
     },
     listing: { set: setListing },
-    merchant: {
-      create: createMerchant,
-      set: {
-        location: setMerchantLocation,
-        name: setMerchantName,
-      },
-    },
     node: {
       create: createNode,
       set: {
@@ -394,6 +387,14 @@ export function createAdminAPI(systems: any) {
         name: setNodeName,
       },
     },
+    npc: {
+      create: createNPC,
+      set: {
+        location: setNPCLocation,
+        name: setNPCName,
+      },
+    },
+
     pet: { forceReveal: petForceReveal },
     registry: {
       food: {

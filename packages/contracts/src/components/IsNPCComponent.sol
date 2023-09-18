@@ -2,9 +2,8 @@
 pragma solidity ^0.8.0;
 import "std-contracts/components/BoolComponent.sol";
 
-uint256 constant ID = uint256(keccak256("component.Is.Merchant"));
+uint256 constant ID = uint256(keccak256("component.Is.NPC"));
 
-// identifies an entity as a Merchant
-contract IsMerchantComponent is BoolComponent {
+contract IsNPCComponent is BoolComponent {
   constructor(address world) BoolComponent(world, ID) {}
 }

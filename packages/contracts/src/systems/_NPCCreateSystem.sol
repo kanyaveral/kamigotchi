@@ -4,12 +4,12 @@ pragma solidity ^0.8.0;
 import { System } from "solecs/System.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 
-import { LibMerchant } from "libraries/LibMerchant.sol";
+import { LibNPC } from "libraries/LibNPC.sol";
 
-uint256 constant ID = uint256(keccak256("system._Merchant.Create"));
+uint256 constant ID = uint256(keccak256("system._NPC.Create"));
 
-// create a Merchant as specified
-contract _MerchantCreateSystem is System {
+// create a NPC as specified
+contract _NPCCreateSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public onlyOwner returns (bytes memory) {
@@ -17,11 +17,11 @@ contract _MerchantCreateSystem is System {
       arguments,
       (uint256, string, uint256)
     );
-    uint256 id = LibMerchant.getByIndex(components, index);
+    uint256 id = LibNPC.getByIndex(components, index);
 
-    require(id == 0, "Merchant: already exists");
+    require(id == 0, "NPC: already exists");
 
-    id = LibMerchant.create(world, components, index, name, location);
+    id = LibNPC.create(world, components, index, name, location);
     return abi.encode(id);
   }
 
