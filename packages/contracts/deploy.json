@@ -4,6 +4,7 @@
     "AddressOwnerComponent",
     "AffinityComponent",
     "BalanceComponent",
+    "BlacklistComponent",
     "BlockLastComponent",
     "BlockRevealComponent",
     "CanNameComponent",
@@ -39,6 +40,7 @@
     "IndexNPCComponent",
     "IndexObjectiveComponent",
     "IndexPetComponent",
+    "IndexRelationshipComponent",
     "IndexReviveComponent",
     "IndexQuestComponent",
     "IndexTraitComponent",
@@ -58,6 +60,7 @@
     "IsPetComponent",
     "IsProductionComponent",
     "IsRegistryComponent",
+    "IsRelationshipComponent",
     "IsRequirementComponent",
     "IsRewardComponent",
     "IsRoomComponent",
@@ -91,7 +94,8 @@
     "TypeComponent",
     "UpgradesComponent",
     "ValueComponent",
-    "ViolenceComponent"
+    "ViolenceComponent",
+    "WhitelistComponent"
   ],
   "systems": [
     {
@@ -226,6 +230,12 @@
       ]
     },
     {
+      "name": "_RegistryCreateRelationshipSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
       "name": "_RegistryCreateReviveSystem",
       "writeAccess": [
         "*"
@@ -281,6 +291,12 @@
     },
     {
       "name": "_RegistryUpdateModSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryUpdateRelationshipSystem",
       "writeAccess": [
         "*"
       ]
@@ -620,14 +636,18 @@
       ]
     },
     {
+      "name": "RelationshipAdvanceSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
       "name": "SkillUpgradeSystem",
       "writeAccess": [
-        "BalanceComponent",
         "BlockLastComponent",
         "IdHolderComponent",
         "IsSkillComponent",
-        "SkillPointComponent",
-        "TypeComponent"
+        "SkillPointComponent"
       ]
     }
   ],
@@ -653,7 +673,9 @@
     "LibRegistryItem",
     "LibRegistryQuests",
     "LibRegistrySkill",
+    "LibRegistryRelationship",
     "LibRegistryTrait",
+    "LibRelationship",
     "LibRoom",
     "LibScore",
     "LibSkill",
