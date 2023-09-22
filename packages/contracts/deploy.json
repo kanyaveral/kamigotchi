@@ -33,6 +33,7 @@
     "IndexGearComponent",
     "IndexHandComponent",
     "IndexItemComponent",
+    "IndexSkillComponent",
     "IndexModComponent",
     "IndexNodeComponent",
     "IndexNPCComponent",
@@ -45,6 +46,7 @@
     "IsConfigComponent",
     "IsCompleteComponent",
     "IsDataComponent",
+    "IsEffectComponent",
     "IsEquippedComponent",
     "IsFungibleComponent",
     "IsInventoryComponent",
@@ -62,6 +64,7 @@
     "IsObjectiveComponent",
     "IsQuestComponent",
     "IsScoreComponent",
+    "IsSkillComponent",
     "IsTraitComponent",
     "LevelComponent",
     "LocationComponent",
@@ -229,6 +232,24 @@
       ]
     },
     {
+      "name": "_RegistryCreateSkillSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryCreateSkillEffectSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryCreateSkillRequirementSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
       "name": "_RegistryCreateTraitSystem",
       "writeAccess": [
         "*"
@@ -236,6 +257,12 @@
     },
     {
       "name": "_RegistryDeleteQuestSystem",
+      "writeAccess": [
+        "*"
+      ]
+    },
+    {
+      "name": "_RegistryDeleteSkillSystem",
       "writeAccess": [
         "*"
       ]
@@ -591,6 +618,17 @@
       "writeAccess": [
         "*"
       ]
+    },
+    {
+      "name": "SkillUpgradeSystem",
+      "writeAccess": [
+        "BalanceComponent",
+        "BlockLastComponent",
+        "IdHolderComponent",
+        "IsSkillComponent",
+        "SkillPointComponent",
+        "TypeComponent"
+      ]
     }
   ],
   "libraries": [
@@ -614,6 +652,7 @@
     "LibRegistryAffinity",
     "LibRegistryItem",
     "LibRegistryQuests",
+    "LibRegistrySkill",
     "LibRegistryTrait",
     "LibRoom",
     "LibScore",

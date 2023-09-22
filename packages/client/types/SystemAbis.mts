@@ -19,8 +19,12 @@ import _RegistryCreateQuestRequirementSystem from "../abi/_RegistryCreateQuestRe
 import _RegistryCreateQuestRewardSystem from "../abi/_RegistryCreateQuestRewardSystem.json";
 import _RegistryCreateQuestSystem from "../abi/_RegistryCreateQuestSystem.json";
 import _RegistryCreateReviveSystem from "../abi/_RegistryCreateReviveSystem.json";
+import _RegistryCreateSkillEffectSystem from "../abi/_RegistryCreateSkillEffectSystem.json";
+import _RegistryCreateSkillRequirementSystem from "../abi/_RegistryCreateSkillRequirementSystem.json";
+import _RegistryCreateSkillSystem from "../abi/_RegistryCreateSkillSystem.json";
 import _RegistryCreateTraitSystem from "../abi/_RegistryCreateTraitSystem.json";
 import _RegistryDeleteQuestSystem from "../abi/_RegistryDeleteQuestSystem.json";
+import _RegistryDeleteSkillSystem from "../abi/_RegistryDeleteSkillSystem.json";
 import _RegistryUpdateFoodSystem from "../abi/_RegistryUpdateFoodSystem.json";
 import _RegistryUpdateGearSystem from "../abi/_RegistryUpdateGearSystem.json";
 import _RegistryUpdateModSystem from "../abi/_RegistryUpdateModSystem.json";
@@ -61,6 +65,7 @@ import ProductionStartSystem from "../abi/ProductionStartSystem.json";
 import ProductionStopSystem from "../abi/ProductionStopSystem.json";
 import QuestAcceptSystem from "../abi/QuestAcceptSystem.json";
 import QuestCompleteSystem from "../abi/QuestCompleteSystem.json";
+import SkillUpgradeSystem from "../abi/SkillUpgradeSystem.json";
 import TradeAcceptSystem from "../abi/TradeAcceptSystem.json";
 import TradeAddToSystem from "../abi/TradeAddToSystem.json";
 import TradeCancelSystem from "../abi/TradeCancelSystem.json";
@@ -88,8 +93,12 @@ export const SystemAbis = {
   "system._Registry.Quest.Create.Reward": _RegistryCreateQuestRewardSystem.abi,
   "system._Registry.Quest.Create": _RegistryCreateQuestSystem.abi,
   "system._Registry.Revive.Create": _RegistryCreateReviveSystem.abi,
+  "system._Registry.Skill.Create.Effect": _RegistryCreateSkillEffectSystem.abi,
+  "system._Registry.Skill.Create.Requirement": _RegistryCreateSkillRequirementSystem.abi,
+  "system._Registry.Skill.Create": _RegistryCreateSkillSystem.abi,
   "system._Registry.Trait.Create": _RegistryCreateTraitSystem.abi,
   "system._Registry.Quest.Delete": _RegistryDeleteQuestSystem.abi,
+  "system._Registry.Skill.Delete": _RegistryDeleteSkillSystem.abi,
   "system._Registry.Food.Update": _RegistryUpdateFoodSystem.abi,
   "system._Registry.Gear.Update": _RegistryUpdateGearSystem.abi,
   "system._Registry.Mod.Update": _RegistryUpdateModSystem.abi,
@@ -130,6 +139,7 @@ export const SystemAbis = {
   "system.Production.Stop": ProductionStopSystem.abi,
   "system.Quest.Accept": QuestAcceptSystem.abi,
   "system.Quest.Complete": QuestCompleteSystem.abi,
+  "system.Skill.Upgrade": SkillUpgradeSystem.abi,
   "system.Trade.Accept": TradeAcceptSystem.abi,
   "system.Trade.AddTo": TradeAddToSystem.abi,
   "system.Trade.Cancel": TradeCancelSystem.abi,

@@ -19,8 +19,12 @@ import { _RegistryCreateQuestRequirementSystem } from "./ethers-contracts/_Regis
 import { _RegistryCreateQuestRewardSystem } from "./ethers-contracts/_RegistryCreateQuestRewardSystem";
 import { _RegistryCreateQuestSystem } from "./ethers-contracts/_RegistryCreateQuestSystem";
 import { _RegistryCreateReviveSystem } from "./ethers-contracts/_RegistryCreateReviveSystem";
+import { _RegistryCreateSkillEffectSystem } from "./ethers-contracts/_RegistryCreateSkillEffectSystem";
+import { _RegistryCreateSkillRequirementSystem } from "./ethers-contracts/_RegistryCreateSkillRequirementSystem";
+import { _RegistryCreateSkillSystem } from "./ethers-contracts/_RegistryCreateSkillSystem";
 import { _RegistryCreateTraitSystem } from "./ethers-contracts/_RegistryCreateTraitSystem";
 import { _RegistryDeleteQuestSystem } from "./ethers-contracts/_RegistryDeleteQuestSystem";
+import { _RegistryDeleteSkillSystem } from "./ethers-contracts/_RegistryDeleteSkillSystem";
 import { _RegistryUpdateFoodSystem } from "./ethers-contracts/_RegistryUpdateFoodSystem";
 import { _RegistryUpdateGearSystem } from "./ethers-contracts/_RegistryUpdateGearSystem";
 import { _RegistryUpdateModSystem } from "./ethers-contracts/_RegistryUpdateModSystem";
@@ -61,6 +65,7 @@ import { ProductionStartSystem } from "./ethers-contracts/ProductionStartSystem"
 import { ProductionStopSystem } from "./ethers-contracts/ProductionStopSystem";
 import { QuestAcceptSystem } from "./ethers-contracts/QuestAcceptSystem";
 import { QuestCompleteSystem } from "./ethers-contracts/QuestCompleteSystem";
+import { SkillUpgradeSystem } from "./ethers-contracts/SkillUpgradeSystem";
 import { TradeAcceptSystem } from "./ethers-contracts/TradeAcceptSystem";
 import { TradeAddToSystem } from "./ethers-contracts/TradeAddToSystem";
 import { TradeCancelSystem } from "./ethers-contracts/TradeCancelSystem";
@@ -88,8 +93,12 @@ export type SystemTypes = {
   "system._Registry.Quest.Create.Reward": _RegistryCreateQuestRewardSystem;
   "system._Registry.Quest.Create": _RegistryCreateQuestSystem;
   "system._Registry.Revive.Create": _RegistryCreateReviveSystem;
+  "system._Registry.Skill.Create.Effect": _RegistryCreateSkillEffectSystem;
+  "system._Registry.Skill.Create.Requirement": _RegistryCreateSkillRequirementSystem;
+  "system._Registry.Skill.Create": _RegistryCreateSkillSystem;
   "system._Registry.Trait.Create": _RegistryCreateTraitSystem;
   "system._Registry.Quest.Delete": _RegistryDeleteQuestSystem;
+  "system._Registry.Skill.Delete": _RegistryDeleteSkillSystem;
   "system._Registry.Food.Update": _RegistryUpdateFoodSystem;
   "system._Registry.Gear.Update": _RegistryUpdateGearSystem;
   "system._Registry.Mod.Update": _RegistryUpdateModSystem;
@@ -130,6 +139,7 @@ export type SystemTypes = {
   "system.Production.Stop": ProductionStopSystem;
   "system.Quest.Accept": QuestAcceptSystem;
   "system.Quest.Complete": QuestCompleteSystem;
+  "system.Skill.Upgrade": SkillUpgradeSystem;
   "system.Trade.Accept": TradeAcceptSystem;
   "system.Trade.AddTo": TradeAddToSystem;
   "system.Trade.Cancel": TradeCancelSystem;
