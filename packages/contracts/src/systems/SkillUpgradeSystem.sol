@@ -32,18 +32,17 @@ contract SkillUpgradeSystem is System {
       );
     }
 
+    // points are decremented when checking prerequisites
     require(
-      LibSkill.checkRequirements(components, id, skillIndex),
-      "SkillUpgrade: unmet requirements"
+      LibSkill.checkPrerequisites(components, id, skillIndex),
+      "SkillUpgrade: unmet prerequisites"
     );
 
     // create the skill if it doesnt exist
     uint256 skillID = LibSkill.get(components, id, skillIndex);
     if (skillID == 0) skillID = LibSkill.create(world, components, id, skillIndex);
 
-    // increment points on skill and decrement points on entity
-    // balance check is run in the library
-    LibSkill.dec(components, id, 1);
+    // increment points on skill
     LibSkill.inc(components, skillID, 1);
 
     LibAccount.updateLastBlock(components, accountID);

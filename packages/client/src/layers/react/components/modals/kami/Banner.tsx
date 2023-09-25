@@ -2,11 +2,13 @@ import { Kami } from "layers/react/shapes/Kami";
 import styled from "styled-components";
 import { ExperienceBar } from "../../library/ExperienceBar";
 import { Tooltip } from "../../library/Tooltip";
+import { ActionButton } from "../../library/ActionButton";
 
 interface Props {
   kami: Kami;
   actions: {
-    levelUp: (kami: Kami) => void;
+    levelUp: (kami: Kami) => void,
+    toggleSkills: () => void,
   }
 }
 
@@ -30,12 +32,23 @@ export const Banner = (props: Props) => {
             <Title>{props.kami.name}</Title>
             <Subtext>{affinities}</Subtext>
           </TitleRow>
-          <ExperienceBar
-            level={props.kami.level * 1}
-            current={props.kami.experience.current * 1}
-            total={props.kami.experience.threshold}
-            triggerLevelUp={() => props.actions.levelUp(props.kami)}
-          />
+          <TitleRow>
+            <ExperienceBar
+              level={props.kami.level * 1}
+              current={props.kami.experience.current * 1}
+              total={props.kami.experience.threshold}
+              triggerLevelUp={() => props.actions.levelUp(props.kami)}
+            />
+            <Tooltip text={['Skill Points']}>
+              <ActionButton
+                id={`level-button`}
+                onClick={() => props.actions.toggleSkills()}
+                text={` (${props.kami.skillPoints > 0 ? Number(props.kami.skillPoints) : '+'}) `}
+                size='small'
+                pulse={props.kami.skillPoints > 0}
+              />
+            </Tooltip>
+          </TitleRow>
         </ContentTop>
         <ContentMiddle>
           {statsArray.map((stat: [string, number]) => {
