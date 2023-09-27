@@ -20,6 +20,7 @@ import { IsSkillComponent, ID as IsSkillCompID } from "components/IsSkillCompone
 import { LogicTypeComponent, ID as LogicTypeCompID } from "components/LogicTypeComponent.sol";
 import { MaxComponent, ID as MaxCompID } from "components/MaxComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
+import { SubtypeComponent, ID as SubtypeCompID } from "components/SubtypeComponent.sol";
 import { TypeComponent, ID as TypeCompID } from "components/TypeComponent.sol";
 import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 
@@ -97,6 +98,7 @@ library LibRegistrySkill {
     unsetIsEffect(components, id);
     unsetSkillIndex(components, id);
     unsetType(components, id);
+    unsetSubtype(components, id);
     unsetLogicType(components, id);
     unsetIndex(components, id);
     unsetValue(components, id);
@@ -158,6 +160,10 @@ library LibRegistrySkill {
     NameComponent(getAddressById(components, NameCompID)).set(id, name);
   }
 
+  function setSubtype(IUintComp components, uint256 id, string memory subtype) internal {
+    SubtypeComponent(getAddressById(components, SubtypeCompID)).set(id, subtype);
+  }
+
   function setType(IUintComp components, uint256 id, string memory _type) internal {
     TypeComponent(getAddressById(components, TypeCompID)).set(id, _type);
   }
@@ -217,6 +223,12 @@ library LibRegistrySkill {
     NameComponent(getAddressById(components, NameCompID)).remove(id);
   }
 
+  function unsetSubtype(IUintComp components, uint256 id) internal {
+    if (SubtypeComponent(getAddressById(components, SubtypeCompID)).has(id)) {
+      SubtypeComponent(getAddressById(components, SubtypeCompID)).remove(id);
+    }
+  }
+
   function unsetType(IUintComp components, uint256 id) internal {
     if (TypeComponent(getAddressById(components, TypeCompID)).has(id)) {
       TypeComponent(getAddressById(components, TypeCompID)).remove(id);
@@ -227,6 +239,29 @@ library LibRegistrySkill {
     if (ValueComponent(getAddressById(components, ValueCompID)).has(id)) {
       ValueComponent(getAddressById(components, ValueCompID)).remove(id);
     }
+  }
+
+  /////////////////
+  // GETTERS
+
+  function getIndex(IUintComp components, uint256 id) internal view returns (uint256) {
+    return IndexComponent(getAddressById(components, IndexCompID)).getValue(id);
+  }
+
+  function getLogicType(IUintComp components, uint256 id) internal view returns (string memory) {
+    return LogicTypeComponent(getAddressById(components, LogicTypeCompID)).getValue(id);
+  }
+
+  function getSubtype(IUintComp components, uint256 id) internal view returns (string memory) {
+    return SubtypeComponent(getAddressById(components, SubtypeCompID)).getValue(id);
+  }
+
+  function getType(IUintComp components, uint256 id) internal view returns (string memory) {
+    return TypeComponent(getAddressById(components, TypeCompID)).getValue(id);
+  }
+
+  function getValue(IUintComp components, uint256 id) internal view returns (uint256) {
+    return ValueComponent(getAddressById(components, ValueCompID)).getValue(id);
   }
 
   /////////////////
