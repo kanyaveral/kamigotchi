@@ -37,8 +37,8 @@ export function registerMerchantModal() {
           components: {
             AccountID,
             Description,
-            IsNPC,
             IsListing,
+            IsNPC,
             ItemIndex,
             Location,
             Name,
@@ -51,6 +51,7 @@ export function registerMerchantModal() {
         AccountID.update$,
         Description.update$,
         IsListing.update$,
+        IsNPC.update$,
         ItemIndex.update$,
         Location.update$,
         Name.update$,
@@ -94,7 +95,7 @@ export function registerMerchantModal() {
       // buy from a listing
       const buy = (listing: Listing, amt: number) => {
         const actionID = `Buying ${amt} ${listing.item.name}` as EntityID; // itemIndex should be replaced with the item's name
-        actions.add({
+        actions?.add({
           id: actionID,
           components: {},
           // on: data.account.index, // what's the appropriate value here?
