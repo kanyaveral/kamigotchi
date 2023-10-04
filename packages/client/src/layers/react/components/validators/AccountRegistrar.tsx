@@ -144,15 +144,15 @@ export function registerAccountRegistrar() {
       useEffect(() => {
         const accountIndex = getAccountIndexFromOwner(selectedAddress);
         const accountDetails = getAccountDetails(accountIndex);
-        setAccountDetails(accountDetails);
-
         if (accountDetails.id) {
           toggleVisibleButtons(true);
         } else {
           toggleVisibleButtons(false);
           toggleVisibleModals(false);
         }
-      }, [selectedAddress, isConnected, accountDetailsFromWorld]);
+
+        setAccountDetails(accountDetails);
+      }, [selectedAddress, isConnected, accountDetailsFromWorld, networks]);
 
 
       /////////////////
