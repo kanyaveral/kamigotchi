@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { map, merge, of } from 'rxjs';
+import { map, merge } from 'rxjs';
 import styled, { keyframes } from 'styled-components';
 import { useAccount } from 'wagmi';
 
@@ -23,40 +23,53 @@ export function registerBurnerDetector() {
     (layers) => {
       const {
         network: {
-          components: { IsAccount, OwnerAddress },
+          network,
+          components: { IsAccount, OwnerAddress, IsRegistry },
         },
       } = layers;
 
-      return merge(IsAccount.update$, OwnerAddress.update$).pipe(
+      return merge(
+        IsAccount.update$,
+        IsRegistry.update$, // hilarious hack to resolve race conditions
+        OwnerAddress.update$
+      ).pipe(
         map(() => {
+          const connectedEOA = network.connectedAddress.get();
           return {
+            connectedEOA,
             network: layers.network.network,
           };
         })
       );
     },
 
-    ({ network }) => {
+    ({ connectedEOA, network }) => {
       const { isConnected } = useAccount(); // refers to Connector
-      const connectedAddress = network.connectedAddress.get();
       const { setBurnerInfo } = useNetworkSettings();
       const [detectedPrivateKey, setDetectedPrivateKey] = useLocalStorage('operatorPrivateKey', '');
       const [detectedAddress, setDetectedAddress] = useState('');
       const [isMismatched, setIsMismatched] = useState(false);
       const [input, setInput] = useState('');
 
-      // set the detectedAddress upon detectedPrivateKey change
-      // check whether mismatched in the process
+      // set the detectedEOA upon detectedPrivateKey change and determine mismatch
       useEffect(() => {
-        const detectedAddress = getAddressFromPrivateKey(detectedPrivateKey);
-        setDetectedAddress(detectedAddress);
+        const detectedEOA = getAddressFromPrivateKey(detectedPrivateKey);
+        setDetectedAddress(detectedEOA);
         setBurnerInfo({
-          connected: connectedAddress ?? '',
-          detected: detectedAddress,
+          connected: connectedEOA ?? '',
+          detected: detectedEOA,
           detectedPrivateKey,
         });
-        setIsMismatched(connectedAddress !== detectedAddress);
-      }, [detectedPrivateKey]);
+        setIsMismatched(connectedEOA !== detectedEOA);
+      }, [detectedPrivateKey, connectedEOA]);
+
+      // catch clicks on modal, prevents duplicate Phaser3 triggers
+      const handleClicks = (event: any) => {
+        event.stopPropagation();
+      };
+      const element = document.getElementById('burner-detector');
+      element?.addEventListener('mousedown', handleClicks);
+
 
       /////////////////
       // STATE
@@ -133,7 +146,7 @@ export function registerBurnerDetector() {
           <ModalContent style={{ pointerEvents: 'auto' }}>
             <Title>Burner Address Detector</Title>
             <br />
-            <Description>Connected: {connectedAddress}</Description>
+            <Description>Connected: {network.connectedAddress.get()}</Description>
             <br />
             <Description>Detected: {detectedAddress}</Description>
             <br />

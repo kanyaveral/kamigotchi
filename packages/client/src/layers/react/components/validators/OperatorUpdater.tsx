@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
 import { EntityID, EntityIndex } from '@latticexyz/recs';
 import { waitForActionCompletion } from '@latticexyz/std-client';
 
+import { defaultChainConfig } from 'constants/chains';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
@@ -22,40 +23,40 @@ export function registerOperatorUpdater() {
     {
       colStart: 20,
       colEnd: 80,
-      rowStart: 22,
-      rowEnd: 73,
+      rowStart: 25,
+      rowEnd: 70,
     },
     (layers) => of(layers),
     (layers) => {
+      const { network: { actions } } = layers;
       const { isConnected } = useAccount();
+      const { chain } = useNetwork();
       const { details: accountDetails } = useKamiAccount();
       const { burnerInfo, selectedAddress, networks } = useNetworkSettings();
       const { visibleModals, setVisibleModals } = dataStore();
 
-      const {
-        network: {
-          actions,
-        },
-      } = layers;
-
+      const [isMismatched, setIsMismatched] = useState(false);
       const [helperText, setHelperText] = useState("");
       const [newAddress, setNewAddress] = useState("");
       const [newPrivKey, setNewPrivKey] = useState("");
 
       // toggle visibility based on many things
       useEffect(() => {
-        if (!visibleModals.operatorUpdater) {
-          const burnersMatch = burnerInfo.connected === burnerInfo.detected;
-          const hasAccount = !!accountDetails.id;
-          const operatorMatch = accountDetails.operatorAddress === burnerInfo.connected;
-          const isVisible = isConnected && burnersMatch && hasAccount && !operatorMatch;
-          setVisibleModals({ ...visibleModals, operatorUpdater: isVisible });
-          if (isVisible) {
-            setHelperText("Connected Burner does not match Account Operator");
-          } else {
-            setHelperText("");
-          }
-        }
+        const burnersMatch = burnerInfo.connected === burnerInfo.detected;
+        const networksMatch = chain?.id === defaultChainConfig.id;
+        const hasAccount = !!accountDetails.id;
+        const operatorMatch = accountDetails.operatorAddress === burnerInfo.connected;
+        const isVisible = (
+          isConnected
+          && burnersMatch
+          && networksMatch
+          && hasAccount
+          && !operatorMatch
+        );
+
+        setVisibleModals({ ...visibleModals, operatorUpdater: isVisible });
+        setHelperText(operatorMatch ? "" : "Connected Burner does not match Account Operator");
+        setIsMismatched(!operatorMatch);
       }, [isConnected, burnerInfo, accountDetails]);
 
 
@@ -74,7 +75,7 @@ export function registerOperatorUpdater() {
         const api = network!.api.player;
 
         const actionID = `Setting Operator` as EntityID;
-        actions.add({
+        actions?.add({
           id: actionID,
           components: {},
           requirement: () => true,
@@ -84,7 +85,7 @@ export function registerOperatorUpdater() {
           },
         });
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;
-        await waitForActionCompletion(actions.Action, actionIndex);
+        await waitForActionCompletion(actions?.Action!, actionIndex);
       }
 
       const setPrivKey = (privKey: string) => {
@@ -107,18 +108,12 @@ export function registerOperatorUpdater() {
         setNewPrivKey(event.target.value);
       };
 
+
       /////////////////
       // DISPLAY
 
-      const hideModal = useCallback(() => {
-        setVisibleModals({ ...visibleModals, operatorUpdater: false });
-      }, [setVisibleModals, visibleModals]);
-
       return (
-        <ModalWrapperFull divName='operatorUpdater' id='operatorUpdater'>
-          <TopButton style={{ pointerEvents: 'auto' }} onClick={hideModal}>
-            X
-          </TopButton>
+        <ModalWrapperFull divName='operatorUpdater' id='operatorUpdater' canExit={!isMismatched}>
           <ModalContent style={{ pointerEvents: 'auto' }}>
             <Title>Update Operator</Title>
             <Description style={{ color: '#FF785B' }}>{helperText}</Description>
