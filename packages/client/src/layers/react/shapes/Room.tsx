@@ -10,6 +10,7 @@ import {
 
 import { Layers } from 'src/types';
 import { Account, getAccount } from './Account';
+import { numberToHex } from 'utils/hex';
 
 // standardized Object shape of a Room Entity
 export interface Room {
@@ -27,13 +28,6 @@ export interface RoomOptions {
   owner?: boolean;
   players?: boolean;
 }
-
-const locationToHex = (location: number) => {
-  let hexLocation = location.toString(16);
-  if (hexLocation.length % 2) hexLocation = '0' + hexLocation;
-  return '0x' + hexLocation;
-}
-
 
 // get a Room object from its EnityIndex
 export const getRoom = (
@@ -60,7 +54,7 @@ export const getRoom = (
     entityIndex: index,
     name: getComponentValue(Name, index)?.value as string,
     description: getComponentValue(Description, index)?.value as string,
-    location: (getComponentValue(Location, index)?.value as number) * 1,
+    location: (getComponentValue(Location, index)?.value || 0 as number) * 1,
     exits: getComponentValue(Exits, index)?.value as number[],
   };
 
@@ -76,7 +70,7 @@ export const getRoom = (
     const accountResults = Array.from(
       runQuery([
         Has(IsAccount),
-        HasValue(Location, { value: locationToHex(room.location) })
+        HasValue(Location, { value: numberToHex(room.location) })
       ])
     );
 
@@ -84,6 +78,9 @@ export const getRoom = (
       return getAccount(layers, accountEntityIndex);
     });
   }
+
+  // convert exits to proper numbers
+  if (room.exits) room.exits = room.exits.map((exit) => exit * 1);
 
   return room;
 };
@@ -109,7 +106,7 @@ export const getRoomEntityIndexByLocation = (layers: Layers, location: number,):
     },
   } = layers;
 
-  let hexLocation = locationToHex(location);
+  let hexLocation = numberToHex(location);
 
   const roomEntityIndex = Array.from(
     runQuery([Has(IsRoom), HasValue(Location, { value: hexLocation })])

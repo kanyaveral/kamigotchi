@@ -13,9 +13,11 @@ import { Kami, queryKamisX } from './Kami';
 import { Quest, getCompletedQuests, getOngoingQuests, parseQuestsStatus } from './Quest';
 import { Skill } from './Skill';
 import {
+  AccountInventories,
   Inventory,
   getInventory,
-  sortInventories
+  newAccountInventories,
+  sortInventories,
 } from './Inventory';
 
 // standardized shape of an Account Entity
@@ -47,14 +49,6 @@ export interface AccountOptions {
   kamis?: boolean;
   inventory?: boolean;
   quests?: boolean;
-}
-
-// bucketed inventory slots
-export interface AccountInventories {
-  food: Inventory[];
-  revives: Inventory[];
-  gear: Inventory[];
-  mods: Inventory[];
 }
 
 // get an Account from its EnityIndex
@@ -89,17 +83,17 @@ export const getAccount = (
     operatorEOA: getComponentValue(OperatorAddress, index)?.value as string,
     name: getComponentValue(Name, index)?.value as string,
     coin: getComponentValue(Coin, index)?.value as number,
-    location: getComponentValue(Location, index)?.value as number,
-    level: 0, // unimplemented for now, dummy value
+    location: (getComponentValue(Location, index)?.value || 0 as number) * 1,
+    level: 0, // placeholder
+    skillPoints: 0, // placeholder
     // stamina: {
     //   total: getComponentValue(Stamina, index)?.value as number,
     //   last: getComponentValue(StaminaCurrent, index)?.value as number,
     //   recoveryPeriod: 1, // dummy value
     // },
-    skillPoints: 0, // unimplemented for now, dummy value
     stamina: getComponentValue(Stamina, index)?.value as number,
     staminaCurrent: getComponentValue(StaminaCurrent, index)?.value as number,
-    staminaRecoveryPeriod: 1, // dummy value
+    staminaRecoveryPeriod: getConfigFieldValue(layers.network, 'ACCOUNT_STAMINA_RECOVERY_PERIOD'),
     lastBlock: getComponentValue(LastBlock, index)?.value as number,
     lastMoveTs: getComponentValue(LastTime, index)?.value as number,
   };
@@ -118,12 +112,7 @@ export const getAccount = (
     );
 
     let inventory: Inventory;
-    let inventories: AccountInventories = {
-      food: [],
-      revives: [],
-      gear: [],
-      mods: [],
-    };
+    let inventories = newAccountInventories();
     for (let i = 0; i < inventoryResults.length; i++) {
       inventory = getInventory(layers, inventoryResults[i]);
       if (inventory.item.type === 'FOOD') inventories.food.push(inventory);
@@ -156,36 +145,43 @@ export const getAccount = (
     }
   }
 
-
-  /////////////////
-  // ADJUSTMENTS
-
-  const staminaRecoveryPeriod = getConfigFieldValue(layers.network, 'ACCOUNT_STAMINA_RECOVERY_PERIOD');
-  account.staminaRecoveryPeriod = staminaRecoveryPeriod;
-
   return account;
 };
 
-
-export const getAccountFromBurner = (layers: Layers, options?: AccountOptions) => {
-  const {
-    network: {
-      network,
-      components: {
-        IsAccount,
-        OperatorAddress,
-      },
-    },
-  } = layers;
-
+// get an Account from its Operator address
+export const getAccountByOperator = (
+  layers: Layers,
+  operatorEOA: string,
+  options?: AccountOptions
+) => {
+  const { network: { components: { IsAccount, OperatorAddress } } } = layers;
   const accountIndex = Array.from(
     runQuery([
       Has(IsAccount),
-      HasValue(OperatorAddress, {
-        value: network.connectedAddress.get(),
-      }),
+      HasValue(OperatorAddress, { value: operatorEOA }),
     ])
   )[0];
-
   return getAccount(layers, accountIndex, options);
+}
+
+// get an Account from its Owner address
+export const getAccountByOwner = (
+  layers: Layers,
+  ownerEOA: string,
+  options?: AccountOptions
+) => {
+  const { network: { components: { IsAccount, OwnerAddress } } } = layers;
+  const accountIndex = Array.from(
+    runQuery([
+      Has(IsAccount),
+      HasValue(OwnerAddress, { value: ownerEOA }),
+    ])
+  )[0];
+  return getAccount(layers, accountIndex, options);
+}
+
+// get an Account, assuming the currently connected burner is the Operator
+export const getAccountFromBurner = (layers: Layers, options?: AccountOptions) => {
+  const { network: { network } } = layers;
+  return getAccountByOperator(layers, network.connectedAddress.get()!, options);
 };
