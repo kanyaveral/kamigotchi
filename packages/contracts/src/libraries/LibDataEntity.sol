@@ -7,66 +7,129 @@ import { getAddressById, getComponentById } from "solecs/utils.sol";
 import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
 
-import { IdAccountComponent, ID as IdAccountCompID } from "components/IdAccountComponent.sol";
-import { IdPetComponent, ID as IdPetCompID } from "components/IdPetComponent.sol";
+import { IdHolderComponent, ID as IdHolderCompID } from "components/IdHolderComponent.sol";
 import { IsDataComponent, ID as IsDataCompID } from "components/IsDataComponent.sol";
+import { IndexComponent, ID as IndexCompID } from "components/IndexComponent.sol";
 import { TypeComponent, ID as TypeCompID } from "components/TypeComponent.sol";
 import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 
 /* Library for data entity patterns. basically a key value store entity linked to an owner
  * Basic structure:
  * - IsDataComponent
- * - Owner Entity (e.g IdAccount, IdPet)
+ * - IdHolderComponent
  * - TypeComponent (key)
- * - Any component to attatch (default: value)
+ * - IndexComponent (optional key)
+ * - ValueComponent (value)
  */
 library LibDataEntity {
   ///////////////////////
   // INTERACTIONS
 
   // creates a data entity owned by an account
-  function createForAccount(
+  function create(
     IWorld world,
     IUintComp components,
-    uint256 accountID,
+    uint256 holderID,
     string memory type_
   ) internal returns (uint256) {
-    require(
-      getAccountDataEntity(components, accountID, type_) == 0,
-      "LibDataEntity: data alr exists"
-    );
     uint256 id = world.getUniqueEntityId();
-    IsDataComponent(getAddressById(components, IsDataCompID)).set(id);
-    IdAccountComponent(getAddressById(components, IdAccountCompID)).set(id, accountID);
-    TypeComponent(getAddressById(components, TypeCompID)).set(id, type_);
+    setIsData(components, id);
+    setHolder(components, id, holderID);
+    setType(components, id, type_);
     return id;
   }
 
-  // creates a data entity owned by a pet
-  function createForPet(
+  function get(
+    IUintComp components,
+    uint256 holderID,
+    uint256 index,
+    string memory type_
+  ) public view returns (uint256) {
+    uint256 dataID = queryDataEntity(components, holderID, index, type_);
+    return dataID == 0 ? 0 : getValue(components, dataID);
+  }
+
+  function incFor(
     IWorld world,
     IUintComp components,
-    uint256 petID,
-    string memory type_
-  ) internal returns (uint256) {
-    require(getPetDataEntity(components, petID, type_) == 0, "LibDataEntity: data alr exists");
-    uint256 id = world.getUniqueEntityId();
+    uint256 holderID,
+    uint256 index,
+    string memory type_,
+    uint256 amt
+  ) public {
+    uint256 dataID = queryDataEntity(components, holderID, index, type_);
+    if (dataID == 0) {
+      dataID = create(world, components, holderID, type_);
+      if (index != 0) setIndex(components, dataID, index);
+    }
+    _inc(components, dataID, amt);
+  }
+
+  function decFor(
+    IWorld world,
+    IUintComp components,
+    uint256 holderID,
+    uint256 index,
+    string memory type_,
+    uint256 amt
+  ) public {
+    uint256 dataID = queryDataEntity(components, holderID, index, type_);
+    if (dataID == 0) {
+      dataID = create(world, components, holderID, type_);
+      if (index != 0) setIndex(components, dataID, index);
+    }
+    _dec(components, dataID, amt);
+  }
+
+  function setFor(
+    IWorld world,
+    IUintComp components,
+    uint256 holderID,
+    uint256 index,
+    string memory type_,
+    uint256 value
+  ) public {
+    uint256 dataID = queryDataEntity(components, holderID, index, type_);
+    if (dataID == 0) {
+      dataID = create(world, components, holderID, type_);
+      if (index != 0) setIndex(components, dataID, index);
+    }
+    setValue(components, dataID, value);
+  }
+
+  // SETTERS
+
+  function setIsData(IUintComp components, uint256 id) internal {
     IsDataComponent(getAddressById(components, IsDataCompID)).set(id);
-    IdPetComponent(getAddressById(components, IdPetCompID)).set(id, petID);
+  }
+
+  function setHolder(IUintComp components, uint256 id, uint256 holderID) internal {
+    IdHolderComponent(getAddressById(components, IdHolderCompID)).set(id, holderID);
+  }
+
+  function setIndex(IUintComp components, uint256 id, uint256 index) internal {
+    IndexComponent(getAddressById(components, IndexCompID)).set(id, index);
+  }
+
+  function setType(IUintComp components, uint256 id, string memory type_) internal {
     TypeComponent(getAddressById(components, TypeCompID)).set(id, type_);
-    return id;
   }
 
-  // sets an existing data entity owned by an account
-  function setForAccount(IUintComp components, uint256 id, uint256 value) internal {
-    require(id != 0, "LibDataEntity: data doesnt exist");
+  function setValue(IUintComp components, uint256 id, uint256 value) internal {
     ValueComponent(getAddressById(components, ValueCompID)).set(id, value);
   }
 
-  // sets an existing data entity owned by a pet
-  function setForPet(IUintComp components, uint256 id, uint256 value) internal {
-    require(id != 0, "LibDataEntity: data doesnt exist");
-    ValueComponent(getAddressById(components, ValueCompID)).set(id, value);
+  function _inc(IUintComp components, uint256 entityID, uint256 amt) internal {
+    uint256 value = getValue(components, entityID);
+    setValue(components, entityID, value + amt);
+  }
+
+  function _dec(IUintComp components, uint256 entityID, uint256 amt) internal {
+    uint256 value = getValue(components, entityID);
+    require(value >= amt, "LibDataEntity: insufficient val");
+    unchecked {
+      setValue(components, entityID, value - amt);
+    }
   }
 
   ///////////////////////
@@ -80,35 +143,18 @@ library LibDataEntity {
   ///////////////////////
   // QUERIES
 
-  function getAccountData(
+  function queryDataEntity(
     IUintComp components,
-    uint256 accountID,
-    string memory type_
-  ) internal view returns (uint256) {
-    uint256 dataID = getAccountDataEntity(components, accountID, type_);
-    return getValue(components, dataID);
-  }
-
-  function getPetData(
-    IUintComp components,
-    uint256 petID,
-    string memory type_
-  ) internal view returns (uint256) {
-    uint256 dataID = getPetDataEntity(components, petID, type_);
-    return getValue(components, dataID);
-  }
-
-  function getAccountDataEntity(
-    IUintComp components,
-    uint256 accountID,
+    uint256 holderID,
+    uint256 index, // optional - 0 if not used
     string memory type_
   ) internal view returns (uint256 result) {
-    QueryFragment[] memory fragments = new QueryFragment[](3);
+    QueryFragment[] memory fragments = new QueryFragment[](index == 0 ? 3 : 4);
     fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsDataCompID), "");
     fragments[1] = QueryFragment(
       QueryType.HasValue,
-      getComponentById(components, IdAccountCompID),
-      abi.encode(accountID)
+      getComponentById(components, IdHolderCompID),
+      abi.encode(holderID)
     );
     fragments[2] = QueryFragment(
       QueryType.HasValue,
@@ -116,27 +162,13 @@ library LibDataEntity {
       abi.encode(type_)
     );
 
-    uint256[] memory results = LibQuery.query(fragments);
-    if (results.length != 0) result = results[0];
-  }
-
-  function getPetDataEntity(
-    IUintComp components,
-    uint256 petID,
-    string memory type_
-  ) internal view returns (uint256 result) {
-    QueryFragment[] memory fragments = new QueryFragment[](3);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsDataCompID), "");
-    fragments[1] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, IdPetCompID),
-      abi.encode(petID)
-    );
-    fragments[2] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, TypeCompID),
-      abi.encode(type_)
-    );
+    if (index != 0) {
+      fragments[3] = QueryFragment(
+        QueryType.HasValue,
+        getComponentById(components, IndexCompID),
+        abi.encode(index)
+      );
+    }
 
     uint256[] memory results = LibQuery.query(fragments);
     if (results.length != 0) result = results[0];
