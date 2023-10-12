@@ -1,19 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
-import {
-  EntityID,
-  Has,
-  HasValue,
-  runQuery,
-} from '@latticexyz/recs';
 
 import { Listings } from './Listings';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { getAccountFromBurner } from 'layers/react/shapes/Account';
-import { Listing } from 'layers/react/shapes/Listing';
-import { getMerchant } from 'layers/react/shapes/Merchant';
+import { Merchant, getMerchantByIndex } from 'layers/react/shapes/Merchant';
 import { registerUIComponent } from 'layers/react/engine/store';
+import { useSelectedEntities } from 'layers/react/store/selectedEntities';
 
 
 // merchant window with listings. assumes at most 1 merchant per room
@@ -23,8 +17,8 @@ export function registerMerchantModal() {
 
     // Grid Config
     {
-      colStart: 33,
-      colEnd: 75,
+      colStart: 30,
+      colEnd: 70,
       rowStart: 20,
       rowEnd: 60,
     },
@@ -33,17 +27,16 @@ export function registerMerchantModal() {
     (layers) => {
       const {
         network: {
-          api: { player },
           components: {
             AccountID,
             Description,
             IsListing,
             IsNPC,
             ItemIndex,
+            NPCIndex,
             Location,
             Name,
           },
-          actions,
         },
       } = layers;
 
@@ -53,29 +46,17 @@ export function registerMerchantModal() {
         IsListing.update$,
         IsNPC.update$,
         ItemIndex.update$,
+        NPCIndex.update$,
         Location.update$,
         Name.update$,
       ).pipe(
         map(() => {
           const account = getAccountFromBurner(layers, { inventory: true });
-
-          // get the merchant in this room
-          const merchantResults = runQuery([
-            Has(IsNPC),
-            HasValue(Location, { value: account.location }),
-          ]);
-
-          // if we have a merchant retrieve its listings
-          // only support one merchant per room for now
-          let merchant, merchantIndex;
-          if (merchantResults.size != 0) {
-            merchantIndex = Array.from(merchantResults)[0];
-            merchant = getMerchant(layers, merchantIndex);
-          }
+          const { npcIndex } = useSelectedEntities.getState();
+          const merchant = getMerchantByIndex(layers, npcIndex);
 
           return {
-            actions,
-            api: player,
+            layers,
             data: {
               account,
               merchant,
@@ -86,42 +67,36 @@ export function registerMerchantModal() {
     },
 
     // Render
-    ({ actions, api, data }) => {
+    ({ layers, data }) => {
       // console.log('mMerchant: data', data);
+      const { npcIndex } = useSelectedEntities();
+      const [merchant, setMerchant] = useState<Merchant>(data.merchant);
 
-      /////////////////
-      // ACTIONS
+      // updates from component subscription updates
+      useEffect(() => {
+        setMerchant(data.merchant);
+      }, [data.merchant]);
 
-      // buy from a listing
-      const buy = (listing: Listing, amt: number) => {
-        const actionID = `Buying ${amt} ${listing.item.name}` as EntityID; // itemIndex should be replaced with the item's name
-        actions?.add({
-          id: actionID,
-          components: {},
-          // on: data.account.index, // what's the appropriate value here?
-          requirement: () => true,
-          updates: () => [],
-          execute: async () => {
-            return api.listing.buy(listing.id, amt);
-          },
-        });
-      };
+      // updates from selected Merchant updates
+      useEffect(() => {
+        setMerchant(getMerchantByIndex(layers, npcIndex));
+      }, [npcIndex]);
+
 
       /////////////////
       // DISPLAY
 
       return (
         <ModalWrapperFull
-          divName='merchant'
           id='merchant'
-          header={<Title>{`${data.merchant?.name}'s Shop`}</Title>}
+          divName='merchant'
+          header={<Title>{`${merchant?.name}'s Shop`}</Title>}
           canExit
         >
-          <Listings listings={data.merchant?.listings} handleBuy={buy} />
+          <Listings listings={merchant?.listings} />
         </ModalWrapperFull>
       );
-    }
-  );
+    })
 }
 
 

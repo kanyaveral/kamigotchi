@@ -4,9 +4,9 @@ import create from 'zustand';
 export interface SelectedEntities {
   accountEntityIndex: EntityIndex;
   kamiEntityIndex: EntityIndex;
-  merchantEntityIndex: EntityIndex;
+  listingEntityIndex: EntityIndex;
   nodeIndex: number;
-  npcEntityIndex: EntityIndex;
+  npcIndex: number;
   room: number;
 }
 
@@ -14,9 +14,9 @@ interface Actions {
   setSelectedEntities: (selectedEntities: SelectedEntities) => void;
   setAccount: (accountEntityIndex: EntityIndex) => void;
   setKami: (kamiEntityIndex: EntityIndex) => void;
-  setMerchant: (merchantEntityIndex: EntityIndex) => void;
+  setListing: (listingEntityIndex: EntityIndex) => void;
   setNode: (nodeIndex: number) => void;
-  setNpc: (npcEntityIndex: EntityIndex) => void;
+  setNpc: (npcIndex: number) => void;
   setRoom: (room: number) => void;
 }
 
@@ -24,9 +24,9 @@ export const useSelectedEntities = create<SelectedEntities & Actions>((set) => {
   const initialState: SelectedEntities = {
     accountEntityIndex: 0 as EntityIndex,
     kamiEntityIndex: 0 as EntityIndex,
-    merchantEntityIndex: 0 as EntityIndex,
-    nodeIndex: 0 as EntityIndex,
-    npcEntityIndex: 0 as EntityIndex,
+    listingEntityIndex: 0 as EntityIndex,
+    nodeIndex: 0 as number,
+    npcIndex: 0 as number,
     room: 0 as number,
   };
 
@@ -41,14 +41,14 @@ export const useSelectedEntities = create<SelectedEntities & Actions>((set) => {
     setKami: (kamiEntityIndex: EntityIndex) => set(
       (state: SelectedEntities) => ({ ...state, kamiEntityIndex })
     ),
-    setMerchant: (merchantEntityIndex: EntityIndex) => set(
-      (state: SelectedEntities) => ({ ...state, merchantEntityIndex })
+    setListing: (listingEntityIndex: EntityIndex) => set(
+      (state: SelectedEntities) => ({ ...state, listingEntityIndex })
     ),
     setNode: (nodeIndex: number) => set(
       (state: SelectedEntities) => ({ ...state, nodeIndex })
     ),
-    setNpc: (npcEntityIndex: EntityIndex) => set(
-      (state: SelectedEntities) => ({ ...state, npcEntityIndex })
+    setNpc: (npcIndex: number) => set(
+      (state: SelectedEntities) => ({ ...state, npcIndex })
     ),
     setRoom: (room: number) => set(
       (state: SelectedEntities) => ({ ...state, room })
