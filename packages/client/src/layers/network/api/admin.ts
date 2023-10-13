@@ -128,7 +128,6 @@ export function createAdminAPI(systems: any) {
     index: number,
     name: string,
     description: string,
-    max: number,
     location: number,
     repeatTime: number
   ) {
@@ -137,7 +136,6 @@ export function createAdminAPI(systems: any) {
       index,
       name,
       description,
-      max,
       location,
       repeatTime
     );
@@ -486,7 +484,7 @@ export function createAdminAPI(systems: any) {
 
   function sleepIf() {
     if (process.env.MODE == 'OPGOERLI') {
-      return new Promise(resolve => setTimeout(resolve, 10000));
+      return new Promise(resolve => setTimeout(resolve, 8000));
     }
   }
 
