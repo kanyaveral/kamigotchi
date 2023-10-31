@@ -30,7 +30,7 @@ import type {
 export interface _RegistryCreateGearSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(uint256,uint256,string,string,uint256,uint256,uint256,uint256,uint256)": FunctionFragment;
+    "executeTyped(uint256,uint256,string,string,string,uint256,uint256,uint256,uint256,uint256,string)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -54,11 +54,13 @@ export interface _RegistryCreateGearSystemInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<string>,
+      PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>
     ]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -133,12 +135,14 @@ export interface _RegistryCreateGearSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       gearIndex: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       type_: PromiseOrValue<string>,
       health: PromiseOrValue<BigNumberish>,
       power: PromiseOrValue<BigNumberish>,
       violence: PromiseOrValue<BigNumberish>,
       harmony: PromiseOrValue<BigNumberish>,
       slots: PromiseOrValue<BigNumberish>,
+      media: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -159,12 +163,14 @@ export interface _RegistryCreateGearSystem extends BaseContract {
     index: PromiseOrValue<BigNumberish>,
     gearIndex: PromiseOrValue<BigNumberish>,
     name: PromiseOrValue<string>,
+    description: PromiseOrValue<string>,
     type_: PromiseOrValue<string>,
     health: PromiseOrValue<BigNumberish>,
     power: PromiseOrValue<BigNumberish>,
     violence: PromiseOrValue<BigNumberish>,
     harmony: PromiseOrValue<BigNumberish>,
     slots: PromiseOrValue<BigNumberish>,
+    media: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -185,12 +191,14 @@ export interface _RegistryCreateGearSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       gearIndex: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       type_: PromiseOrValue<string>,
       health: PromiseOrValue<BigNumberish>,
       power: PromiseOrValue<BigNumberish>,
       violence: PromiseOrValue<BigNumberish>,
       harmony: PromiseOrValue<BigNumberish>,
       slots: PromiseOrValue<BigNumberish>,
+      media: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -223,12 +231,14 @@ export interface _RegistryCreateGearSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       gearIndex: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       type_: PromiseOrValue<string>,
       health: PromiseOrValue<BigNumberish>,
       power: PromiseOrValue<BigNumberish>,
       violence: PromiseOrValue<BigNumberish>,
       harmony: PromiseOrValue<BigNumberish>,
       slots: PromiseOrValue<BigNumberish>,
+      media: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -250,12 +260,14 @@ export interface _RegistryCreateGearSystem extends BaseContract {
       index: PromiseOrValue<BigNumberish>,
       gearIndex: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       type_: PromiseOrValue<string>,
       health: PromiseOrValue<BigNumberish>,
       power: PromiseOrValue<BigNumberish>,
       violence: PromiseOrValue<BigNumberish>,
       harmony: PromiseOrValue<BigNumberish>,
       slots: PromiseOrValue<BigNumberish>,
+      media: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

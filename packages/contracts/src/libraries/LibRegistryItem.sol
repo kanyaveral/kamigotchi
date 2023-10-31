@@ -8,6 +8,7 @@ import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
+import { DescriptionComponent, ID as DescriptionCompID } from "components/DescriptionComponent.sol";
 import { IndexItemComponent, ID as IndexItemCompID } from "components/IndexItemComponent.sol";
 import { IndexFoodComponent, ID as IndexFoodCompID } from "components/IndexFoodComponent.sol";
 import { IndexGearComponent, ID as IndexGearCompID } from "components/IndexGearComponent.sol";
@@ -18,6 +19,7 @@ import { IsNonFungibleComponent, ID as IsNonFungCompID } from "components/IsNonF
 import { IsLootboxComponent, ID as IsLootboxCompID } from "components/IsLootboxComponent.sol";
 import { IsRegistryComponent, ID as IsRegCompID } from "components/IsRegistryComponent.sol";
 import { KeysComponent, ID as KeysCompID } from "components/KeysComponent.sol";
+import { MediaURIComponent, ID as MediaURICompID } from "components/MediaURIComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
 import { TypeComponent, ID as TypeCompID } from "components/TypeComponent.sol";
 import { WeightsComponent, ID as WeightsCompID } from "components/WeightsComponent.sol";
@@ -47,7 +49,9 @@ library LibRegistryItem {
     uint256 index,
     uint256 foodIndex,
     string memory name,
-    uint256 health
+    string memory description,
+    uint256 health,
+    string memory mediaURI
   ) internal returns (uint256) {
     uint256 id = world.getUniqueEntityId();
     setIsRegistry(components, id);
@@ -55,7 +59,9 @@ library LibRegistryItem {
     setItemIndex(components, id, index);
     setFoodIndex(components, id, foodIndex);
     setName(components, id, name);
+    setDescription(components, id, description);
     LibStat.setHealth(components, id, health);
+    setMediaURI(components, id, mediaURI);
     return id;
   }
 
@@ -66,12 +72,14 @@ library LibRegistryItem {
     uint256 index,
     uint256 gearIndex,
     string memory name,
+    string memory description,
     string memory type_,
     uint256 health,
     uint256 power,
     uint256 violence,
     uint256 harmony,
-    uint256 slots
+    uint256 slots,
+    string memory mediaURI
   ) internal returns (uint256) {
     uint256 id = world.getUniqueEntityId();
     setIsRegistry(components, id);
@@ -79,7 +87,9 @@ library LibRegistryItem {
     setItemIndex(components, id, index);
     setGearIndex(components, id, gearIndex);
     setName(components, id, name);
+    setDescription(components, id, description);
     setType(components, id, type_);
+    setMediaURI(components, id, mediaURI);
 
     if (health > 0) LibStat.setHealth(components, id, health);
     else LibStat.removeHealth(components, id);
@@ -110,8 +120,10 @@ library LibRegistryItem {
     IUintComp components,
     uint256 index,
     string memory name,
+    string memory description,
     uint256[] memory keys,
-    uint256[] memory weights
+    uint256[] memory weights,
+    string memory mediaURI
   ) internal returns (uint256 id) {
     id = world.getUniqueEntityId();
     setIsRegistry(components, id);
@@ -121,6 +133,8 @@ library LibRegistryItem {
     setKeys(components, id, keys);
     setWeights(components, id, weights);
     setName(components, id, name);
+    setDescription(components, id, description);
+    setMediaURI(components, id, mediaURI);
   }
 
   // Create a Registry entry for a Mod item. (e.g. cpu, gem, etc.)
@@ -130,10 +144,12 @@ library LibRegistryItem {
     uint256 index,
     uint256 modIndex,
     string memory name,
+    string memory description,
     uint256 health,
     uint256 power,
     uint256 violence,
-    uint256 harmony
+    uint256 harmony,
+    string memory mediaURI
   ) internal returns (uint256) {
     uint256 id = world.getUniqueEntityId();
     setIsRegistry(components, id);
@@ -141,6 +157,8 @@ library LibRegistryItem {
     setItemIndex(components, id, index);
     setModIndex(components, id, modIndex);
     setName(components, id, name);
+    setDescription(components, id, description);
+    setMediaURI(components, id, mediaURI);
 
     if (health > 0) LibStat.setHealth(components, id, health);
     else LibStat.removeHealth(components, id);
@@ -164,7 +182,9 @@ library LibRegistryItem {
     uint256 index,
     uint256 reviveIndex,
     string memory name,
-    uint256 health
+    string memory description,
+    uint256 health,
+    string memory mediaURI
   ) internal returns (uint256) {
     uint256 id = world.getUniqueEntityId();
     setIsRegistry(components, id);
@@ -172,7 +192,9 @@ library LibRegistryItem {
     setItemIndex(components, id, index);
     setReviveIndex(components, id, reviveIndex);
     setName(components, id, name);
+    setDescription(components, id, description);
     LibStat.setHealth(components, id, health);
+    setMediaURI(components, id, mediaURI);
     return id;
   }
 
@@ -183,7 +205,9 @@ library LibRegistryItem {
     unsetIsNonFungible(components, id);
     unsetItemIndex(components, id);
     unsetName(components, id);
+    unsetDescription(components, id);
     unsetType(components, id);
+    unsetMediaURI(components, id);
 
     unsetFoodIndex(components, id);
     unsetGearIndex(components, id);
@@ -255,6 +279,10 @@ library LibRegistryItem {
     IndexFoodComponent(getAddressById(components, IndexFoodCompID)).set(id, foodIndex);
   }
 
+  function setDescription(IUintComp components, uint256 id, string memory description) internal {
+    DescriptionComponent(getAddressById(components, DescriptionCompID)).set(id, description);
+  }
+
   function setGearIndex(IUintComp components, uint256 id, uint256 gearIndex) internal {
     IndexGearComponent(getAddressById(components, IndexGearCompID)).set(id, gearIndex);
   }
@@ -287,6 +315,10 @@ library LibRegistryItem {
     IndexModComponent(getAddressById(components, IndexModCompID)).set(id, modIndex);
   }
 
+  function setMediaURI(IUintComp components, uint256 id, string memory mediaURI) internal {
+    MediaURIComponent(getAddressById(components, MediaURICompID)).set(id, mediaURI);
+  }
+
   function setReviveIndex(IUintComp components, uint256 id, uint256 reviveIndex) internal {
     IndexReviveComponent(getAddressById(components, IndexReviveCompID)).set(id, reviveIndex);
   }
@@ -305,6 +337,11 @@ library LibRegistryItem {
 
   function unsetFoodIndex(IUintComp components, uint256 id) internal {
     IndexFoodComponent comp = IndexFoodComponent(getAddressById(components, IndexFoodCompID));
+    if (comp.has(id)) comp.remove(id);
+  }
+
+  function unsetDescription(IUintComp components, uint256 id) internal {
+    DescriptionComponent comp = DescriptionComponent(getAddressById(components, DescriptionCompID));
     if (comp.has(id)) comp.remove(id);
   }
 
@@ -347,6 +384,11 @@ library LibRegistryItem {
 
   function unsetModIndex(IUintComp components, uint256 id) internal {
     IndexModComponent comp = IndexModComponent(getAddressById(components, IndexModCompID));
+    if (comp.has(id)) comp.remove(id);
+  }
+
+  function unsetMediaURI(IUintComp components, uint256 id) internal {
+    MediaURIComponent comp = MediaURIComponent(getAddressById(components, MediaURICompID));
     if (comp.has(id)) comp.remove(id);
   }
 

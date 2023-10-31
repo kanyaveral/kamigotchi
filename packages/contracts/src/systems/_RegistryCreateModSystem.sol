@@ -19,11 +19,16 @@ contract _RegistryCreateModSystem is System {
       uint256 index,
       uint256 modIndex,
       string memory name,
+      string memory description,
       uint256 health,
       uint256 power,
       uint256 violence,
-      uint256 harmony
-    ) = abi.decode(arguments, (uint256, uint256, string, uint256, uint256, uint256, uint256));
+      uint256 harmony,
+      string memory media
+    ) = abi.decode(
+        arguments,
+        (uint256, uint256, string, string, uint256, uint256, uint256, uint256, string)
+      );
     uint256 registryID = LibRegistryItem.getByModIndex(components, modIndex);
 
     require(registryID == 0, "CreateMod: index already exists");
@@ -36,10 +41,12 @@ contract _RegistryCreateModSystem is System {
       index,
       modIndex,
       name,
+      description,
       health,
       power,
       violence,
-      harmony
+      harmony,
+      media
     );
     return "";
   }
@@ -48,11 +55,16 @@ contract _RegistryCreateModSystem is System {
     uint256 index,
     uint256 modIndex,
     string memory name,
+    string memory description,
     uint256 health,
     uint256 power,
     uint256 violence,
-    uint256 harmony
+    uint256 harmony,
+    string memory media
   ) public onlyOwner returns (bytes memory) {
-    return execute(abi.encode(index, modIndex, name, health, power, violence, harmony));
+    return
+      execute(
+        abi.encode(index, modIndex, name, description, health, power, violence, harmony, media)
+      );
   }
 }

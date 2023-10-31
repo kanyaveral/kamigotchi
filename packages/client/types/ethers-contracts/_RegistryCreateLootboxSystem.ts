@@ -30,7 +30,7 @@ import type {
 export interface _RegistryCreateLootboxSystemInterface extends utils.Interface {
   functions: {
     "execute(bytes)": FunctionFragment;
-    "executeTyped(uint256,string,uint256[],uint256[])": FunctionFragment;
+    "executeTyped(uint256,string,string,uint256[],uint256[],string)": FunctionFragment;
     "owner()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
@@ -52,8 +52,10 @@ export interface _RegistryCreateLootboxSystemInterface extends utils.Interface {
     values: [
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
+      PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>[],
-      PromiseOrValue<BigNumberish>[]
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<string>
     ]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -127,8 +129,10 @@ export interface _RegistryCreateLootboxSystem extends BaseContract {
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       keys: PromiseOrValue<BigNumberish>[],
       weights: PromiseOrValue<BigNumberish>[],
+      media: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -148,8 +152,10 @@ export interface _RegistryCreateLootboxSystem extends BaseContract {
   executeTyped(
     index: PromiseOrValue<BigNumberish>,
     name: PromiseOrValue<string>,
+    description: PromiseOrValue<string>,
     keys: PromiseOrValue<BigNumberish>[],
     weights: PromiseOrValue<BigNumberish>[],
+    media: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -169,8 +175,10 @@ export interface _RegistryCreateLootboxSystem extends BaseContract {
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       keys: PromiseOrValue<BigNumberish>[],
       weights: PromiseOrValue<BigNumberish>[],
+      media: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -202,8 +210,10 @@ export interface _RegistryCreateLootboxSystem extends BaseContract {
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       keys: PromiseOrValue<BigNumberish>[],
       weights: PromiseOrValue<BigNumberish>[],
+      media: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -224,8 +234,10 @@ export interface _RegistryCreateLootboxSystem extends BaseContract {
     executeTyped(
       index: PromiseOrValue<BigNumberish>,
       name: PromiseOrValue<string>,
+      description: PromiseOrValue<string>,
       keys: PromiseOrValue<BigNumberish>[],
       weights: PromiseOrValue<BigNumberish>[],
+      media: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -210,12 +210,15 @@
         "IndexItemComponent",
         "IndexFoodComponent",
         "NameComponent",
-        "HealthComponent"
+        "DescriptionComponent",
+        "HealthComponent",
+        "MediaURIComponent"
       ]
     },
     {
       "name": "_RegistryCreateGearSystem",
       "writeAccess": [
+        "DescriptionComponent",
         "IsRegistryComponent",
         "IsNonFungibleComponent",
         "IndexItemComponent",
@@ -226,24 +229,28 @@
         "PowerComponent",
         "ViolenceComponent",
         "HarmonyComponent",
-        "SlotsComponent"
+        "SlotsComponent",
+        "MediaURIComponent"
       ]
     },
     {
       "name": "_RegistryCreateLootboxSystem",
       "writeAccess": [
+        "DescriptionComponent",
         "IsRegistryComponent",
         "IsFungibleComponent",
         "IsLootboxComponent",
         "IndexItemComponent",
         "KeysComponent",
         "WeightsComponent",
-        "NameComponent"
+        "NameComponent",
+        "MediaURIComponent"
       ]
     },
     {
       "name": "_RegistryCreateModSystem",
       "writeAccess": [
+        "DescriptionComponent",
         "IsRegistryComponent",
         "IsFungibleComponent",
         "IndexItemComponent",
@@ -253,7 +260,8 @@
         "HealthComponent",
         "PowerComponent",
         "ViolenceComponent",
-        "HarmonyComponent"
+        "HarmonyComponent",
+        "MediaURIComponent"
       ]
     },
     {
@@ -295,7 +303,14 @@
     {
       "name": "_RegistryCreateReviveSystem",
       "writeAccess": [
-        "*"
+        "IsRegistryComponent",
+        "IsFungibleComponent",
+        "IndexItemComponent",
+        "IndexReviveComponent",
+        "NameComponent",
+        "DescriptionComponent",
+        "HealthComponent",
+        "MediaURIComponent"
       ]
     },
     {
@@ -308,6 +323,7 @@
         "DescriptionComponent",
         "ForComponent",
         "MaxComponent",
+        "MediaURIComponent",
         "NameComponent",
         "TypeComponent"
       ]
@@ -345,6 +361,7 @@
     {
       "name": "_RegistryDeleteItemSystem",
       "writeAccess": [
+        "DescriptionComponent",
         "IsRegistryComponent",
         "IsFungibleComponent",
         "IsNonFungibleComponent",
@@ -360,6 +377,7 @@
         "PowerComponent",
         "ViolenceComponent",
         "HarmonyComponent",
+        "MediaURIComponent",
         "SlotsComponent",
         "KeysComponent",
         "WeightsComponent"
@@ -385,6 +403,7 @@
         "IndexComponent",
         "LogicTypeComponent",
         "MaxComponent",
+        "MediaURIComponent",
         "NameComponent",
         "SubtypeComponent",
         "TypeComponent",
