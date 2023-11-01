@@ -6,7 +6,7 @@ import { ActionButton } from "layers/react/components/library/ActionButton";
 import { Tooltip } from "layers/react/components/library/Tooltip";
 import { Account } from "layers/react/shapes/Account";
 import { Inventory } from "layers/react/shapes/Inventory";
-import { Lootbox, LootboxLog, getLootboxLog } from "layers/react/shapes/Lootbox";
+import { Lootbox } from "layers/react/shapes/Lootbox";
 
 interface Props {
   account: Account;
@@ -14,17 +14,16 @@ interface Props {
     openTx: (index: number, amount: number) => Promise<void>;
     revealTx: (id: EntityID) => Promise<void>;
     setState: (state: string) => void;
-    setLog: (log: LootboxLog) => void;
   };
-  inventory: Inventory;
+  inventory: Inventory | undefined;
   utils: {
     getLootbox: (index: number) => Lootbox;
-    getLog: (index: EntityIndex) => LootboxLog;
   }
 }
 
 export const Opener = (props: Props) => {
   const [state, setState] = useState("START");
+  const [curBal, setCurBal] = useState(0);
   const [triedReveal, setTriedReveal] = useState(false);
   const [waitingToReveal, setWaitingToReveal] = useState(false);
   const [selectedBox, setSelectedBox] = useState<Lootbox>();
@@ -42,7 +41,6 @@ export const Opener = (props: Props) => {
         reversed.forEach(async (LootboxLog) => {
           try {
             await props.actions.revealTx(LootboxLog.id);
-            props.actions.setLog(props.utils.getLog(LootboxLog.entityIndex));
             props.actions.setState("REWARDS");
           }
           catch (e) { console.log(e); }
@@ -58,9 +56,10 @@ export const Opener = (props: Props) => {
 
   useEffect(() => {
     setSelectedBox(
-      props.utils.getLootbox(props.inventory.item.index)
+      props.utils.getLootbox(props.inventory?.item.index || 0)
     );
-  }, [props.inventory.item.index]);
+    setCurBal(props.inventory?.balance || 0);
+  }, [props.inventory ? props.inventory.item : 0]);
 
   const startReveal = async (amount: number) => {
     setWaitingToReveal(true);
@@ -77,7 +76,7 @@ export const Opener = (props: Props) => {
     if (waitingToReveal) {
       return (<div></div>)
     } else {
-      const enabled = (amount <= (props.inventory.balance ? props.inventory.balance : 0));
+      const enabled = (amount <= (curBal));
       const warnText = enabled ? '' : 'Insufficient boxes';
       return (
         <Tooltip text={[warnText]}>
@@ -116,7 +115,7 @@ export const Opener = (props: Props) => {
         {OpenButton(10)}
       </ProductBox>
       <SubText style={{ gridRow: 3 }}>
-        You have: {(props.inventory.balance ? props.inventory.balance : 0)} {selectedBox?.name}es
+        You have: {curBal} {selectedBox?.name}es
       </SubText>
     </Grid>
   );

@@ -1,11 +1,12 @@
 import styled from "styled-components";
 
 import { Tooltip } from "layers/react/components/library/Tooltip";
-import { getInventoryByFamilyIndex, AccountInventories } from "layers/react/shapes/Inventory";
+import { getInventoryByFamilyIndex } from "layers/react/shapes/Inventory";
+import { Inventories } from "layers/react/shapes/Account";
 import { Item } from "layers/react/shapes/Item";
 
 interface Props {
-  inventories: AccountInventories;
+  inventories: Inventories;
   getItem: (index: number) => Item;
 };
 
@@ -32,9 +33,9 @@ export const Items = (props: Props) => {
 
   const cells = inventorySlots.map((slot, i) => {
     return (
-      <Tooltip text={[slot.item.name, slot.item.description]} grow>
+      <Tooltip text={[slot.item.name!, slot.item.description!]} grow>
         <CellGrid>
-          <Icon src={slot.item.uri} />
+          <Icon src={slot.item.uri!} />
           <ItemNumber>{slot.inventory?.balance ?? 0}</ItemNumber>
         </CellGrid>
       </Tooltip>

@@ -13,6 +13,7 @@ import { Opener } from './Opener';
 import { Rewards } from './Rewards';
 import { Lootbox, LootboxLog, getLootboxByIndex, getLootboxLog } from 'layers/react/shapes/Lootbox';
 import { getItemByIndex } from 'layers/react/shapes/Item';
+import { dataStore } from 'layers/react/store/createStore';
 
 
 
@@ -69,8 +70,18 @@ export function registerLootboxesModal() {
         },
       } = layers;
 
+      const { visibleModals } = dataStore();
+
       const [state, setState] = useState("OPEN");
-      const [log, setLog] = useState<LootboxLog>();
+      const [log, setLog] = useState<EntityIndex>();
+
+      // Refresh modal upon closure
+      useEffect(() => {
+        if (!visibleModals.lootboxes) {
+          setState("OPEN");
+          setLog(undefined);
+        }
+      }, [visibleModals.lootboxes]);
 
       /////////////////
       // ACTIONS
@@ -94,7 +105,7 @@ export function registerLootboxesModal() {
       };
 
       const revealTx = async (id: EntityID) => {
-        const actionID = (`Revealing...`) as EntityID;
+        const actionID = (`Revealing lootboxes...`) as EntityID;
         actions?.add({
           id: actionID,
           components: {},
@@ -158,17 +169,17 @@ export function registerLootboxesModal() {
             return (
               <Opener
                 account={account}
-                actions={{ openTx, revealTx, setState, setLog }}
-                inventory={account.inventories?.lootboxes![0]!}
-                utils={{ getLog, getLootbox }}
+                actions={{ openTx, revealTx, setState }}
+                inventory={account.inventories?.lootboxes![0]}
+                utils={{ getLootbox }}
               />
             );
             break;
           case "REWARDS":
             return (
               <Rewards
-                log={log!}
-                utils={{ getItem }}
+                account={account}
+                utils={{ getItem, getLog }}
               />
             );
             break;
@@ -176,9 +187,9 @@ export function registerLootboxesModal() {
             return (
               <Opener
                 account={account}
-                actions={{ openTx, revealTx, setState, setLog }}
-                inventory={account.inventories?.lootboxes![0]!}
-                utils={{ getLog, getLootbox }}
+                actions={{ openTx, revealTx, setState }}
+                inventory={account.inventories?.lootboxes![0]}
+                utils={{ getLootbox }}
               />
             );
             break;

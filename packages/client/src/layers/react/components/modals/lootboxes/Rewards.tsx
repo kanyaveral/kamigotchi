@@ -1,39 +1,19 @@
-import { EntityID, EntityIndex } from "@latticexyz/recs";
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import { EntityIndex } from "@latticexyz/recs";
 
-import { ActionButton } from "layers/react/components/library/ActionButton";
-import { Tooltip } from "layers/react/components/library/Tooltip";
-import { Account } from "layers/react/shapes/Account";
-import { Inventory } from "layers/react/shapes/Inventory";
-import { Lootbox, LootboxLog, getLootboxLog } from "layers/react/shapes/Lootbox";
+import { LootboxLog } from "layers/react/shapes/Lootbox";
 import { Item } from "layers/react/shapes/Item";
-import { FoodImages, ReviveImages } from 'constants/food';
+import { Account } from "layers/react/shapes/Account";
 
 interface Props {
-  log: LootboxLog;
+  account: Account;
   utils: {
     getItem: (index: number) => Item;
+    getLog: (index: EntityIndex) => LootboxLog;
   }
 }
 
 export const Rewards = (props: Props) => {
-
-  ///////////////
-  // TEMP ITEM IMAGES
-
-  // temporary till item images are dynamimcally stored in URI
-  const getImage = (item: Item) => {
-    switch (item.type) {
-      case "FOOD":
-        return FoodImages.get(item.familyIndex!);
-      case "REVIVE":
-        return ReviveImages.get(item.familyIndex!);
-      default:
-        return;
-    }
-  }
-
 
   ///////////////
   // DISPLAY
@@ -43,32 +23,43 @@ export const Rewards = (props: Props) => {
 
     return (
       <tr>
-        {/* <TableData><Image src={item.uri!} /></TableData> */}
-        <TableData><Image src={getImage(item)} /></TableData>
-        <TableData>{item.name!}</TableData>
+        <TableData><Image src={item!.uri} /></TableData>
+        <TableData>{item!.name}</TableData>
         <TableData>x{Number(amount)}</TableData>
       </tr>
     )
   }
 
   const ItemsList = () => {
-    const items = props.log?.droptable.keys;
-    const amounts = props.log?.droptable.results!;
     let list = [];
+    // display the latest log for account
+    // TODO: display all logs
+    const logs = props.account.lootboxLogs?.revealed;
+    if (logs && logs.length > 0) {
+      // console.log(logs)
+      const log = props.utils.getLog(logs[logs.length - 1].entityIndex);
+      // console.log(log);
+      const items = log.droptable.keys;
+      const amounts = log.droptable.results!;
 
-    for (let i = 0; i < items.length; i++) {
-      if (amounts[i] > 0) list.push(parseItem(items[i], amounts[i]));
+      for (let i = 0; i < items.length; i++) {
+        if (amounts[i] > 0) list.push(parseItem(items[i], amounts[i]));
+      }
     }
 
     return (
       <ResultTable>
-        <tr>
-          <TableTitle></TableTitle>
-          <TableTitle>Item</TableTitle>
-          <TableTitle>Quantity</TableTitle>
-        </tr>
-        {list}
-      </ResultTable>
+        <thead>
+          <tr>
+            <TableTitle></TableTitle>
+            <TableTitle>Item</TableTitle>
+            <TableTitle>Quantity</TableTitle>
+          </tr>
+        </thead>
+        <tbody>
+          {list}
+        </tbody >
+      </ResultTable >
     )
   }
 
