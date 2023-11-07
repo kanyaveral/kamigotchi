@@ -4,32 +4,40 @@ import { kamiIcon } from 'assets/images/icons/menu';
 
 import { MenuButton } from 'layers/react/components/library/MenuButton';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { dataStore } from 'layers/react/store/createStore';
+import { VisibleModals, dataStore } from 'layers/react/store/createStore';
 
 export function registerPartyButton() {
   registerUIComponent(
     'PartyButton',
     {
-      colStart: 76,
-      colEnd: 79,
+      colStart: 3,
+      colEnd: 10,
       rowStart: 3,
       rowEnd: 10,
     },
     (layers) => of(layers),
     () => {
       const { visibleButtons } = dataStore();
-      const modalsToHide = { dialogue: false, leaderboard: false };
+      const modalsToHide: Partial<VisibleModals> = {
+        bridgeERC20: false,
+        bridgeERC721: false,
+        dialogue: false,
+        emaBoard: false,
+        kami: false,
+        leaderboard: false,
+        map: false,
+        nameKami: false,
+      };
 
       return (
         <MenuButton
           id='party_button'
+          image={kamiIcon}
+          tooltip='Party'
           targetDiv='party'
-          text='Party'
           hideModals={modalsToHide}
           visible={visibleButtons.party}
-        >
-          <img style={{ height: '100%', width: 'auto' }} src={kamiIcon} alt='kami_icon' />
-        </MenuButton>
+        />
       );
     }
   );

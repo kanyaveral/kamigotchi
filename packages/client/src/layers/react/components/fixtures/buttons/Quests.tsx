@@ -35,13 +35,12 @@ export function registerQuestsButton() {
       return (
         <MenuButton
           id='quests_button'
+          image={questsIcon}
+          tooltip='Quests'
           targetDiv='quests'
-          text='Quests'
           hideModals={modalsToHide}
           visible={visibleButtons.quests}
-        >
-          <img style={{ height: '100%', width: 'auto' }} src={questsIcon} alt='chat_icon' />
-        </MenuButton>
+        />
       );
     }
   );

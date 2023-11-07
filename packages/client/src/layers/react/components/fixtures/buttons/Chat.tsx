@@ -23,13 +23,12 @@ export function registerChatButton() {
       return (
         <MenuButton
           id='chat_button'
+          image={chatIcon}
+          tooltip='Chat'
           targetDiv='lootboxes'
-          text='Chat'
           hideModals={modalsToHide}
           visible={visibleButtons.chat}
-        >
-          <img style={{ height: '100%', width: 'auto' }} src={chatIcon} alt='chat_icon' />
-        </MenuButton>
+        />
       );
     }
   );
