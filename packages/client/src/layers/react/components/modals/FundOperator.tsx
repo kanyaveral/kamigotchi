@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { useBalance } from 'wagmi';
 import { EntityID, EntityIndex } from '@latticexyz/recs';
 import { waitForActionCompletion } from '@latticexyz/std-client';
+import crypto from "crypto";
 
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
@@ -77,33 +78,33 @@ export function registerFundOperatorModal() {
         const network = networks.get(selectedAddress);
         const account = network!.api.player.account;
 
-        const actionID = `Funding Operator` as EntityID;
-        actions.add({
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
+        actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'AccountFund',
+          params: [amount.toString()],
+          description: `Funding Operator ${amount.toString()}`,
           execute: async () => {
             return account.fund(amount.toString());
           },
         });
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;
-        await waitForActionCompletion(actions.Action, actionIndex);
+        await waitForActionCompletion(actions!.Action, actionIndex);
       };
 
       const refundTx = async () => {
-        const actionID = `Refunding Owner` as EntityID;
-        actions.add({
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
+        actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'AccountRefund',
+          params: [amount.toString()],
+          description: `Refunding Owner ${amount.toString()}`,
           execute: async () => {
             return account.refund(amount.toString());
           },
         });
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;
-        await waitForActionCompletion(actions.Action, actionIndex);
+        await waitForActionCompletion(actions!.Action, actionIndex);
       };
 
 

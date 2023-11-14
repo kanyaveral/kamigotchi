@@ -26,7 +26,7 @@ export function registerWalletConnecter() {
     (layers) => of(layers),
     (layers) => {
       const { chain } = useNetwork();
-      const { toggleVisibleButtons, toggleVisibleModals } = dataStore();
+      const { toggleVisibleButtons, toggleVisibleModals, toggleFixtures } = dataStore();
 
       const {
         address: connectorAddress,
@@ -76,6 +76,7 @@ export function registerWalletConnecter() {
         if (!isConnected || !isCorrectNetwork) {
           toggleVisibleModals(false);
           toggleVisibleButtons(false);
+          toggleFixtures(false);
         }
       }, [chain, connector, connectorAddress, isConnected, isCorrectNetwork]);
 
@@ -136,16 +137,16 @@ export function registerWalletConnecter() {
       );
 
       return (
-        <ModalWrapper id='wallet-connector' style={{ display: modalDisplay() }}>
-          <ModalContent style={{ pointerEvents: 'auto' }}>
+        <Wrapper id='wallet-connector' style={{ display: modalDisplay() }}>
+          <Content style={{ pointerEvents: 'auto' }}>
             <Title>{title}</Title>
             <Description>({status})</Description>
             <Description>{description}</Description>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               {BottomButton()}
             </div>
-          </ModalContent>
-        </ModalWrapper>
+          </Content>
+        </Wrapper>
       );
     }
   );
@@ -172,7 +173,7 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `;
 
-const ModalContent = styled.div`
+const Content = styled.div`
   display: grid;
   justify-content: center;
   background-color: white;
@@ -185,7 +186,7 @@ const ModalContent = styled.div`
   border-color: black;
 `;
 
-const ModalWrapper = styled.div`
+const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   animation: ${fadeIn} 1.3s ease-in-out;

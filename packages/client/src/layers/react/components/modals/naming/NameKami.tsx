@@ -2,6 +2,7 @@ import React from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { EntityID } from '@latticexyz/recs';
+import crypto from "crypto";
 
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { SingleInputTextForm } from 'layers/react/components/library/SingleInputTextForm';
@@ -55,12 +56,12 @@ export function registerNameKamiModal() {
 
       // queue the naming action up
       const nameKami = (kami: Kami, name: string) => {
-        const actionID = `Renaming ${kami.name}` as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'KamiName',
+          params: [kami.id, name],
+          description: `Renaming ${kami.name}`,
           execute: async () => {
             return api.pet.name(kami.id, name);
           },

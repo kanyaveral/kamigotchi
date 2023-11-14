@@ -47,7 +47,7 @@ export function registerBurnerDetector() {
     ({ connectedEOA, network }) => {
       const { isConnected } = useAccount(); // refers to Connector
       const { setBurnerInfo } = useNetworkSettings();
-      const { toggleVisibleButtons, toggleVisibleModals } = dataStore();
+      const { toggleVisibleButtons, toggleVisibleModals, toggleFixtures } = dataStore();
       const [detectedPrivateKey, setDetectedPrivateKey] = useLocalStorage('operatorPrivateKey', '');
       const [detectedAddress, setDetectedAddress] = useState('');
       const [isMismatched, setIsMismatched] = useState(false);
@@ -77,6 +77,7 @@ export function registerBurnerDetector() {
         if (isMismatched) {
           toggleVisibleModals(false);
           toggleVisibleButtons(false);
+          toggleFixtures(false);
         }
       }, [isMismatched]);
 
@@ -151,8 +152,8 @@ export function registerBurnerDetector() {
 
 
       return (
-        <ModalWrapper id='burner-detector' style={{ display: modalDisplay() }}>
-          <ModalContent style={{ pointerEvents: 'auto' }}>
+        <Wrapper id='burner-detector' style={{ display: modalDisplay() }}>
+          <Content style={{ pointerEvents: 'auto' }}>
             <Title>Burner Address Detector</Title>
             <br />
             <Description>Connected: {network.connectedAddress.get()}</Description>
@@ -166,8 +167,8 @@ export function registerBurnerDetector() {
               {GenerateButton()}
               {SubmitButton()}
             </ActionWrapper>
-          </ModalContent>
-        </ModalWrapper>
+          </Content>
+        </Wrapper>
       );
     }
   );
@@ -203,13 +204,13 @@ const Input = styled.input`
   font-family: Pixel;
 `;
 
-const ModalWrapper = styled.div`
+const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   animation: ${fadeIn} 1.3s ease-in-out;
 `;
 
-const ModalContent = styled.div`
+const Content = styled.div`
   width: 99%;    
   border-radius: 10px;
   border-style: solid;

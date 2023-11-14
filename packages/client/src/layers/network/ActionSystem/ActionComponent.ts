@@ -4,10 +4,14 @@ export function defineActionComponent<T = undefined>(world: World) {
   const Action = defineComponent(
     world,
     {
-      state: Type.Number,
-      on: Type.OptionalEntity,
+      action: Type.OptionalString,
+      description: Type.String,
+      params: Type.OptionalEntityArray,
       metadata: Type.OptionalT,
+      on: Type.OptionalEntity,
       overrides: Type.OptionalStringArray,
+      state: Type.Number,
+      time: Type.Number,
       txHash: Type.OptionalString,
     },
     { id: "Action" }

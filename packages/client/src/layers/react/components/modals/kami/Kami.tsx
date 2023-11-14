@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { map, merge } from 'rxjs';
 import { EntityID } from '@latticexyz/recs';
+import crypto from "crypto";
 
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { Kami, getKami } from 'layers/react/shapes/Kami';
-import { getRegistrySkills } from 'layers/react/shapes/Skill';
+import { Skill, getRegistrySkills } from 'layers/react/shapes/Skill';
 import { useSelectedEntities } from 'layers/react/store/selectedEntities';
 import { Banner } from './Banner';
 import { KillLogs } from './KillLogs';
@@ -114,27 +115,27 @@ export function registerKamiModal() {
       // ACTIONS
 
       const levelUp = (kami: Kami) => {
-        const actionID = `Leveling up ${kami.name}` as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'KamiLevel',
+          params: [kami.id],
+          description: `Leveling up ${kami.name}`,
           execute: async () => {
             return api.pet.level(kami.id);
           },
         })
       }
 
-      const upgradeSkill = (kami: Kami, skillIndex: number) => {
-        const actionID = `Upgrading skill ` as EntityID;
+      const upgradeSkill = (kami: Kami, skill: Skill) => {
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'SkillUpgrade',
+          params: [kami.id, skill.index],
+          description: `Upgrading ${skill.name} for ${kami.name}`,
           execute: async () => {
-            return api.skill.upgrade(kami.id, skillIndex);
+            return api.skill.upgrade(kami.id, skill.index);
           },
         })
       }
@@ -147,11 +148,13 @@ export function registerKamiModal() {
         if (tab === 'traits') {
           return <Traits kami={getSelectedKami()} />
         } else if (tab === 'skills') {
-          return <Skills
-            skills={getRegistrySkills(layers)}
-            kami={getSelectedKami()}
-            actions={{ upgrade: upgradeSkill }}
-          />
+          return (
+            <Skills
+              skills={getRegistrySkills(layers)}
+              kami={getSelectedKami()}
+              actions={{ upgrade: upgradeSkill }}
+            />
+          );
         } else if (tab === 'battles') {
           return <KillLogs kami={getSelectedKami()} />
         }

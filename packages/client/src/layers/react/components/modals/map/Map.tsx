@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import { EntityID } from '@latticexyz/recs';
+import crypto from "crypto";
 
 import { RoomInfo } from './RoomInfo';
 import { mapIcon } from 'assets/images/icons/menu';
@@ -78,12 +79,12 @@ export function registerMapModal() {
 
       const move = (location: number) => {
         const room = getRoomByLocation(layers, location);
-        const actionID = `Moving to ${room.name}` as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'AccountMove',
+          params: [location],
+          description: `Moving to ${room.name}`,
           execute: async () => {
             return api.account.move(location);
           },

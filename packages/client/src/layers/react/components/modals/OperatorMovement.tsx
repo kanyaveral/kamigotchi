@@ -2,15 +2,13 @@ import React, { useEffect } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
 import { EntityID } from '@latticexyz/recs';
+import crypto from "crypto";
 
 import { registerUIComponent } from 'layers/react/engine/store';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { dataStore } from 'layers/react/store/createStore';
-import {
-  Room,
-  getRoomByLocation,
-} from 'layers/react/shapes/Room';
+import { Room, getRoomByLocation } from 'layers/react/shapes/Room';
 import { useSelectedEntities } from 'layers/react/store/selectedEntities';
 
 // TODO: update this file and component name to be more desctiptive
@@ -46,13 +44,13 @@ export function registerOperatorMovementModal() {
 
       const move = () => {
         if (!selectedRoom) return;
-        const actionID = `Moving to ${selectedRoom.name}` as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
 
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'AccountMove',
+          params: [location],
+          description: `Moving to ${selectedRoom.name}`,
           execute: async () => {
             const roomMovment = await api.player.account.move(location);
             setVisibleModals({ ...visibleModals, roomMovement: false });

@@ -9,6 +9,7 @@ import {
 import { waitForActionCompletion } from '@latticexyz/std-client';
 import { IconButton } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
+import crypto from "crypto";
 
 import { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
@@ -129,7 +130,7 @@ export function registerAccountRegistrar() {
       const { details: accountDetails, setDetails: setAccountDetails } = useKamiAccount();
       const { burnerInfo, selectedAddress, networks } = useNetworkSettings();
       const { visibleModals, setVisibleModals } = dataStore();
-      const { toggleVisibleButtons, toggleVisibleModals } = dataStore();
+      const { toggleVisibleButtons, toggleVisibleModals, toggleFixtures } = dataStore();
       const [isVisible, setIsVisible] = useState(false);
 
       // set visibility of this validator
@@ -153,6 +154,7 @@ export function registerAccountRegistrar() {
         const accountDetails = getAccountDetails(accountIndex);
         if (!accountDetails.id) {
           toggleVisibleButtons(false);
+          toggleFixtures(false);
           toggleVisibleModals(false);
         }
 
@@ -218,12 +220,12 @@ export function registerAccountRegistrar() {
         const api = network!.api.player;
 
         console.log('CREATING ACCOUNT FOR:', selectedAddress);
-        const actionID = `Creating Account: ${username}` as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'AccountCreate',
+          params: [burnerInfo.connected, username],
+          description: `Creating Account for ${username}`,
           execute: async () => {
             return api.account.register(burnerInfo.connected, username);
           },
@@ -233,18 +235,18 @@ export function registerAccountRegistrar() {
         // return waitForActionCompletion(actions?.Action, actionIndex);
       }
 
-      // transaction to mint the Mint ERC20 Token
+      // transaction to mint the Mint Token (ERC20)
       const mintToken = (amount: number, value: number) => {
         const network = networks.get(selectedAddress);
         const api = network!.api.player;
 
         console.log(`MINTING ${amount} TOKENS`);
-        const actionID = (amount == 1 ? `Minting Token` : `Minting Tokens`) as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'AccountCreate',
+          params: [amount, value],
+          description: `Minting ${amount} $KAMI for ${value}`,
           execute: async () => {
             return api.mint.mintToken(amount, value);
           },
@@ -317,8 +319,8 @@ export function registerAccountRegistrar() {
       // DISPLAY
 
       return (
-        <ModalWrapper id='account-registrar' style={{ display: isVisible ? 'block' : 'none' }}>
-          <ModalContent style={{ pointerEvents: 'auto' }}>
+        <Wrapper id='account-registrar' style={{ display: isVisible ? 'block' : 'none' }}>
+          <Content style={{ pointerEvents: 'auto' }}>
             <Title>Register Your Account</Title>
             <Subtitle>(no registered account for connected address)</Subtitle>
             <Header>Connected Addresses</Header>
@@ -331,8 +333,8 @@ export function registerAccountRegistrar() {
               hasButton={true}
               onSubmit={(v: string) => handleAccountCreation(v)}
             />
-          </ModalContent>
-        </ModalWrapper>
+          </Content>
+        </Wrapper>
       );
     }
   );
@@ -347,13 +349,13 @@ const fadeIn = keyframes`
   }
 `;
 
-const ModalWrapper = styled.div`
+const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   animation: ${fadeIn} 1.3s ease-in-out;
 `;
 
-const ModalContent = styled.div`
+const Content = styled.div`
   background-color: white;
   border-style: solid;
   border-width: 2px;

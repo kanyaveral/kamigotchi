@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { EntityID, EntityIndex, Has, HasValue, runQuery } from '@latticexyz/recs';
 import { waitForActionCompletion } from '@latticexyz/std-client';
+import crypto from "crypto";
 
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
@@ -87,12 +88,12 @@ export function registerLootboxesModal() {
       // ACTIONS
 
       const openTx = async (index: number, amount: number) => {
-        const actionID = (`Opening ${amount} lootbox${amount > 1 ? "es" : ""}`) as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'LootboxCommit',
+          params: [index, amount],
+          description: `Opening ${amount} of lootbox ${index}`,
           execute: async () => {
             return player.lootbox.startReveal(index, amount);
           },
@@ -105,12 +106,12 @@ export function registerLootboxesModal() {
       };
 
       const revealTx = async (id: EntityID) => {
-        const actionID = (`Revealing lootboxes...`) as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'LootboxReveal',
+          params: [id],
+          description: `Inspecting lootbox contents`,
           execute: async () => {
             return player.lootbox.executeReveal(id);
           },

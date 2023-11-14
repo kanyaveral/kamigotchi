@@ -3,6 +3,7 @@ import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { useBalance, useContractRead } from 'wagmi';
 import { EntityID } from '@latticexyz/recs';
+import crypto from "crypto";
 
 import { abi } from "abi/Farm20ProxySystem.json"
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
@@ -11,7 +12,6 @@ import { registerUIComponent } from 'layers/react/engine/store';
 import { getAccountFromBurner } from 'layers/react/shapes/Account';
 import { useKamiAccount } from 'layers/react/store/kamiAccount';
 import { useNetworkSettings } from 'layers/react/store/networkSettings';
-
 
 export function registerERC20BridgeModal() {
   registerUIComponent(
@@ -72,12 +72,12 @@ export function registerERC20BridgeModal() {
         const actions = network!.actions;
         const api = network!.api.player;
 
-        const actionID = `Depositing $MUSU` as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'MUSUDeposit',
+          params: [amount],
+          description: `Depositing ${amount} $MUSU`,
           execute: async () => {
             return api.ERC20.deposit(amount);
           },
@@ -90,12 +90,12 @@ export function registerERC20BridgeModal() {
         const actions = network!.actions;
         const api = network!.api.player;
 
-        const actionID = `Withdrawing $MUSU` as EntityID;
+        const actionID = crypto.randomBytes(32).toString("hex") as EntityID;
         actions?.add({
           id: actionID,
-          components: {},
-          requirement: () => true,
-          updates: () => [],
+          action: 'MUSUWithdraw',
+          params: [amount],
+          description: `Withdrawing ${amount} $MUSU`,
           execute: async () => {
             // unimplemented
             // return api.ERC20.withdraw(amount);
