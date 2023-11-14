@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { map } from 'rxjs';
 import styled from 'styled-components';
 
@@ -35,7 +35,7 @@ export function registerActionQueueFixture() {
           style={{ display: fixtures.actionQueue ? 'block' : 'none' }}
         >
           <Content style={{ pointerEvents: 'auto' }}>
-            {(mode === 'expanded') && <Log network={layers.network} />}
+            {(mode !== 'collapsed') && <Log network={layers.network} />}
             <Controls
               mode={mode}
               setMode={setMode}
@@ -53,20 +53,22 @@ const Wrapper = styled.div`
   align-items: left;
 `;
 
+// cancer. just absolute cancer
 const Content = styled.div`
   position: absolute;
-  bottom: 1vw;
-  right: 1vw;
-  width: 33vw;
   padding: .2vw;
-  max-height: 33vh;
+  
+  right: 1.33vw;
+  width: 32.66vw;
+  max-width: 32.66vw;
+
+  bottom: 3vh;
+  max-height: 23vh;
 
   border: solid black 2px;
   border-radius: 10px;
-  
 
   background-color: white;  
   display: flex;
   flex-flow: column nowrap;
-
 `;

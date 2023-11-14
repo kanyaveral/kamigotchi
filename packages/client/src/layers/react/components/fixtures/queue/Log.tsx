@@ -1,17 +1,23 @@
 import { getComponentEntities, getComponentValueStrict } from "@latticexyz/recs";
-import styled from "styled-components";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PendingIcon from '@mui/icons-material/Pending';
+import ErrorIcon from '@mui/icons-material/Error';
+import CancelIcon from '@mui/icons-material/Cancel';
 import moment from 'moment';
+import styled from "styled-components";
 
 import { NetworkLayer } from "layers/network/types";
 import { ActionStateString, ActionState } from 'layers/network/ActionSystem/constants';
 import { Tooltip } from "layers/react/components/library/Tooltip";
 
-// Color coding of action queue
-type ColorMapping = { [key: string]: string };
-const statusColors: ColorMapping = {
-  "pending": "orange",
-  "failed": "red",
-  "complete": "green",
+// Color coded icon mapping of action queue
+type ColorMapping = { [key: string]: any };
+const statusIcons: ColorMapping = {
+  "executing": <PendingIcon style={{ color: 'yellow' }} />,
+  "pending": <PendingIcon style={{ color: 'orange' }} />,
+  "complete": <CheckCircleIcon style={{ color: 'green' }} />,
+  "failed": <ErrorIcon style={{ color: 'red' }} />,
+  "cancelled": <CancelIcon style={{ color: 'red' }} />,
 }
 
 interface Props {
@@ -26,17 +32,18 @@ export const Log = (props: Props) => {
     return moment(time).fromNow();
   }
 
+  // generate the status icon
   const Status = (status: string, metadata: string) => {
-    const text = status.toLowerCase();
-    const color = statusColors[text];
-    const reason = metadata.substring(metadata.indexOf(":") + 1);
-    return (
-      <Tooltip text={[reason]}>
-        <Text style={{ color: `${color}`, display: "inline" }}>
-          {text}
-        </Text>
-      </Tooltip>
-    );
+    const icon = statusIcons[status.toLowerCase()];
+
+    let tooltip = [status];
+    if (metadata) {
+      const event = metadata.substring(0, metadata.indexOf(":"));
+      const reason = metadata.substring(metadata.indexOf(":") + 1);
+      tooltip = [`${status} (${event})`, '', `${reason}`]
+    }
+
+    return (<Tooltip text={tooltip}>{icon}</Tooltip>);
   }
 
   const Description = (action: any) => {
@@ -70,9 +77,13 @@ export const Log = (props: Props) => {
       let metadata = actionData.metadata ?? '';
       return (
         <Row key={`action${entityIndex}`}>
-          {Status(state, metadata)}
-          {Description(actionData)}
-          {Time(actionData.time)}
+          <RowSection1>
+            {Status(state, metadata)}
+            {Description(actionData)}
+          </RowSection1>
+          <RowSection2>
+            {Time(actionData.time)}
+          </RowSection2>
         </Row>
       );
     })
@@ -86,22 +97,25 @@ export const Log = (props: Props) => {
 }
 
 const Content = styled.div`
+  border: solid grey .14vw;
+  border-radius: 10px;
+
+  background-color: #ddd;
+  padding: .2vw;
+  overflow-y: scroll;
+
   display: flex;
   flex-direction: column;
-  background-color: #ddd;
-  border-radius: 10px;
-  padding: 1vw;
-  border: solid grey 2px;
-
-  overflow-y: scroll;
+  flex-grow: 1;
 `;
 
 const Row = styled.div`
   padding: .2vw;
+  height: 100%;
 
   display: flex;
   flex-flow: row nowrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
 
   font-family: Pixel;
@@ -109,11 +123,23 @@ const Row = styled.div`
   text-align: left;
 `;
 
+const RowSection1 = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: .2vw;
+`;
+
+const RowSection2 = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+`;
 
 const Text = styled.div`
   font-size: .7vw;
   color: #333;
   text-align: left;
-  padding: 2px;
+  padding: .2vw;
   font-family: Pixel;
 `;
