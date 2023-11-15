@@ -1,27 +1,29 @@
-import ErrorIcon from '@mui/icons-material/Error';
 import styled from "styled-components";
 import { useBalance } from "wagmi";
+import ErrorIcon from '@mui/icons-material/Error';
 
-import PlaceHolderIcon from 'assets/images/icons/exit_native.png';
+import PlaceHolderIcon1 from 'assets/images/icons/exit_native.png';
+import PlaceHolderIcon2 from 'assets/images/icons/home_native.png';
+import PlaceHolderIcon3 from 'assets/images/icons/sound_native.png';
 import { GasConstants } from 'constants/gas';
 import { NetworkLayer } from "layers/network/types";
 import { IconButton } from "layers/react/components/library/IconButton";
+import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { useKamiAccount } from 'layers/react/store/kamiAccount';
 import { useComponentSettings } from 'layers/react/store/componentSettings';
 import { playClick } from 'utils/sounds';
-import { Tooltip } from '../../library/Tooltip';
+
 
 interface Props {
-  mode: 'collapsed' | 'expanded';
+  mode: number;
   setMode: Function;
   network: NetworkLayer;
 }
 
 export const Controls = (props: Props) => {
+  const { mode, setMode } = props;
   const { details: accountDetails } = useKamiAccount();
   const { modals, setModals } = useComponentSettings();
-  const { mode, setMode } = props;
-
 
   const { data: OperatorBal } = useBalance({
     address: accountDetails.operatorAddress as `0x${string}`,
@@ -29,7 +31,7 @@ export const Controls = (props: Props) => {
   });
 
   const toggleMode = () => {
-    setMode(mode === 'collapsed' ? 'expanded' : 'collapsed');
+    setMode((mode + 1) % 3);
   }
 
   const clickGasIcon = () => {
@@ -40,17 +42,11 @@ export const Controls = (props: Props) => {
     });
   }
 
-  const ToggleButton = () => {
-    const icon = PlaceHolderIcon;
-    return (
-      <IconButton
-        id='toggle'
-        onClick={() => toggleMode()}
-        img={icon}
-      />
-    );
-  }
 
+  //////////////////
+  // RENDERINGS
+
+  // gas warning icon, becomes more prominent as gas is depleted
   const GasWarning = () => {
     let warning = '';
     let color = '';
@@ -79,12 +75,29 @@ export const Controls = (props: Props) => {
     )
   }
 
+  // button to toggle the modal between difference sizes
+  const ToggleButton = () => {
+    const iconMapping = [
+      PlaceHolderIcon1,
+      PlaceHolderIcon2,
+      PlaceHolderIcon3,
+    ];
+
+    return (
+      <IconButton
+        id='toggle'
+        onClick={() => toggleMode()}
+        img={iconMapping[mode]}
+      />
+    );
+  }
+
   return (
     <Row>
-      <Symbolics>
+      <RowPrefix>
         <GasWarning />
         <Text>TX Queue</Text>
-      </Symbolics>
+      </RowPrefix>
       <ToggleButton />
     </Row>
   );
@@ -100,11 +113,11 @@ const Row = styled.div`
   justify-content: space-between;
 `;
 
-const Symbolics = styled.div`
+const RowPrefix = styled.div`
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  gap: .2vw;
+  gap: .5vw;
 `;
 
 const Text = styled.div`
