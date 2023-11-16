@@ -78,6 +78,7 @@ export function createComponents(world: World) {
 
     // Indices
     Index: defineNumberEZ("Index", "component.Index"), // generic index
+    AccountIndex: defineNumberEZ("AccountIndex", "component.Index.Account"),
     BackgroundIndex: defineNumberEZ("BackgroundIndex", "component.Index.Background"),
     BodyIndex: defineNumberEZ("BodyIndex", "component.Index.Body"),
     ColorIndex: defineNumberEZ("ColorIndex", "component.Index.Color"),
@@ -148,6 +149,7 @@ export function createComponents(world: World) {
 
     // speeeeecial
     CanName: defineBoolEZ("CanName", "component.Can.Name"),
+    FavoriteFood: defineStringEZ("FavoriteFood", "component.Favorite.Food"),
     LoadingState: defineLoadingStateComponent(world),
     MediaURI: defineStringEZ("MediaURI", "component.MediaURI"),
     OperatorAddress: defineStringEZ("OperatorAddress", "component.Address.Operator"),
