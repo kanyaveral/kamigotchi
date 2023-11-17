@@ -59,7 +59,6 @@ export function registerInventoryModal() {
     },
 
     ({ data }) => {
-      // console.log('mInventory', data);
       const getInventories = () => {
         let accInv = data.account.inventories;
         let inventories: Inventory[] = [];

@@ -113,6 +113,8 @@ export const getAccount = (
     creationTs: getComponentValue(StartTime, entityIndex)?.value as number,
   };
 
+  // prevent queries account hasnt loaded yet
+  if (!account.ownerEOA) return account;
 
   /////////////////
   // OPTIONAL DATA
