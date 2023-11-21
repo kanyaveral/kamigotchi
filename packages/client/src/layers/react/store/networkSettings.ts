@@ -4,7 +4,7 @@ import { NetworkLayer } from 'src/layers/network/types';
 
 
 export interface State {
-  burnerInfo: BurnerSettings;
+  burner: Burner;
   selectedAddress: string;
   networks: Map<string, NetworkLayer>;
   validations: Validations;
@@ -13,14 +13,18 @@ export interface State {
 interface Actions {
   addNetwork: (address: string, network: NetworkLayer) => void;
   setSelectedAddress: (address: string) => void;
-  setBurnerInfo: (burnerInfo: BurnerSettings) => void;
+  setBurner: (burner: Burner) => void;
   setValidations: (validations: Validations) => void;
 }
 
-interface BurnerSettings {
-  connected: string;
-  detected: string;
-  detectedPrivateKey: string;
+interface Burner {
+  connected: {
+    address: string;
+  };
+  detected: {
+    address: string;
+    key: string;
+  }
 }
 
 interface Validations {
@@ -31,24 +35,28 @@ interface Validations {
 
 export const useNetworkSettings = create<State & Actions>((set) => {
   const initialState: State = {
-    burnerInfo: {
-      connected: '',
-      detected: '',
-      detectedPrivateKey: '',
+    burner: {
+      connected: {
+        address: '',
+      },
+      detected: {
+        address: '',
+        key: '',
+      },
     },
     selectedAddress: '',
     networks: new Map<string, NetworkLayer>(),
     validations: {
       isConnected: false,
-      burnerMatches: false,
       chainMatches: false,
+      burnerMatches: false,
     }
   };
 
   return {
     ...initialState,
-    setBurnerInfo: (burnerInfo: BurnerSettings) => set(
-      (state: State) => ({ ...state, burnerInfo })
+    setBurner: (burner: Burner) => set(
+      (state: State) => ({ ...state, burner })
     ),
     setSelectedAddress: (selectedAddress: string) => set(
       (state: State) => ({ ...state, selectedAddress })
