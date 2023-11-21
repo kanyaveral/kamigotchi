@@ -24,6 +24,30 @@ interface Actions {
 ////////////////
 // BUTTONS
 
+////////////////
+// OVERVIEW
+
+interface State {
+  buttons: Buttons;
+  fixtures: Fixtures;
+  modals: Modals;
+  validators: Validators;
+}
+
+interface Actions {
+  setButtons: (data: Buttons) => void;
+  setFixtures: (data: Fixtures) => void;
+  setModals: (data: Modals) => void;
+  setValidators: (data: Validators) => void;
+  toggleButtons: (isOn: boolean) => void;
+  toggleModals: (isOn: boolean) => void;
+  toggleFixtures: (isOn: boolean) => void;
+}
+
+
+////////////////
+// BUTTONS
+
 export interface Buttons {
   help: boolean;
   inventory: boolean;
@@ -63,6 +87,7 @@ export const toggleFixtures = (isOn: boolean): Fixtures => ({
 // MODALS
 
 export interface Modals {
+  accountOperator: boolean;
   bridgeERC20: boolean;
   bridgeERC721: boolean;
   buy: boolean;
@@ -81,7 +106,6 @@ export interface Modals {
   merchant: boolean;
   node: boolean;
   operatorFund: boolean;
-  operatorUpdater: boolean;
   party: boolean;
   quests: boolean;
   roomMovement: boolean;
@@ -89,6 +113,7 @@ export interface Modals {
 }
 
 export const toggleModals = (isOn: boolean): Modals => ({
+  accountOperator: isOn,
   bridgeERC20: isOn,
   bridgeERC721: isOn,
   buy: isOn,
@@ -107,7 +132,6 @@ export const toggleModals = (isOn: boolean): Modals => ({
   merchant: isOn,
   node: isOn,
   operatorFund: isOn,
-  operatorUpdater: isOn,
   party: isOn,
   quests: isOn,
   roomMovement: isOn,
@@ -146,6 +170,7 @@ export const useComponentSettings = create<State & Actions>((set) => {
       notification: true,
     },
     modals: {
+      accountOperator: false,
       bridgeERC20: false,
       bridgeERC721: false,
       buy: false,
@@ -163,8 +188,7 @@ export const useComponentSettings = create<State & Actions>((set) => {
       merchant: false,
       nameKami: false,
       node: false,
-      operatorFund: true,
-      operatorUpdater: false,
+      operatorFund: false,
       party: false,
       quests: false,
       roomMovement: false,
