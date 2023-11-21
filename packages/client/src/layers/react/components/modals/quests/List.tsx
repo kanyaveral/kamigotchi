@@ -19,6 +19,7 @@ interface Props {
     completeQuest: (quest: Quest) => void;
   };
   utils: {
+    setNumAvail: (num: number) => void;
     queryItemRegistry: (index: number) => EntityIndex;
     queryFoodRegistry: (index: number) => EntityIndex;
     queryReviveRegistry: (index: number) => EntityIndex;
@@ -247,6 +248,31 @@ export const List = (props: Props) => {
   ///////////////////
   // DISPLAY
 
+  const getAvaliableQuests = () => {
+    // get available, non-repeatable quests from registry
+    const oneTimes = props.registryQuests.filter((q: Quest) => {
+      return (
+        meetsRequirements(q)
+        && meetsMax(props.account, q)
+        && !q.repeatable
+      );
+    });
+
+    // get available, repeatable quests from registry
+    const repeats = props.registryQuests.filter((q: Quest) => {
+      return (
+        meetsRequirements(q)
+        && q.repeatable
+        && meetsRepeat(q)
+      );
+    });
+
+    const quests = repeats.concat(oneTimes);
+    props.utils.setNumAvail(quests.length);
+
+    return quests;
+  }
+
   const AcceptButton = (quest: Quest) => {
     let tooltipText = '';
 
@@ -338,25 +364,7 @@ export const List = (props: Props) => {
   }
 
   const AvailableQuests = () => {
-    // get available, non-repeatable quests from registry
-    const oneTimes = props.registryQuests.filter((q: Quest) => {
-      return (
-        meetsRequirements(q)
-        && meetsMax(props.account, q)
-        && !q.repeatable
-      );
-    });
-
-    // get available, repeatable quests from registry
-    const repeats = props.registryQuests.filter((q: Quest) => {
-      return (
-        meetsRequirements(q)
-        && q.repeatable
-        && meetsRepeat(q)
-      );
-    });
-
-    const quests = repeats.concat(oneTimes);
+    const quests = getAvaliableQuests();
 
     if (quests.length == 0)
       return <EmptyText>No available quests. Do something else.</EmptyText>;
@@ -403,6 +411,7 @@ export const List = (props: Props) => {
   }
 
   const OngoingQuests = () => {
+    getAvaliableQuests(); // update numAvail
     const rawQuests = [...props.account.quests?.ongoing ?? []];
 
     if (rawQuests.length == 0)

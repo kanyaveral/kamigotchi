@@ -12,6 +12,7 @@ import {
 import { registerAccountInfoFixture } from './fixtures/AccountInfo';
 import { registerActionQueueFixture } from './fixtures/queue/';
 import { registerWalletFixture } from './fixtures/Wallet';
+import { registerNotificationFixture } from './fixtures/Notifications';
 
 import { registerDialogueModal } from './modals/dialogue';
 import { registerKamiModal } from './modals/kami';
@@ -58,6 +59,7 @@ export function registerUIComponents() {
   registerAccountInfoFixture();
   registerActionQueueFixture();
   registerWalletFixture();
+  registerNotificationFixture();
 
   // menu modals
   registerHelpModal();

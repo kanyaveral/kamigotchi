@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import { EntityID, EntityIndex } from '@latticexyz/recs';
 import crypto from "crypto";
@@ -43,6 +43,7 @@ export function registerQuestsModal() {
             QuestIndex,
             Value,
           },
+          notifications
         },
       } = layers;
 
@@ -68,6 +69,7 @@ export function registerQuestsModal() {
           return {
             layers,
             actions,
+            notifications,
             api: player,
             data: {
               account,
@@ -78,10 +80,33 @@ export function registerQuestsModal() {
       );
     },
 
-    ({ layers, actions, api, data }) => {
-      // console.log('mQuest:', data);
+    ({ layers, actions, notifications, api, data }) => {
       const [tab, setTab] = useState<TabType>('AVAILABLE');
+      const [numAvail, setNumAvail] = useState(0);
 
+      useEffect(() => {
+        const id = "Available Quests";
+        if (notifications.has(id as EntityID)) {
+          if (numAvail == 0)
+            notifications.remove(id as EntityID);
+          notifications.update(
+            id as EntityID,
+            {
+              description:
+                `There ${numAvail == 1 ? 'is' : 'are'} ${numAvail} quest${numAvail == 1 ? '' : 's'} you can accept.`
+            });
+        } else {
+          if (numAvail > 0)
+            notifications.add({
+              id: id as EntityID,
+              title: `Available Quest${numAvail == 1 ? '' : 's'}!`,
+              description:
+                `There ${numAvail == 1 ? 'is' : 'are'} ${numAvail} quest${numAvail == 1 ? '' : 's'} you can accept.`,
+              time: Date.now().toString(),
+              modal: "quests",
+            });
+        }
+      }, [numAvail]);
 
       ///////////////////
       // INTERACTIONS
@@ -128,6 +153,7 @@ export function registerQuestsModal() {
             mode={tab}
             actions={{ acceptQuest, completeQuest }}
             utils={{
+              setNumAvail: (num: number) => setNumAvail(num),
               getItem: (index: EntityIndex) => getItem(layers, index),
               getRoom: (location: number) => getRoomByLocation(layers, location),
               getQuestByIndex: (index: number) => getQuestByIndex(layers, index),
