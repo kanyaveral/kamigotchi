@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import styled from "styled-components";
 
 import { feedIcon, reviveIcon } from "assets/images/icons/actions";
 import { ActionButton } from "layers/react/components/library/ActionButton";
@@ -8,8 +9,20 @@ import { KamiCard } from "layers/react/components/library/KamiCard";
 import { Tooltip } from "layers/react/components/library/Tooltip";
 import { Account } from "layers/react/shapes/Account";
 import { Inventory } from "layers/react/shapes/Inventory";
-import { Kami } from "layers/react/shapes/Kami";
-import styled from "styled-components";
+import {
+  Kami,
+  isDead,
+  isHarvesting,
+  isResting,
+  isUnrevealed,
+  isOffWorld,
+  onCooldown,
+  calcHealth,
+  isFull,
+  calcOutput,
+} from "layers/react/shapes/Kami";
+import { getRateDisplay } from 'utils/rates';
+
 
 
 interface Props {
@@ -23,8 +36,10 @@ interface Props {
 }
 
 export const Kards = (props: Props) => {
+  const { actions, account, kamis } = props;
+
   // ticking
-  const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [_, setLastRefresh] = useState(Date.now());
   useEffect(() => {
     const refreshClock = () => {
       setLastRefresh(Date.now());
@@ -35,79 +50,12 @@ export const Kards = (props: Props) => {
     };
   }, []);
 
+
   /////////////////
   // INTERPRETATION
 
-  // calculate the time a kami has spent idle (in seconds)
-  const calcIdleTime = (kami: Kami): number => {
-    return lastRefresh / 1000 - kami.lastUpdated;
-  };
-
-  // calculate the time a production has been active since its last update
-  const calcProductionTime = (kami: Kami): number => {
-    let productionTime = 0;
-    if (isHarvesting(kami) && kami.production) {
-      productionTime = lastRefresh / 1000 - kami.production.startTime;
-    }
-    return productionTime;
-  }
-
-  // calculate health based on the drain against last confirmed health
-  const calcHealth = (kami: Kami): number => {
-    let duration;
-    if (isHarvesting(kami)) duration = calcProductionTime(kami);
-    else duration = calcIdleTime(kami);
-
-    const totalHealth = kami.stats.health + kami.bonusStats.health;
-    let health = 1 * kami.health;
-    health += kami.healthRate * duration;
-    health = Math.min(Math.max(health, 0), totalHealth);
-    return health;
-  };
-
-  // converts a per-second rate to a per-hour rate string with a given precision
-  const getRateDisplay = (rate: number | undefined, roundTo: number): string => {
-    if (rate === undefined) rate = 0;
-    let hourlyRate = rate * 3600;
-    let display = hourlyRate.toString();
-    if (roundTo) {
-      hourlyRate *= 10 ** roundTo;
-      hourlyRate = Math.round(hourlyRate);
-      hourlyRate /= 10 ** roundTo;
-      display = hourlyRate.toFixed(roundTo);
-    }
-    if (hourlyRate > 0) display = '+' + display;
-    return display;
-  };
-
-  // calculate the expected output from a pet production based on starttime
-  const calcOutput = (kami: Kami): number => {
-    let output = 0;
-    if (isHarvesting(kami) && kami.production) {
-      output = kami.production.balance;
-      let duration = calcProductionTime(kami);
-      output += Math.floor(duration * kami.production?.rate);
-    }
-    return Math.max(output, 0);
-  };
-
-  // interpret the location of the kami based on the kami's state
-  const getLocation = (kami: Kami): number => {
-    let location = 0;
-    if (!isHarvesting(kami)) location = props.account.location;
-    else if (kami.production && kami.production.node) {
-      location = kami.production.node.location;
-    }
-    return location;
-  };
-
-  const isFull = (kami: Kami): boolean => {
-    const totalHealth = kami.stats.health + kami.bonusStats.health;
-    return Math.round(calcHealth(kami)) >= totalHealth;
-  };
-
-  const hasFood = (): boolean => {
-    let inventories = props.account.inventories;
+  const hasFood = (account: Account): boolean => {
+    let inventories = account.inventories;
     if (!inventories || !inventories.food) return false;
 
     const total = inventories.food.reduce(
@@ -117,8 +65,8 @@ export const Kards = (props: Props) => {
     return total > 0;
   };
 
-  const hasRevive = (): boolean => {
-    let inventories = props.account.inventories;
+  const hasRevive = (account: Account): boolean => {
+    let inventories = account.inventories;
     if (!inventories || !inventories.revives) return false;
 
     const total = inventories.revives.reduce(
@@ -128,21 +76,15 @@ export const Kards = (props: Props) => {
     return total > 0;
   };
 
-  // determine whether the kami is still on cooldown
-  const onCooldown = (kami: Kami): boolean => {
-    const idleTime = lastRefresh / 1000 - kami.lastUpdated;
-    return kami.cooldown > idleTime;
-  }
-
   // get the reason why a kami can't feed.
   // assume the kami is either resting or harvesting
-  const whyCantFeed = (kami: Kami): string => {
+  const whyCantFeed = (kami: Kami, account: Account): string => {
     let reason = '';
-    if (getLocation(kami) != props.account.location) {
+    if (isHarvesting(kami) && kami.production?.node?.location != account.location) {
       reason = `not at your location`;
     } else if (isFull(kami)) {
       reason = `can't eat, full`;
-    } else if (!hasFood()) {
+    } else if (!hasFood(account)) {
       reason = `buy food, poore`;
     } else if (onCooldown(kami)) {
       reason = `can't eat, on cooldown`;
@@ -150,32 +92,8 @@ export const Kards = (props: Props) => {
     return reason;
   };
 
-  const canFeed = (kami: Kami): boolean => {
-    return !whyCantFeed(kami);
-  };
-
-  // naive check right now, needs to be updated with murder check as well
-  const isDead = (kami: Kami): boolean => {
-    return kami.state === 'DEAD';
-  };
-
-  // check whether the kami is harvesting
-  const isHarvesting = (kami: Kami): boolean =>
-    kami.state === 'HARVESTING' && kami.production != undefined;
-
-  // check whether the kami is resting
-  const isResting = (kami: Kami): boolean => {
-    return kami.state === 'RESTING';
-  };
-
-  // check whether the kami is revealed
-  const isUnrevealed = (kami: Kami): boolean => {
-    return kami.state === 'UNREVEALED';
-  };
-
-  // check whether the kami is captured by slave traders
-  const isOffWorld = (kami: Kami): boolean => {
-    return kami.state === '721_EXTERNAL';
+  const canFeed = (kami: Kami, account: Account): boolean => {
+    return !whyCantFeed(kami, account);
   };
 
   // get the description of the kami as a list of lines
@@ -216,19 +134,20 @@ export const Kards = (props: Props) => {
   /////////////////
   // DISPLAY
 
-  const FeedButton = (kami: Kami) => {
-    const canFeedKami = canFeed(kami);
-    const tooltipText = whyCantFeed(kami);
+  // Feed Button display evaluation
+  const FeedButton = (kami: Kami, account: Account) => {
+    const canFeedKami = canFeed(kami, account);
+    const tooltipText = whyCantFeed(kami, account);
     const canHeal = (inv: Inventory) => !isFull(kami) || inv.item.stats?.health! == 0;
 
-    const stockedInventory = props.account.inventories?.food?.filter(
+    const stockedInventory = account.inventories?.food?.filter(
       (inv: Inventory) => inv.balance && inv.balance > 0
     ) ?? [];
 
     const feedOptions = stockedInventory.map((inv: Inventory) => {
       return {
         text: `${inv.item.name!} ${!canHeal(inv) ? ' [Kami full]' : ''}`,
-        onClick: () => props.actions.feed(kami, inv.item.familyIndex || 1),
+        onClick: () => actions.feed(kami, inv.item.familyIndex || 1),
         disabled: !canHeal(inv)
       };
     });
@@ -246,18 +165,19 @@ export const Kards = (props: Props) => {
     return returnVal;
   };
 
+  // Reveal Button display evaluation
   const RevealButton = (kami: Kami) => (
     <ActionButton
       id={`reveal-kami`}
       text='Reveal'
-      onClick={() => props.actions.reveal(kami)}
+      onClick={() => actions.reveal(kami)}
     />
   );
 
-  const ReviveButton = (kami: Kami) => {
+  // Revive Button display evaluation
+  const ReviveButton = (kami: Kami, account: Account) => {
     let tooltipText = 'Revive your Kami';
-    if (!hasRevive()) tooltipText = 'no revives in inventory';
-    else if (getLocation(kami) != props.account.location) tooltipText = `not at your location`;
+    if (!hasRevive(account)) tooltipText = 'no revives in inventory';
     else if (onCooldown(kami)) tooltipText = 'on cooldown';
 
     return (
@@ -265,19 +185,19 @@ export const Kards = (props: Props) => {
         <IconButton
           id={`revive-kami`}
           img={reviveIcon}
-          onClick={() => props.actions.revive(kami, 1)}
-          disabled={!hasRevive() || onCooldown(kami)}
+          onClick={() => actions.revive(kami, 1)}
+          disabled={!hasRevive(account) || onCooldown(kami)}
         />
       </Tooltip>
     );
   };
 
   // Choose and return the action button to display
-  const DisplayedAction = (kami: Kami) => {
+  const DisplayedAction = (kami: Kami, account: Account) => {
     if (isUnrevealed(kami)) return RevealButton(kami);
-    if (isResting(kami)) return FeedButton(kami);
-    if (isHarvesting(kami)) return FeedButton(kami);
-    if (isDead(kami)) return ReviveButton(kami);
+    if (isResting(kami)) return FeedButton(kami, account);
+    if (isHarvesting(kami)) return FeedButton(kami, account);
+    if (isDead(kami)) return ReviveButton(kami, account);
   };
 
   // Rendering of Individual Kami Cards in the Party Modal
@@ -291,7 +211,7 @@ export const Kards = (props: Props) => {
           kami={kami}
           description={getDescription(kami)}
           subtext={`${calcOutput(kami)} $MUSU`}
-          action={DisplayedAction(kami)}
+          action={DisplayedAction(kami, account)}
           battery
           cooldown
         />
@@ -303,7 +223,7 @@ export const Kards = (props: Props) => {
   ///////////////////
   // EMPTY TEXT
 
-  if (props.kamis.length === 0) {
+  if (kamis.length === 0) {
     return (
       <EmptyText>
         You have no kamis. Get some.
@@ -311,7 +231,7 @@ export const Kards = (props: Props) => {
     );
   }
 
-  return KamiCards(props.kamis);
+  return KamiCards(kamis);
 }
 
 const EmptyText = styled.div`

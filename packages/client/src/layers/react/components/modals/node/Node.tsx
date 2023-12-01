@@ -229,7 +229,7 @@ export function registerNodeModal() {
             allies={node.kamis?.allies!}
             enemies={node.kamis?.enemies!}
             actions={{ collect, feed, liquidate, stop }}
-            liquidationConfig={data.liquidationConfig}
+            battleConfig={data.liquidationConfig}
             tab={tab}
           />
         </ModalWrapperFull>

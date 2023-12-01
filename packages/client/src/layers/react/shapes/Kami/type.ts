@@ -6,18 +6,18 @@ import {
   HasValue,
   getComponentValue,
   runQuery,
-  QueryFragment,
 } from '@latticexyz/recs';
 
 import { Layers } from 'src/types';
-import { Account, getAccount } from './Account';
-import { getConfigFieldValue } from './Config';
-import { Kill, getKill } from './Kill';
-import { Production, getProduction } from './Production';
-import { Stats, getStats } from './Stats';
-import { Skill, getSkills } from './Skill';
-import { Traits, TraitIndices, getTraits } from './Trait';
-import { Bonuses, getBonuses } from './Bonus';
+import { Account, getAccount } from '../Account';
+import { getConfigFieldValue } from '../Config';
+import { Kill, getKill } from '../Kill';
+import { Production, getProduction } from '../Production';
+import { Stats, getStats } from '../Stats';
+import { Skill, getSkills } from '../Skill';
+import { Traits, TraitIndices, getTraits } from '../Trait';
+import { Bonuses, getBonuses } from '../Bonus';
+
 
 // standardized shape of a Kami Entity
 export interface Kami {
@@ -47,7 +47,7 @@ export interface Kami {
   namable: boolean;
 }
 
-export interface KamiExperience {
+interface KamiExperience {
   current: number;
   threshold: number;
 }
@@ -60,12 +60,6 @@ export interface Options {
   production?: boolean;
   skills?: boolean;
   traits?: boolean;
-}
-
-// items to query
-export interface QueryOptions {
-  account?: EntityID;
-  state?: string;
 }
 
 // get a Kami from its EnityIndex. includes options for which data to include
@@ -274,42 +268,4 @@ export const getKami = (
   kami.healthRate = healthRate;
 
   return kami;
-};
-
-export const queryKamisX = (
-  layers: Layers,
-  options: QueryOptions,
-  kamiOptions?: Options
-): Kami[] => {
-  const {
-    network: {
-      components: {
-        AccountID,
-        IsPet,
-        State,
-      },
-    },
-  } = layers;
-
-  const toQuery: QueryFragment[] = [Has(IsPet)];
-
-  if (options?.account) {
-    toQuery.push(HasValue(AccountID, { value: options.account }));
-  }
-
-  if (options?.state) {
-    toQuery.push(HasValue(State, { value: options.state }));
-  }
-
-  const kamiIDs = Array.from(
-    runQuery(toQuery)
-  );
-
-  return kamiIDs.map(
-    (index): Kami => getKami(
-      layers,
-      index,
-      kamiOptions
-    )
-  );;
 };
