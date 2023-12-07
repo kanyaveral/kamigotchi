@@ -15,7 +15,20 @@ const smallshrine: DialogueNode = {
   ],
 };
 
-export default [stonelantern, smallshrine];
+const waterfall: DialogueNode = {
+  index: 113,
+  text: [
+    "Water pours down from a great height, but the pool is shallower than expected.",
+    "Where could the water be going? Maybe we should explore further.",
+  ],
+  action: {
+    type: 'move',
+    label: 'Explore',
+    input: 15,
+  },
+};
+
+export default [stonelantern, smallshrine, waterfall];
 
 // export const room11: Room = {
 //   location: 11,
@@ -34,11 +47,4 @@ export default [stonelantern, smallshrine];
 //       offset: { x: 45.5, y: 31 },
 //       onClick: triggerPetNamingModal,
 //     },
-//     {
-//       key: 'waterfall',
-//       path: objectWaterfall,
-//       offset: { x: 22.6, y: -33.5 },
-//       onClick: () => triggerRoomMovementModal(15),
-//     },
-//   ],
 // };
