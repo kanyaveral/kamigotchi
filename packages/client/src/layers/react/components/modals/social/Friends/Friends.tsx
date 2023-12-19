@@ -1,18 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 import { FrenList } from "./FrenList"
-import { Header } from "./Header"
 import { Requests } from "./Requests";
 import { Search } from "./Search";
-
-import { feedIcon, reviveIcon } from "assets/images/icons/actions";
-import { ActionButton } from "layers/react/components/library/ActionButton";
+import { searchIcon } from "assets/images/icons/actions";
+import { ActionButton } from "layers/react/components/library";
 import { IconButton } from "layers/react/components/library/IconButton";
-import { IconListButton } from "layers/react/components/library/IconListButton";
-import { ModalWrapperLite } from "layers/react/components/library/ModalWrapper";
-import { Card } from "layers/react/components/library/Card";
-import { Tooltip } from "layers/react/components/library/Tooltip";
 import { Account } from "layers/react/shapes/Account";
 import { Friendship } from "layers/react/shapes/Friendship";
 
@@ -49,6 +43,13 @@ export const Friends = (props: Props) => {
           actions={actions}
         />
       );
+    } else if (tab === "REQUESTS") {
+      return (
+        <Requests
+          account={account}
+          actions={actions}
+        />
+      );
     } else if (tab === "SEARCH") {
       return (
         <Search
@@ -57,9 +58,9 @@ export const Friends = (props: Props) => {
           queries={queries}
         />
       );
-    } else if (tab === "REQUESTS") {
+    } else {
       return (
-        <Requests
+        <FrenList
           account={account}
           actions={actions}
         />
@@ -67,16 +68,65 @@ export const Friends = (props: Props) => {
     }
   }
 
-  return (
-    <div>
-      <Header
-        tab={tab}
-        setTab={setTab}
+  const Footer = (
+    <FootContainer>
+      <IconButton
+        id='friends-search'
+        onClick={() => setTab("SEARCH")}
+        img={searchIcon}
       />
-      {Content()}
-    </div>
+      <ActionButton
+        id='friends-add'
+        onClick={() => { tab === "FRIENDS" ? setTab("REQUESTS") : setTab("FRIENDS") }}
+        text={tab === "FRIENDS" ? "Requests" : "back"}
+        size='icon-medium'
+      />
+    </FootContainer>
+  )
+
+  return (
+    <Container>
+      <BodyContainer>
+        {Content()}
+      </BodyContainer>
+      {Footer}
+    </Container>
   );
 }
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  height: 100%;
+  width: 100%;
+  padding: 0.5vh 1vw;
+`;
+
+const BodyContainer = styled.div`
+  height: 100%;
+  width: 100%;
+  padding: 0.1vw;
+`;
+
+const FootContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+`;
+
+const FootText = styled.div`
+  font-family: Pixel;
+  font-size: 1vw;
+  text-align: center;
+  color: #333;
+  padding: 0.7vh 0vw;
+  margin: 3vh;
+  height: 100%;
+`;
 
 const EmptyText = styled.div`
   font-family: Pixel;

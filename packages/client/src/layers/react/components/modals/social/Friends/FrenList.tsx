@@ -1,10 +1,7 @@
-import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { useIcon } from "assets/images/icons/actions";
 import { ActionListButton } from "layers/react/components/library/ActionListButton";
 import { Card } from "layers/react/components/library/Card";
-import { Tooltip } from "layers/react/components/library/Tooltip";
 import { Account } from "layers/react/shapes/Account";
 import { Friendship } from "layers/react/shapes/Friendship";
 
@@ -92,11 +89,6 @@ export const FrenList = (props: Props) => {
 
   return FriendCards(account.friends!.friends);
 }
-
-const Container = styled.div`
-  overflow-y: scroll;
-  height: 100%;
-`;
 
 const BodyContainer = styled.div`
   display: flex;

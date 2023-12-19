@@ -1,18 +1,15 @@
-import { EntityID, EntityIndex } from '@latticexyz/recs';
-import { waitForActionCompletion } from '@latticexyz/std-client';
+import { EntityID } from '@latticexyz/recs';
 import crypto from "crypto";
 import React from 'react';
 import { map, merge } from 'rxjs';
 
 import { Friends } from './Friends';
-import { kamiIcon } from 'assets/images/icons/menu';
+import { socialIcon } from 'assets/images/icons/menu';
 import { ModalHeader } from 'layers/react/components/library/ModalHeader';
 import { ModalWrapperFull } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { Account, getAccountByName, getAccountByOwner, getAccountFromBurner } from 'layers/react/shapes/Account';
 import { Friendship, queryFriendshipX } from 'layers/react/shapes/Friendship';
-import { useComponentSettings } from 'layers/react/store/componentSettings';
-import { useSelectedEntities } from 'layers/react/store/selectedEntities';
 import 'layers/react/styles/font.css';
 
 
@@ -109,10 +106,6 @@ export function registerSocialModal() {
 
     // Render
     ({ layers, actions, api, data, world }) => {
-      const { modals, setModals } = useComponentSettings();
-      const { setKami } = useSelectedEntities();
-
-
       /////////////////
       // ACTIONS
 
@@ -210,7 +203,7 @@ export function registerSocialModal() {
         <ModalWrapperFull
           id='social_modal'
           divName='social'
-          header={<ModalHeader title='Social' icon={kamiIcon} />}
+          header={<ModalHeader title='Social' icon={socialIcon} />}
           canExit
         >
           <Friends
