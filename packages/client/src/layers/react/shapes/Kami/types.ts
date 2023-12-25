@@ -10,13 +10,13 @@ import {
 
 import { Layers } from 'src/types';
 import { Account, getAccount } from '../Account';
+import { Bonuses, getBonuses } from '../Bonus';
 import { getConfigFieldValue } from '../Config';
 import { Kill, getKill } from '../Kill';
 import { Production, getProduction } from '../Production';
 import { Stats, getStats } from '../Stats';
 import { Skill, getSkills } from '../Skill';
 import { Traits, TraitIndices, getTraits } from '../Trait';
-import { Bonuses, getBonuses } from '../Bonus';
 
 
 // standardized shape of a Kami Entity
@@ -31,12 +31,18 @@ export interface Kami {
   health: number;
   healthRate: number;
   state: string;
-  lastUpdated: number;
-  cooldown: number;
   skillPoints: number;
   stats: Stats;
   bonusStats: Stats;
   bonuses: Bonuses;
+  time: {
+    cooldown: {
+      last: number;
+      requirement: number;
+    };
+    last: number;
+    start: number;
+  };
   account?: Account;
   deaths?: Kill[];
   kills?: Kill[];
@@ -86,6 +92,7 @@ export const getKami = (
         IsKill,
         IsProduction,
         LastTime,
+        LastActionTime,
         Level,
         MediaURI,
         Name,
@@ -93,6 +100,7 @@ export const getKami = (
         PetIndex,
         SkillPoint,
         SourceID,
+        StartTime,
         State,
         TargetID,
         TraitIndex,
@@ -117,8 +125,14 @@ export const getKami = (
     healthRate: 0,
     state: getComponentValue(State, index)?.value as string,
     namable: getComponentValue(CanName, index)?.value as boolean,
-    lastUpdated: (getComponentValue(LastTime, index)?.value as number) * 1,
-    cooldown: getConfigFieldValue(layers.network, 'KAMI_IDLE_REQ'),
+    time: {
+      cooldown: {
+        last: (getComponentValue(LastActionTime, index)?.value as number) * 1,
+        requirement: getConfigFieldValue(layers.network, 'KAMI_IDLE_REQ'),
+      },
+      last: (getComponentValue(LastTime, index)?.value as number) * 1,
+      start: (getComponentValue(StartTime, index)?.value as number) * 1,
+    },
     skillPoints: (getComponentValue(SkillPoint, index)?.value ?? 0 as number) * 1,
     stats: getStats(layers, index),
     bonuses: getBonuses(layers, index),
@@ -241,6 +255,7 @@ export const getKami = (
 
   /////////////////
   // ADJUSTMENTS
+  // TODO: move these over to functions.ts now that we've standardized calcs
 
   // experience threshold calculation according to level
   if (kami.level) {

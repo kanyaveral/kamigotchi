@@ -1,6 +1,6 @@
-export type { Kami } from './type';
-export { getKami } from './type';
-export { queryKamisX } from './query';
+export type { Kami } from './types';
+export { getKami } from './types';
+export { queryKamisX } from './queries';
 export {
   isDead,
   isHarvesting,
@@ -8,15 +8,16 @@ export {
   isUnrevealed,
   isOffWorld,
   getLocation,
-  calcRestTime,
+  calcIdleTime,
   calcHarvestTime,
+  calcCooldownRemaining,
   onCooldown,
-  getCooldown,
   calcHealth,
   isFull,
   isStarving,
   calcOutput,
   calcLiqThresholdValue,
+  canHarvest,
   canMog,
   canLiquidate,
 } from './functions';
