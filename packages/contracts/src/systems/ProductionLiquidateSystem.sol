@@ -66,14 +66,13 @@ contract ProductionLiquidateSystem is System {
     LibProduction.stop(components, targetProductionID);
     LibKill.create(world, components, petID, targetPetID, nodeID, balance, bounty);
 
-    // bump the cooldown by the value of the bonus
+    // Update ts for Standard Action Cooldowns
+    uint256 standardActionTs = block.timestamp;
     uint256 bonusID = LibBonus.get(components, petID, "ATTACK_COOLDOWN");
-    if (bonusID != 0) {
-      uint256 cooldownDiscount = LibBonus.getValue(components, bonusID);
-      LibPet.setLastTs(components, petID, block.timestamp - cooldownDiscount);
-    }
+    if (bonusID != 0) standardActionTs -= LibBonus.getValue(components, bonusID);
+    LibPet.setLastActionTs(components, petID, standardActionTs);
 
-    // logging and tracking
+    // standard logging and tracking
     LibScore.incBy(world, components, accountID, "LIQUIDATE", 1);
     LibDataEntity.incFor(world, components, accountID, 0, "LIQUIDATE", 1);
     LibDataEntity.incFor(
@@ -92,7 +91,7 @@ contract ProductionLiquidateSystem is System {
       "BEEN_LIQUIDATEED",
       1
     );
-    LibAccount.updateLastBlock(components, accountID);
+    LibAccount.updateLastTs(components, accountID);
     return "";
   }
 
