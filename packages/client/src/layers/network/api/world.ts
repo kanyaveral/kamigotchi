@@ -144,6 +144,17 @@ export function setUpWorldAPI(systems: any) {
     }
   }
 
+  async function deleteRooms(api: AdminAPI, locations: number[]) {
+    for (let i = 0; i < locations.length; i++) {
+      await sleepIf();
+      try {
+        await api.room.delete(locations[i]);
+      } catch {
+        console.error("Could not delete room at location " + locations[i]);
+      }
+    }
+  }
+
   ////////////////////
   // ITEMS
 
@@ -171,6 +182,17 @@ export function setUpWorldAPI(systems: any) {
             console.error("Item type not found: " + allItems[i].get('Type'));
         }
       } catch { }
+    }
+  }
+
+  async function deleteItems(api: AdminAPI, indices: number[]) {
+    for (let i = 0; i < indices.length; i++) {
+      await sleepIf();
+      try {
+        await api.registry.item.delete(indices[i]);
+      } catch {
+        console.error("Could not delete item " + indices[i]);
+      }
     }
   }
 
@@ -253,6 +275,17 @@ export function setUpWorldAPI(systems: any) {
           allNodes[i].get('Affinity')
         );
       } catch { }
+    }
+  }
+
+  async function deleteNodes(api: AdminAPI, indices: number[]) {
+    for (let i = 0; i < indices.length; i++) {
+      await sleepIf();
+      try {
+        await api.node.delete(indices[i]);
+      } catch {
+        console.error("Could not delete node " + indices[i]);
+      }
     }
   }
 
@@ -379,6 +412,17 @@ export function setUpWorldAPI(systems: any) {
     await api.registry.quest.add.reward(11, "ITEM", 4, 1);
   }
 
+  async function deleteQuests(api: AdminAPI, indices: number[]) {
+    for (let i = 0; i < indices.length; i++) {
+      await sleepIf();
+      try {
+        await api.registry.quest.delete(indices[i]);
+      } catch {
+        console.error("Could not delete quest " + indices[i]);
+      }
+    }
+  }
+
 
   ////////////////////
   // RELATIONSHIPS
@@ -398,6 +442,17 @@ export function setUpWorldAPI(systems: any) {
     await api.registry.relationship.create(1, 8, 'mina 8', [3], [6]);
     await api.registry.relationship.create(1, 9, 'mina 9', [8], [6]);
     await api.registry.relationship.create(1, 10, 'mina 10', [5, 7, 9], []);
+  }
+
+  async function deleteRelationships(api: AdminAPI, npcs: number[], indices: number[]) {
+    for (let i = 0; i < indices.length; i++) {
+      await sleepIf();
+      try {
+        await api.registry.relationship.delete(npcs[i], indices[i]);
+      } catch {
+        console.error("Could not delete relationship " + indices[i] + " for npc " + npcs[i]);
+      }
+    }
   }
 
   ////////////////////
@@ -478,6 +533,17 @@ export function setUpWorldAPI(systems: any) {
     await api.registry.skill.add.requirement(401, "SKILL", 4, 3);
   }
 
+  async function deleteSkills(api: AdminAPI, indices: number[]) {
+    for (let i = 0; i < indices.length; i++) {
+      await sleepIf();
+      try {
+        await api.registry.skill.delete(indices[i]);
+      } catch {
+        console.error("Could not delete skill " + indices[i]);
+      }
+    }
+  }
+
 
   ////////////////////
   // TRAITS
@@ -547,6 +613,17 @@ export function setUpWorldAPI(systems: any) {
     await initSingle(hand, "HAND");
   }
 
+  async function deleteTraits(api: AdminAPI, indices: number[], types: string[]) {
+    for (let i = 0; i < indices.length; i++) {
+      await sleepIf();
+      try {
+        await api.registry.trait.delete(indices[i], types[i]);
+      } catch {
+        console.error("Could not delete trait " + indices[i]);
+      }
+    }
+  }
+
   //////////////////////
   // UTILS
 
@@ -614,28 +691,35 @@ export function setUpWorldAPI(systems: any) {
     },
     items: {
       init: () => initItems(createAdminAPI(systems)),
+      deletes: (indices: number[]) => deleteItems(createAdminAPI(systems), indices),
     },
     npcs: {
       init: () => initNpcs(createAdminAPI(systems)),
     },
     nodes: {
       init: () => initNodes(createAdminAPI(systems)),
+      deletes: (indices: number[]) => deleteNodes(createAdminAPI(systems), indices),
     },
     quests: {
       init: () => initQuests(createAdminAPI(systems)),
+      deletes: (indices: number[]) => deleteQuests(createAdminAPI(systems), indices),
     },
     relationships: {
       init: () => initRelationships(createAdminAPI(systems)),
+      deletes: (npcs: number[], indices: number[]) => deleteRelationships(createAdminAPI(systems), indices, npcs),
     },
     rooms: {
       init: () => initRooms(createAdminAPI(systems)),
+      deletes: (indices: number[]) => deleteRooms(createAdminAPI(systems), indices),
     },
     skill: {
       init: () => initSkills(createAdminAPI(systems)),
+      deletes: (indices: number[]) => deleteSkills(createAdminAPI(systems), indices),
     },
     traits: {
       init: () => initTraits(createAdminAPI(systems)),
       tryInit: () => initTraitsWithFail(createAdminAPI(systems)),
+      deletes: (indices: number[], types: string[]) => deleteTraits(createAdminAPI(systems), indices, types),
     },
   }
 
