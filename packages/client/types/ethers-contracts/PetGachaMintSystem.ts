@@ -27,75 +27,49 @@ import type {
   PromiseOrValue,
 } from "./common";
 
-export type TraitStatsStruct = {
-  health: PromiseOrValue<BigNumberish>;
-  power: PromiseOrValue<BigNumberish>;
-  violence: PromiseOrValue<BigNumberish>;
-  harmony: PromiseOrValue<BigNumberish>;
-  slots: PromiseOrValue<BigNumberish>;
-};
-
-export type TraitStatsStructOutput = [
-  number,
-  number,
-  number,
-  number,
-  number
-] & {
-  health: number;
-  power: number;
-  violence: number;
-  harmony: number;
-  slots: number;
-};
-
-export interface _721BatchMinterSystemInterface extends utils.Interface {
+export interface PetGachaMintSystemInterface extends utils.Interface {
   functions: {
-    "_getTraitStats(uint256)": FunctionFragment;
-    "batchMint(uint256)": FunctionFragment;
     "execute(bytes)": FunctionFragment;
+    "executeTyped(uint256)": FunctionFragment;
+    "init(bytes)": FunctionFragment;
     "owner()": FunctionFragment;
-    "setTraits()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "_getTraitStats"
-      | "batchMint"
       | "execute"
+      | "executeTyped"
+      | "init"
       | "owner"
-      | "setTraits"
       | "transferOwnership"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "_getTraitStats",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "batchMint",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "execute",
     values: [PromiseOrValue<BytesLike>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "executeTyped",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "init",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(functionFragment: "setTraits", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
   ): string;
 
+  decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "_getTraitStats",
+    functionFragment: "executeTyped",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "batchMint", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "init", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "setTraits", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -120,12 +94,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface _721BatchMinterSystem extends BaseContract {
+export interface PetGachaMintSystem extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: _721BatchMinterSystemInterface;
+  interface: PetGachaMintSystemInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -147,26 +121,22 @@ export interface _721BatchMinterSystem extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    _getTraitStats(
-      id: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    batchMint(
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     execute(
       arguments: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
-    setTraits(
+    executeTyped(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    init(
+      arugments: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
     transferOwnership(
       account: PromiseOrValue<string>,
@@ -174,26 +144,22 @@ export interface _721BatchMinterSystem extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  _getTraitStats(
-    id: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  batchMint(
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   execute(
     arguments: PromiseOrValue<BytesLike>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  owner(overrides?: CallOverrides): Promise<string>;
-
-  setTraits(
+  executeTyped(
+    amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  init(
+    arugments: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
 
   transferOwnership(
     account: PromiseOrValue<string>,
@@ -201,24 +167,22 @@ export interface _721BatchMinterSystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    _getTraitStats(
-      id: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<TraitStatsStructOutput>;
-
-    batchMint(
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
     execute(
       arguments: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    owner(overrides?: CallOverrides): Promise<string>;
+    executeTyped(
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
 
-    setTraits(overrides?: CallOverrides): Promise<void>;
+    init(
+      arugments: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
 
     transferOwnership(
       account: PromiseOrValue<string>,
@@ -238,26 +202,22 @@ export interface _721BatchMinterSystem extends BaseContract {
   };
 
   estimateGas: {
-    _getTraitStats(
-      id: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    batchMint(
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     execute(
       arguments: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setTraits(
+    executeTyped(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    init(
+      arugments: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       account: PromiseOrValue<string>,
@@ -266,26 +226,22 @@ export interface _721BatchMinterSystem extends BaseContract {
   };
 
   populateTransaction: {
-    _getTraitStats(
-      id: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    batchMint(
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     execute(
       arguments: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    setTraits(
+    executeTyped(
+      amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    init(
+      arugments: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       account: PromiseOrValue<string>,

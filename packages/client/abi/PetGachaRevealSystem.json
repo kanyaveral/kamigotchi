@@ -48,71 +48,6 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        }
-      ],
-      "name": "_getTraitStats",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint8",
-              "name": "health",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "power",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "violence",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "harmony",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "slots",
-              "type": "uint8"
-            }
-          ],
-          "internalType": "struct TraitStats",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "batchMint",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "bytes",
           "name": "arguments",
           "type": "bytes"
@@ -124,6 +59,25 @@
           "internalType": "bytes",
           "name": "",
           "type": "bytes"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "commitIDs",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "forceReveal",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
         }
       ],
       "stateMutability": "nonpayable",
@@ -143,9 +97,21 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "setTraits",
-      "outputs": [],
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "rawCommitIDs",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "reveal",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -164,11 +130,10 @@
     }
   ],
   "methodIdentifiers": {
-    "_getTraitStats(uint256)": "c4908186",
-    "batchMint(uint256)": "8467be0d",
     "execute(bytes)": "09c5eabe",
+    "forceReveal(uint256[])": "02d9e4af",
     "owner()": "8da5cb5b",
-    "setTraits()": "c061a3b5",
+    "reveal(uint256[])": "b93f208a",
     "transferOwnership(address)": "f2fde38b"
   }
 }

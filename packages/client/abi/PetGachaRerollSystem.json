@@ -48,71 +48,6 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        }
-      ],
-      "name": "_getTraitStats",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint8",
-              "name": "health",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "power",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "violence",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "harmony",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "slots",
-              "type": "uint8"
-            }
-          ],
-          "internalType": "struct TraitStats",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "batchMint",
-      "outputs": [
-        {
-          "internalType": "uint256[]",
-          "name": "",
-          "type": "uint256[]"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "bytes",
           "name": "arguments",
           "type": "bytes"
@@ -130,6 +65,19 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "arguments",
+          "type": "bytes"
+        }
+      ],
+      "name": "init",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "owner",
       "outputs": [
@@ -143,10 +91,22 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "setTraits",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "petID",
+          "type": "uint256"
+        }
+      ],
+      "name": "reroll",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -164,11 +124,10 @@
     }
   ],
   "methodIdentifiers": {
-    "_getTraitStats(uint256)": "c4908186",
-    "batchMint(uint256)": "8467be0d",
     "execute(bytes)": "09c5eabe",
+    "init(bytes)": "4ddf47d4",
     "owner()": "8da5cb5b",
-    "setTraits()": "c061a3b5",
+    "reroll(uint256)": "1c19c215",
     "transferOwnership(address)": "f2fde38b"
   }
 }
