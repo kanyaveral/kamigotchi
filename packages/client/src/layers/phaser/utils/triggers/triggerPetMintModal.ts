@@ -5,11 +5,11 @@ export const triggerPetMintModal = () => {
   const { modals } = useVisibility.getState();
   playClick();
 
-  if (!modals.kamiMint) {
+  if (!modals.gacha) {
     useVisibility.setState({
       modals: {
         ...modals,
-        kamiMint: true,
+        gacha: true,
         bridgeERC20: false,
         bridgeERC721: false,
         dialogue: false,
@@ -21,6 +21,6 @@ export const triggerPetMintModal = () => {
       },
     });
   } else {
-    useVisibility.setState({ modals: { ...modals, kamiMint: false } });
+    useVisibility.setState({ modals: { ...modals, gacha: false } });
   }
 };
