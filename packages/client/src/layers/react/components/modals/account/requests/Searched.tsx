@@ -1,0 +1,68 @@
+import { Account } from "layers/network/shapes/Account";
+import { ActionListButton } from "layers/react/components/library";
+import { AccountCard } from "layers/react/components/library/AccountCard";
+import styled from "styled-components";
+
+
+interface Props {
+  accounts: Account[];
+  actions: {
+    blockFren: (account: Account) => void;
+    requestFren: (account: Account) => void;
+  }
+}
+
+export const Searched = (props: Props) => {
+  const { accounts, actions } = props;
+
+
+  const Actions = (account: Account) => {
+    return (
+      <ActionListButton
+        id={`options-${account.entityIndex}`}
+        text=''
+        options={[
+          { text: 'Add', onClick: () => actions.requestFren(account) },
+          { text: 'Block', onClick: () => actions.blockFren(account) },
+        ]}
+      />
+    );
+  }
+
+  // inbound list of pending friend requests
+  if (accounts.length === 0) return <EmptyText>no matching results</EmptyText>;
+
+  return (
+    <Container>
+      {accounts.map((account) => (
+        <AccountCard
+          key={account.index}
+          account={account}
+          description={[`free agent ${account.index * 1}`]}
+          actions={Actions(account)}
+        />
+      ))}
+    </Container>
+  );
+}
+
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+`;
+
+
+const EmptyText = styled.div`
+  color: black;
+  margin: 1vw;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: .9vw;
+  font-family: Pixel;
+`;
