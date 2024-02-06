@@ -62,7 +62,7 @@ const opSepolia: Chain = {
 };
 
 // object mapping between environment MODEs and chain configs
-const chainConfigs: Map<string, Chain> = new Map([
+export const chainConfigs: Map<string, Chain> = new Map([
   ['', localhost],  // default to localhost when no environment mode provided
   ['DEV', localhost],
   ['TEST', opSepolia],
@@ -70,4 +70,15 @@ const chainConfigs: Map<string, Chain> = new Map([
   ['OPSEP', opSepolia],
 ]);
 
-export const defaultChain = chainConfigs.get(process.env.MODE ?? '')!;
+
+// overrides the chosen chain config if the url param is set
+const getDefaultChainConfig = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const mode = urlParams.get('mode');
+  if (!mode) return chainConfigs.get(process.env.MODE ?? '');
+  if (chainConfigs.has(mode)) return chainConfigs.get(mode);
+  return localhost;
+}
+
+// export const defaultChain = chainConfigs.get(process.env.MODE ?? '')!;
+export const defaultChain = getDefaultChainConfig()!;
