@@ -25,8 +25,8 @@ export const Tabs = (props: Props) => {
         Party
       </Button>
       <Button
-        onClick={() => setTab('friends')}
-        disabled={props.tab === 'friends'}
+        onClick={() => setTab('frens')}
+        disabled={props.tab === 'frens'}
         style={{ borderRight: 'solid black .15vw' }}
       >
         Friends
@@ -42,6 +42,10 @@ export const Tabs = (props: Props) => {
 }
 
 const Container = styled.div`
+  border: solid .15vw black;
+  border-radius: .3vw .3vw 0 0;
+  border-bottom: none;
+
   width: 100%;
   background-color: white;
   display: flex;
