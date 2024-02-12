@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { SkillNode } from './SkillNode';
+import { Node } from './Node';
+import { Edge } from './Edge';
 import { SkillTrees } from 'constants/skills/trees';
 import { Kami } from 'layers/network/shapes/Kami';
 import { Skill } from 'layers/network/shapes/Skill';
@@ -16,14 +17,61 @@ interface Props {
 }
 
 export const Matrix = (props: Props) => {
+  const contentRef = useRef<HTMLDivElement>(null);
   const { kami, skills, setHovered, setSelected } = props;
   const [mode, setMode] = useState(SkillTrees.keys().next().value);
   const [nodeRects, setNodeRects] = useState(new Map<number, DOMRect>());
+  const [baseRect, setBaseRect] = useState<DOMRect>();
+  const [edges, setEdges] = useState<number[][]>([]);
+
 
   useEffect(() => {
-    setSelected(SkillTrees.get(mode)![0][0]);
-  }, [mode]);
+    // Function to update the bounding rectangle
+    const updateRect = () => {
+      if (contentRef.current) {
+        const newRect = contentRef.current.getBoundingClientRect();
+        setBaseRect(newRect);
+      }
+    };
 
+    // Set up a resize observer to update the rectangle when the window resizes
+    const resizeObserver = new ResizeObserver(updateRect);
+    if (contentRef.current) resizeObserver.observe(contentRef.current);
+    return () => {
+      if (contentRef.current) resizeObserver.unobserve(contentRef.current);
+    };
+  }, []);
+
+  // whenever the tree mode changes
+  // - assign the root node of the tree as the selected Display skill
+  // - update the web of dependencies used to draw edges
+  useEffect(() => {
+    const tree = SkillTrees.get(mode)!;
+    const indexList = tree.flat(); // list of skill indices in this tree
+    setSelected(indexList[0]); // set selected to root skill node
+
+    let edges = [] as number[][];
+    for (const index of indexList) {
+      const skill = skills.get(index);
+      if (!skill) continue;
+      const dependencies = getNodeDependencies(skill);
+      edges = edges.concat(dependencies.map((dep) => [dep, index]));
+    }
+
+    // no dependency data is available initially
+    setEdges(edges);
+  }, [mode, skills.size]);
+
+
+  ////////////////////
+  // INTERPRETATION
+
+  // get the (skill node) dependencies of a skill node
+  const getNodeDependencies = (skill: Skill) => {
+    if (!skill.requirements) return [];
+    const skillReqs = skill.requirements.filter((req) => req.type === 'SKILL');
+    return skillReqs.map((req) => req.index! * 1);
+  }
 
   return (
     <Container>
@@ -42,22 +90,32 @@ export const Matrix = (props: Props) => {
           ))}
         </TreeButtons>
       </TopRow>
-      <NodeMatrix>
-        {SkillTrees.get(mode)!.map((row, i) => (
+      <Content ref={contentRef} >
+        {(skills.size > 0) && SkillTrees.get(mode)!.map((row, i) => (
           <NodeRow key={i}>
             {row.map((index) => (
-              <SkillNode
+              <Node
                 key={index}
                 kami={kami}
                 skill={skills.get(index)!}
                 nodeRects={nodeRects}
+                setNodeRects={setNodeRects}
                 setHovered={setHovered}
                 setSelected={setSelected}
               />
             ))}
           </NodeRow>
         ))}
-      </NodeMatrix>
+        {edges.map((edge, i) => (
+          <Edge
+            key={i}
+            from={edge[0]}
+            to={edge[1]}
+            baseRect={baseRect!}
+            nodeRects={nodeRects}
+          />
+        ))}
+      </Content>
     </Container>
   );
 }
@@ -78,7 +136,7 @@ const TopRow = styled.div`
   padding: 1vw .6vw;
   height: 3vw;
   background-color: #999;
-  opacity: .6;
+  opacity: .9;
   position: absolute;
 
   display: flex;
@@ -88,11 +146,15 @@ const TopRow = styled.div`
 `;
 
 const PointsText = styled.div`
-  padding: 1vw 1vw;
+  border: solid black .15vw;
+  border-radius: .6vw;
+  background-color: #ffffff;
+  padding: .6vw;
+  opacity: 1;
 
   color: black;
   font-family: Pixel;
-  font-size: 1vw;
+  font-size: .9vw;
   text-align: left;
 `;
 
@@ -107,7 +169,7 @@ const TreeButtons = styled.div`
   gap: .6vw;
 `;
 
-const NodeMatrix = styled.div`
+const Content = styled.div`
   padding-top: 3vw;
   display: flex;
   flex-flow: column nowrap;

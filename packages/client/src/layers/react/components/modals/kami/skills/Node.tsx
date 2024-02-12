@@ -1,14 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { Kami } from "layers/network/shapes/Kami";
-import {
-  Skill,
-  Requirement,
-  meetsSkillCost,
-  isSkillMaxxed,
-  meetsSkillRequirement
-} from "layers/network/shapes/Skill";
+import { Skill } from "layers/network/shapes/Skill";
 import { Tooltip } from "layers/react/components/library/Tooltip";
 import { playClick } from 'utils/sounds';
 
@@ -17,19 +11,33 @@ interface Props {
   skill: Skill;
   kami: Kami;
   nodeRects: Map<number, DOMRect>;
+  setNodeRects: (nodeRects: Map<number, DOMRect>) => void;
   setHovered: (skillIndex: number) => void;
   setSelected: (skillIndex: number) => void;
 }
 
-export const SkillNode = (props: Props) => {
-  const { skill, kami, nodeRects, setHovered, setSelected } = props;
+export const Node = (props: Props) => {
+  const { skill, nodeRects, setNodeRects, setHovered, setSelected } = props;
   const myRef = useRef<HTMLDivElement>(null);
 
+
   useEffect(() => {
-    if (myRef.current) {
-      nodeRects.set(skill.index * 1, myRef.current.getBoundingClientRect());
-    }
+    // Function to update the bounding rectangle
+    const updateRect = () => {
+      if (myRef.current) {
+        const newRect = myRef.current.getBoundingClientRect();
+        setNodeRects(new Map(nodeRects.set(skill.index * 1, newRect)));
+      }
+    };
+
+    // Set up a resize observer to update the rectangle when the window resizes
+    const resizeObserver = new ResizeObserver(updateRect);
+    if (myRef.current) resizeObserver.observe(myRef.current);
+    return () => {
+      if (myRef.current) resizeObserver.unobserve(myRef.current);
+    };
   }, []);
+
 
   const handleClick = () => {
     playClick();
@@ -40,7 +48,8 @@ export const SkillNode = (props: Props) => {
   return (
     <Container key={skill.index} ref={myRef}>
       <Tooltip text={[`${skill.name}`]} key={skill.index}>
-        <Image src={skill.uri}
+        <Image
+          src={skill.uri}
           onClick={handleClick}
           onMouseEnter={() => setHovered(skill.index * 1)}
           onMouseLeave={() => setHovered(0)}
@@ -52,8 +61,8 @@ export const SkillNode = (props: Props) => {
 
 
 const Image = styled.img`
-  border: solid black .15vw;
   border-radius: 1.5vw;
+  
   width: 6vw;
   &:hover {
     opacity: 0.6;
@@ -61,12 +70,11 @@ const Image = styled.img`
 `;
 
 const Container = styled.div`
+  border: solid black .15vw;
+  border-radius: 1.5vw;
   margin: 1vw;
-
+  
+  background-color: black;
+  z-index: 1;
   pointer-events: auto;
-  &:disabled {
-    background-color: #b2b2b2;
-    cursor: default;
-    pointer-events: none;
-  }
 `;

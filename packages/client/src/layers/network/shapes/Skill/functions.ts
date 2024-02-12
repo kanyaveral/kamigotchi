@@ -1,17 +1,20 @@
 import { Effect, Requirement, Skill } from "./types";
 import { Account } from "../Account";
-import { Kami } from "../Kami";
+import { Kami, isStarving, isDead, isOffWorld, isWithAccount } from "../Kami";
 
 
 // get the reason why a player cannot upgrade a skill
 // checking (in order) location/status, maxxed out, requirements unmet, not enough points
-// TODO: actually check for location instead of being lazy
-export const getUpgradeError = (index: number, kami: Kami, registry: Skill[]) => {
+// NOTE: assumes Account, Skills and Production are attached to the input Kami
+export const getUpgradeError = (index: number, kami: Kami, registry: Map<number, Skill>) => {
   // status/location check
-  if (kami.state !== 'RESTING') return [`${kami.name} must be Resting`];
+  if (isDead(kami)) return [`${kami.name} is Dead`];
+  if (isOffWorld(kami)) return [`${kami.name} is Off World`];
+  if (isStarving(kami)) return [`${kami.name} is Starving`];
+  if (!isWithAccount(kami)) return [`${kami.name} is too far away.`];
 
   // registry check
-  const rSkill = registry.find((s) => s.index * 1 === index);
+  const rSkill = registry.get(index);
   if (!rSkill) return ['Skill not found'];
 
   // maxxed out check
@@ -23,7 +26,7 @@ export const getUpgradeError = (index: number, kami: Kami, registry: Skill[]) =>
   for (let req of rSkill.requirements ?? []) {
     if (!meetsRequirement(req, kami)) return [
       `Unmet Requirement:`,
-      `${parseRequirementText(req, registry)}`,
+      `- ${parseRequirementText(req, registry)}`,
     ];
   }
 
@@ -35,13 +38,15 @@ export const getUpgradeError = (index: number, kami: Kami, registry: Skill[]) =>
 }
 
 // parse the description of a skill requirement from its components
-export const parseRequirementText = (requirement: Requirement, registry: Skill[]): string => {
+export const parseRequirementText = (requirement: Requirement, registry: Map<number, Skill>): string => {
+  const index = (requirement.index ?? 0) * 1;
+
   switch (requirement.type) {
     case 'LEVEL':
       return `Kami Lvl${requirement.value}`;
     case 'SKILL':
-      const skillName = registry.find((entry) => entry.index === requirement.index)?.name;
-      return `${skillName} Lvl${(requirement.value ?? 0) * 1}`;
+      const skillName = registry.get(index!)?.name;
+      return `Lvl${(requirement.value ?? 0) * 1} ${skillName}`;
     default:
       return ' ???';
   }
@@ -107,18 +112,4 @@ export const meetsRequirement = (requirement: Requirement, holder: Account | Kam
       console.warn('Unknown requirement type', requirement.type);
       return false;
   }
-}
-
-// check whether a holder meets the required level of a skill
-const meetsRequiredLevel = (requirement: Requirement, holder: Account | Kami) => {
-  const target = requirement.value as number || 0;
-  const current = holder.level;
-  return current >= target;
-}
-
-// check whether a holder meets the required skill level of a skill
-const meetsRequiredSkill = (requirement: Requirement, holder: Account | Kami) => {
-  const target = requirement.value as number || 0;
-  const current = holder.skills?.find((n) => n.index === requirement.index)?.points.current || 0;
-  return current >= target;
 }

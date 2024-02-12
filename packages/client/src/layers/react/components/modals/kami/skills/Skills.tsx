@@ -3,32 +3,36 @@ import styled from "styled-components";
 
 import { Details } from "./Details";
 import { Matrix } from "./Matrix";
+import { Account } from "layers/network/shapes/Account";
 import { Kami } from "layers/network/shapes/Kami";
 import { Skill } from "layers/network/shapes/Skill";
 import { playClick } from 'utils/sounds';
 
 
 interface Props {
+  account: Account;
   kami: Kami;
-  skills: Skill[];
+  skills: Skill[]; // registry skills
   actions: {
     upgrade: Function;
   }
 }
 
 export const Skills = (props: Props) => {
-  const { skills, kami, actions } = props;
+  // console.log('mSkill:', props.kami);
+  const { account, kami, skills, actions } = props;
   const [skillMap, setSkillMap] = useState(new Map<number, Skill>());
-  const [selected, setSelected] = useState(0);
-  const [hovered, setHovered] = useState(0);
-  const [displayed, setDisplayed] = useState(0);
+  const [selected, setSelected] = useState(0);   // index of selected (anchored) skill
+  const [hovered, setHovered] = useState(0);     // index of hovered skill
+  const [displayed, setDisplayed] = useState(0); // index of displayed skill
 
-  // keep a hashmap of Skill indices to Skill objects for easy lookup
+
+  // keep a hashmap for easy lookup of Skill Indices => Skill Objects
   useEffect(() => {
-    const result = skills.reduce((map: Map<number, Skill>, skill) => {
-      map.set(skill.index * 1, skill);
-      return map;
-    }, new Map<number, Skill>());
+    const result = skills.reduce(
+      (map, skill) => map.set(skill.index * 1, skill),
+      new Map<number, Skill>()
+    );
     setSkillMap(result);
   }, [skills.length]);
 
@@ -56,7 +60,7 @@ export const Skills = (props: Props) => {
   return (
     <Wrapper>
       <Details
-        data={{ kami, index: displayed, registry: skills }}
+        data={{ account, kami, index: displayed, skills: skillMap }}
         actions={{ upgrade: (skill: Skill) => triggerUpgrade(skill) }}
       />
       <Matrix
