@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { Popover } from '@mui/material';
@@ -63,12 +63,7 @@ export function IconListButton(props: Props) {
 
   return (
     <div>
-      <Button
-        ref={toggleRef}
-        id={props.id}
-        onClick={handleClick}
-        style={setStyles()}
-      >
+      <Button ref={toggleRef} id={props.id} onClick={handleClick} style={setStyles()}>
         <Corner />
         <Image src={props.img} />
       </Button>

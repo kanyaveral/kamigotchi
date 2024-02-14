@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { interval, map } from 'rxjs';
 import { EntityID } from '@latticexyz/recs';
 import crypto from 'crypto';
+import { useEffect, useState } from 'react';
+import { interval, map } from 'rxjs';
 
-import { Banner } from './Banner';
-import { Kards } from './Kards';
-import { Tabs } from './Tabs';
-import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { getAccountFromBurner } from 'layers/network/shapes/Account';
 import { Kami } from 'layers/network/shapes/Kami';
 import { getLiquidationConfig } from 'layers/network/shapes/LiquidationConfig';
 import { Node, getNodeByIndex } from 'layers/network/shapes/Node';
+import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { useSelected } from 'layers/react/store/selected';
+import { Banner } from './Banner';
+import { Kards } from './Kards';
+import { Tabs } from './Tabs';
 
 // merchant window with listings. assumes at most 1 merchant per room
 export function registerNodeModal() {
@@ -111,10 +111,7 @@ export function registerNodeModal() {
           params: [enemyKami.production!.id, myKami.id],
           description: `Liquidating ${enemyKami.name} with ${myKami.name}`,
           execute: async () => {
-            return api.player.production.liquidate(
-              enemyKami.production!.id,
-              myKami.id
-            );
+            return api.player.production.liquidate(enemyKami.production!.id, myKami.id);
           },
         });
       };
@@ -140,9 +137,7 @@ export function registerNodeModal() {
           id: actionID,
           action: 'ProductionStop',
           params: [kami.production!.id],
-          description: `Removing ${kami.name} from ${
-            kami.production!.node?.name
-          }`,
+          description: `Removing ${kami.name} from ${kami.production!.node?.name}`,
           execute: async () => {
             return api.player.production.stop(kami.production!.id);
           },

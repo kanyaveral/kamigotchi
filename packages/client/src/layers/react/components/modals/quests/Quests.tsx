@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { interval, map } from 'rxjs';
 import { EntityID, EntityIndex } from '@latticexyz/recs';
 import crypto from 'crypto';
+import { useEffect, useState } from 'react';
+import { interval, map } from 'rxjs';
 
-import { Footer } from './Footer';
-import { List } from './List';
-import { Tabs } from './Tabs';
 import { questsIcon } from 'assets/images/icons/menu';
-import { ModalHeader } from 'layers/react/components/library/ModalHeader';
-import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
-import { registerUIComponent } from 'layers/react/engine/store';
 import { getAccountFromBurner } from 'layers/network/shapes/Account';
-import {
-  Quest,
-  getQuestByIndex,
-  getRegistryQuests,
-  parseQuestsStatus,
-} from 'layers/network/shapes/Quest';
 import {
   getItem,
   getItemByIndex,
   queryFoodRegistry,
   queryReviveRegistry,
 } from 'layers/network/shapes/Item';
+import {
+  Quest,
+  getQuestByIndex,
+  getRegistryQuests,
+  parseQuestsStatus,
+} from 'layers/network/shapes/Quest';
 import { getRoomByLocation } from 'layers/network/shapes/Room';
+import { ModalHeader } from 'layers/react/components/library/ModalHeader';
+import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
+import { registerUIComponent } from 'layers/react/engine/store';
+import { Footer } from './Footer';
+import { List } from './List';
+import { Tabs } from './Tabs';
 
 export function registerQuestsModal() {
   registerUIComponent(
@@ -44,11 +44,7 @@ export function registerQuestsModal() {
             kamis: true,
             inventory: true,
           });
-          const quests = parseQuestsStatus(
-            network,
-            account,
-            getRegistryQuests(network)
-          );
+          const quests = parseQuestsStatus(network, account, getRegistryQuests(network));
 
           return {
             network,
@@ -67,18 +63,18 @@ export function registerQuestsModal() {
         if (notifications.has(id as EntityID)) {
           if (numAvail == 0) notifications.remove(id as EntityID);
           notifications.update(id as EntityID, {
-            description: `There ${
-              numAvail == 1 ? 'is' : 'are'
-            } ${numAvail} quest${numAvail == 1 ? '' : 's'} you can accept.`,
+            description: `There ${numAvail == 1 ? 'is' : 'are'} ${numAvail} quest${
+              numAvail == 1 ? '' : 's'
+            } you can accept.`,
           });
         } else {
           if (numAvail > 0)
             notifications.add({
               id: id as EntityID,
               title: `Available Quest${numAvail == 1 ? '' : 's'}!`,
-              description: `There ${
-                numAvail == 1 ? 'is' : 'are'
-              } ${numAvail} quest${numAvail == 1 ? '' : 's'} you can accept.`,
+              description: `There ${numAvail == 1 ? 'is' : 'are'} ${numAvail} quest${
+                numAvail == 1 ? '' : 's'
+              } you can accept.`,
               time: Date.now().toString(),
               modal: 'quests',
             });
@@ -133,16 +129,11 @@ export function registerQuestsModal() {
             utils={{
               setNumAvail: (num: number) => setNumAvail(num),
               getItem: (index: EntityIndex) => getItem(network, index),
-              getRoom: (location: number) =>
-                getRoomByLocation(network, location),
-              getQuestByIndex: (index: number) =>
-                getQuestByIndex(network, index),
-              queryItemRegistry: (index: number) =>
-                getItemByIndex(network, index).entityIndex,
-              queryFoodRegistry: (index: number) =>
-                queryFoodRegistry(network, index),
-              queryReviveRegistry: (index: number) =>
-                queryReviveRegistry(network, index),
+              getRoom: (location: number) => getRoomByLocation(network, location),
+              getQuestByIndex: (index: number) => getQuestByIndex(network, index),
+              queryItemRegistry: (index: number) => getItemByIndex(network, index).entityIndex,
+              queryFoodRegistry: (index: number) => queryFoodRegistry(network, index),
+              queryReviveRegistry: (index: number) => queryReviveRegistry(network, index),
             }}
           />
         </ModalWrapper>

@@ -1,15 +1,15 @@
+import { EntityID } from '@latticexyz/recs';
+import crypto from 'crypto';
 import React, { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { useBalance, useContractRead } from 'wagmi';
-import { EntityID } from '@latticexyz/recs';
-import crypto from 'crypto';
 
 import { abi } from 'abi/Farm20ProxySystem.json';
-import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
-import { ActionButton } from 'layers/react/components/library/ActionButton';
-import { registerUIComponent } from 'layers/react/engine/store';
 import { getAccountFromBurner } from 'layers/network/shapes/Account';
+import { ActionButton } from 'layers/react/components/library/ActionButton';
+import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
+import { registerUIComponent } from 'layers/react/engine/store';
 import { useAccount } from 'layers/react/store/account';
 import { useNetwork } from 'layers/react/store/network';
 
@@ -130,9 +130,7 @@ export function registerERC20BridgeModal() {
           setEnableButton(false);
           setStatusText('');
         } else if (
-          isDepositState
-            ? amount > Number(EOABal?.formatted)
-            : amount > Number(account.coin ?? 0)
+          isDepositState ? amount > Number(EOABal?.formatted) : amount > Number(account.coin ?? 0)
         ) {
           setEnableButton(false);
           setStatusText('Insufficient Balance');
@@ -173,14 +171,8 @@ export function registerERC20BridgeModal() {
             style={{ backgroundColor: color }}
             onClick={() => setIsDepositState(fundState)}
           >
-            <Description style={{ color: textColor }}>
-              {' '}
-              {balance} $MUSU{' '}
-            </Description>
-            <SubDescription style={{ color: textColor }}>
-              {' '}
-              {text}{' '}
-            </SubDescription>
+            <Description style={{ color: textColor }}> {balance} $MUSU </Description>
+            <SubDescription style={{ color: textColor }}> {text} </SubDescription>
           </BoxButton>
         );
       };
@@ -189,15 +181,9 @@ export function registerERC20BridgeModal() {
         <ModalWrapper divName='bridgeERC20' id='bridgeERC20' canExit overlay>
           <Header>Bridge $MUSU</Header>
           <Grid>
-            <div style={{ width: '100%', gridRow: 1, gridColumn: 1 }}>
-              {StateBox(true)}
-            </div>
-            <div style={{ width: '100%', gridRow: 1, gridColumn: 2 }}>
-              {StateBox(false)}
-            </div>
-            <Description
-              style={{ gridRow: 2, gridColumnStart: 1, gridColumnEnd: 3 }}
-            >
+            <div style={{ width: '100%', gridRow: 1, gridColumn: 1 }}>{StateBox(true)}</div>
+            <div style={{ width: '100%', gridRow: 1, gridColumn: 2 }}>{StateBox(false)}</div>
+            <Description style={{ gridRow: 2, gridColumnStart: 1, gridColumnEnd: 3 }}>
               Bridge $MUSU between your wallet (ERC20) and the game world.
             </Description>
             <div
@@ -220,9 +206,7 @@ export function registerERC20BridgeModal() {
               ></Input>
               <SubText>{statusText}</SubText>
             </div>
-            <div style={{ gridRow: 5, gridColumnStart: 1, gridColumnEnd: 3 }}>
-              {TxButton()}
-            </div>
+            <div style={{ gridRow: 5, gridColumnStart: 1, gridColumnEnd: 3 }}>{TxButton()}</div>
           </Grid>
         </ModalWrapper>
       );

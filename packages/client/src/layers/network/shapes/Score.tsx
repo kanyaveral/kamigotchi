@@ -8,8 +8,8 @@ import {
   runQuery,
 } from '@latticexyz/recs';
 
-import { Account, getAccount } from './Account';
 import { NetworkLayer } from 'layers/network/types';
+import { Account, getAccount } from './Account';
 
 // standardized Object shape of a Score Entity
 export interface Score {
@@ -44,16 +44,12 @@ export const getScore = (network: NetworkLayer, index: EntityIndex): Score => {
   };
 };
 
-export const getScores = (
-  network: NetworkLayer,
-  filter: ScoresFilter
-): Score[] => {
+export const getScores = (network: NetworkLayer, filter: ScoresFilter): Score[] => {
   const { IsScore, Epoch, Type } = network.components;
 
   // set filters
   const queryFragments = [Has(IsScore)] as QueryFragment[];
-  if (filter.epoch)
-    queryFragments.push(HasValue(Epoch, { value: filter.epoch }));
+  if (filter.epoch) queryFragments.push(HasValue(Epoch, { value: filter.epoch }));
   if (filter.type) queryFragments.push(HasValue(Type, { value: filter.type }));
 
   // retrieve the relevant entities and their shapes

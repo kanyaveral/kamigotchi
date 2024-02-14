@@ -1,9 +1,9 @@
-import { EntityIndex, EntityID, getComponentValue } from '@latticexyz/recs';
+import { EntityID, EntityIndex, getComponentValue } from '@latticexyz/recs';
 
+import { NetworkLayer } from 'layers/network/types';
 import { getConfigFieldValue } from '../Config';
 import { Kami, getKami } from '../Kami';
 import { Node, getNode } from '../Node';
-import { NetworkLayer } from 'layers/network/types';
 
 // standardized shape of an Production Entity
 export interface Production {
@@ -56,8 +56,7 @@ export const getProduction = (
   if (options.kami) {
     const kamiID = getComponentValue(PetID, index)?.value as EntityID;
     const kamiEntityIndex = world.entityToIndex.get(kamiID);
-    if (kamiEntityIndex)
-      production.kami = getKami(network, kamiEntityIndex, { account: true });
+    if (kamiEntityIndex) production.kami = getKami(network, kamiEntityIndex, { account: true });
   }
 
   // populate Node

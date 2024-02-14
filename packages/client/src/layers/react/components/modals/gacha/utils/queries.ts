@@ -1,26 +1,16 @@
 import {
-  EntityID,
-  Has,
-  HasValue,
-  runQuery,
-  QueryFragment,
-  EntityIndex,
-} from '@latticexyz/recs';
-
-import {
   Kami,
+  Options,
+  QueryOptions,
   getKami,
   queryKamiEntitiesX,
-  QueryOptions,
-  Options,
 } from 'layers/network/shapes/Kami';
 import { NetworkLayer } from 'layers/network/types';
 
 export const getLazyKamis = (
   network: NetworkLayer
 ): ((queryOpts: QueryOptions, options?: Options) => Array<() => Kami>) => {
-  return (queryOpts: QueryOptions, options?: Options) =>
-    _getLazyKamis(network, queryOpts, options);
+  return (queryOpts: QueryOptions, options?: Options) => _getLazyKamis(network, queryOpts, options);
 };
 
 const _getLazyKamis = (

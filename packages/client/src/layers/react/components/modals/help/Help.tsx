@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
 
-import { HelpTabs } from './types';
-import { CopyInfo } from './copy';
-import { SectionContent } from './SectionContent';
-import { helpIcon } from 'assets/images/icons/menu';
 import { HelpMenuIcons } from 'assets/images/icons/help';
+import { helpIcon } from 'assets/images/icons/menu';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { IconButton } from 'layers/react/components/library/IconButton';
 import { ModalHeader } from 'layers/react/components/library/ModalHeader';
@@ -14,6 +11,9 @@ import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { registerUIComponent } from 'layers/react/engine/store';
 import 'layers/react/styles/font.css';
+import { SectionContent } from './SectionContent';
+import { CopyInfo } from './copy';
+import { HelpTabs } from './types';
 
 export function registerHelpModal() {
   registerUIComponent(
@@ -36,19 +36,14 @@ export function registerHelpModal() {
             display: `${tab == HelpTabs.HOME ? 'none' : 'inline-flex'}`,
           }}
         >
-          <ActionButton
-            id='help_back_button'
-            onClick={() => setTab(HelpTabs.HOME)}
-            text='<'
-          />
+          <ActionButton id='help_back_button' onClick={() => setTab(HelpTabs.HOME)} text='<' />
         </ButtonRow>
       );
 
       const Menu = () => (
         <MenuBody>
           <MenuText>
-            Here are valuable resources that can help you navigate Kamigotchi
-            World.
+            Here are valuable resources that can help you navigate Kamigotchi World.
           </MenuText>
           <Tooltip text={['Getting Started']}>
             <Label>Book 1</Label>
@@ -89,11 +84,7 @@ export function registerHelpModal() {
         >
           <BackButton />
           <Banner src={CopyInfo[tab].header} alt={CopyInfo[tab].title} />
-          {tab === HelpTabs.HOME ? (
-            <Menu />
-          ) : (
-            <SectionContent body={CopyInfo[tab].body} />
-          )}
+          {tab === HelpTabs.HOME ? <Menu /> : <SectionContent body={CopyInfo[tab].body} />}
         </ModalWrapper>
       );
     }

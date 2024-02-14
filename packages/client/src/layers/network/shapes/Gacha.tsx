@@ -8,9 +8,9 @@ import {
   runQuery,
 } from '@latticexyz/recs';
 
-import { getConfigFieldValueWei } from './Config';
-import { Kami, queryKamisX, Options as KamiOptions } from './Kami';
 import { NetworkLayer } from 'layers/network/types';
+import { getConfigFieldValueWei } from './Config';
+import { Kami, Options as KamiOptions, queryKamisX } from './Kami';
 
 // standardized shape of a gacha commit
 export interface GachaCommit {
@@ -21,10 +21,7 @@ export interface GachaCommit {
   // reroll (shown in Kami)
 }
 
-export const getCommit = (
-  network: NetworkLayer,
-  index: EntityIndex
-): GachaCommit => {
+export const getCommit = (network: NetworkLayer, index: EntityIndex): GachaCommit => {
   const {
     components: { RevealBlock },
     world,
@@ -36,10 +33,7 @@ export const getCommit = (
   };
 };
 
-export const queryAccCommits = (
-  network: NetworkLayer,
-  accountID: EntityID
-): GachaCommit[] => {
+export const queryAccCommits = (network: NetworkLayer, accountID: EntityID): GachaCommit[] => {
   const {
     components: { AccountID, Type, RevealBlock },
   } = network;
@@ -55,10 +49,7 @@ export const queryAccCommits = (
   return raw.map((index): GachaCommit => getCommit(network, index));
 };
 
-export const queryGachaKamis = (
-  network: NetworkLayer,
-  kamiOptions?: KamiOptions
-): Kami[] => {
+export const queryGachaKamis = (network: NetworkLayer, kamiOptions?: KamiOptions): Kami[] => {
   return queryKamisX(network, { state: 'GACHA' }, kamiOptions);
 };
 
@@ -69,10 +60,7 @@ export const calcRerollCost = (network: NetworkLayer, kami: Kami): bigint => {
   return baseCost * BigInt(kami.rerolls + 1);
 };
 
-export const isGachaAvailable = (
-  commit: GachaCommit,
-  currBlock: number
-): boolean => {
+export const isGachaAvailable = (commit: GachaCommit, currBlock: number): boolean => {
   // although commits are valid for 256 blocks, set to 250 for a small buffer
   return commit.revealBlock + 250 > currBlock;
 };

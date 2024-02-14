@@ -3,7 +3,6 @@ import {
   EntityIndex,
   Has,
   HasValue,
-  Layers,
   getComponentValue,
   runQuery,
 } from '@latticexyz/recs';
@@ -35,10 +34,7 @@ interface DefenseBonus {
 }
 
 // gets the bonuses based on the entity index of a kami
-export const getBonuses = (
-  network: NetworkLayer,
-  entityIndex: EntityIndex
-): Bonuses => {
+export const getBonuses = (network: NetworkLayer, entityIndex: EntityIndex): Bonuses => {
   const { world } = network;
   const holderID = world.entities[entityIndex];
 

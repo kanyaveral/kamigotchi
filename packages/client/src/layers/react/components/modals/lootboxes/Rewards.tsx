@@ -1,11 +1,11 @@
-import styled from 'styled-components';
 import { EntityIndex } from '@latticexyz/recs';
 import { getRarities } from 'constants/rarities';
 import { ItemIcon } from 'layers/react/components/library/ItemIcon';
+import styled from 'styled-components';
 
-import { LootboxLog } from 'layers/network/shapes/Lootbox';
-import { Item } from 'layers/network/shapes/Item';
 import { Account } from 'layers/network/shapes/Account';
+import { Item } from 'layers/network/shapes/Item';
+import { LootboxLog } from 'layers/network/shapes/Lootbox';
 
 interface Props {
   account: Account;
@@ -47,8 +47,7 @@ export const Rewards = (props: Props) => {
       const amounts = log.droptable.results!;
 
       for (let i = 0; i < items.length; i++) {
-        if (amounts[i] > 0)
-          list.push(parseItem(items[i], rarities[i], amounts[i]));
+        if (amounts[i] > 0) list.push(parseItem(items[i], rarities[i], amounts[i]));
       }
     }
 

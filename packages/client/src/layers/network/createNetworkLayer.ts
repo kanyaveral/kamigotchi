@@ -1,6 +1,5 @@
 import { GodID } from '@latticexyz/network';
 import {
-  Component,
   EntityIndex,
   Type,
   createWorld,
@@ -10,30 +9,26 @@ import {
 } from '@latticexyz/recs';
 import { SetupContractConfig, setupMUDNetwork } from '@latticexyz/std-client';
 
+import { SystemAbis } from 'types/SystemAbis.mjs';
+import { SystemTypes } from 'types/SystemTypes';
+import { createActionSystem } from './LocalSystems/ActionSystem/createActionSystem';
+import { createNotificationSystem } from './LocalSystems/NotificationSystem/createNotificationSystem';
 import { createAdminAPI } from './api/admin';
 import { createPlayerAPI } from './api/player';
 import { setUpWorldAPI } from './api/world';
 import { createComponents } from './components/register';
 import { initExplorer } from './explorer';
-import { createActionSystem } from './LocalSystems/ActionSystem/createActionSystem';
-import { createNotificationSystem } from './LocalSystems/NotificationSystem/createNotificationSystem';
-import { SystemTypes } from 'types/SystemTypes';
-import { SystemAbis } from 'types/SystemAbis.mjs';
 
 export async function createNetworkLayer(config: SetupContractConfig) {
   const world = createWorld();
   const components = createComponents(world);
 
-  const { txQueue, systems, txReduced$, network, startSync } =
-    await setupMUDNetwork<typeof components, SystemTypes>(
-      config,
-      world,
-      components,
-      SystemAbis,
-      {
-        fetchSystemCalls: true,
-      }
-    );
+  const { txQueue, systems, txReduced$, network, startSync } = await setupMUDNetwork<
+    typeof components,
+    SystemTypes
+  >(config, world, components, SystemAbis, {
+    fetchSystemCalls: true,
+  });
 
   let actions;
   const provider = network.providers.get().json;

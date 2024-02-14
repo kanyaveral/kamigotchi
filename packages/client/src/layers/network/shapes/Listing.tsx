@@ -1,14 +1,14 @@
 import {
-  EntityIndex,
   EntityID,
+  EntityIndex,
   Has,
   HasValue,
   getComponentValue,
   runQuery,
 } from '@latticexyz/recs';
 
-import { Item, getItem } from './Item';
 import { NetworkLayer } from 'layers/network/types';
+import { Item, getItem } from './Item';
 
 // standardized shape of a FE Listing Entity
 export interface Listing {
@@ -19,10 +19,7 @@ export interface Listing {
 }
 
 // get an Listing from its EntityIndex
-export const getListing = (
-  network: NetworkLayer,
-  index: EntityIndex
-): Listing => {
+export const getListing = (network: NetworkLayer, index: EntityIndex): Listing => {
   const {
     world,
     components: { IsRegistry, ItemIndex, PriceBuy },

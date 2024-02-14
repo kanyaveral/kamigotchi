@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 
 import { ExitButton } from 'layers/react/components/library/ExitButton';
-import { useVisibility, Modals } from 'layers/react/store/visibility';
+import { Modals, useVisibility } from 'layers/react/store/visibility';
 
 interface Props {
   id: string;
@@ -18,8 +18,7 @@ interface Props {
 // ModalWrapper is an animated wrapper around all modals.
 // It includes and exit button with a click sound as well as Content formatting.
 export const ModalWrapper = (props: Props) => {
-  const { divName, id, children, header, footer, canExit, overlay, noPadding } =
-    props;
+  const { divName, id, children, header, footer, canExit, overlay, noPadding } = props;
   const { modals } = useVisibility();
 
   // update modal visibility according to store settings

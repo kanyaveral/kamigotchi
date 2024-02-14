@@ -1,14 +1,12 @@
+import { useState } from 'react';
 import styled from 'styled-components';
-import React, { useEffect, useState } from 'react';
 
-import { ActionButton } from 'layers/react/components/library';
-import { InputSingleNumberForm } from 'layers/react/components/library';
+import { ActionButton, InputSingleNumberForm } from 'layers/react/components/library';
 import { BalanceBar } from './components/BalanceBar';
 import { KamiGrid } from './components/KamiGrid';
 
-import { playClick } from 'utils/sounds';
 import musuIcon from 'assets/images/icons/musu.png';
-import { Kami, QueryOptions, Options } from 'layers/network/shapes/Kami';
+import { Kami, Options, QueryOptions } from 'layers/network/shapes/Kami';
 
 interface Props {
   actions: {
@@ -23,10 +21,7 @@ interface Props {
     Tab: JSX.Element;
   };
   query: {
-    getLazyKamis: (
-      queryOpts: QueryOptions,
-      options?: Options
-    ) => Array<() => Kami>;
+    getLazyKamis: (queryOpts: QueryOptions, options?: Options) => Array<() => Kami>;
   };
 }
 
@@ -62,10 +57,7 @@ export const Pool = (props: Props) => {
     ];
   };
 
-  const lazyKamis = props.query.getLazyKamis(
-    { state: 'GACHA' },
-    { traits: true }
-  );
+  const lazyKamis = props.query.getLazyKamis({ state: 'GACHA' }, { traits: true });
 
   const getTruncatedKamis = () => {
     const amt = numShown < lazyKamis.length ? numShown : lazyKamis.length;

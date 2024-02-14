@@ -4,6 +4,7 @@
   "arrowParens": "always",
   "trailingComma": "es5",
   "tabWidth": 2,
-  "printWidth": 80,
-  "useTabs": false
+  "printWidth": 100,
+  "useTabs": false,
+  "plugins": ["prettier-plugin-organize-imports"]
 }

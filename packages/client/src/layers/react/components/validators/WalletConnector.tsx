@@ -1,8 +1,8 @@
 import { useChainModal, useConnectModal } from '@rainbow-me/rainbowkit';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
-import { useAccount, useNetwork, Connector } from 'wagmi';
+import { Connector, useAccount, useNetwork } from 'wagmi';
 
 import { defaultChain } from 'constants/chains';
 import { createNetworkConfig, createNetworkLayer } from 'layers/network';
@@ -61,9 +61,7 @@ export function registerWalletConnecter() {
           setButtonLabel('Connect');
         } else if (!chainMatches) {
           setTitle('Wrong Network');
-          setWarning(
-            `You're currently connected to the ${chain?.name} network`
-          );
+          setWarning(`You're currently connected to the ${chain?.name} network`);
           setDescription(`Please connect to ${defaultChain.name} network.`);
           setButtonLabel('Change Networks');
         } else {

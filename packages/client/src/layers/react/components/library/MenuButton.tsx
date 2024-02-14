@@ -1,8 +1,7 @@
-import React from 'react';
 import styled from 'styled-components';
 import { Tooltip } from './Tooltip';
 
-import { useVisibility, Modals } from 'layers/react/store/visibility';
+import { Modals, useVisibility } from 'layers/react/store/visibility';
 import { playClick } from 'utils/sounds';
 
 interface Props {
@@ -41,10 +40,7 @@ export const MenuButton = (props: Props) => {
   return (
     <Tooltip text={[tooltip]}>
       <div id={id}>
-        <Button
-          style={{ display: visible ? 'flex' : 'none' }}
-          onClick={handleToggle}
-        >
+        <Button style={{ display: visible ? 'flex' : 'none' }} onClick={handleToggle}>
           <Image src={image} alt={id} />
         </Button>
       </div>

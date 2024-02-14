@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
-import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { Tooltip } from 'layers/react/components/library';
+import { ActionButton } from 'layers/react/components/library/ActionButton';
 
 import { helpIcon } from 'assets/images/icons/menu';
 import { playClick } from 'utils/sounds';
@@ -21,11 +21,7 @@ export const Tabs = (props: Props) => {
 
   let text: string[] = [];
   if (props.tab === 'MINT')
-    text = [
-      'Get a kamigochi from the gacha pool!',
-      '',
-      'Each kamigochi costs 1 $KAMI.',
-    ];
+    text = ['Get a kamigochi from the gacha pool!', '', 'Each kamigochi costs 1 $KAMI.'];
   else if (props.tab === 'REROLL')
     text = [
       'Re-roll your kamigochi to get a new one from the pool!',

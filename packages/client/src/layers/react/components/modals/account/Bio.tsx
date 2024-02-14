@@ -6,8 +6,8 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Account } from 'layers/network/shapes/Account';
-import { Tooltip } from '../../library';
 import { playClick } from 'utils/sounds';
+import { Tooltip } from '../../library';
 
 interface Props {
   account: Account;
@@ -69,9 +69,7 @@ export const Bio = (props: Props) => {
     return (
       <DetailRow>
         <CakeIcon style={{ height: '1vw', width: '1vw' }} />
-        <Description>
-          {moment(1000 * account.time.creation).format('MMM DD, YYYY')}
-        </Description>
+        <Description>{moment(1000 * account.time.creation).format('MMM DD, YYYY')}</Description>
       </DetailRow>
     );
   };

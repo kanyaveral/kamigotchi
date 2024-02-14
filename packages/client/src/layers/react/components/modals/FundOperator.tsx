@@ -1,17 +1,17 @@
+import { EntityID, EntityIndex } from '@latticexyz/recs';
+import { waitForActionCompletion } from '@latticexyz/std-client';
+import crypto from 'crypto';
 import React, { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { useBalance } from 'wagmi';
-import { EntityID, EntityIndex } from '@latticexyz/recs';
-import { waitForActionCompletion } from '@latticexyz/std-client';
-import crypto from 'crypto';
 
-import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
+import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { useAccount } from 'layers/react/store/account';
 import { useNetwork } from 'layers/react/store/network';
-import { playSuccess, playScribble } from 'utils/sounds';
+import { playScribble, playSuccess } from 'utils/sounds';
 
 export function registerFundOperatorModal() {
   registerUIComponent(
@@ -136,12 +136,7 @@ export function registerFundOperatorModal() {
       const TxButton = () => {
         const text = isFundState! ? 'Fund Operator' : 'Send to Owner';
         return (
-          <ActionButton
-            id='button-deposit'
-            onClick={() => chooseTx()}
-            size='large'
-            text={text}
-          />
+          <ActionButton id='button-deposit' onClick={() => chooseTx()} size='large' text={text} />
         );
       };
 
@@ -153,26 +148,15 @@ export function registerFundOperatorModal() {
         const color = fundState == isFundState ? 'grey' : 'white';
         const textColor = fundState == isFundState ? 'white' : 'black';
         return (
-          <BoxButton
-            style={{ backgroundColor: color }}
-            onClick={() => setIsFundState(fundState)}
-          >
-            <Description style={{ color: textColor }}>
-              {' '}
-              {balance} ETH{' '}
-            </Description>
-            <SubDescription style={{ color: textColor }}>
-              {' '}
-              {text}{' '}
-            </SubDescription>
+          <BoxButton style={{ backgroundColor: color }} onClick={() => setIsFundState(fundState)}>
+            <Description style={{ color: textColor }}> {balance} ETH </Description>
+            <SubDescription style={{ color: textColor }}> {text} </SubDescription>
           </BoxButton>
         );
       };
 
       useEffect(() => {
-        const curBal = isFundState
-          ? Number(OwnerBal?.formatted)
-          : Number(OperatorBal?.formatted);
+        const curBal = isFundState ? Number(OwnerBal?.formatted) : Number(OperatorBal?.formatted);
 
         if (amount > curBal) {
           setStatusText('Insufficient balance');
@@ -184,14 +168,10 @@ export function registerFundOperatorModal() {
           setStatusColor('grey');
           // placeholder gas estimation
           if (isFundState)
-            setStatusText(
-              'This should last you for approximately 1000 transactions'
-            );
+            setStatusText('This should last you for approximately 1000 transactions');
           else {
             const remainBal = curBal - amount;
-            setStatusText(
-              "You'd have " + remainBal.toFixed(4).toString() + ' ETH left'
-            );
+            setStatusText("You'd have " + remainBal.toFixed(4).toString() + ' ETH left');
           }
         }
       }, [amount, OwnerBal, OperatorBal, isFundState]);
@@ -200,17 +180,10 @@ export function registerFundOperatorModal() {
         <ModalWrapper divName='operatorFund' id='operatorFund' canExit overlay>
           <Header>Operator gas</Header>
           <Grid>
-            <div style={{ width: '100%', gridRow: 1, gridColumn: 1 }}>
-              {StateBox(true)}
-            </div>
-            <div style={{ width: '100%', gridRow: 1, gridColumn: 2 }}>
-              {StateBox(false)}
-            </div>
-            <Description
-              style={{ gridRow: 2, gridColumnStart: 1, gridColumnEnd: 3 }}
-            >
-              Fund operator. You need gas to function. Better description to
-              follow.
+            <div style={{ width: '100%', gridRow: 1, gridColumn: 1 }}>{StateBox(true)}</div>
+            <div style={{ width: '100%', gridRow: 1, gridColumn: 2 }}>{StateBox(false)}</div>
+            <Description style={{ gridRow: 2, gridColumnStart: 1, gridColumnEnd: 3 }}>
+              Fund operator. You need gas to function. Better description to follow.
             </Description>
             <div
               style={{
@@ -232,9 +205,7 @@ export function registerFundOperatorModal() {
               ></Input>
               <WarnText style={{ color: statusColor }}>{statusText}</WarnText>
             </div>
-            <div style={{ gridRow: 5, gridColumnStart: 1, gridColumnEnd: 3 }}>
-              {TxButton()}
-            </div>
+            <div style={{ gridRow: 5, gridColumnStart: 1, gridColumnEnd: 3 }}>{TxButton()}</div>
           </Grid>
         </ModalWrapper>
       );

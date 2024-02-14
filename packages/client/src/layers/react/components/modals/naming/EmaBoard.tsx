@@ -1,20 +1,19 @@
 import { EntityID } from '@latticexyz/recs';
-import React from 'react';
+import crypto from 'crypto';
 import { interval, map } from 'rxjs';
 import styled from 'styled-components';
-import crypto from 'crypto';
 
 import { useIcon } from 'assets/images/icons/actions';
+import { getAccountFromBurner } from 'layers/network/shapes/Account';
+import { Kami } from 'layers/network/shapes/Kami';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { IconButton } from 'layers/react/components/library/IconButton';
 import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { getAccountFromBurner } from 'layers/network/shapes/Account';
-import { Kami } from 'layers/network/shapes/Kami';
-import { useVisibility } from 'layers/react/store/visibility';
 import { useSelected } from 'layers/react/store/selected';
+import { useVisibility } from 'layers/react/store/visibility';
 
 export function registerEMABoardModal() {
   registerUIComponent(
@@ -54,9 +53,7 @@ export function registerEMABoardModal() {
       };
 
       const useRenamePotion = (kami: Kami) => {
-        const inv = data.account.inventories?.consumables.find(
-          (inv) => inv.item.index === 9001
-        );
+        const inv = data.account.inventories?.consumables.find((inv) => inv.item.index === 9001);
         if (!inv) return;
 
         const actionID = crypto.randomBytes(32).toString('hex') as EntityID;
@@ -100,11 +97,7 @@ export function registerEMABoardModal() {
         } else if (isDead(kami)) {
           return <Tooltip text={['cannot hear you (dead)']}>{button}</Tooltip>;
         } else if (!canName(kami)) {
-          return (
-            <Tooltip text={['cannot rename;', 'use some holy dust!']}>
-              {button}
-            </Tooltip>
-          );
+          return <Tooltip text={['cannot rename;', 'use some holy dust!']}>{button}</Tooltip>;
         }
         return button;
       };

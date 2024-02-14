@@ -1,15 +1,12 @@
-import { useEffect } from 'react';
-import moment from 'moment';
-import styled from 'styled-components';
 import { EntityIndex, getComponentValueStrict } from '@latticexyz/recs';
 import PendingIcon from '@mui/icons-material/Pending';
+import moment from 'moment';
+import { useEffect } from 'react';
+import styled from 'styled-components';
 
 import { IndicatorIcons } from 'assets/images/icons/indicators';
+import { ActionState, ActionStateString } from 'layers/network/LocalSystems/ActionSystem/constants';
 import { NetworkLayer } from 'layers/network/types';
-import {
-  ActionStateString,
-  ActionState,
-} from 'layers/network/LocalSystems/ActionSystem/constants';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 
 interface Props {
@@ -49,10 +46,7 @@ export const Logs = (props: Props) => {
 
   // render the human readable description and detailed tooltip of a given action
   const Description = (action: any) => {
-    const tooltip = [
-      `Action: ${action.action}`,
-      `Input(s): ${action.params.join(', ')}`,
-    ];
+    const tooltip = [`Action: ${action.action}`, `Input(s): ${action.params.join(', ')}`];
     return (
       <Tooltip text={tooltip}>
         <Text>{action.description}</Text>
@@ -83,11 +77,7 @@ export const Logs = (props: Props) => {
     );
   };
 
-  return (
-    <Content id='tx-logs'>
-      {actionIndices.map((entityIndex) => Log(entityIndex))}
-    </Content>
-  );
+  return <Content id='tx-logs'>{actionIndices.map((entityIndex) => Log(entityIndex))}</Content>;
 };
 
 const Content = styled.div`

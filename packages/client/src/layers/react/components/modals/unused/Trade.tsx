@@ -1,6 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { map, merge } from 'rxjs';
-import { BigNumber } from 'ethers';
 import {
   EntityIndex,
   Has,
@@ -9,6 +6,7 @@ import {
   getComponentValue,
   runQuery,
 } from '@latticexyz/recs';
+import { map, merge } from 'rxjs';
 
 import { registerUIComponent } from 'layers/react/engine/store';
 
@@ -70,10 +68,7 @@ export function registerTradeModal() {
           HasValue(State, { value: 'ACCEPTED' }),
         ]);
 
-        const activeTrades = new Set([
-          ...activeRequesteeTrades,
-          ...activeRequesterTrades,
-        ]);
+        const activeTrades = new Set([...activeRequesteeTrades, ...activeRequesterTrades]);
         if (activeTrades.size > 0) {
           index = Array.from(activeTrades)[0];
         }
@@ -85,10 +80,7 @@ export function registerTradeModal() {
         const id = world.entities[index];
 
         const inventoryIndices = Array.from(
-          runQuery([
-            Has(IsInventory),
-            HasValue(HolderID, { value: world.entities[index] }),
-          ])
+          runQuery([Has(IsInventory), HasValue(HolderID, { value: world.entities[index] })])
         );
 
         // reorganize inventory into lists
@@ -97,10 +89,8 @@ export function registerTradeModal() {
         let balances: number[] = [],
           balance: number;
         for (let i = 0; i < inventoryIndices.length; i++) {
-          itemType = getComponentValue(ItemIndex, inventoryIndices[i])
-            ?.value as number;
-          balance = getComponentValue(Balance, inventoryIndices[i])
-            ?.value as number;
+          itemType = getComponentValue(ItemIndex, inventoryIndices[i])?.value as number;
+          balance = getComponentValue(Balance, inventoryIndices[i])?.value as number;
           itemTypes.push(itemType);
           balances.push(balance);
         }
@@ -117,12 +107,7 @@ export function registerTradeModal() {
       };
 
       // NOTE: we really want precise data subscriptions for this one, a nightmare without
-      return merge(
-        AccountID.update$,
-        State.update$,
-        DelegateeID.update$,
-        IsInventory.update$
-      ).pipe(
+      return merge(AccountID.update$, State.update$, DelegateeID.update$, IsInventory.update$).pipe(
         map(() => {
           // get the account entity of the controlling wallet
           const accountIndex = Array.from(

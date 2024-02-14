@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { CopyButton } from 'layers/react/components/library/CopyButton';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
-import { useVisibility } from 'layers/react/store/visibility';
 import { useAccount } from 'layers/react/store/account';
+import { useVisibility } from 'layers/react/store/visibility';
 
 export const Account = () => {
   const { account: kamiAccount } = useAccount();
@@ -65,10 +65,7 @@ export const Account = () => {
           </Tooltip>
         </SubHeaderRow>
         {FieldRow('Address', kamiAccount.operatorAddress)}
-        {FieldRow(
-          'Private Key',
-          localStorage.getItem('operatorPrivateKey') || ''
-        )}
+        {FieldRow('Private Key', localStorage.getItem('operatorPrivateKey') || '')}
       </Section>
     </Container>
   );

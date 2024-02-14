@@ -1,6 +1,6 @@
+import ErrorIcon from '@mui/icons-material/Error';
 import styled from 'styled-components';
 import { useBalance } from 'wagmi';
-import ErrorIcon from '@mui/icons-material/Error';
 
 import { triggerIcons } from 'assets/images/icons/triggers';
 import { GasConstants } from 'constants/gas';
@@ -57,36 +57,21 @@ export const Controls = (props: Props) => {
       warning = 'Your Operator could eat. Consider topping up on gas soon.';
     } else if (Number(OperatorBal?.formatted) < GasConstants.Full) {
       color = 'ddd';
-      warning =
-        'Your Operator is chugging along happily. Nothing to see here ^.^';
+      warning = 'Your Operator is chugging along happily. Nothing to see here ^.^';
     }
 
     return (
       <Tooltip text={[warning]}>
-        <ErrorIcon
-          style={{ color }}
-          cursor='pointer'
-          onClick={() => clickGasIcon()}
-        />
+        <ErrorIcon style={{ color }} cursor='pointer' onClick={() => clickGasIcon()} />
       </Tooltip>
     );
   };
 
   // button to toggle the modal between difference sizes
   const ToggleButton = () => {
-    const iconMapping = [
-      triggerIcons.eyeClosed,
-      triggerIcons.eyeHalf,
-      triggerIcons.eyeOpen,
-    ];
+    const iconMapping = [triggerIcons.eyeClosed, triggerIcons.eyeHalf, triggerIcons.eyeOpen];
 
-    return (
-      <IconButton
-        id='toggle'
-        onClick={() => toggleMode()}
-        img={iconMapping[mode]}
-      />
-    );
+    return <IconButton id='toggle' onClick={() => toggleMode()} img={iconMapping[mode]} />;
   };
 
   return (

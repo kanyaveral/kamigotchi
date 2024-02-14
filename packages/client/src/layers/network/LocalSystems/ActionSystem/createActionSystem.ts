@@ -1,20 +1,19 @@
 import { Provider } from '@ethersproject/providers';
 import {
+  EntityIndex,
   World,
   createEntity,
   getComponentValue,
-  updateComponent,
-  EntityID,
-  EntityIndex,
   removeComponent,
   setComponent,
+  updateComponent,
 } from '@latticexyz/recs';
 import { awaitStreamValue } from '@latticexyz/utils';
 import { Observable } from 'rxjs';
 
+import { defineActionComponent } from './ActionComponent';
 import { ActionState } from './constants';
 import { ActionRequest } from './types';
-import { defineActionComponent } from './ActionComponent';
 
 export type ActionSystem = ReturnType<typeof createActionSystem>;
 
@@ -71,12 +70,8 @@ export function createActionSystem<M = undefined>(
   async function execute(index: EntityIndex) {
     const request = requests.get(index);
     if (!request || !request.index) return;
-    if (
-      getComponentValue(Action, request.index)?.state !== ActionState.Requested
-    )
-      return;
-    const updateAction = (updates: any) =>
-      updateComponent(Action, request.index!, updates);
+    if (getComponentValue(Action, request.index)?.state !== ActionState.Requested) return;
+    const updateAction = (updates: any) => updateComponent(Action, request.index!, updates);
 
     // Update the action state
     updateAction({ state: ActionState.Executing });
@@ -131,9 +126,7 @@ export function createActionSystem<M = undefined>(
       return false;
     }
     if (getComponentValue(Action, index)?.state !== ActionState.Requested) {
-      console.warn(
-        `Trying to cancel Action Request ${request.id} not in the "Requested" state.`
-      );
+      console.warn(`Trying to cancel Action Request ${request.id} not in the "Requested" state.`);
       return false;
     }
 

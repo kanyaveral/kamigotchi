@@ -1,15 +1,15 @@
+import crypto from 'crypto';
 import React, { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 import styled from 'styled-components';
-import crypto from 'crypto';
 
-import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
+import { EntityID } from '@latticexyz/recs';
 import { Listing, getListing } from 'layers/network/shapes/Listing';
+import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { useSelected } from 'layers/react/store/selected';
-import { EntityID } from '@latticexyz/recs';
-import { ActionButton } from '../../library/ActionButton';
 import { useVisibility } from 'layers/react/store/visibility';
+import { ActionButton } from '../../library/ActionButton';
 
 // merchant window with listings. assumes at most 1 merchant per room
 export function registerBuyModal() {
@@ -35,9 +35,7 @@ export function registerBuyModal() {
       const { api, actions } = network;
       const { modals, setModals } = useVisibility();
       const { listingEntityIndex } = useSelected();
-      const [listing, setListing] = useState(
-        getListing(network, listingEntityIndex)
-      );
+      const [listing, setListing] = useState(getListing(network, listingEntityIndex));
       const [quantity, setQuantity] = useState(1);
 
       // update current item based on selection
@@ -87,28 +85,15 @@ export function registerBuyModal() {
       // RENDER
 
       const ConfirmButton = () => (
-        <ActionButton
-          id={`button-confirm`}
-          onClick={() => buy(listing, quantity)}
-          text='Confirm'
-        />
+        <ActionButton id={`button-confirm`} onClick={() => buy(listing, quantity)} text='Confirm' />
       );
 
       const CancelButton = () => (
-        <ActionButton
-          id={`button-cancel`}
-          onClick={() => closeModal()}
-          text='Cancel'
-        />
+        <ActionButton id={`button-cancel`} onClick={() => closeModal()} text='Cancel' />
       );
 
       return (
-        <ModalWrapper
-          id='buy'
-          divName='buy'
-          header={<Title>Confirm Purchase</Title>}
-          overlay
-        >
+        <ModalWrapper id='buy' divName='buy' header={<Title>Confirm Purchase</Title>} overlay>
           <Content>
             <Image src={listing.item.image.default} />
             <InfoSection>
@@ -125,9 +110,7 @@ export function registerBuyModal() {
                   onKeyDown={(e) => catchKeys(e)}
                   onChange={(e) => handleChange(e)}
                 />
-                <Description>{` ($${
-                  quantity * listing.buyPrice
-                })`}</Description>
+                <Description>{` ($${quantity * listing.buyPrice})`}</Description>
               </InputRow>
             </InfoSection>
           </Content>

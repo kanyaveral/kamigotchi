@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { map, merge } from 'rxjs';
-import { Has, HasValue, runQuery } from '@latticexyz/recs';
-import { EntityID } from '@latticexyz/recs';
-import { BigNumberish } from 'ethers';
-import { useContractRead } from 'wagmi';
+import { EntityID, Has, HasValue, runQuery } from '@latticexyz/recs';
 import crypto from 'crypto';
+import { BigNumberish } from 'ethers';
+import { useEffect, useState } from 'react';
+import { map, merge } from 'rxjs';
 import styled from 'styled-components';
+import { useContractRead } from 'wagmi';
 
 import { abi } from 'abi/Pet721ProxySystem.json';
-import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
-import { registerUIComponent } from 'layers/react/engine/store';
 import { Account, getAccount } from 'layers/network/shapes/Account';
 import { Kami, getKami } from 'layers/network/shapes/Kami';
+import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
+import { registerUIComponent } from 'layers/react/engine/store';
 import { useAccount } from 'layers/react/store/account';
 import { useNetwork } from 'layers/react/store/network';
 
@@ -120,15 +119,9 @@ export function registerERC721BridgeModal() {
       // for use in mud
       const buttonSelect = (props: any) => {
         if (isExportable(props.kami)) {
-          return (
-            <Button onClick={() => withdrawTx(props.kami.index)}>
-              Unstake
-            </Button>
-          );
+          return <Button onClick={() => withdrawTx(props.kami.index)}>Unstake</Button>;
         } else if (isImportable(props.kami)) {
-          return (
-            <Button onClick={() => depositTx(props.kami.index)}>Stake</Button>
-          );
+          return <Button onClick={() => depositTx(props.kami.index)}>Stake</Button>;
         }
         // specific conditions that disable bridging
         else if (isHarvesting(props.kami)) {
@@ -187,8 +180,7 @@ export function registerERC721BridgeModal() {
             let kamis: Kami[] = [];
             let petIndex;
             for (let i = 0; i < indices.length; i++) {
-              petIndex = ('0x' +
-                indices[i].toString(16).padStart(2, '0')) as unknown as number;
+              petIndex = ('0x' + indices[i].toString(16).padStart(2, '0')) as unknown as number;
               const entityID = Array.from(
                 runQuery([Has(IsPet), HasValue(PetIndex, { value: petIndex })])
               )[0];
@@ -229,14 +221,7 @@ export function registerERC721BridgeModal() {
       // Rendering of Individual Kami Cards in the Party Modal
       const KamiCards = (kamis: Kami[]) => {
         return kamis?.map((kami) => {
-          return (
-            <KamiCard
-              kami={kami}
-              key={kami.index}
-              image={kami.uri}
-              title={kami.name}
-            />
-          );
+          return <KamiCard kami={kami} key={kami.index} image={kami.uri} title={kami.name} />;
         });
       };
 
@@ -259,25 +244,18 @@ export function registerERC721BridgeModal() {
 
       const isResting = (kami: Kami): boolean => kami.state === 'RESTING';
 
-      const isOutOfWorld = (kami: Kami): boolean =>
-        kami.state === '721_EXTERNAL';
+      const isOutOfWorld = (kami: Kami): boolean => kami.state === '721_EXTERNAL';
 
       return (
         <ModalWrapper id='bridgeERC721' divName='bridgeERC721' canExit overlay>
           <Title>Stake/Unstake Kamis</Title>
           <Grid>
-            <Description style={{ gridRow: 1, gridColumn: 1 }}>
-              In game
-            </Description>
+            <Description style={{ gridRow: 1, gridColumn: 1 }}>In game</Description>
             <Scrollable style={{ gridRow: 2, gridColumn: 1 }}>
               {KamiCards(data.account.kamis)}
             </Scrollable>
-            <Description style={{ gridRow: 1, gridColumn: 2 }}>
-              In wallet
-            </Description>
-            <Scrollable style={{ gridRow: 2, gridColumn: 2 }}>
-              {KamiCards(EOAKamis)}
-            </Scrollable>
+            <Description style={{ gridRow: 1, gridColumn: 2 }}>In wallet</Description>
+            <Scrollable style={{ gridRow: 2, gridColumn: 2 }}>{KamiCards(EOAKamis)}</Scrollable>
           </Grid>
         </ModalWrapper>
       );

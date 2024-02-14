@@ -1,15 +1,15 @@
 import {
-  EntityIndex,
   EntityID,
-  getComponentValue,
+  EntityIndex,
   Has,
   HasValue,
+  getComponentValue,
   runQuery,
 } from '@latticexyz/recs';
 
-import { Kami, getKami } from './Kami';
-import { numberToHex } from 'utils/hex';
 import { NetworkLayer } from 'layers/network/types';
+import { numberToHex } from 'utils/hex';
+import { Kami, getKami } from './Kami';
 
 // standardized shape of a Node Entity
 export interface Node {
@@ -84,8 +84,7 @@ export const getNode = (
 
     // get list of kamis from list of productions
     for (let i = 0; i < productionEntityIndices.length; i++) {
-      const kamiID = getComponentValue(PetID, productionEntityIndices[i])
-        ?.value as EntityID;
+      const kamiID = getComponentValue(PetID, productionEntityIndices[i])?.value as EntityID;
       const kamiEntityIndex = world.entityToIndex.get(kamiID);
       if (kamiEntityIndex) {
         kamis.push(
@@ -119,11 +118,7 @@ export const getNode = (
   return node;
 };
 
-export const getNodeByIndex = (
-  network: NetworkLayer,
-  index: number,
-  options?: Options
-): Node => {
+export const getNodeByIndex = (network: NetworkLayer, index: number, options?: Options): Node => {
   const {
     components: { IsNode, NodeIndex },
   } = network;
@@ -134,10 +129,7 @@ export const getNodeByIndex = (
   return getNode(network, entityIndex, options);
 };
 
-export const getAllNodes = (
-  network: NetworkLayer,
-  options?: Options
-): Node[] => {
+export const getAllNodes = (network: NetworkLayer, options?: Options): Node[] => {
   const {
     components: { IsNode },
   } = network;

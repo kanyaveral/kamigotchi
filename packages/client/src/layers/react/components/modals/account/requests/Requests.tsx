@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Inbound } from './Inbound';
-import { Outbound } from './Outbound';
 import { Account } from 'layers/network/shapes/Account';
 import { Friendship } from 'layers/network/shapes/Friendship';
 import { ActionButton, Tooltip } from 'layers/react/components/library';
+import { Inbound } from './Inbound';
+import { Outbound } from './Outbound';
 import { Searched } from './Searched';
 
 interface Props {
@@ -34,10 +34,8 @@ export const Requests = (props: Props) => {
   useEffect(() => {
     const inboundIndices = requests.inbound.map((req) => req.account.index);
     const outboundIndices = requests.outbound.map((req) => req.target.index);
-    const friendIndices =
-      account.friends?.friends.map((fren) => fren.target.index) ?? [];
-    const blockedIndices =
-      account.friends?.blocked.map((fren) => fren.target.index) ?? [];
+    const friendIndices = account.friends?.friends.map((fren) => fren.target.index) ?? [];
+    const blockedIndices = account.friends?.blocked.map((fren) => fren.target.index) ?? [];
     setKnownAccIndices([
       account.index,
       ...blockedIndices,
@@ -63,9 +61,7 @@ export const Requests = (props: Props) => {
 
   // filters the list of accounts by whether their name/ownerEOA contains a substring
   const filterAccounts = (value: string) => {
-    const accounts = props.accounts.filter(
-      (account) => !knownAccIndices.includes(account.index)
-    );
+    const accounts = props.accounts.filter((account) => !knownAccIndices.includes(account.index));
 
     if (value.length < 2) return accounts;
 
@@ -123,10 +119,7 @@ export const Requests = (props: Props) => {
         />
       )}
       {mode === 'outbound' && (
-        <Outbound
-          requests={requests.outbound}
-          actions={{ cancelFren: actions.cancelFren }}
-        />
+        <Outbound requests={requests.outbound} actions={{ cancelFren: actions.cancelFren }} />
       )}
       {mode === 'search' && (
         <Searched

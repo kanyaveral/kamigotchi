@@ -6,10 +6,10 @@ import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ValidatorWrapper } from 'layers/react/components/library/ValidatorWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { useLocalStorage } from 'layers/react/hooks/useLocalStorage';
-import { useVisibility } from 'layers/react/store/visibility';
 import { useNetwork } from 'layers/react/store/network';
-import { generatePrivateKey, getAddressFromPrivateKey } from 'utils/address';
+import { useVisibility } from 'layers/react/store/visibility';
 import 'layers/react/styles/font.css';
+import { generatePrivateKey, getAddressFromPrivateKey } from 'utils/address';
 
 export function registerBurnerDetector() {
   registerUIComponent(
@@ -44,10 +44,7 @@ export function registerBurnerDetector() {
     },
 
     ({ connectedEOA, network }) => {
-      const [detectedPrivateKey, setDetectedPrivateKey] = useLocalStorage(
-        'operatorPrivateKey',
-        ''
-      );
+      const [detectedPrivateKey, setDetectedPrivateKey] = useLocalStorage('operatorPrivateKey', '');
       const { toggleButtons, toggleModals, toggleFixtures } = useVisibility();
       const { validators, setValidators } = useVisibility();
       const { validations, setValidations, setBurner } = useNetwork();
@@ -64,8 +61,7 @@ export function registerBurnerDetector() {
         const detectedEOA = getAddressFromPrivateKey(detectedPrivateKey);
         setDetectedAddress(detectedEOA);
 
-        const burnerMatches =
-          parseInt(connectedEOA, 16) === parseInt(detectedEOA, 16);
+        const burnerMatches = parseInt(connectedEOA, 16) === parseInt(detectedEOA, 16);
         setBurnerMatches(burnerMatches);
 
         if (!detectedPrivateKey) {
@@ -91,9 +87,7 @@ export function registerBurnerDetector() {
 
       // determining visibility based on above/prev checks
       useEffect(() => {
-        setIsVisible(
-          validations.isConnected && validations.chainMatches && !burnerMatches
-        );
+        setIsVisible(validations.isConnected && validations.chainMatches && !burnerMatches);
       }, [validations, burnerMatches]);
 
       // adjust visibility of windows based on above determination
@@ -112,9 +106,7 @@ export function registerBurnerDetector() {
       /////////////////
       // STATE
 
-      const handleInputChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-      ) => {
+      const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInput(event.target.value);
       };
 

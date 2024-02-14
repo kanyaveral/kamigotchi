@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { ActionButton } from './ActionButton';
 import { Tooltip } from './Tooltip';
@@ -13,8 +12,7 @@ interface Props {
 }
 
 export const ExperienceBar = (props: Props) => {
-  const { level, current, total, triggerLevelUp, disabled, disabledReason } =
-    props;
+  const { level, current, total, triggerLevelUp, disabled, disabledReason } = props;
   const percentage = Math.round((current / total) * 1000) / 10;
   const canLevelUp = !disabled && current >= total;
 

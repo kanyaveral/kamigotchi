@@ -1,8 +1,8 @@
 import { EntityID, EntityIndex, getComponentValue } from '@latticexyz/recs';
 
+import { NetworkLayer } from 'layers/network/types';
 import { Kami, getKami } from './Kami';
 import { Node, getNode } from './Node';
-import { NetworkLayer } from 'layers/network/types';
 
 // standardized Object shape of a Kill Entity
 export interface Kill {
@@ -22,11 +22,7 @@ interface Options {
 }
 
 // get a Kill object from its EnityIndex
-export const getKill = (
-  network: NetworkLayer,
-  index: EntityIndex,
-  options?: Options
-): Kill => {
+export const getKill = (network: NetworkLayer, index: EntityIndex, options?: Options): Kill => {
   const {
     components: { NodeID, SourceID, TargetID, Balance, Coin, Time },
     world,

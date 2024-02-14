@@ -1,9 +1,4 @@
-import {
-  EntityIndex,
-  getComponentValue,
-  getComponentEntities,
-} from '@latticexyz/recs';
-import React from 'react';
+import { EntityIndex, getComponentEntities, getComponentValue } from '@latticexyz/recs';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 
@@ -27,9 +22,7 @@ export function registerNotificationFixture() {
 
       return merge(notifications.Notification.update$).pipe(
         map(() => {
-          const list = Array.from(
-            getComponentEntities(notifications.Notification)
-          );
+          const list = Array.from(getComponentEntities(notifications.Notification));
           return {
             notifications: notifications,
             list: list,
@@ -53,10 +46,7 @@ export function registerNotificationFixture() {
         if (!notification) return null;
 
         return (
-          <Card
-            key={id.toString()}
-            onClick={() => handleClick(notification.modal)}
-          >
+          <Card key={id.toString()} onClick={() => handleClick(notification.modal)}>
             <Title>{notification.title}</Title>
             <Description>{notification.description}</Description>
           </Card>

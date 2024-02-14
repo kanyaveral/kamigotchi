@@ -1,15 +1,8 @@
-import React from 'react';
+import { Table, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import styled from 'styled-components';
-import {
-  Table,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
 
-import { Kill } from 'layers/network/shapes/Kill';
 import { Kami } from 'layers/network/shapes/Kami';
+import { Kill } from 'layers/network/shapes/Kill';
 import { useSelected } from 'layers/react/store/selected';
 import { useVisibility } from 'layers/react/store/visibility';
 import { playClick } from 'utils/sounds';
@@ -83,12 +76,8 @@ export const KillLogs = (props: Props) => {
         >
           {adversary?.name}
         </TableCell>
-        <TableCell sx={type === 'kill' ? killStyle : deathStyle}>
-          {type}
-        </TableCell>
-        <TableCell sx={type === 'kill' ? killStyle : deathStyle}>
-          {getPnLString(log)}
-        </TableCell>
+        <TableCell sx={type === 'kill' ? killStyle : deathStyle}>{type}</TableCell>
+        <TableCell sx={type === 'kill' ? killStyle : deathStyle}>{getPnLString(log)}</TableCell>
       </TableRow>
     );
   };
