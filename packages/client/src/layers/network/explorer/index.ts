@@ -4,8 +4,11 @@ import { getAccountByIndex, getAllAccounts } from 'layers/network/shapes/Account
 import { getAllKamis, getKamiByIndex } from 'layers/network/shapes/Kami';
 import { getAllNodes, getNodeByIndex } from 'layers/network/shapes/Node';
 import { getAllRooms, getRoomByIndex } from 'layers/network/shapes/Room';
+import { getAllItems, getItemByIndex } from '../shapes/Item';
 import { getAllMerchants, getMerchantByIndex } from '../shapes/Merchant';
-import { getQuestByIndex } from '../shapes/Quest';
+import { getQuestByIndex, getRegistryQuests } from '../shapes/Quest';
+import { getRegistrySkills, getSkillByIndex } from '../shapes/Skill';
+import { getRegistryTraits, getTraitByIndex } from '../shapes/Trait';
 import { NetworkLayer } from '../types';
 
 // explorer for our 'shapes', exposed on the window object @ network.explorer
@@ -13,6 +16,9 @@ import { NetworkLayer } from '../types';
 export const initExplorer = (network: NetworkLayer) => {
   let explorer = network.explorer;
   const { components } = network;
+
+  /////////////////
+  // INSTANCES
 
   explorer.account = {
     get: (index: number, options?: {}) => {
@@ -59,12 +65,31 @@ export const initExplorer = (network: NetworkLayer) => {
     indices: () => Array.from(components.RoomIndex.values.value.values()),
   };
 
+  /////////////////
+  // REGISTRIES
+
+  explorer.item = {
+    get: (index: number) => getItemByIndex(network, index),
+    getAll: () => getAllItems(network),
+    indices: () => [...new Set(Array.from(components.ItemIndex.values.value.values()))],
+  };
+
   explorer.quest = {
-    get: (index: number, options?: {}) => {
-      return getQuestByIndex(network, index);
-    },
-    entities: () => Array.from(components.IsRoom.entities()),
-    indices: () => Array.from(components.RoomIndex.values.value.values()),
+    get: (index: number) => getQuestByIndex(network, index),
+    getAll: () => getRegistryQuests(network),
+    indices: () => [...new Set(Array.from(components.QuestIndex.values.value.values()))],
+  };
+
+  explorer.skill = {
+    get: (index: number, options?: {}) => getSkillByIndex(network, index, options),
+    getAll: () => getRegistrySkills(network),
+    indices: () => [...new Set(Array.from(components.SkillIndex.values.value.values()))],
+  };
+
+  explorer.trait = {
+    get: (index: number) => getTraitByIndex(network, index),
+    getAll: () => getRegistryTraits(network),
+    indices: () => [...new Set(Array.from(components.TraitIndex.values.value.values()))],
   };
 
   // helper function to get all the set components values for a given entity
