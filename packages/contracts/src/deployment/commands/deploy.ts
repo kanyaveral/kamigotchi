@@ -31,6 +31,13 @@ const run = async () => {
     forgeOpts: argv.forgeOpts,
   });
 
+  /// foundry implementation of world.ts - not in use
+  // const initResult = await executeCallFromStream(
+  //   getRpc(mode)!,
+  //   getDeployerKey(mode)!,
+  //   "0x610178da211fef7d417bc0e6fed39f05609ad788"
+  // );
+
   openurl.open(
     "http://localhost:3000/?worldAddress=" +
       result.deployedWorldAddress +

@@ -3,7 +3,7 @@ import { generateLibDeploy } from "./codegen";
 import { findLog } from "./findLog";
 import execa = require("execa");
 
-const contractsDir = __dirname + "/../../";
+const contractsDir = __dirname + "/../../contracts/";
 
 /**
  * Deploy world, components and systems from deploy.json
@@ -24,7 +24,7 @@ export async function deploy(
     "forge",
     [
       "script",
-      "src/deployment/Deploy.s.sol:Deploy",
+      "src/deployment/contracts/Deploy.s.sol:Deploy",
       "--broadcast",
       "--sig",
       "deploy(uint256,address,bool)",
