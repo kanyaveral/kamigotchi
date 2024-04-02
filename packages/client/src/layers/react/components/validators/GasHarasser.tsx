@@ -1,19 +1,19 @@
-import { EntityIndex } from '@mud-classic/recs';
+import { EntityID, EntityIndex } from '@mud-classic/recs';
 import { waitForActionCompletion } from 'layers/network/utils';
 import React, { useEffect, useState } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
-import { useBalance } from 'wagmi';
+import { v4 as uuid } from 'uuid';
+import { useBalance, useBlockNumber } from 'wagmi';
 
 import { defaultChain } from 'constants/chains';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ValidatorWrapper } from 'layers/react/components/library/ValidatorWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useAccount } from 'layers/react/store/account';
-import { useNetwork } from 'layers/react/store/network';
-import { useVisibility } from 'layers/react/store/visibility';
+import { useAccount, useNetwork, useVisibility } from 'layers/react/store';
 import 'layers/react/styles/font.css';
 import { playClick, playSuccess } from 'utils/sounds';
+import { formatEther } from 'viem';
 
 // TODO: check for whether an account with the burner address already exists
 export function registerGasHarasser() {
@@ -30,7 +30,8 @@ export function registerGasHarasser() {
       const {
         network: { actions, world },
       } = layers;
-      const { selectedAddress, networks, validations: networkValidations } = useNetwork();
+      const { data: blockNumber } = useBlockNumber({ watch: true });
+      const { selectedAddress, apis, validations: networkValidations } = useNetwork();
       const { validators, setValidators } = useVisibility();
       const { account, validations, setValidations } = useAccount();
 
@@ -38,25 +39,34 @@ export function registerGasHarasser() {
       const [isVisible, setIsVisible] = useState(false);
       const [value, setValue] = useState(0.05);
 
-      const { data: OperatorBal } = useBalance({
+      // Operator Eth Balance
+      const { data: balance, refetch } = useBalance({
         address: account.operatorAddress as `0x${string}`,
-        watch: true,
       });
+
+      /////////////////
+      // SUBSCRIPTIONS
+
+      useEffect(() => {
+        refetch();
+      }, [blockNumber]);
 
       // run the primary check(s) for this validator, track in store for easy access
       useEffect(() => {
-        const hasGas = Number(OperatorBal?.formatted) > 0;
+        const hasGas = Number(formatEther(balance?.value ?? BigInt(0))) > 0;
         setHasGas(hasGas);
         setValidations({ ...validations, operatorHasGas: hasGas });
-      }, [OperatorBal]);
+      }, [balance]);
 
       // determine visibility based on above/prev checks
       useEffect(() => {
+        console.log('hasGas', hasGas);
+        console.log('validations', validations);
+        console.log('networkValidations', networkValidations);
         setIsVisible(
-          defaultChain.id !== 31337 &&
-            networkValidations.isConnected &&
+          defaultChain.id !== 1337 &&
+            networkValidations.authenticated &&
             networkValidations.chainMatches &&
-            networkValidations.burnerMatches &&
             validations.accountExists &&
             validations.operatorMatches &&
             !hasGas
@@ -72,7 +82,6 @@ export function registerGasHarasser() {
       }, [
         isVisible,
         validators.walletConnector,
-        validators.burnerDetector,
         validators.accountRegistrar,
         validators.operatorUpdater,
       ]);
@@ -81,15 +90,16 @@ export function registerGasHarasser() {
       // ACTIONS
 
       const fundTx = async () => {
-        const network = networks.get(selectedAddress);
-        const account = network!.api.player.account;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-        actions?.add({
+        const actionID = uuid() as EntityID;
+        actions.add({
           action: 'AccountFund',
           params: [value.toString()],
           description: `Funding Operator ${value.toString()}`,
           execute: async () => {
-            return account.fund(value.toString());
+            return api.account.fund(value.toString());
           },
         });
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;

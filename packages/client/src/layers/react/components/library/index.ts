@@ -4,7 +4,6 @@ export { Battery } from './Battery';
 export { Card } from './Card';
 export { CopyButton } from './CopyButton';
 export { Countdown } from './Countdown';
-export { AccountButton } from './CustomRainbowButton';
 export { ExitButton } from './ExitButton';
 export { FarcasterConnect } from './FarcasterConnect';
 export { Gauge } from './Gauge';

@@ -1,10 +1,10 @@
-import { FetchBalanceResult } from '@wagmi/core';
-import { useEffect, useState } from 'react';
-import { map, merge } from 'rxjs';
+import { useEffect } from 'react';
+import { interval, map } from 'rxjs';
 import styled from 'styled-components';
-import { useBalance, useContractRead } from 'wagmi';
+import { erc20Abi, formatEther, formatUnits } from 'viem';
+import { useBalance, useBlockNumber, useReadContract, useReadContracts } from 'wagmi';
 
-import { abi as Pet721ProxySystemABI } from 'abi/Pet721ProxySystem.json';
+import { abi as Mint20ProxySystemABI } from 'abi/Mint20ProxySystem.json';
 import { GasConstants } from 'constants/gas';
 import {
   Account,
@@ -17,7 +17,7 @@ import { Battery } from 'layers/react/components/library/Battery';
 import { Gauge } from 'layers/react/components/library/Gauge';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useVisibility } from 'layers/react/store/visibility';
+import { useVisibility } from 'layers/react/store';
 
 export function registerAccountInfoFixture() {
   registerUIComponent(
@@ -30,22 +30,16 @@ export function registerAccountInfoFixture() {
     },
     (layers) => {
       const { network } = layers;
-      const { Coin, RoomIndex, Name, OperatorAddress, Stamina } = network.components;
+      const { world, components } = network;
 
-      return merge(
-        Coin.update$,
-        RoomIndex.update$,
-        Name.update$,
-        OperatorAddress.update$,
-        Stamina.update$
-      ).pipe(
+      return interval(1000).pipe(
         map(() => {
           const account = getAccountFromBurner(network);
           return {
             network,
             data: {
               account,
-              room: getRoomByIndex(network, account.roomIndex),
+              room: getRoomByIndex(world, components, account.roomIndex),
             },
           };
         })
@@ -53,57 +47,70 @@ export function registerAccountInfoFixture() {
     },
     ({ network, data }) => {
       // console.log('mAccountInfo:', data);
-      const [lastRefresh, setLastRefresh] = useState(Date.now());
       const { account, room } = data;
       const { fixtures } = useVisibility();
+      const blockNumber = useBlockNumber({ watch: true, cacheTime: 500 });
+
+      /////////////////
+      // SUBSCRIPTIONS
+
+      // Operator Eth Balance
+      const { data: operatorEthBalance, refetch: refetchOperatorEthBalance } = useBalance({
+        address: account.operatorEOA as `0x${string}`,
+      });
+
+      // $KAMI Contract Address
+      const { data: mint20Addy, refetch: refetchMint20Addy } = useReadContract({
+        address: network.systems['system.Mint20.Proxy']?.address as `0x${string}`,
+        abi: Mint20ProxySystemABI,
+        functionName: 'getTokenAddy',
+      });
+
+      // $KAMI Balance
+      const { data: ownerMint20Balance, refetch: refetchOwnerMint20Balance } = useReadContracts({
+        contracts: [
+          {
+            abi: erc20Abi,
+            address: mint20Addy as `0x${string}`,
+            functionName: 'balanceOf',
+            args: [account.ownerEOA as `0x${string}`],
+          },
+          {
+            abi: erc20Abi,
+            address: mint20Addy as `0x${string}`,
+            functionName: 'decimals',
+          },
+        ],
+      });
 
       /////////////////
       // TRACKING
 
-      // Ticking
+      // update the relevant details as we retrieve new blocks
       useEffect(() => {
-        const refreshClock = () => {
-          setLastRefresh(Date.now());
-        };
-        const timerId = setInterval(refreshClock, 1000);
-        return function cleanup() {
-          clearInterval(timerId);
-        };
-      }, []);
-
-      // Operator Balance
-      const { data: operatorGas } = useBalance({
-        address: account.operatorEOA as `0x${string}`,
-        watch: true,
-      });
-
-      // $KAMI Balance
-      const { data: mint20Addy } = useContractRead({
-        address: network.systems['system.Mint20.Proxy']?.address as `0x${string}`,
-        abi: Pet721ProxySystemABI,
-        functionName: 'getTokenAddy',
-      });
-
-      const { data: ownerKAMI } = useBalance({
-        address: account.ownerEOA as `0x${string}`,
-        token: mint20Addy as `0x${string}`,
-        watch: true,
-      });
+        refetchMint20Addy();
+        refetchOwnerMint20Balance();
+        refetchOperatorEthBalance();
+      }, [blockNumber]);
 
       /////////////////
       // INTERPRETATION
 
       // calculated the gas gauge level
-      const calcGaugeSetting = (gasBalance: FetchBalanceResult | undefined): number => {
-        const amt = Number(gasBalance?.formatted);
-        if (amt >= GasConstants.Full) return 100;
-        if (amt <= GasConstants.Low) return 0;
-        return (amt / GasConstants.Full) * 100;
+      const calcGaugeSetting = (balance: bigint = BigInt(0)): number => {
+        const formatted = Number(formatEther(balance));
+        const level = formatted / GasConstants.Full;
+        return 100 * Math.min(level, 1.0);
       };
 
       // parses a wagmi FetchBalanceResult
-      const parseBalanceResult = (bal: FetchBalanceResult | undefined, precision: number = 4) => {
-        return Number(bal?.formatted ?? 0).toFixed(precision);
+      const parseTokenBalance = (
+        balance: bigint = BigInt(0),
+        decimals: number = 18,
+        precision: number = 3
+      ) => {
+        const formatted = formatUnits(balance, decimals);
+        return Number(formatted).toFixed(precision);
       };
 
       const parseStaminaString = (account: Account) => {
@@ -158,14 +165,21 @@ export function registerAccountInfoFixture() {
               </Cell>
               <Cell style={borderLeftStyle}>
                 <Tooltip text={getKAMITooltip()}>
-                  <TextBox>$KAMI: {parseBalanceResult(ownerKAMI, 1)}</TextBox>
+                  <TextBox>
+                    $KAMI:{' '}
+                    {parseTokenBalance(
+                      ownerMint20Balance?.[0]?.result,
+                      ownerMint20Balance?.[1]?.result
+                    )}
+                  </TextBox>
                 </Tooltip>
               </Cell>
               <Cell style={borderLeftStyle}>
                 <Tooltip text={getGasTooltip()}>
                   <TextBox>
-                    Gas: {parseBalanceResult(operatorGas)}Ξ
-                    <Gauge level={calcGaugeSetting(operatorGas)} />
+                    Gas:{' '}
+                    {parseTokenBalance(operatorEthBalance?.value, operatorEthBalance?.decimals)}Ξ
+                    <Gauge level={calcGaugeSetting(operatorEthBalance?.value)} />
                   </TextBox>
                 </Tooltip>
               </Cell>

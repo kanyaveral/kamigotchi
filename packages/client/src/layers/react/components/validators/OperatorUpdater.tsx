@@ -1,8 +1,9 @@
-import { EntityIndex } from '@mud-classic/recs';
+import { EntityID, EntityIndex } from '@mud-classic/recs';
 import { waitForActionCompletion } from 'layers/network/utils';
 import React, { useEffect, useState } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
+import { v4 as uuid } from 'uuid';
 
 import { getAccountByOperator } from 'layers/network/shapes/Account';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
@@ -10,9 +11,7 @@ import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { ValidatorWrapper } from 'layers/react/components/library/ValidatorWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { useLocalStorage } from 'layers/react/hooks/useLocalStorage';
-import { useAccount } from 'layers/react/store/account';
-import { useNetwork } from 'layers/react/store/network';
-import { useVisibility } from 'layers/react/store/visibility';
+import { useAccount, useNetwork, useVisibility } from 'layers/react/store';
 import 'layers/react/styles/font.css';
 import { generatePrivateKey } from 'utils/address';
 import { playClick, playScribble, playSuccess } from 'utils/sounds';
@@ -29,14 +28,15 @@ export function registerOperatorUpdater() {
     },
     (layers) => of(layers),
     (layers) => {
-      const {
-        network: { actions },
-      } = layers;
+      const { network } = layers;
+      const { actions, components, world } = network;
       const [_, setDetectedPrivateKey] = useLocalStorage('operatorPrivateKey', '');
-      const { burner, selectedAddress, networks, validations: networkValidations } = useNetwork();
+
+      const { account: kamiAccount, validations, setValidations } = useAccount();
+      const { burnerAddress, selectedAddress } = useNetwork();
+      const { apis, validations: networkValidations } = useNetwork();
       const { toggleButtons, toggleModals } = useVisibility();
       const { validators, setValidators } = useVisibility();
-      const { account: kamiAccount, validations, setValidations } = useAccount();
 
       const [operatorMatches, setOperatorMatches] = useState(false);
       const [operatorTaken, setOperatorTaken] = useState(false);
@@ -46,15 +46,15 @@ export function registerOperatorUpdater() {
 
       // run the primary check(s) for this validator, track in store for easy access
       useEffect(() => {
-        const operatorMatches = kamiAccount.operatorAddress === burner.connected.address;
+        const operatorMatches = kamiAccount.operatorAddress === burnerAddress;
         setOperatorMatches(operatorMatches);
         setValidations({ ...validations, operatorMatches });
-      }, [burner.connected.address, kamiAccount.operatorAddress]);
+      }, [burnerAddress, kamiAccount.operatorAddress]);
 
       // determine visibility based on above/prev checks
       useEffect(() => {
         setIsVisible(
-          networkValidations.isConnected &&
+          networkValidations.authenticated &&
             networkValidations.chainMatches &&
             networkValidations.burnerMatches &&
             validations.accountExists &&
@@ -84,28 +84,28 @@ export function registerOperatorUpdater() {
 
       // check if the connected burner is already taken by an account
       useEffect(() => {
-        const account = getAccountByOperator(layers.network, burner.connected.address);
+        const account = getAccountByOperator(world, components, burnerAddress);
         setOperatorTaken(!!account.id);
-      }, [mode, burner.connected.address]);
+      }, [mode, burnerAddress]);
 
       /////////////////
       // ACTIONS
 
       const setOperator = async (address: string) => {
-        const network = networks.get(selectedAddress);
-        const world = network!.world;
-        const api = network!.api.player;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-        actions?.add({
+        const actionID = uuid() as EntityID;
+        actions.add({
           action: 'AccountSetOperator',
           params: [address],
-          description: `Setting Account Avatar to ${address}`,
+          description: `Setting Account Avatar to 0x..${address.slice(-4)}`,
           execute: async () => {
             return api.account.set.operator(address);
           },
         });
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;
-        await waitForActionCompletion(actions?.Action!, actionIndex);
+        await waitForActionCompletion(actions.Action, actionIndex);
       };
 
       const setOperatorWithFx = async (address: string) => {
@@ -169,7 +169,7 @@ export function registerOperatorUpdater() {
             <ActionButton
               id={`copy`}
               text='Use connected one'
-              onClick={() => setValue(burner.connected.address)}
+              onClick={() => setValue(burnerAddress)}
               disabled={operatorTaken}
               size='vending'
             />
@@ -193,7 +193,7 @@ export function registerOperatorUpdater() {
           errorPrimary='Connected Burner != Account Avatar'
         >
           <Description>Account Avatar: {kamiAccount.operatorAddress}</Description>
-          <Description>Connected Burner: {burner.connected.address}</Description>
+          <Description>Connected Burner: {burnerAddress}</Description>
           <br />
           <WarningOption onClick={() => handleSetMode('key')}>
             {mode === 'key' ? '→ ' : ''}Please, find your keys {kamiAccount.name}

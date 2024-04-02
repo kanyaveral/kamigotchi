@@ -1,79 +1,79 @@
-import {
-  EntityIndex,
-  Type,
-  createWorld,
-  defineComponent,
-  getComponentValue,
-  setComponent,
-} from '@mud-classic/recs';
+import { ExternalProvider } from '@ethersproject/providers';
+import { Type, createWorld, defineComponent } from '@mud-classic/recs';
 
-import { GodID } from './workers/workers';
-import { SetupContractConfig, setupMUDNetwork } from "layers/network/setup";
+import { createNetworkConfig } from 'layers/network';
 import { SystemAbis } from 'types/SystemAbis.mjs';
 import { SystemTypes } from 'types/SystemTypes';
-import { createActionSystem } from './systems/ActionSystem/createActionSystem';
-import { createNotificationSystem } from './systems/NotificationSystem/createNotificationSystem';
-import { createAdminAPI } from './api/admin';
-import { createPlayerAPI } from './api/player';
-import { setUpWorldAPI } from './api/world';
-import { createComponents } from './components/register';
+import { createAdminAPI, createPlayerAPI, setupWorldAPI } from './api';
+import { createComponents } from './components';
 import { initExplorer } from './explorer';
+import { SetupContractConfig, setupMUDNetwork } from './setup';
+import { createActionSystem, createNotificationSystem } from './systems';
+import { createNetwork } from './workers';
 
+export type NetworkLayer = Awaited<ReturnType<typeof createNetworkLayer>>;
+
+// create and return a full network layer
 export async function createNetworkLayer(config: SetupContractConfig) {
   const world = createWorld();
   const components = createComponents(world);
 
-  const { txQueue, systems, txReduced$, network, startSync } = await setupMUDNetwork<
+  const { network, startSync, systems, createSystems, txReduced$ } = await setupMUDNetwork<
     typeof components,
     SystemTypes
-  >(config, world, components, SystemAbis, {
-    fetchSystemCalls: true,
-  });
+  >(world, components, SystemAbis, config, { fetchSystemCalls: true });
 
-  let actions;
   const provider = network.providers.get().json;
-  if (provider) actions = createActionSystem(world, txReduced$, provider);
-  const notifications = createNotificationSystem(world);
+  if (!provider) throw new Error('no Provider.. provided by network');
 
-  // local component to trigger updates
-  // effectively a hopper to make EOA wallet updates compatible with phaser
-  // could be extended to replace clunky streams in react
-  const NetworkUpdater = defineComponent(world, { value: Type.Boolean });
-  const UpdateNetwork = () => {
-    const godEntityIndex = world.entityToIndex.get(GodID) as EntityIndex;
-    let nextVal = false;
-    if (getComponentValue(NetworkUpdater, godEntityIndex)?.value != undefined) {
-      nextVal = !getComponentValue(NetworkUpdater, godEntityIndex)?.value;
-    }
-    setComponent(NetworkUpdater, godEntityIndex, { value: nextVal });
-  };
+  const actions = createActionSystem(world, txReduced$, provider);
+  const notifications = createNotificationSystem(world);
 
   let networkLayer = {
     world,
-    components,
-    txQueue,
-    systems,
-    txReduced$,
-    startSync,
     network,
     actions,
+    components,
     notifications,
+    startSync,
+    systems, // SystemExecutor
+    createSystems, // SystemExecutor factory function
     api: {
       admin: createAdminAPI(systems),
       player: createPlayerAPI(systems),
-      world: setUpWorldAPI(systems, provider),
+      world: setupWorldAPI(systems, provider),
     },
     updates: {
       components: {
-        Network: NetworkUpdater,
-      },
-      functions: {
-        UpdateNetwork,
+        Network: defineComponent(world, { value: Type.Boolean }), // local comp to tiggers updates
       },
     },
-    explorer: {} as any,
+    explorer: initExplorer(world, components),
   };
 
-  initExplorer(networkLayer);
   return networkLayer;
+}
+
+// Create a network instance using the provided provider.
+// Uses private key in localstorage if no provider is provided.
+export async function createNetworkInstance(provider?: ExternalProvider) {
+  const networkConfig = createNetworkConfig(provider);
+  if (!networkConfig) throw new Error('Invalid config');
+  const network = await createNetwork(networkConfig);
+  return network;
+}
+
+// Create a newly initialized System Executor, using a new provider.
+// Update the network/systems/api of the network layer, if one is provided.
+export async function updateNetworkLayer(layer: NetworkLayer, provider?: ExternalProvider) {
+  const networkInstance = await createNetworkInstance(provider);
+  const systems = layer.createSystems(networkInstance);
+  layer.network = networkInstance;
+  layer.systems = systems;
+  layer.api = {
+    admin: createAdminAPI(systems),
+    player: createPlayerAPI(systems),
+    world: setupWorldAPI(systems, provider ?? networkInstance.providers.get().json),
+  };
+  return layer;
 }

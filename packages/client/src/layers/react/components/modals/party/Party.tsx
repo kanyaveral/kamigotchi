@@ -23,13 +23,14 @@ export function registerPartyModal() {
     (layers) =>
       interval(1000).pipe(
         map(() => {
-          const account = getAccountFromBurner(layers.network, {
+          const { network } = layers;
+          const account = getAccountFromBurner(network, {
             inventory: true,
             kamis: true,
           });
 
           return {
-            network: layers.network,
+            network,
             data: { account },
           };
         })
@@ -38,6 +39,7 @@ export function registerPartyModal() {
     // Render
     ({ network, data }) => {
       // console.log('PartyM: data', data);
+      const { account } = data;
       const { actions, api } = network;
 
       /////////////////
@@ -45,7 +47,7 @@ export function registerPartyModal() {
 
       // feed a kami
       const feed = (kami: Kami, itemIndex: number) => {
-        actions?.add({
+        actions.add({
           action: 'KamiFeed',
           params: [kami.id, itemIndex],
           description: `Feeding ${kami.name}`,
@@ -57,7 +59,7 @@ export function registerPartyModal() {
 
       // revive a kami using a revive item
       const revive = (kami: Kami, itemIndex: number) => {
-        actions?.add({
+        actions.add({
           action: 'KamiRevive',
           params: [kami.id, itemIndex],
           description: `Reviving ${kami.name}`,
@@ -74,11 +76,7 @@ export function registerPartyModal() {
           header={<ModalHeader title='Party' icon={kamiIcon} />}
           canExit
         >
-          <Kards
-            kamis={data.account.kamis ? data.account.kamis : []}
-            account={data.account}
-            actions={{ feed, revive }}
-          />
+          <Kards account={account} kamis={account.kamis} actions={{ feed, revive }} />
         </ModalWrapper>
       );
     }

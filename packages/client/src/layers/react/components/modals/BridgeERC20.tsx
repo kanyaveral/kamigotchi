@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
-import { useBalance, useContractRead } from 'wagmi';
+import { useBalance, useReadContract } from 'wagmi';
 
 import { abi } from 'abi/Farm20ProxySystem.json';
 import { getAccountFromBurner } from 'layers/network/shapes/Account';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useAccount } from 'layers/react/store/account';
-import { useNetwork } from 'layers/react/store/network';
+import { useAccount, useNetwork } from 'layers/react/store';
 
 export function registerERC20BridgeModal() {
   registerUIComponent(
@@ -21,19 +20,15 @@ export function registerERC20BridgeModal() {
       rowEnd: 74,
     },
     (layers) => {
-      const {
-        network: {
-          systems,
-          components: { Coin },
-        },
-      } = layers;
+      const { network } = layers;
+      const { actions, components, systems } = network;
+      const { Coin } = components;
 
       return merge(Coin.update$).pipe(
         map(() => {
-          const account = getAccountFromBurner(layers.network);
-          const { coin } = account;
-
+          const account = getAccountFromBurner(network);
           return {
+            actions,
             account,
             proxyAddy: systems['system.Farm20.Proxy'].address,
           };
@@ -41,9 +36,9 @@ export function registerERC20BridgeModal() {
       );
     },
 
-    ({ account, proxyAddy }) => {
+    ({ actions, account, proxyAddy }) => {
       const { account: kamiAccount } = useAccount();
-      const { selectedAddress, networks } = useNetwork();
+      const { selectedAddress, apis } = useNetwork();
 
       const [isDepositState, setIsDepositState] = useState(true);
       const [amount, setAmount] = useState(0);
@@ -51,26 +46,25 @@ export function registerERC20BridgeModal() {
       const [enableButton, setEnableButton] = useState(true);
 
       // get token balance of controlling account
-      const { data: erc20Addy } = useContractRead({
+      const { data: erc20Addy } = useReadContract({
         address: proxyAddy as `0x${string}`,
         abi: abi,
         functionName: 'getTokenAddy',
       });
+
       const { data: EOABal } = useBalance({
         address: kamiAccount.ownerAddress as `0x${string}`,
         token: erc20Addy as `0x${string}`,
-        watch: true,
       });
 
       /////////////////
       // TRANSACTIONS
 
       const depositTx = () => {
-        const network = networks.get(selectedAddress);
-        const actions = network!.actions;
-        const api = network!.api.player;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-        actions?.add({
+        actions.add({
           action: 'MUSUDeposit',
           params: [amount],
           description: `Depositing ${amount} $MUSU`,
@@ -78,15 +72,13 @@ export function registerERC20BridgeModal() {
             return api.ERC20.deposit(amount);
           },
         });
-        return actionID;
       };
 
       const withdrawTx = () => {
-        const network = networks.get(selectedAddress);
-        const actions = network!.actions;
-        const api = network!.api.player;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-        actions?.add({
+        actions.add({
           action: 'MUSUWithdraw',
           params: [amount],
           description: `Withdrawing ${amount} $MUSU`,
@@ -95,7 +87,6 @@ export function registerERC20BridgeModal() {
             // return api.ERC20.withdraw(amount);
           },
         });
-        return actionID;
       };
 
       ///////////////

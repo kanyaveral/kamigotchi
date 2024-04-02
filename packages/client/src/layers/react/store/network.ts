@@ -1,55 +1,37 @@
 import { create } from 'zustand';
 
-import { NetworkLayer } from 'src/layers/network/types';
+import { PlayerAPI, createPlayerAPI } from 'layers/network/api/player';
+import { TxQueue } from 'layers/network/workers';
+import { SystemTypes } from 'types/SystemTypes';
 
 export interface State {
-  burner: Burner;
+  burnerAddress: string;
   selectedAddress: string;
-  networks: Map<string, NetworkLayer>;
   validations: Validations;
+  apis: Map<string, PlayerAPI>;
 }
 
 interface Actions {
-  addNetwork: (address: string, network: NetworkLayer) => void;
+  addAPI: (address: string, systems: TxQueue<SystemTypes>) => void;
   setSelectedAddress: (address: string) => void;
-  setBurner: (burner: Burner) => void;
+  setBurnerAddress: (address: string) => void;
   setValidations: (validations: Validations) => void;
-}
-
-// represents the burner EOA(s) detected in localstorage / connected to the network
-// in-game txs originate from 'connected', which is set from the 'detected' one upon load
-interface Burner {
-  connected: {
-    address: string;
-  };
-  detected: {
-    address: string;
-    key: string;
-  };
 }
 
 // the result of  validations run on network state
 interface Validations {
-  isConnected: boolean;
+  authenticated: boolean;
   chainMatches: boolean;
   burnerMatches: boolean;
 }
 
 export const useNetwork = create<State & Actions>((set) => {
   const initialState: State = {
-    burner: {
-      connected: {
-        address: '',
-      },
-      detected: {
-        address: '',
-        key: '',
-      },
-    },
+    burnerAddress: '',
     selectedAddress: '',
-    networks: new Map<string, NetworkLayer>(),
+    apis: new Map<string, PlayerAPI>(),
     validations: {
-      isConnected: false,
+      authenticated: false,
       chainMatches: false,
       burnerMatches: false,
     },
@@ -57,15 +39,16 @@ export const useNetwork = create<State & Actions>((set) => {
 
   return {
     ...initialState,
-    setBurner: (burner: Burner) => set((state: State) => ({ ...state, burner })),
+    setBurnerAddress: (burnerAddress: string) =>
+      set((state: State) => ({ ...state, burnerAddress })),
     setSelectedAddress: (selectedAddress: string) =>
       set((state: State) => ({ ...state, selectedAddress })),
     setValidations: (validations: Validations) =>
       set((state: State) => ({ ...state, validations })),
-    addNetwork: (address: string, network: NetworkLayer) =>
+    addAPI: (address: string, systems: TxQueue<SystemTypes>) =>
       set((state: State) => ({
         ...state,
-        networks: new Map(state.networks).set(address, network),
+        apis: new Map(state.apis).set(address, createPlayerAPI(systems)),
       })),
   };
 });

@@ -7,8 +7,7 @@ import { getRoomByIndex } from 'layers/network/shapes/Room';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useSelected } from 'layers/react/store/selected';
-import { useVisibility } from 'layers/react/store/visibility';
+import { useSelected, useVisibility } from 'layers/react/store';
 import 'layers/react/styles/font.css';
 
 export function registerDialogueModal() {
@@ -31,6 +30,7 @@ export function registerDialogueModal() {
 
     // Render
     ({ network }) => {
+      const { actions, components, world } = network;
       const { modals } = useVisibility();
       const { dialogueIndex } = useSelected();
       const [dialogueNode, setDialogueNode] = React.useState({
@@ -53,9 +53,9 @@ export function registerDialogueModal() {
       // ACTIONS
 
       const move = (roomIndex: number) => {
-        const room = getRoomByIndex(network, roomIndex);
+        const room = getRoomByIndex(world, components, roomIndex);
 
-        network.actions?.add({
+        actions.add({
           action: 'AccountMove',
           params: [roomIndex],
           description: `Moving to ${room.name}`,

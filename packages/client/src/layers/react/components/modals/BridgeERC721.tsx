@@ -3,15 +3,14 @@ import { BigNumberish } from 'ethers';
 import { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
-import { useContractRead } from 'wagmi';
+import { useReadContract } from 'wagmi';
 
 import { abi } from 'abi/Pet721ProxySystem.json';
-import { Account, getAccount } from 'layers/network/shapes/Account';
+import { getAccountFromBurner } from 'layers/network/shapes/Account';
 import { Kami, getKami } from 'layers/network/shapes/Kami';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useAccount } from 'layers/react/store/account';
-import { useNetwork } from 'layers/react/store/network';
+import { useAccount, useNetwork } from 'layers/react/store';
 
 import 'layers/react/styles/font.css';
 
@@ -24,64 +23,42 @@ export function registerERC721BridgeModal() {
       rowStart: 15,
       rowEnd: 85,
     },
+    // REQUIREMENT: serve network props, based on subscriptions
     (layers) => {
-      const {
-        network: {
-          network,
-          components: { AccountID, IsAccount, OperatorAddress, State },
-          systems,
-        },
-      } = layers;
+      const { network } = layers;
+      const { components, systems } = network;
+      const { AccountID, State } = components;
 
       return merge(AccountID.update$, State.update$).pipe(
         map(() => {
-          const accountIndex = Array.from(
-            runQuery([
-              Has(IsAccount),
-              HasValue(OperatorAddress, {
-                value: network.connectedAddress.get(),
-              }),
-            ])
-          )[0];
-
-          const account =
-            accountIndex !== undefined
-              ? getAccount(layers.network, accountIndex, { kamis: true })
-              : ({} as Account);
-
           return {
-            layers: layers,
-            data: {
-              account: { ...account },
-            } as any,
+            network,
+            data: { account: getAccountFromBurner(network, { kamis: true }) },
             proxyAddy: systems['system.Pet721.Proxy'].address,
           };
         })
       );
     },
-
-    ({ layers, data, proxyAddy }) => {
-      const {
-        network: {
-          components: { IsPet, PetIndex },
-        },
-      } = layers;
+    // RENDER: draw the damn thing
+    ({ data, network, proxyAddy }) => {
+      const { account } = data;
+      const { actions, components, world } = network;
+      const { IsPet, PetIndex } = components;
 
       const { account: kamiAccount } = useAccount();
-      const { selectedAddress, networks } = useNetwork();
+      const { selectedAddress, apis } = useNetwork();
 
       const [EOAKamis, setEOAKamis] = useState<Kami[]>([]);
 
-      //////////////////
-      // TRANSACTIONS //
+      /////////////////
+      // TRANSACTIONS
 
       // TODO: pets without accounts are linked to EOA, no account. link EOA
       const depositTx = (tokenID: BigNumberish) => {
-        const network = networks.get(selectedAddress);
-        const actions = network!.actions;
-        const api = network!.api.player;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-        actions?.add({
+        actions.add({
           action: 'KamiDeposit',
           params: [tokenID],
           description: `Staking Kami ${tokenID}`,
@@ -89,15 +66,13 @@ export function registerERC721BridgeModal() {
             return api.ERC721.deposit(tokenID);
           },
         });
-        return actionID;
       };
 
       const withdrawTx = (tokenID: BigNumberish) => {
-        const network = networks.get(selectedAddress);
-        const actions = network!.actions;
-        const api = network!.api.player;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-        actions?.add({
+        actions.add({
           action: 'KamiWithdraw',
           params: [tokenID],
           description: `Unstaking Kami ${tokenID}`,
@@ -105,11 +80,10 @@ export function registerERC721BridgeModal() {
             return api.ERC721.withdraw(tokenID);
           },
         });
-        return actionID;
       };
 
       //////////////////
-      // MODAL LOGIC //
+      // MODAL LOGIC
 
       // for use in mud
       const buttonSelect = (props: any) => {
@@ -129,12 +103,12 @@ export function registerERC721BridgeModal() {
       };
 
       // External Kamis
-      const { data: erc721 } = useContractRead({
+      const { data: erc721 } = useReadContract({
         address: proxyAddy as `0x${string}`,
         abi: abi,
         functionName: 'getTokenAddy',
       });
-      const { data: erc721List } = useContractRead({
+      const { data: erc721List } = useReadContract({
         address: erc721 as `0x${string}`,
         abi: [
           {
@@ -159,7 +133,6 @@ export function registerERC721BridgeModal() {
         ],
         functionName: 'getAllTokens',
         args: [kamiAccount.ownerAddress as `0x${string}`],
-        watch: true,
       });
 
       // update list of externally owned kamis
@@ -181,7 +154,7 @@ export function registerERC721BridgeModal() {
               )[0];
 
               kamis.push(
-                getKami(layers.network, entityID, {
+                getKami(world, components, entityID, {
                   deaths: true,
                   production: true,
                   traits: true,
@@ -221,7 +194,7 @@ export function registerERC721BridgeModal() {
       };
 
       /////////////////
-      //  KAMI LOGIC
+      // KAMI LOGIC
 
       const isImportable = (kami: Kami): boolean => {
         return isOutOfWorld(kami);
@@ -247,7 +220,7 @@ export function registerERC721BridgeModal() {
           <Grid>
             <Description style={{ gridRow: 1, gridColumn: 1 }}>In game</Description>
             <Scrollable style={{ gridRow: 2, gridColumn: 1 }}>
-              {KamiCards(data.account.kamis)}
+              {KamiCards(account.kamis)}
             </Scrollable>
             <Description style={{ gridRow: 1, gridColumn: 2 }}>In wallet</Description>
             <Scrollable style={{ gridRow: 2, gridColumn: 2 }}>{KamiCards(EOAKamis)}</Scrollable>

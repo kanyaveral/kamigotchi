@@ -1,15 +1,17 @@
-import { World } from "@mud-classic/recs";
+import { World } from '@mud-classic/recs';
 
 import {
   defineBoolComponent,
-  defineNumberComponent,
-  defineStringComponent,
   defineLoadingStateComponent,
   defineLocationComponent,
   defineNumberArrayComponent,
+  defineNumberComponent,
   defineStatComponent,
+  defineStringComponent,
   defineTimelockComponent,
 } from './definitions';
+
+export type Components = ReturnType<typeof createComponents>;
 
 // define functions for registration
 export function createComponents(world: World) {

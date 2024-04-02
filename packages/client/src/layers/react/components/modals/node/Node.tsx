@@ -7,7 +7,7 @@ import { getLiquidationConfig } from 'layers/network/shapes/LiquidationConfig';
 import { Node, getNodeByIndex } from 'layers/network/shapes/Node';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useSelected } from 'layers/react/store/selected';
+import { useSelected } from 'layers/react/store';
 import { Banner } from './Banner';
 import { Kards } from './Kards';
 import { Tabs } from './Tabs';
@@ -30,37 +30,36 @@ export function registerNodeModal() {
       interval(1000).pipe(
         map(() => {
           const { network } = layers;
+          const { world, components } = network;
           const { nodeIndex } = useSelected.getState();
 
-          const account = getAccountFromBurner(network, {
-            kamis: true,
-            inventory: true,
-          });
-          const node = getNodeByIndex(network, nodeIndex, {
+          const account = getAccountFromBurner(network, { kamis: true, inventory: true });
+          const liquidationConfig = getLiquidationConfig(world, components);
+          const node = getNodeByIndex(world, components, nodeIndex, {
             kamis: true,
             accountID: account?.id,
           });
-          const liquidationConfig = getLiquidationConfig(network);
 
           return {
             network,
-            data: { account, node, liquidationConfig },
+            data: { account, liquidationConfig, node },
           };
         })
       ),
 
     // Render
-    ({ network, data }) => {
+    ({ data, network }) => {
       // console.log('NodeM: data', data);
-      const { actions, api } = network;
+      const { account, liquidationConfig } = data;
+      const { actions, api, components, world } = network;
       const [tab, setTab] = useState('allies');
       const { nodeIndex } = useSelected();
       const [node, setNode] = useState<Node>(data.node);
 
       // updates from selected Node updates
       useEffect(() => {
-        const nodeOptions = { kamis: true, accountID: data.account.id };
-        setNode(getNodeByIndex(network, nodeIndex, nodeOptions));
+        const nodeOptions = { kamis: true, accountID: account.id };
+        setNode(getNodeByIndex(world, components, nodeIndex, nodeOptions));
       }, [nodeIndex]);
 
       // updates from component subscription updates
@@ -73,7 +72,7 @@ export function registerNodeModal() {
 
       // collects on an existing production
       const collect = (kami: Kami) => {
-        actions?.add({
+        actions.add({
           action: 'ProductionCollect',
           params: [kami.id],
           description: `Collecting ${kami.name}'s Harvest`,
@@ -85,7 +84,7 @@ export function registerNodeModal() {
 
       // feed a kami
       const feed = (kami: Kami, itemIndex: number) => {
-        actions?.add({
+        actions.add({
           action: 'KamiFeed',
           params: [kami.id, itemIndex],
           description: `Feeding ${kami.name}`,
@@ -98,7 +97,7 @@ export function registerNodeModal() {
       // liquidate a production
       // assume this function is only called with two kamis that have productions
       const liquidate = (myKami: Kami, enemyKami: Kami) => {
-        actions?.add({
+        actions.add({
           action: 'ProductionLiquidate',
           params: [enemyKami.production!.id, myKami.id],
           description: `Liquidating ${enemyKami.name} with ${myKami.name}`,
@@ -110,7 +109,7 @@ export function registerNodeModal() {
 
       // starts a production for the given pet and node
       const start = (kami: Kami, node: Node) => {
-        actions?.add({
+        actions.add({
           action: 'ProductionStart',
           params: [kami.id, node.id],
           description: `Placing ${kami.name} on ${node.name}`,
@@ -122,7 +121,7 @@ export function registerNodeModal() {
 
       // stops a production
       const stop = (kami: Kami) => {
-        actions?.add({
+        actions.add({
           action: 'ProductionStop',
           params: [kami.production!.id],
           description: `Removing ${kami.name} from ${kami.production!.node?.name}`,
@@ -142,9 +141,9 @@ export function registerNodeModal() {
           header={[
             <Banner
               key='banner'
-              account={data.account}
+              account={account}
               node={node}
-              kamis={data.account.kamis || []}
+              kamis={account.kamis}
               addKami={(kami) => start(kami, node)}
             />,
             <Tabs key='tabs' tab={tab} setTab={setTab} />,
@@ -152,11 +151,11 @@ export function registerNodeModal() {
           canExit
         >
           <Kards
-            account={data.account}
+            account={account}
             allies={node.kamis?.allies!}
             enemies={node.kamis?.enemies!}
             actions={{ collect, feed, liquidate, stop }}
-            battleConfig={data.liquidationConfig}
+            battleConfig={liquidationConfig}
             tab={tab}
           />
         </ModalWrapper>

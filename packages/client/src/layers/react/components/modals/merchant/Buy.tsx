@@ -5,8 +5,7 @@ import styled from 'styled-components';
 import { Listing, getListing } from 'layers/network/shapes/Listing';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useSelected } from 'layers/react/store/selected';
-import { useVisibility } from 'layers/react/store/visibility';
+import { useSelected, useVisibility } from 'layers/react/store';
 import { ActionButton } from '../../library/ActionButton';
 
 // merchant window with listings. assumes at most 1 merchant per room
@@ -24,22 +23,23 @@ export function registerBuyModal() {
     (layers) =>
       interval(1000).pipe(
         map(() => {
-          return { network: layers.network };
+          const { network } = layers;
+          return { network };
         })
       ),
 
     // Render
     ({ network }) => {
-      const { api, actions } = network;
+      const { api, actions, components, world } = network;
       const { modals, setModals } = useVisibility();
       const { listingEntityIndex } = useSelected();
-      const [listing, setListing] = useState(getListing(network, listingEntityIndex));
+      const [listing, setListing] = useState(getListing(world, components, listingEntityIndex));
       const [quantity, setQuantity] = useState(1);
 
       // update current item based on selection
       // NOTE: may need to subscribe to component updates too, to resolve edge cases
       useEffect(() => {
-        setListing(getListing(network, listingEntityIndex));
+        setListing(getListing(world, components, listingEntityIndex));
         setQuantity(1);
       }, [listingEntityIndex]);
 
@@ -48,7 +48,7 @@ export function registerBuyModal() {
 
       // buy from a listing
       const buy = (listing: Listing, amt: number) => {
-        actions?.add({
+        actions.add({
           action: 'ListingBuy',
           params: [listing.id, amt],
           description: `Buying ${amt} of ${listing.item!.name}`,

@@ -6,7 +6,7 @@ import { Kami, getKamiByIndex } from 'layers/network/shapes/Kami';
 import { Skill, getRegistrySkills } from 'layers/network/shapes/Skill';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useSelected } from 'layers/react/store/selected';
+import { useSelected } from 'layers/react/store';
 import { KillLogs } from './battles/KillLogs';
 import { Banner } from './header/Banner';
 import { Tabs } from './header/Tabs';
@@ -24,25 +24,23 @@ export function registerKamiModal() {
     },
 
     // Requirement
-    (layers) =>
-      interval(1000).pipe(
+    (layers) => {
+      const { network } = layers;
+      return interval(1000).pipe(
         map(() => {
-          const account = getAccountFromBurner(layers.network, {
-            inventory: true,
-            kamis: true,
-          });
-
+          const account = getAccountFromBurner(network, { inventory: true, kamis: true });
           return {
-            network: layers.network,
+            network,
             data: { account },
           };
         })
-      ),
+      );
+    },
 
     // Render
     ({ data, network }) => {
       const { account } = data;
-      const { actions, api } = network;
+      const { actions, api, components, world } = network;
       const { kamiIndex } = useSelected();
       const [tab, setTab] = useState('traits');
 
@@ -50,7 +48,7 @@ export function registerKamiModal() {
       // DATA FETCHING
 
       const getSelectedKami = () => {
-        return getKamiByIndex(network, kamiIndex, {
+        return getKamiByIndex(world, components, kamiIndex, {
           account: true,
           deaths: true,
           kills: true,
@@ -64,7 +62,7 @@ export function registerKamiModal() {
       // ACTIONS
 
       const levelUp = (kami: Kami) => {
-        actions?.add({
+        actions.add({
           action: 'KamiLevel',
           params: [kami.id],
           description: `Leveling up ${kami.name}`,
@@ -75,7 +73,7 @@ export function registerKamiModal() {
       };
 
       const upgradeSkill = (kami: Kami, skill: Skill) => {
-        actions?.add({
+        actions.add({
           action: 'SkillUpgrade',
           params: [kami.id, skill.index],
           description: `Upgrading ${skill.name} for ${kami.name}`,
@@ -110,7 +108,7 @@ export function registerKamiModal() {
             <Skills
               account={account}
               kami={getSelectedKami()}
-              skills={getRegistrySkills(network)}
+              skills={getRegistrySkills(world, components)}
               actions={{ upgrade: upgradeSkill }}
             />
           )}

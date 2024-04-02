@@ -1,15 +1,15 @@
-import { EntityIndex } from '@mud-classic/recs';
+import { EntityID, EntityIndex } from '@mud-classic/recs';
 import { waitForActionCompletion } from 'layers/network/utils';
 import React, { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
-import { useBalance } from 'wagmi';
+import { v4 as uuid } from 'uuid';
+import { useBalance, useBlockNumber } from 'wagmi';
 
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useAccount } from 'layers/react/store/account';
-import { useNetwork } from 'layers/react/store/network';
+import { useAccount, useNetwork } from 'layers/react/store';
 import { playScribble, playSuccess } from 'utils/sounds';
 
 export function registerFundOperatorModal() {
@@ -30,68 +30,67 @@ export function registerFundOperatorModal() {
 
       return merge(OperatorAddress.update$, IsAccount.update$).pipe(
         map(() => {
-          return { layers };
+          return { network: layers.network };
         })
       );
     },
 
-    ({ layers }) => {
-      const {
-        network: {
-          api: {
-            player: { account },
-          },
-          actions,
-          world,
-        },
-      } = layers;
+    ({ network }) => {
+      const { actions, world } = network;
       const { account: kamiAccount } = useAccount();
-      const { selectedAddress, networks } = useNetwork();
+      const { selectedAddress, apis } = useNetwork();
+      const blockNumber = useBlockNumber({ watch: true, cacheTime: 500 });
 
-      const [isFundState, setIsFundState] = useState(true);
+      const [isFunding, setIsFunding] = useState(true);
       const [amount, setAmount] = useState(0.05);
       const [statusText, setStatusText] = useState('');
       const [statusColor, setStatusColor] = useState('grey');
 
-      /////////////////
-      // BALANCES
-
-      const { data: OwnerBal } = useBalance({
+      const { data: OwnerBalance, refetch: refetchOwnerBalance } = useBalance({
         address: kamiAccount.ownerAddress as `0x${string}`,
-        watch: true,
       });
 
-      const { data: OperatorBal } = useBalance({
+      const { data: OperatorBalance, refetch: refetchOperatorBalance } = useBalance({
         address: kamiAccount.operatorAddress as `0x${string}`,
-        watch: true,
       });
 
       /////////////////
-      // TRANSACTIONS
+      // TRACKING
+
+      useEffect(() => {
+        refetchOwnerBalance();
+        refetchOperatorBalance();
+      }, [blockNumber]);
+
+      /////////////////
+      // ACTIONS
 
       const fundTx = async () => {
-        const network = networks.get(selectedAddress);
-        const account = network!.api.player.account;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-        actions?.add({
+        const actionID = uuid() as EntityID;
+        actions.add({
           action: 'AccountFund',
           params: [amount.toString()],
           description: `Funding Operator ${amount.toString()}`,
           execute: async () => {
-            return account.fund(amount.toString());
+            return api.account.fund(amount.toString());
           },
         });
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;
         await waitForActionCompletion(actions!.Action, actionIndex);
       };
 
+      // refund the specified eth balance to the owner from the burner/operator address
       const refundTx = async () => {
-        actions?.add({
+        const actionID = uuid() as EntityID;
+        actions.add({
           action: 'AccountRefund',
           params: [amount.toString()],
           description: `Refunding Owner ${amount.toString()}`,
           execute: async () => {
-            return account.refund(amount.toString());
+            return network.api.player.account.refund(amount.toString());
           },
         });
         const actionIndex = world.entityToIndex.get(actionID) as EntityIndex;
@@ -99,15 +98,12 @@ export function registerFundOperatorModal() {
       };
 
       /////////////////
-      // DISPLAY LOGIC
+      // INTERACTIONS
 
       const chooseTx = async () => {
         playScribble();
-        if (isFundState) {
-          await fundTx();
-        } else {
-          await refundTx();
-        }
+        if (isFunding) await fundTx();
+        else await refundTx();
         playSuccess();
       };
 
@@ -117,19 +113,15 @@ export function registerFundOperatorModal() {
         }
       };
 
-      const setMax = () => {
-        setAmount(Number(OwnerBal?.formatted));
-      };
-
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAmount(Number(event.target.value));
       };
 
       ///////////////
-      // COMPONENTS
+      // DISPLAY
 
       const TxButton = () => {
-        const text = isFundState! ? 'Fund Operator' : 'Send to Owner';
+        const text = isFunding! ? 'Fund Operator' : 'Send to Owner';
         return (
           <ActionButton id='button-deposit' onClick={() => chooseTx()} size='large' text={text} />
         );
@@ -138,12 +130,12 @@ export function registerFundOperatorModal() {
       const StateBox = (fundState: boolean) => {
         const text = fundState ? 'Owner' : 'Operator';
         const balance = fundState
-          ? Number(OwnerBal?.formatted).toFixed(4)
-          : Number(OperatorBal?.formatted).toFixed(4);
-        const color = fundState == isFundState ? 'grey' : 'white';
-        const textColor = fundState == isFundState ? 'white' : 'black';
+          ? Number(OwnerBalance?.formatted).toFixed(4)
+          : Number(OperatorBalance?.formatted).toFixed(4);
+        const color = fundState == isFunding ? 'grey' : 'white';
+        const textColor = fundState == isFunding ? 'white' : 'black';
         return (
-          <BoxButton style={{ backgroundColor: color }} onClick={() => setIsFundState(fundState)}>
+          <BoxButton style={{ backgroundColor: color }} onClick={() => setIsFunding(fundState)}>
             <Description style={{ color: textColor }}> {balance} ETH </Description>
             <SubDescription style={{ color: textColor }}> {text} </SubDescription>
           </BoxButton>
@@ -151,7 +143,9 @@ export function registerFundOperatorModal() {
       };
 
       useEffect(() => {
-        const curBal = isFundState ? Number(OwnerBal?.formatted) : Number(OperatorBal?.formatted);
+        const curBal = isFunding
+          ? Number(OwnerBalance?.formatted)
+          : Number(OperatorBalance?.formatted);
 
         if (amount > curBal) {
           setStatusText('Insufficient balance');
@@ -162,14 +156,13 @@ export function registerFundOperatorModal() {
         } else {
           setStatusColor('grey');
           // placeholder gas estimation
-          if (isFundState)
-            setStatusText('This should last you for approximately 1000 transactions');
+          if (isFunding) setStatusText('This should last you for approximately 1000 transactions');
           else {
             const remainBal = curBal - amount;
             setStatusText("You'd have " + remainBal.toFixed(4).toString() + ' ETH left');
           }
         }
-      }, [amount, OwnerBal, OperatorBal, isFundState]);
+      }, [amount, OwnerBalance, OperatorBalance, isFunding]);
 
       return (
         <ModalWrapper divName='operatorFund' id='operatorFund' canExit overlay>

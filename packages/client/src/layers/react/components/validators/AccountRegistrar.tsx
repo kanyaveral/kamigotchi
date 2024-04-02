@@ -20,9 +20,13 @@ import { CopyButton } from 'layers/react/components/library/CopyButton';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { ValidatorWrapper } from 'layers/react/components/library/ValidatorWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { Account, emptyAccountDetails, useAccount } from 'layers/react/store/account';
-import { useNetwork } from 'layers/react/store/network';
-import { useVisibility } from 'layers/react/store/visibility';
+import {
+  Account,
+  emptyAccountDetails,
+  useAccount,
+  useNetwork,
+  useVisibility,
+} from 'layers/react/store';
 import { playScribble } from 'utils/sounds';
 
 /**
@@ -55,13 +59,9 @@ export function registerAccountRegistrar() {
       rowEnd: 60,
     },
     (layers) => {
-      const {
-        network: {
-          world,
-          components: { IsAccount, AccountIndex, Name, OperatorAddress, OwnerAddress },
-          actions,
-        },
-      } = layers;
+      const { network } = layers;
+      const { world, components } = network;
+      const { IsAccount, AccountIndex, Name, OperatorAddress, OwnerAddress } = components;
 
       // TODO?: replace this with getAccount shape
       const getAccountDetails = (entityIndex: EntityIndex): Account => {
@@ -100,29 +100,31 @@ export function registerAccountRegistrar() {
           const kamiAccountFromWorldUpdate = getAccountDetails(accountIndexUpdatedByWorld);
           const operatorAddresses = new Set(OperatorAddress.values.value.values());
           return {
-            layers,
-            actions,
-            world,
-            kamiAccountFromWorldUpdate,
-            operatorAddresses,
-            getAccountIndexFromOwner,
-            getAccountDetails,
+            data: {
+              kamiAccountFromWorldUpdate,
+              operatorAddresses,
+            },
+            functions: {
+              getAccountIndexFromOwner,
+              getAccountDetails,
+            },
+            network,
           };
         })
       );
     },
 
-    ({
-      layers,
-      kamiAccountFromWorldUpdate,
-      operatorAddresses,
-      getAccountIndexFromOwner,
-      getAccountDetails,
-    }) => {
+    ({ data, functions, network }) => {
+      const { kamiAccountFromWorldUpdate, operatorAddresses } = data;
+      const { getAccountDetails, getAccountIndexFromOwner } = functions;
+      const { actions, components, world } = network;
+
       const {
-        network: { actions, world },
-      } = layers;
-      const { burner, selectedAddress, networks, validations: networkValidations } = useNetwork();
+        burnerAddress,
+        selectedAddress,
+        apis,
+        validations: networkValidations,
+      } = useNetwork();
       const { toggleButtons, toggleModals, toggleFixtures } = useVisibility();
       const { validators, setValidators } = useVisibility();
       const { setAccount, validations, setValidations } = useAccount();
@@ -150,7 +152,7 @@ export function registerAccountRegistrar() {
       // determine visibility based on above/prev checks
       useEffect(() => {
         setIsVisible(
-          networkValidations.isConnected &&
+          networkValidations.authenticated &&
             networkValidations.chainMatches &&
             networkValidations.burnerMatches &&
             !accountExists
@@ -172,7 +174,7 @@ export function registerAccountRegistrar() {
 
       // validation for username input
       useEffect(() => {
-        const account = getAccountByName(layers.network, name);
+        const account = getAccountByName(world, components, name);
         setNameTaken(!!account.id);
       }, [name]);
 
@@ -180,11 +182,11 @@ export function registerAccountRegistrar() {
       // ACTIONS
 
       const copyBurnerAddress = () => {
-        navigator.clipboard.writeText(burner.connected.address);
+        navigator.clipboard.writeText(burnerAddress);
       };
 
       const copyBurnerPrivateKey = () => {
-        navigator.clipboard.writeText(burner.detected.key);
+        // navigator.clipboard.writeText(burner.detected.key);
       };
 
       const handleAccountCreation = async (username: string, food: string) => {
@@ -192,8 +194,10 @@ export function registerAccountRegistrar() {
         toggleFixtures(true);
         try {
           const actionID = createAccount(username, food);
+          if (!actionID) throw new Error('Account creation failed');
+
           await waitForActionCompletion(
-            actions?.Action!,
+            actions.Action,
             world.entityToIndex.get(actionID) as EntityIndex
           );
         } catch (e) {
@@ -202,14 +206,13 @@ export function registerAccountRegistrar() {
       };
 
       const createAccount = (username: string, food: string) => {
-        const network = networks.get(selectedAddress);
-        const api = network!.api.player;
-        const connectedBurner = burner.connected.address;
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
+        console.log(`CREATING ACCOUNT (${username}): ${selectedAddress}`);
 
-        console.log('CREATING ACCOUNT:', selectedAddress);
-
+        const connectedBurner = burnerAddress;
         const actionID = uuid() as EntityID;
-        actions?.add({
+        actions.add({
           id: actionID,
           action: 'AccountCreate',
           params: [connectedBurner, username, food],
@@ -233,7 +236,7 @@ export function registerAccountRegistrar() {
       // RENDERING
 
       const OperatorDisplay = () => {
-        const address = burner.connected.address;
+        const address = burnerAddress;
         const addrPrefix = address.slice(0, 6);
         const addrSuffix = address.slice(-4);
         const addressTaken = operatorAddresses.has(address);
@@ -332,7 +335,7 @@ export function registerAccountRegistrar() {
       };
 
       const UsernameStep = () => {
-        const addressTaken = operatorAddresses.has(burner.connected.address);
+        const addressTaken = operatorAddresses.has(burnerAddress);
 
         const NextButton = () => {
           let button = (

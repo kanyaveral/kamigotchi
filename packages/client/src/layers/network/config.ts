@@ -16,9 +16,8 @@ export type NetworkConfig = {
   externalProvider?: ExternalProvider;
   initialBlockNumber: number;
   checkpointUrl?: string;
-  faucetServiceUrl?: string;
-  relayServiceUrl?: string;
-  snapshotUrl?: string;
+  snapshotServiceUrl?: string;
+  streamServiceUrl?: string;
 };
 
 // shape a flat NetworkConfig struct into lattice's SetupContractConfig struct
@@ -43,37 +42,26 @@ const shape: (networkConfig: NetworkConfig) => SetupContractConfig = (config) =>
   initialBlockNumber: config.initialBlockNumber,
   worldAddress: config.worldAddress,
   devMode: config.devMode,
-  faucetServiceUrl: config.faucetServiceUrl,
-  relayServiceUrl: config.relayServiceUrl,
-  snapshotServiceUrl: config.snapshotUrl,
+  snapshotServiceUrl: config.snapshotServiceUrl,
+  streamServiceUrl: config.streamServiceUrl,
 });
 
 // Populate the network config based on url params
 export function createConfig(externalProvider?: ExternalProvider): SetupContractConfig | undefined {
   let config: NetworkConfig = <NetworkConfig>{};
 
-  // get the determined environment mode
+  // get the determined environment mode from env vars or override
   let mode = import.meta.env.MODE;
-  if (mode) console.log(`Environment mode ${mode} detected.\n`);
-  else {
+  if (!mode) {
     console.warn(`No environment mode detected. Defaulting to 'development'\n`);
     mode = 'development';
   }
-
-  // override the environment mode if the url param is set
   mode = getModeOverride() ?? mode;
 
   // resolve the network config based on the environment mode
-  switch (mode) {
-    case 'development':
-      config = createConfigRawLocal(externalProvider);
-      break;
-    case 'staging':
-      config = createConfigRawOPSepolia(externalProvider);
-      break;
-    default:
-      config = createConfigRawLocal(externalProvider);
-  }
+  if (mode === 'development') config = createConfigRawLocal(externalProvider);
+  else if (mode === 'staging') config = createConfigRawOPSepolia(externalProvider);
+  else config = createConfigRawLocal(externalProvider);
 
   if (
     config.worldAddress &&
@@ -90,7 +78,6 @@ function createConfigRawLocal(externalProvider?: ExternalProvider): NetworkConfi
   const params = new URLSearchParams(window.location.search);
 
   let config: NetworkConfig = <NetworkConfig>{};
-  // config.devMode = false;
   config.devMode = true;
 
   // EOAs and privatekey
@@ -114,12 +101,8 @@ function createConfigRawLocal(externalProvider?: ExternalProvider): NetworkConfi
   config.jsonRpc = jsonRpc;
   config.wsRpc = wsRpc;
 
-  // urls
-  config.checkpointUrl = params.get('checkpoint') || '';
-  config.snapshotUrl = params.get('snapshotUrl') || '';
-
   // chainId
-  const chainIdString = params.get('chainId') || '31337';
+  const chainIdString = params.get('chainId') || '1337';
   config.chainId = parseInt(chainIdString);
 
   // world
@@ -137,7 +120,7 @@ function createConfigRawOPSepolia(externalProvider?: ExternalProvider): NetworkC
   let config: NetworkConfig = <NetworkConfig>{
     jsonRpc: 'https://go.getblock.io/19cc856d2ae14db5907bfad3688d59b7',
     wsRpc: 'wss://go.getblock.io/b32c8ea4f9a94c41837c68df4881d52f',
-    snapshotUrl: 'https://snapshot.asphodel.io',
+    snapshotServiceUrl: 'https://snapshot.asphodel.io',
 
     chainId: 11155420,
     worldAddress: '0xB85F066f2eec6f5fCea0C02591f3ed5E40070e22',
@@ -161,16 +144,16 @@ function createConfigRawOPSepolia(externalProvider?: ExternalProvider): NetworkC
 const getModeOverride = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const modeOverride = urlParams.get('mode');
-  if (modeOverride) console.warn(`Environment mode override ${modeOverride} detected.`);
-  else return;
+  if (!modeOverride) return;
 
   // return the mode override if it is a valid one
+  console.warn(`Environment mode override { ${modeOverride} } detected.`);
   if (chainConfigs.has(modeOverride)) {
     console.warn(`Overriding environment mode..`);
     return modeOverride;
   } else {
     console.warn(
-      `No chain config found for override mode '${modeOverride}'.\n`,
+      `No chain config found for override mode { ${modeOverride} }.\n`,
       `Must be one of [${Array.from(chainConfigs.keys()).join(' | ')}].\n`,
       `Defaulting to provided environment mode.`
     );

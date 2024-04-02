@@ -10,8 +10,7 @@ import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { ModalWrapper } from 'layers/react/components/library/ModalWrapper';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { useSelected } from 'layers/react/store/selected';
-import { useVisibility } from 'layers/react/store/visibility';
+import { useSelected, useVisibility } from 'layers/react/store';
 
 export function registerEMABoardModal() {
   registerUIComponent(
@@ -27,13 +26,14 @@ export function registerEMABoardModal() {
     (layers) =>
       interval(1000).pipe(
         map(() => {
-          const account = getAccountFromBurner(layers.network, {
+          const { network } = layers;
+          const account = getAccountFromBurner(network, {
             inventory: true,
             kamis: true,
           });
 
           return {
-            network: layers.network,
+            network,
             data: { account },
           };
         })
@@ -54,7 +54,7 @@ export function registerEMABoardModal() {
         const inv = data.account.inventories?.consumables.find((inv) => inv.item.index === 9001);
         if (!inv) return;
 
-        actions?.add({
+        actions.add({
           action: 'KamiFeed',
           params: [kami.id, inv.id],
           description: `Using holy dust on ${kami.name}`,
@@ -164,7 +164,7 @@ export function registerEMABoardModal() {
           header={<Title>Ema Board</Title>}
           canExit
         >
-          <List>{KamiList(data.account.kamis || [])}</List>
+          <List>{KamiList(data.account.kamis)}</List>
         </ModalWrapper>
       );
     }

@@ -3,18 +3,20 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import { farcasterLogo } from 'assets/images/logos';
 import { Account } from 'layers/network/shapes/Account';
+import { ActionSystem } from 'layers/network/systems/ActionSystem';
 import { IconButton, Tooltip } from 'layers/react/components/library';
 import { useAccount, useNetwork } from 'layers/react/store';
 import { FarcasterUser, client, emptyFaracasterUser, handleSignIn } from 'src/clients/neynar';
 
 interface Props {
+  actionSystem: ActionSystem;
   account: Account;
   size?: 'small' | 'medium' | 'large';
 }
 
 export const FarcasterConnect = (props: Props) => {
-  const { account, size } = props;
-  const { selectedAddress, networks } = useNetwork();
+  const { actionSystem, account, size } = props;
+  const { selectedAddress, apis } = useNetwork();
   const [farcasterUser, setFarcasterUser] = useLocalStorage<FarcasterUser>(
     'farcasterUser',
     emptyFaracasterUser
@@ -91,18 +93,15 @@ export const FarcasterConnect = (props: Props) => {
 
   // connect the farcaster account found in localstorage to the onchain kami account
   function connectFarcaster(fid: number, pfpURI: string) {
-    const network = networks.get(selectedAddress);
-    if (!network) {
-      console.error(`Network not found for address ${selectedAddress}`);
-      return;
-    }
+    const api = apis.get(selectedAddress);
+    if (!api) return console.error(`API not established for ${selectedAddress}`);
 
-    network.actions?.add({
+    actionSystem.add({
       action: 'ConnectFarcaster',
       params: [fid, pfpURI],
       description: `Connecting to Farcaster Account ${fid}`,
       execute: async () => {
-        return network.api.player.account.set.farcaster(fid, pfpURI);
+        return api.account.set.farcaster(fid, pfpURI);
       },
     });
   }

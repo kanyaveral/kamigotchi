@@ -21,8 +21,7 @@ import { IconButton } from 'layers/react/components/library/IconButton';
 import { IconListButton } from 'layers/react/components/library/IconListButton';
 import { KamiCard } from 'layers/react/components/library/KamiCard';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
-import { useSelected } from 'layers/react/store/selected';
-import { useVisibility } from 'layers/react/store/visibility';
+import { useSelected, useVisibility } from 'layers/react/store';
 import { playClick } from 'utils/sounds';
 
 interface Props {
@@ -199,7 +198,7 @@ export const Kards = (props: Props) => {
     }
 
     return (
-      <Tooltip text={[tooltip]}>
+      <Tooltip key='feed-tooltip' text={[tooltip]}>
         <IconListButton img={feedIcon} disabled={tooltip !== 'feed kami'} options={feedOptions} />
       </Tooltip>
     );

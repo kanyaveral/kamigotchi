@@ -33,12 +33,18 @@ export function registerQuestsModal() {
       interval(1000).pipe(
         map(() => {
           const { network } = layers;
+          const { world, components } = network;
           const account = getAccountFromBurner(network, {
             quests: true,
             kamis: true,
             inventory: true,
           });
-          const quests = parseQuestsStatus(network, account, getRegistryQuests(network));
+          const quests = parseQuestsStatus(
+            world,
+            components,
+            account,
+            getRegistryQuests(world, components)
+          );
 
           return {
             network,
@@ -46,9 +52,8 @@ export function registerQuestsModal() {
           };
         })
       ),
-
     ({ network, data }) => {
-      const { actions, api, notifications } = network;
+      const { actions, api, components, notifications, world } = network;
       const [tab, setTab] = useState<TabType>('AVAILABLE');
       const [numAvail, setNumAvail] = useState(0);
 
@@ -79,7 +84,7 @@ export function registerQuestsModal() {
       // INTERACTIONS
 
       const acceptQuest = async (quest: Quest) => {
-        actions?.add({
+        actions.add({
           action: 'QuestAccept',
           params: [quest.index * 1],
           description: `Accepting Quest ${quest.index * 1}`,
@@ -90,7 +95,7 @@ export function registerQuestsModal() {
       };
 
       const completeQuest = async (quest: Quest) => {
-        actions?.add({
+        actions.add({
           action: 'QuestComplete',
           params: [quest.id],
           description: `Completing Quest ${quest.index * 1}`,
@@ -118,10 +123,11 @@ export function registerQuestsModal() {
             actions={{ acceptQuest, completeQuest }}
             utils={{
               setNumAvail: (num: number) => setNumAvail(num),
-              getItem: (index: EntityIndex) => getItem(network, index),
-              getRoom: (roomIndex: number) => getRoomByIndex(network, roomIndex),
-              getQuestByIndex: (index: number) => getQuestByIndex(network, index),
-              queryItemRegistry: (index: number) => getItemByIndex(network, index).entityIndex,
+              getItem: (index: EntityIndex) => getItem(world, components, index),
+              getRoom: (roomIndex: number) => getRoomByIndex(world, components, roomIndex),
+              getQuestByIndex: (index: number) => getQuestByIndex(world, components, index),
+              queryItemRegistry: (index: number) =>
+                getItemByIndex(world, components, index).entityIndex,
             }}
           />
         </ModalWrapper>
