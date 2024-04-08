@@ -4,8 +4,7 @@ pragma solidity ^0.8.0;
 import { LibString } from "solady/utils/LibString.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
-import { LibQuery } from "solecs/LibQuery.sol";
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
 import { IdNodeComponent, ID as IdNodeCompID } from "components/IdNodeComponent.sol";
@@ -20,10 +19,18 @@ import { TimeStartComponent, ID as TimeStartCompID } from "components/TimeStartC
 import { LibBonus } from "libraries/LibBonus.sol";
 import { LibCoin } from "libraries/LibCoin.sol";
 import { LibConfig } from "libraries/LibConfig.sol";
+import { LibDataEntity } from "libraries/LibDataEntity.sol";
 import { LibNode } from "libraries/LibNode.sol";
 import { LibPet } from "libraries/LibPet.sol";
 import { LibRegistryAffinity } from "libraries/LibRegistryAffinity.sol";
 import { LibStat } from "libraries/LibStat.sol";
+
+struct HarvestRates {
+  uint8 prec;
+  uint32 base;
+  uint8 basePrec;
+  uint8 multiplierPrec;
+}
 
 /*
  * LibProduction handles all retrieval and manipulation of mining nodes/productions
@@ -33,13 +40,8 @@ library LibProduction {
   // INTERACTIONS
 
   // Creates a production for a pet at a deposit. Assumes one doesn't already exist.
-  function create(
-    IWorld world,
-    IUintComp components,
-    uint256 nodeID,
-    uint256 petID
-  ) internal returns (uint256) {
-    uint256 id = world.getUniqueEntityId();
+  function create(IUintComp components, uint256 nodeID, uint256 petID) internal returns (uint256) {
+    uint256 id = genID(petID);
     IsProductionComponent(getAddressById(components, IsProdCompID)).set(id);
     IdPetComponent(getAddressById(components, IdPetCompID)).set(id, petID);
     IdNodeComponent(getAddressById(components, IdNodeCompID)).set(id, nodeID);
@@ -99,7 +101,7 @@ library LibProduction {
   function calcOutput(IUintComp components, uint256 id) internal view returns (uint256) {
     uint256 rate = getRate(components, id);
     uint256 duration = calcDuration(components, id);
-    uint256 precision = 10 ** LibConfig.getValueOf(components, "HARVEST_RATE_PREC");
+    uint256 precision = 10 ** uint256(LibConfig.getArray(components, "HARVEST_RATE")[0]);
     return (rate * duration) / precision;
   }
 
@@ -107,21 +109,15 @@ library LibProduction {
   function calcRate(IUintComp components, uint256 id) internal view returns (uint256) {
     if (!isActive(components, id)) return 0;
 
-    string[] memory configs = new string[](4);
-    configs[0] = "HARVEST_RATE_PREC";
-    configs[1] = "HARVEST_RATE_BASE";
-    configs[2] = "HARVEST_RATE_BASE_PREC";
-    configs[3] = "HARVEST_RATE_MULT_PREC";
-
-    uint256[] memory values = LibConfig.getBatchValueOf(components, configs);
+    uint32[8] memory values = LibConfig.getArray(components, "HARVEST_RATE");
 
     uint256 petID = getPet(components, id);
     uint256 power = uint256(uint32(LibPet.calcTotalPower(components, petID)));
-    uint256 precision = 10 ** values[0];
-    uint256 base = values[1];
-    uint256 basePrecision = 10 ** values[2];
+    uint256 precision = 10 ** uint256(values[0]);
+    uint256 base = uint256(values[1]);
+    uint256 basePrecision = 10 ** uint256(values[2]);
     uint256 mult = calcRateMultiplier(components, id);
-    uint256 multPrecision = 10 ** values[3];
+    uint256 multPrecision = 10 ** uint256(values[3]);
 
     return (precision * base * power * mult) / (3600 * basePrecision * multPrecision);
   }
@@ -159,7 +155,7 @@ library LibProduction {
   ) internal view returns (uint256) {
     uint256 petID = getPet(components, id);
     uint256 bonusID = LibBonus.get(components, petID, "HARVEST_OUTPUT");
-    uint256 bonusMult = LibBonus.getValue(components, bonusID);
+    uint256 bonusMult = LibBonus.getBalance(components, bonusID);
     return bonusMult;
   }
 
@@ -190,7 +186,7 @@ library LibProduction {
   // Set the node for a pet's production
   function setNode(IUintComp components, uint256 id, uint256 nodeID) internal {
     IdNodeComponent comp = IdNodeComponent(getAddressById(components, IdNodeCompID));
-    if (comp.getValue(id) != nodeID) {
+    if (comp.get(id) != nodeID) {
       comp.set(id, nodeID);
       IndexNodeComponent(getAddressById(components, IndexNodeCompID)).set(
         id,
@@ -223,27 +219,27 @@ library LibProduction {
   }
 
   function getLastTs(IUintComp components, uint256 id) internal view returns (uint256 ts) {
-    return TimeLastComponent(getAddressById(components, TimeLastCompID)).getValue(id);
+    return TimeLastComponent(getAddressById(components, TimeLastCompID)).get(id);
   }
 
   function getNode(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IdNodeComponent(getAddressById(components, IdNodeCompID)).getValue(id);
+    return IdNodeComponent(getAddressById(components, IdNodeCompID)).get(id);
   }
 
   function getPet(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IdPetComponent(getAddressById(components, IdPetCompID)).getValue(id);
+    return IdPetComponent(getAddressById(components, IdPetCompID)).get(id);
   }
 
   function getRate(IUintComp components, uint256 id) internal view returns (uint256) {
-    return RateComponent(getAddressById(components, RateCompID)).getValue(id);
+    return RateComponent(getAddressById(components, RateCompID)).get(id);
   }
 
   function getState(IUintComp components, uint256 id) internal view returns (string memory) {
-    return StateComponent(getAddressById(components, StateCompID)).getValue(id);
+    return StateComponent(getAddressById(components, StateCompID)).get(id);
   }
 
   function getStartTs(IUintComp components, uint256 id) internal view returns (uint256) {
-    return TimeStartComponent(getAddressById(components, TimeStartCompID)).getValue(id);
+    return TimeStartComponent(getAddressById(components, TimeStartCompID)).get(id);
   }
 
   /////////////////
@@ -251,63 +247,21 @@ library LibProduction {
 
   // get a production by a pet. assumed only 1
   function getForPet(IUintComp components, uint256 petID) internal view returns (uint256 result) {
-    uint256[] memory results = _getAllX(components, 0, petID, "");
-    if (results.length != 0) {
-      result = results[0];
-    }
+    uint256 id = genID(petID);
+    return IsProductionComponent(getAddressById(components, IsProdCompID)).has(id) ? id : 0;
   }
 
-  // get all productions
-  function getAll(IUintComp components) internal view returns (uint256[] memory) {
-    return _getAllX(components, 0, 0, "");
+  /////////////////////
+  // LOGGING
+
+  function logHarvestTime(IUintComp components, uint256 accountID, uint256 value) internal {
+    LibDataEntity.inc(components, accountID, 0, "HARVEST_TIME", value);
   }
 
-  // get all the active productions on a node
-  function getAllOnNode(
-    IUintComp components,
-    uint256 nodeID
-  ) internal view returns (uint256[] memory) {
-    return _getAllX(components, nodeID, 0, "ACTIVE");
-  }
+  /////////////////////
+  // UTILS
 
-  // Retrieves all productions based on any defined filters
-  function _getAllX(
-    IUintComp components,
-    uint256 nodeID,
-    uint256 petID,
-    string memory state
-  ) internal view returns (uint256[] memory) {
-    uint256 numFilters;
-    if (nodeID != 0) numFilters++;
-    if (petID != 0) numFilters++;
-    if (!LibString.eq(state, "")) numFilters++;
-
-    QueryFragment[] memory fragments = new QueryFragment[](numFilters + 1);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsProdCompID), "");
-
-    uint256 filterCount;
-    if (nodeID != 0) {
-      fragments[++filterCount] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IdNodeCompID),
-        abi.encode(nodeID)
-      );
-    }
-    if (petID != 0) {
-      fragments[++filterCount] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IdPetCompID),
-        abi.encode(petID)
-      );
-    }
-    if (!LibString.eq(state, "")) {
-      fragments[++filterCount] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, StateCompID),
-        abi.encode(state)
-      );
-    }
-
-    return LibQuery.query(fragments);
+  function genID(uint256 petID) internal pure returns (uint256) {
+    return uint256(keccak256(abi.encodePacked("production", petID)));
   }
 }

@@ -56,21 +56,45 @@ contract StatComponent is BareComponent {
     _set(entity, abi.encode(value));
   }
 
-  function getValue(uint256 entity) public view virtual returns (Stat memory) {
-    Stat memory value = abi.decode(getRawValue(entity), (Stat));
-    return value;
+  function setBatch(uint256[] memory entities, Stat[] memory values) public virtual {
+    bytes[] memory rawValues = new bytes[](entities.length);
+    for (uint256 i = 0; i < entities.length; i++) rawValues[i] = abi.encode(values[i]);
+
+    setBatch(entities, rawValues);
+  }
+
+  function extract(uint256 entity) public virtual returns (Stat memory) {
+    return abi.decode(extractRaw(entity), (Stat));
+  }
+
+  function extractBatch(uint256[] memory entities) public virtual returns (Stat[] memory) {
+    bytes[] memory rawValues = extractRawBatch(entities);
+    Stat[] memory values = new Stat[](entities.length);
+    for (uint256 i = 0; i < entities.length; i++) values[i] = abi.decode(rawValues[i], (Stat));
+    return values;
+  }
+
+  function get(uint256 entity) public view virtual returns (Stat memory) {
+    return abi.decode(getRaw(entity), (Stat));
+  }
+
+  function getBatch(uint256[] memory entities) public view virtual returns (Stat[] memory) {
+    bytes[] memory rawValues = getRawBatch(entities);
+    Stat[] memory values = new Stat[](entities.length);
+    for (uint256 i = 0; i < entities.length; i++) values[i] = abi.decode(rawValues[i], (Stat));
+    return values;
   }
 
   // calculate the stat total = ((1 + boost) * (base + shift))
   function calcTotal(uint256 entity) public view virtual returns (int32) {
-    Stat memory value = getValue(entity);
+    Stat memory value = get(entity);
     int32 total = ((1e3 + value.boost) * (value.base + value.shift)) / 1e3;
     return (total > 0) ? total : int32(0);
   }
 
   // adjust the shift value of the stat.
   function shift(uint256 entity, int32 amt) public onlyWriter returns (int32) {
-    Stat memory value = getValue(entity);
+    Stat memory value = get(entity);
     value.shift += amt;
     _set(entity, abi.encode(value));
     return value.shift;
@@ -78,7 +102,7 @@ contract StatComponent is BareComponent {
 
   // adjust the boost value of the stat. an adjustment on baseline 1000 (100.0%)
   function boost(uint256 entity, int32 amt) public onlyWriter returns (int32) {
-    Stat memory value = getValue(entity);
+    Stat memory value = get(entity);
     value.boost += amt;
     _set(entity, abi.encode(value));
     return value.boost;
@@ -86,13 +110,13 @@ contract StatComponent is BareComponent {
 
   // adjust the sync value of the stat. bound result between [0, calcTotal()]
   function sync(uint256 entity, int32 amt) public onlyWriter returns (int32) {
-    Stat memory value = getValue(entity);
+    Stat memory value = get(entity);
     return sync(entity, amt, calcTotal(entity));
   }
 
   // adjust the sync value of the stat with a specified max value
   function sync(uint256 entity, int32 amt, int32 max) public onlyWriter returns (int32) {
-    Stat memory value = getValue(entity);
+    Stat memory value = get(entity);
 
     value.sync += amt;
     if (value.sync < 0) value.sync = 0;

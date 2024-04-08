@@ -4,9 +4,10 @@ pragma solidity ^0.8.0;
 import { LibString } from "solady/utils/LibString.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
-import { LibQuery } from "solecs/LibQuery.sol";
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
+
+import { LibDataEntity } from "libraries/LibDataEntity.sol";
 
 import { IsNodeComponent, ID as IsNodeCompID } from "components/IsNodeComponent.sol";
 import { IndexNodeComponent, ID as IndexNodeCompID } from "components/IndexNodeComponent.sol";
@@ -26,13 +27,12 @@ library LibNode {
   // Create a Node as specified and return its id.
   // Type: [ HARVEST | HEALING | SACRIFICIAL | TRAINING ]
   function create(
-    IWorld world,
     IUintComp components,
     uint32 index,
     string memory nodeType,
     uint32 roomIndex
   ) internal returns (uint256) {
-    uint256 id = world.getUniqueEntityId();
+    uint256 id = genID(index);
     IsNodeComponent(getAddressById(components, IsNodeCompID)).set(id);
     IndexNodeComponent(getAddressById(components, IndexNodeCompID)).set(id, index);
     TypeComponent(getAddressById(components, TypeCompID)).set(id, nodeType);
@@ -100,7 +100,7 @@ library LibNode {
     uint256 id
   ) internal view returns (string memory affinity) {
     if (hasAffinity(components, id)) {
-      affinity = AffinityComponent(getAddressById(components, AffCompID)).getValue(id);
+      affinity = AffinityComponent(getAddressById(components, AffCompID)).get(id);
     }
   }
 
@@ -109,80 +109,69 @@ library LibNode {
     uint256 id
   ) internal view returns (string memory description) {
     if (hasDescription(components, id)) {
-      description = DescriptionComponent(getAddressById(components, DescCompID)).getValue(id);
+      description = DescriptionComponent(getAddressById(components, DescCompID)).get(id);
     }
   }
 
   function getIndex(IUintComp components, uint256 id) internal view returns (uint32) {
-    return IndexNodeComponent(getAddressById(components, IndexNodeCompID)).getValue(id);
+    return IndexNodeComponent(getAddressById(components, IndexNodeCompID)).get(id);
   }
 
   function getRoom(IUintComp components, uint256 id) internal view returns (uint32) {
-    return IndexRoomComponent(getAddressById(components, RoomCompID)).getValue(id);
+    return IndexRoomComponent(getAddressById(components, RoomCompID)).get(id);
   }
 
   function getName(IUintComp components, uint256 id) internal view returns (string memory name) {
     if (hasName(components, id)) {
-      name = NameComponent(getAddressById(components, NameCompID)).getValue(id);
+      name = NameComponent(getAddressById(components, NameCompID)).get(id);
     }
   }
 
   // The type of node (e.g. Harvesting | Healing | etc)
   function getType(IUintComp components, uint256 id) internal view returns (string memory) {
-    return TypeComponent(getAddressById(components, TypeCompID)).getValue(id);
+    return TypeComponent(getAddressById(components, TypeCompID)).get(id);
   }
 
   /////////////////
   // QUERIES
 
-  // return an array of all nodes at a room roomIndex
-  function getAllAtRoomIndex(
-    IUintComp components,
-    uint32 roomIndex
-  ) internal view returns (uint256[] memory) {
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsNodeCompID), "");
-    fragments[1] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, RoomCompID),
-      abi.encode(roomIndex)
-    );
-
-    return LibQuery.query(fragments);
-  }
-
   // Return the ID of a Node by its index
   function getByIndex(IUintComp components, uint32 index) internal view returns (uint256 result) {
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsNodeCompID), "");
-    fragments[1] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, IndexNodeCompID),
-      abi.encode(index)
-    );
-
-    uint256[] memory results = LibQuery.query(fragments);
-    if (results.length != 0) {
-      result = results[0];
-    }
+    uint256 id = genID(index);
+    return IsNodeComponent(getAddressById(components, IsNodeCompID)).has(id) ? id : 0;
   }
 
-  // Return the ID of a Node by its name
-  function getByName(
-    IUintComp components,
-    string memory name
-  ) internal view returns (uint256 result) {
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsNodeCompID), "");
-    fragments[1] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, NameCompID),
-      abi.encode(name)
-    );
+  /////////////////////
+  // LOGGING
 
-    uint256[] memory results = LibQuery.query(fragments);
-    if (results.length != 0) {
-      result = results[0];
-    }
+  function logHarvestAt(
+    IUintComp components,
+    uint256 holderID,
+    uint32 index,
+    uint256 amt
+  ) internal {
+    LibDataEntity.inc(components, holderID, index, "HARVEST_AT_NODE", amt);
+  }
+
+  function logHarvestAffinity(
+    IUintComp components,
+    uint256 holderID,
+    string memory affinity,
+    uint256 amt
+  ) internal {
+    LibDataEntity.inc(
+      components,
+      holderID,
+      0,
+      LibString.concat("HARVEST_AFFINITY_", affinity),
+      amt
+    );
+  }
+
+  /////////////////////
+  // UTILS
+
+  function genID(uint32 index) internal pure returns (uint256) {
+    return uint256(keccak256(abi.encodePacked("node", index)));
   }
 }

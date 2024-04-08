@@ -1,7 +1,7 @@
 import { EntityID, EntityIndex, World, getComponentValue } from '@mud-classic/recs';
 
 import { Components } from 'layers/network';
-import { getConfigFieldValue } from '../Config';
+import { getConfigFieldValueArray } from '../Config';
 import { Kami, getKami } from '../Kami';
 import { Node, getNode } from '../Node';
 
@@ -68,7 +68,7 @@ export const getProduction = (
   /////////////////
   // ADJUSTMENTS
 
-  const ratePrecision = 10 ** getConfigFieldValue(components, 'HARVEST_RATE_PREC');
+  const ratePrecision = 10 ** getConfigFieldValueArray(world, components, 'HARVEST_RATE')[0];
   production.rate /= ratePrecision;
 
   return production;

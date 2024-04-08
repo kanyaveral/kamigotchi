@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "std-contracts/components/Uint256Component.sol";
+import "components/types/Uint256Component.sol";
 
-uint256 constant ID = uint256(keccak256("component.Id.Requestee"));
+uint256 constant ID = uint256(keccak256("component.id.requestee"));
 
 // a reference to a Requestee entity's ID
 contract IdRequesteeComponent is Uint256Component {

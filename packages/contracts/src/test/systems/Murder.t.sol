@@ -3,6 +3,9 @@ pragma solidity ^0.8.0;
 
 import "test/utils/SetupTemplate.t.sol";
 
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
+import { getAddressById, getComponentById } from "solecs/utils.sol";
+
 contract MurderTest is SetupTemplate {
   uint _idleRequirement;
   uint[] internal _listingIDs;
@@ -25,7 +28,7 @@ contract MurderTest is SetupTemplate {
     _nodeIDs.push(_createHarvestingNode(5, 3, "Test Node", "this is a node", "NORMAL"));
 
     // starting states
-    _idleRequirement = LibConfig.getValueOf(components, "KAMI_IDLE_REQ");
+    _idleRequirement = LibConfig.get(components, "KAMI_IDLE_REQ");
   }
 
   /////////////////
@@ -403,7 +406,7 @@ contract MurderTest is SetupTemplate {
   //     petIndex = rand % numPets;
   //     attackerID = _petIDs[playerIndex][petIndex];
   //     nodeID = LibProduction.getNode(components, LibPet.getProduction(components, attackerID));
-  //     productionIDs = LibProduction.getAllOnNode(components, nodeID);
+  //     productionIDs = getAllOnNode(components, nodeID);
   //     productionID = productionIDs[rand % productionIDs.length];
   //     victimID = LibProduction.getPet(components, productionID);
 
@@ -438,4 +441,66 @@ contract MurderTest is SetupTemplate {
   //     }
   //   }
   // }
+
+  //////////////
+  // QUERIES
+
+  // get all productions
+  function getAll(IUint256Component components) internal view returns (uint256[] memory) {
+    return _getAllX(components, 0, 0, "");
+  }
+
+  // get all the active productions on a node
+  function getAllOnNode(
+    IUint256Component components,
+    uint256 nodeID
+  ) internal view returns (uint256[] memory) {
+    return _getAllX(components, nodeID, 0, "ACTIVE");
+  }
+
+  // Retrieves all productions based on any defined filters
+  function _getAllX(
+    IUint256Component components,
+    uint256 nodeID,
+    uint256 petID,
+    string memory state
+  ) internal view returns (uint256[] memory) {
+    uint256 numFilters;
+    if (nodeID != 0) numFilters++;
+    if (petID != 0) numFilters++;
+    if (!LibString.eq(state, "")) numFilters++;
+
+    QueryFragment[] memory fragments = new QueryFragment[](numFilters + 1);
+
+    uint256 filterCount;
+    if (nodeID != 0) {
+      fragments[filterCount++] = QueryFragment(
+        QueryType.HasValue,
+        getComponentById(components, IdNodeComponentID),
+        abi.encode(nodeID)
+      );
+    }
+    if (petID != 0) {
+      fragments[filterCount++] = QueryFragment(
+        QueryType.HasValue,
+        getComponentById(components, IdPetComponentID),
+        abi.encode(petID)
+      );
+    }
+    if (!LibString.eq(state, "")) {
+      fragments[filterCount++] = QueryFragment(
+        QueryType.HasValue,
+        getComponentById(components, StateComponentID),
+        abi.encode(state)
+      );
+    }
+
+    fragments[filterCount] = QueryFragment(
+      QueryType.Has,
+      getComponentById(components, IsProductionComponentID),
+      ""
+    );
+
+    return LibQuery.query(fragments);
+  }
 }

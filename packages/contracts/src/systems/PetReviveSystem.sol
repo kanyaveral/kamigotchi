@@ -28,7 +28,6 @@ contract PetReviveSystem is System {
     require(LibString.eq(type_, "REVIVE"), "PetRevive: god can't save you");
 
     // standard checks (ownership, cooldown, state)
-    require(accountID != 0, "PetRevive: no account");
     require(LibPet.getAccount(components, id) == accountID, "PetRevive: pet not urs");
     require(LibPet.isDead(components, id), "PetRevive: pet not dead");
 
@@ -42,7 +41,8 @@ contract PetReviveSystem is System {
     LibPet.setLastTs(components, id, block.timestamp); // explicitly, as we don't sync health on this EP
 
     // standard logging and tracking
-    LibDataEntity.incFor(world, components, accountID, itemIndex, "INV_USE", 1);
+    LibDataEntity.inc(components, accountID, itemIndex, "INV_USE", 1);
+    LibPet.logRevive(components, accountID);
     LibAccount.updateLastTs(components, accountID);
     return "";
   }

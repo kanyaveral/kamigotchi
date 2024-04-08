@@ -98,11 +98,11 @@ contract BatchMinterTest is SetupTemplate {
     vm.prank(deployer);
     uint256[] memory petIDs = __721BatchMinterSystem.batchMint(numPets);
 
-    uint[] memory backgrounds = LibRegistryTrait.getAllOfType(components, IndexBackgroundCompID);
-    uint[] memory bodies = LibRegistryTrait.getAllOfType(components, IndexBodyCompID);
-    uint[] memory colors = LibRegistryTrait.getAllOfType(components, IndexColorCompID);
-    uint[] memory faces = LibRegistryTrait.getAllOfType(components, IndexFaceCompID);
-    uint[] memory hands = LibRegistryTrait.getAllOfType(components, IndexHandCompID);
+    uint[] memory backgrounds = LibRegistryTrait.getAllOfType(components, "BACKGROUND");
+    uint[] memory bodies = LibRegistryTrait.getAllOfType(components, "BODY");
+    uint[] memory colors = LibRegistryTrait.getAllOfType(components, "COLOR");
+    uint[] memory faces = LibRegistryTrait.getAllOfType(components, "FACE");
+    uint[] memory hands = LibRegistryTrait.getAllOfType(components, "HAND");
 
     uint[] memory bgCounts = new uint[](backgrounds.length);
     uint[] memory bodyCounts = new uint[](bodies.length);
@@ -151,11 +151,11 @@ contract BatchMinterTest is SetupTemplate {
   //////////////////////
 
   function _calcStatsFromTraits(uint petID) internal view returns (int32[] memory) {
-    int32 health = int32(int(LibConfig.getValueOf(components, "KAMI_BASE_HEALTH")));
-    int32 power = int32(int(LibConfig.getValueOf(components, "KAMI_BASE_POWER")));
-    int32 violence = int32(int(LibConfig.getValueOf(components, "KAMI_BASE_VIOLENCE")));
-    int32 harmony = int32(int(LibConfig.getValueOf(components, "KAMI_BASE_HARMONY")));
-    int32 slots = int32(int(LibConfig.getValueOf(components, "KAMI_BASE_SLOTS")));
+    int32 health = int32(int(LibConfig.get(components, "KAMI_BASE_HEALTH")));
+    int32 power = int32(int(LibConfig.get(components, "KAMI_BASE_POWER")));
+    int32 violence = int32(int(LibConfig.get(components, "KAMI_BASE_VIOLENCE")));
+    int32 harmony = int32(int(LibConfig.get(components, "KAMI_BASE_HARMONY")));
+    int32 slots = int32(int(LibConfig.get(components, "KAMI_BASE_SLOTS")));
 
     // sum the stats from all traits
     uint256 traitRegistryID;

@@ -17,7 +17,7 @@ import { WeightsComponent, ID as WeightsCompID } from "components/WeightsCompone
 
 import { LibDataEntity } from "libraries/LibDataEntity.sol";
 import { LibInventory } from "libraries/LibInventory.sol";
-import { LibRandom } from "libraries/LibRandom.sol";
+import { LibRandom } from "libraries/utils/LibRandom.sol";
 import { LibRegistryItem } from "libraries/LibRegistryItem.sol";
 
 library LibLootbox {
@@ -45,7 +45,7 @@ library LibLootbox {
     setIsLootbox(components, id);
     setIsLog(components, id);
     setBalance(components, id, count);
-    setHolder(components, id, LibInventory.getHolder(components, invID));
+    setHolder(components, id, LibInventory.getOwner(components, invID));
     setIndex(components, id, LibInventory.getItemIndex(components, invID));
     LibRandom.setRevealBlock(components, id, block.number);
   }
@@ -102,7 +102,7 @@ library LibLootbox {
 
     uint256 invID = LibInventory.get(components, holderID, index);
     if (invID == 0) {
-      invID = LibInventory.create(world, components, holderID, index);
+      invID = LibInventory.create(components, holderID, index);
     }
     LibInventory.inc(components, invID, count);
   }
@@ -126,23 +126,23 @@ library LibLootbox {
   }
 
   function getBalance(IUintComp components, uint256 id) internal view returns (uint256) {
-    return BalanceComponent(getAddressById(components, BalanceCompID)).getValue(id);
+    return BalanceComponent(getAddressById(components, BalanceCompID)).get(id);
   }
 
   function getHolder(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IdHolderComponent(getAddressById(components, IdHolderCompID)).getValue(id);
+    return IdHolderComponent(getAddressById(components, IdHolderCompID)).get(id);
   }
 
   function getIndex(IUintComp components, uint256 id) internal view returns (uint32) {
-    return IndexItemComponent(getAddressById(components, IndexItemCompID)).getValue(id);
+    return IndexItemComponent(getAddressById(components, IndexItemCompID)).get(id);
   }
 
   function getKeys(IUintComp components, uint256 id) internal view returns (uint32[] memory) {
-    return KeysComponent(getAddressById(components, KeysCompID)).getValue(id);
+    return KeysComponent(getAddressById(components, KeysCompID)).get(id);
   }
 
   function getWeights(IUintComp components, uint256 id) internal view returns (uint256[] memory) {
-    return WeightsComponent(getAddressById(components, WeightsCompID)).getValue(id);
+    return WeightsComponent(getAddressById(components, WeightsCompID)).get(id);
   }
 
   //////////////////
@@ -202,6 +202,6 @@ library LibLootbox {
     uint32 index,
     uint256 count
   ) internal {
-    LibDataEntity.incFor(world, components, holderID, index, "LOOTBOX_OPENED", count);
+    LibDataEntity.inc(components, holderID, index, "LOOTBOX_OPENED", count);
   }
 }

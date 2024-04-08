@@ -20,14 +20,13 @@ contract FriendRequestSystem is System {
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
     uint256 targetID = LibAccount.getByOwner(components, targetAddr);
 
-    require(accountID != 0, "FriendRequest: no account");
     require(targetID != 0, "FriendRequest: target no account");
     require(accountID != targetID, "FriendRequest: cannot fren self");
 
     // friendship specific checks
     require(
-      LibFriend.getAccountRequests(components, targetID).length <
-        LibConfig.getValueOf(components, "FRIENDS_REQUEST_LIMIT"),
+      LibFriend.getRequestCount(components, targetID) <
+        LibConfig.get(components, "FRIENDS_REQUEST_LIMIT"),
       "Max friend requests reached"
     );
     /// @dev FE should not get here; if either alr requested, friends, or blocked, a friendship will exist
@@ -46,7 +45,7 @@ contract FriendRequestSystem is System {
     }
 
     // create request
-    uint256 requestID = LibFriend.request(world, components, accountID, targetID);
+    uint256 requestID = LibFriend.create(components, accountID, targetID, "REQUEST");
 
     // standard logging and tracking
     LibAccount.updateLastTs(components, accountID);

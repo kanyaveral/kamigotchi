@@ -17,32 +17,36 @@ contract _RegistryCreateQuestSystem is System {
       uint32 index,
       string memory name,
       string memory description,
-      uint32 roomIndex,
+      string memory endText,
+      uint256 points,
       uint256 duration
-    ) = abi.decode(arguments, (uint32, string, string, uint32, uint256));
+    ) = abi.decode(arguments, (uint32, string, string, string, uint256, uint256));
 
-    uint256 regID = LibRegistryQuests.createQuest(world, components, index, name, description);
-
-    // set roomIndex (if any)
-    if (roomIndex != 0) {
-      LibRegistryQuests.setRoomIndex(components, regID, roomIndex);
-    }
+    uint256 regID = LibRegistryQuests.createQuest(
+      components,
+      index,
+      name,
+      description,
+      endText,
+      points
+    );
 
     // set repeatable (if so)
     if (duration > 0) {
       LibRegistryQuests.setRepeatable(components, regID, duration);
     }
 
-    return "";
+    return abi.encode(regID);
   }
 
   function executeTyped(
     uint32 index,
     string memory name,
     string memory description,
-    uint32 roomIndex,
+    string memory endText,
+    uint256 points,
     uint256 duration
   ) public onlyOwner returns (bytes memory) {
-    return execute(abi.encode(index, name, description, roomIndex, duration));
+    return execute(abi.encode(index, name, description, endText, points, duration));
   }
 }

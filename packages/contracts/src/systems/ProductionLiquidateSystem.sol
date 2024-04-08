@@ -27,7 +27,6 @@ contract ProductionLiquidateSystem is System {
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
 
     // standard checks (ownership, cooldown, state)
-    require(accountID != 0, "FarmLiquidate: no account");
     require(LibPet.getAccount(components, petID) == accountID, "FarmLiquidate: pet not urs");
     require(LibPet.isHarvesting(components, petID), "FarmLiquidate: pet must be harvesting");
 
@@ -72,26 +71,24 @@ contract ProductionLiquidateSystem is System {
     // Update ts for Standard Action Cooldowns
     uint256 standardActionTs = block.timestamp;
     uint256 bonusID = LibBonus.get(components, petID, "ATTACK_COOLDOWN");
-    if (bonusID != 0) standardActionTs -= LibBonus.getValue(components, bonusID);
+    if (bonusID != 0) standardActionTs -= LibBonus.getBalance(components, bonusID);
     LibPet.setLastActionTs(components, petID, standardActionTs);
 
     // standard logging and tracking
-    LibScore.incBy(world, components, accountID, "LIQUIDATE", 1);
-    LibDataEntity.incFor(world, components, accountID, 0, "LIQUIDATE", 1);
-    LibDataEntity.incFor(
-      world,
+    LibScore.inc(components, accountID, "LIQUIDATE", 1);
+    LibDataEntity.inc(components, accountID, 0, "LIQUIDATE_TOTAL", 1);
+    LibDataEntity.inc(
       components,
       accountID,
       LibNode.getIndex(components, nodeID),
-      "NODE_LIQUIDATE",
+      "LIQUIDATE_AT_NODE",
       1
     );
-    LibDataEntity.incFor(
-      world,
+    LibDataEntity.inc(
       components,
       LibPet.getAccount(components, targetPetID),
       0,
-      "BEEN_LIQUIDATEED",
+      "LIQUIDATED_VICTIM",
       1
     );
     LibAccount.updateLastTs(components, accountID);

@@ -3,8 +3,7 @@ pragma solidity ^0.8.0;
 
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
-import { LibQuery } from "solecs/LibQuery.sol";
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
 import { IndexItemComponent, ID as IndexItemCompID } from "components/IndexItemComponent.sol";
@@ -28,14 +27,13 @@ library LibListing {
 
   // creates a merchant listing with the specified parameters
   function create(
-    IWorld world,
     IUintComp components,
     uint32 npcIndex,
     uint32 itemIndex,
     uint256 buyPrice,
     uint256 sellPrice
   ) internal returns (uint256) {
-    uint256 id = world.getUniqueEntityId();
+    uint256 id = genID(npcIndex, itemIndex);
     IsListingComponent(getAddressById(components, IsListingCompID)).set(id);
     IndexNPCComponent(getAddressById(components, IndexNPCComponentID)).set(id, npcIndex);
     IndexItemComponent(getAddressById(components, IndexItemCompID)).set(id, itemIndex);
@@ -134,22 +132,22 @@ library LibListing {
   }
 
   function getNPCIndex(IUintComp components, uint256 id) internal view returns (uint32) {
-    return IndexNPCComponent(getAddressById(components, IndexNPCComponentID)).getValue(id);
+    return IndexNPCComponent(getAddressById(components, IndexNPCComponentID)).get(id);
   }
 
   // return the item index of a listing
   function getItemIndex(IUintComp components, uint256 id) internal view returns (uint32) {
-    return IndexItemComponent(getAddressById(components, IndexItemCompID)).getValue(id);
+    return IndexItemComponent(getAddressById(components, IndexItemCompID)).get(id);
   }
 
   function getBuyPrice(IUintComp components, uint256 id) internal view returns (uint256 price) {
     if (hasBuyPrice(components, id))
-      price = PriceBuyComponent(getAddressById(components, PriceBuyCompID)).getValue(id);
+      price = PriceBuyComponent(getAddressById(components, PriceBuyCompID)).get(id);
   }
 
   function getSellPrice(IUintComp components, uint256 id) internal view returns (uint256 price) {
     if (hasSellPrice(components, id))
-      price = PriceSellComponent(getAddressById(components, PriceSellCompID)).getValue(id);
+      price = PriceSellComponent(getAddressById(components, PriceSellCompID)).get(id);
   }
 
   /////////////////
@@ -158,76 +156,52 @@ library LibListing {
   // gets an item listing from a merchant by its indices
   function get(
     IUintComp components,
-    uint256 merchantIndex,
+    uint32 merchantIndex,
     uint32 itemIndex
   ) internal view returns (uint256 result) {
-    uint256[] memory results = _getAllX(components, merchantIndex, itemIndex);
-    if (results.length != 0) {
-      result = results[0];
-    }
+    uint256 id = genID(merchantIndex, itemIndex);
+    return IsListingComponent(getAddressById(components, IsListingCompID)).has(id) ? id : 0;
   }
 
-  // gets all listings from a merchant by its index
-  function getAllForMerchant(
-    IUintComp components,
-    uint256 merchantIndex
-  ) internal view returns (uint256[] memory) {
-    return _getAllX(components, merchantIndex, 0);
-  }
+  //////////////////
+  // UTILS
 
-  // Retrieves all listingsbased on any defined filters
-  function _getAllX(
-    IUintComp components,
-    uint256 merchantIndex,
-    uint32 itemIndex
-  ) internal view returns (uint256[] memory) {
-    uint256 numFilters;
-    if (merchantIndex != 0) numFilters++;
-    if (itemIndex != 0) numFilters++;
-
-    QueryFragment[] memory fragments = new QueryFragment[](numFilters + 1);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsListingCompID), "");
-
-    uint256 filterCount;
-    if (merchantIndex != 0) {
-      fragments[++filterCount] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IndexNPCComponentID),
-        abi.encode(merchantIndex)
-      );
-    }
-    if (itemIndex != 0) {
-      fragments[++filterCount] = QueryFragment(
-        QueryType.HasValue,
-        getComponentById(components, IndexItemCompID),
-        abi.encode(itemIndex)
-      );
-    }
-    return LibQuery.query(fragments);
+  function genID(uint32 merchantIndex, uint32 itemIndex) internal pure returns (uint256) {
+    return uint256(keccak256(abi.encodePacked("listing", merchantIndex, itemIndex)));
   }
 
   //////////////////
   // DATA LOGGING
 
-  // @notice log increase for item buy
+  /// @notice log increase for item buy
   function logIncItemBuy(
-    IWorld world,
     IUintComp components,
     uint256 accountID,
     uint32 itemIndex,
     uint256 amt
   ) internal {
-    LibDataEntity.incFor(world, components, accountID, itemIndex, "ITEM_BUY", amt);
+    LibDataEntity.inc(components, accountID, 0, "ITEM_BUY_TOTAL", amt);
+    LibDataEntity.inc(components, accountID, itemIndex, "ITEM_BUY", amt);
   }
 
-  // @notice log increase for item sell
+  /// @notice log increase for item sell
   function logIncItemSell(
-    IWorld world,
     IUintComp components,
     uint256 accountID,
     uint32 itemIndex,
     uint256 amt
   ) internal {
-    LibDataEntity.incFor(world, components, accountID, itemIndex, "ITEM_SELL", amt);
+    LibDataEntity.inc(components, accountID, 0, "ITEM_SELL_TOTAL", amt);
+    LibDataEntity.inc(components, accountID, itemIndex, "ITEM_SELL", amt);
+  }
+
+  /// @notice log coins spent
+  function logSpendCoin(IUintComp components, uint256 accountID, uint256 amt) internal {
+    LibDataEntity.inc(components, accountID, 0, "COIN_SPEND", amt);
+  }
+
+  /// @notice log coin revenue earned
+  function logEarnCoin(IUintComp components, uint256 accountID, uint256 amt) internal {
+    LibDataEntity.inc(components, accountID, 0, "COIN_REVENUE", amt);
   }
 }

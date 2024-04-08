@@ -24,7 +24,6 @@ contract ProductionStartSystem is System {
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
 
     // standard checks (ownership, cooldown, state)
-    require(accountID != 0, "FarmStart: no account");
     require(LibPet.getAccount(components, petID) == accountID, "FarmStart: pet not urs");
     require(LibPet.isResting(components, petID), "FarmStart: pet must be resting");
     require(!LibPet.onCooldown(components, petID), "FarmStart: pet on cooldown");
@@ -36,7 +35,7 @@ contract ProductionStartSystem is System {
 
     // start the production, create if none exists
     uint256 id = LibProduction.getForPet(components, petID);
-    if (id == 0) id = LibProduction.create(world, components, nodeID, petID);
+    if (id == 0) id = LibProduction.create(components, nodeID, petID);
     else LibProduction.setNode(components, id, nodeID);
     LibProduction.start(components, id);
     LibPet.setState(components, petID, "HARVESTING");
@@ -44,7 +43,7 @@ contract ProductionStartSystem is System {
     // Update ts for Standard Action Cooldowns
     uint256 standardActionTs = block.timestamp;
     uint256 bonusID = LibBonus.get(components, petID, "HARVEST_COOLDOWN");
-    if (bonusID != 0) standardActionTs -= LibBonus.getValue(components, bonusID);
+    if (bonusID != 0) standardActionTs -= LibBonus.getBalance(components, bonusID);
     LibPet.setLastActionTs(components, petID, standardActionTs);
 
     // standard logging and tracking

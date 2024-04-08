@@ -3,165 +3,105 @@ pragma solidity ^0.8.0;
 
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
-import { LibQuery } from "solecs/LibQuery.sol";
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
 import { LibString } from "solady/utils/LibString.sol";
+import { LibPack } from "libraries/utils/LibPack.sol";
 
-import { IsConfigComponent, ID as IsConfigCompID } from "components/IsConfigComponent.sol";
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
-import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
-import { WeiComponent, ID as WeiCompID } from "components/WeiComponent.sol";
+import { BareValueComponent, ID as ValueCompID } from "components/BareValueComponent.sol";
 
-// a config entity is a global config of field values, identified by its NameComponent
+/// @notice a config entity is a global config of field values, identified by its NameComponent
+/** @dev
+ * There are 3 types of configs, all packed and stored into a single uint256.
+ * - uint256
+ * - string
+ * - uint32[8] (to store multiple values in a single entry)
+ */
 library LibConfig {
-  // Create a global config field entity. Value is set separately
-  function create(
-    IWorld world,
-    IUintComp components,
-    string memory name
-  ) internal returns (uint256) {
-    uint256 id = world.getUniqueEntityId();
-    IsConfigComponent(getAddressById(components, IsConfigCompID)).set(id);
-    NameComponent(getAddressById(components, NameCompID)).set(id, name);
-    return id;
+  /// @notice Retrieve the ID of a config with the given type
+  function getID(string memory name) internal pure returns (uint256 result) {
+    return uint256(keccak256(abi.encodePacked("is.config", name)));
   }
 
   //////////////////
   // SETTERS
 
-  // Set the value of a global config field entity
+  /// @notice Set a value of a global config field entity
   function setValue(IUintComp components, uint256 id, uint256 value) internal {
-    ValueComponent(getAddressById(components, ValueCompID)).set(id, value);
+    BareValueComponent(getAddressById(components, ValueCompID)).set(id, value);
   }
 
-  // Packs a string value as a uint256 for a config. Max 32 chars.
+  /// @notice Set an array of values of a global config field entity
+  function setValueArray(IUintComp components, uint256 id, uint32[8] memory values) internal {
+    setValue(components, id, LibPack.packArrU32(values));
+  }
+
+  /// @notice Set a string value of a global config field entity
   function setValueString(IUintComp components, uint256 id, string memory value) internal {
     require(bytes(value).length <= 32, "LibConfig: string too long");
     require(bytes(value).length > 0, "LibConfig: string too short");
-    setValue(components, id, uint256(LibString.packOne(value)));
-  }
-
-  // Set Wei value for a config entity
-  function setWei(IUintComp components, uint256 id, uint256 value) internal {
-    WeiComponent(getAddressById(components, WeiCompID)).set(id, value);
-  }
-
-  // set the value of a global config entity by its name
-  function setValueOf(IUintComp components, string memory name, uint256 value) internal {
-    uint256 id = get(components, name);
-    setValue(components, id, value);
+    setValue(components, id, LibPack.stringToUint(value));
   }
 
   //////////////////
   // GETTERS
 
-  // Retrieve the value of a global config field entity
-  function getValue(IUintComp components, uint256 id) internal view returns (uint256) {
-    return ValueComponent(getAddressById(components, ValueCompID)).getValue(id);
-  }
-
-  function getWei(IUintComp components, uint256 id) internal view returns (uint256) {
-    return WeiComponent(getAddressById(components, WeiCompID)).getValue(id);
-  }
-
-  // Retrieve the value of a global config field entity by name. Assume it exists.
-  function getValueOf(IUintComp components, string memory name) internal view returns (uint256) {
-    uint256 id = get(components, name);
+  /// @notice Retrieve the value (without precision) of a global config field entity. Assumes it exists
+  function get(IUintComp components, string memory name) internal view returns (uint256) {
+    uint256 id = getID(name);
     return getValue(components, id);
   }
 
-  function getValueStringOf(
+  /// @notice Retrieve an array of values. Assumes it exists
+  function getArray(
+    IUintComp components,
+    string memory name
+  ) internal view returns (uint32[8] memory) {
+    uint256 id = getID(name);
+    return getValueArray(components, id);
+  }
+
+  /// @notice Retrieve the string value of a global config field entity. Assumes it exists
+  function getString(
     IUintComp components,
     string memory name
   ) internal view returns (string memory) {
-    return _uintToString(getValueOf(components, name));
+    uint256 id = getID(name);
+    return getValueString(components, id);
   }
 
-  function getWeiValueOf(IUintComp components, string memory name) internal view returns (uint256) {
-    uint256 id = get(components, name);
-    return getWei(components, id);
-  }
-
-  function getBatchValueOf(
-    IUintComp components,
-    string[] memory names
-  ) public view returns (uint256[] memory) {
-    uint256[] memory values = getBatch(components, names);
-
-    ValueComponent valueComp = ValueComponent(getAddressById(components, ValueCompID));
-    for (uint256 i = 0; i < names.length; i++) {
-      if (values[i] != 0) values[i] = valueComp.getValue(values[i]);
-    }
-
-    return values;
-  }
-
-  function getBatchValueStringOf(
-    IUintComp components,
-    string[] memory names
-  ) internal view returns (string[] memory) {
-    string[] memory values = new string[](names.length);
-    uint256[] memory ids = getBatch(components, names);
-
-    ValueComponent valueComp = ValueComponent(getAddressById(components, ValueCompID));
-    for (uint256 i = 0; i < names.length; i++) {
-      if (ids[i] != 0) values[i] = _uintToString(valueComp.getValue(ids[i]));
-    }
-
-    return values;
-  }
-
-  //////////////////
-  // QUERIES
-
-  /// @notice Retrieve the ID of a config with the given type
-  function get(IUintComp components, string memory name) internal view returns (uint256 result) {
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsConfigCompID), "");
-    fragments[1] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, NameCompID),
-      abi.encode(name)
-    );
-
-    uint256[] memory results = LibQuery.query(fragments);
-    if (results.length > 0) {
-      result = results[0];
-    }
-  }
-
-  /// @notice Retrieve an array of IDs of a config with the given types
+  /// @notice Retrieves a batch of values (without precision). Assumes all exists
   function getBatch(
     IUintComp components,
     string[] memory names
-  ) internal view returns (uint256[] memory entities) {
-    entities = new uint256[](names.length);
+  ) public view returns (uint256[] memory) {
+    uint256[] memory values = new uint256[](names.length);
+    for (uint256 i = 0; i < names.length; i++) values[i] = getID(names[i]);
 
-    QueryFragment memory nameFragment = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, NameCompID),
-      new bytes(0)
-    );
+    BareValueComponent valueComp = BareValueComponent(getAddressById(components, ValueCompID));
+    for (uint256 i = 0; i < names.length; i++)
+      if (values[i] != 0) values[i] = uint256(uint32(valueComp.get(values[i])));
 
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsConfigCompID), "");
-
-    for (uint256 i = 0; i < names.length; i++) {
-      nameFragment.value = abi.encode(names[i]);
-      fragments[1] = nameFragment;
-      uint256[] memory results = LibQuery.query(fragments);
-      if (results.length > 0) {
-        entities[i] = results[0];
-      }
-    }
+    return values;
   }
 
-  /////////////////////////
-  // UTILITIES
+  /// @notice Retrieve the value (without precision) of a global config field entity. Assumes it exists
+  function getValue(IUintComp components, uint256 id) internal view returns (uint256) {
+    return BareValueComponent(getAddressById(components, ValueCompID)).get(id);
+  }
 
-  function _uintToString(uint256 value) internal pure returns (string memory) {
-    return LibString.unpackOne((bytes32(abi.encodePacked(value))));
+  /// @notice Retrieve an array of values. Assumes it exists
+  function getValueArray(
+    IUintComp components,
+    uint256 id
+  ) internal view returns (uint32[8] memory) {
+    return LibPack.unpackArrU32(getValue(components, id));
+  }
+
+  /// @notice Retrieve the string value of a global config field entity
+  function getValueString(IUintComp components, uint256 id) internal view returns (string memory) {
+    return LibPack.uintToString(getValue(components, id));
   }
 }

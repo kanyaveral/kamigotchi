@@ -21,7 +21,6 @@ contract ListingSellSystem is System {
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
     uint256 merchantID = LibListing.getMerchant(components, listingID);
 
-    require(accountID != 0, "Account: not found");
     require(
       LibNPC.sharesRoomWith(components, merchantID, accountID),
       "Listing.Sell(): must be in same room as npc"
@@ -31,16 +30,17 @@ contract ListingSellSystem is System {
       "Listing.Sell(): invalid listing!"
     );
 
+    uint256 price = LibListing.getSellPrice(components, listingID);
     LibListing.sellTo(components, listingID, accountID, amt);
 
     // standard logging and tracking
     LibListing.logIncItemSell(
-      world,
       components,
       accountID,
       LibListing.getItemIndex(components, listingID),
       amt
     );
+    LibListing.logSpendCoin(components, accountID, amt * price);
     LibAccount.updateLastTs(components, accountID);
     return "";
   }

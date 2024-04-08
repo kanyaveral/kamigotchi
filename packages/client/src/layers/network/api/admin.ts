@@ -31,18 +31,21 @@ export function createAdminAPI(systems: any) {
 
   async function setConfig(field: string, value: BigNumberish) {
     await sleepIf();
-    return systems['system._Config.Set'].executeTyped(field, value);
+    return systems['system._Config.Set'].setValue(field, value);
+  }
+
+  async function setConfigArray(field: string, value: number[]) {
+    await sleepIf();
+    const arr = new Array(8);
+    arr.fill(0);
+    for (let i = 0; i < value.length; i++) arr[i] = value[i];
+    return systems['system._Config.Set'].setValueArray(field, arr);
   }
 
   // values must be ≤ 32char
   async function setConfigString(field: string, value: string) {
     await sleepIf();
-    return systems['system._Config.Set.String'].executeTyped(field, value);
-  }
-
-  async function setConfigWei(field: string, value: BigNumberish) {
-    await sleepIf();
-    return systems['system._Config.Set.Wei'].executeTyped(field, value);
+    return systems['system._Config.Set'].setValueString(field, value);
   }
 
   /////////////////
@@ -143,7 +146,8 @@ export function createAdminAPI(systems: any) {
     index: number,
     name: string,
     description: string,
-    roomIndex: number,
+    endText: string,
+    points: number,
     repeatTime: number
   ) {
     await sleepIf();
@@ -151,7 +155,8 @@ export function createAdminAPI(systems: any) {
       index,
       name,
       description,
-      roomIndex,
+      endText,
+      points,
       repeatTime
     );
   }
@@ -503,9 +508,9 @@ export function createAdminAPI(systems: any) {
     },
     config: {
       set: {
+        array: setConfigArray,
         number: setConfig,
         string: setConfigString,
-        wei: setConfigWei,
       },
     },
     listing: {

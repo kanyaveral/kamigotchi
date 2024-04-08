@@ -20,10 +20,9 @@ contract PetUseItemSystem is System {
     (uint256 id, uint256 invID) = abi.decode(arguments, (uint256, uint256));
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
 
-    require(accountID != 0, "no account");
     require(LibPet.isPet(components, id), "not a pet");
     require(LibPet.getAccount(components, id) == accountID, "Pet not urs");
-    require(LibInventory.getHolder(components, invID) == accountID, "Item not urs");
+    require(LibInventory.getOwner(components, invID) == accountID, "Item not urs");
     LibInventory.dec(components, invID, 1); // implicit inventory balance check
 
     string memory type_ = LibInventory.getType(components, invID);

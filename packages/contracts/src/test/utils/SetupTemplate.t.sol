@@ -281,6 +281,13 @@ abstract contract SetupTemplate is TestSetupImports {
     _QuestDropSystem.executeTyped(questID);
   }
 
+  /* RELATIONSHIP */
+
+  function _advRelationship(uint playerIdx, uint32 npcIdx, uint32 relIdx) internal returns (uint) {
+    vm.prank(_getOperator(playerIdx));
+    return abi.decode(_RelationshipAdvanceSystem.executeTyped(npcIdx, relIdx), (uint256));
+  }
+
   /* SKILLS */
 
   function _upgradeSkill(uint playerIndex, uint targetID, uint32 skillIndex) internal virtual {
@@ -295,7 +302,7 @@ abstract contract SetupTemplate is TestSetupImports {
   function _getItemBalance(uint playerIndex, uint32 itemIndex) internal view returns (uint) {
     uint accountID = _getAccount(playerIndex);
     uint inventoryID = LibInventory.get(components, accountID, itemIndex);
-    return LibInventory.getBalance(components, inventoryID);
+    return inventoryID == 0 ? 0 : LibInventory.getBalance(components, inventoryID);
   }
 
   /////////////////
@@ -311,9 +318,9 @@ abstract contract SetupTemplate is TestSetupImports {
 
     vm.startPrank(deployer);
     uint256 invID = LibInventory.get(components, accountID, index);
-    if (invID == 0) invID = LibInventory.create(world, components, accountID, index);
+    if (invID == 0) invID = LibInventory.create(components, accountID, index);
     LibInventory.inc(components, invID, amt);
-    LibInventory.logIncItemTotal(world, components, accountID, index, amt);
+    LibInventory.logIncItemTotal(components, accountID, index, amt);
     vm.stopPrank();
   }
 
@@ -326,10 +333,13 @@ abstract contract SetupTemplate is TestSetupImports {
   /////////////////
   // WORLD POPULATION
 
-  function _createRoom(string memory name, Location memory location, uint32 index) internal {
+  function _createRoom(
+    string memory name,
+    Location memory location,
+    uint32 index
+  ) internal returns (uint256) {
     uint32[] memory exits = new uint32[](0);
-    vm.prank(deployer);
-    __RoomCreateSystem.executeTyped(location, index, name, "", exits);
+    return _createRoom(name, location, index, exits);
   }
 
   function _createRoom(
@@ -337,12 +347,11 @@ abstract contract SetupTemplate is TestSetupImports {
     Location memory location,
     uint32 index,
     uint32 exitIndex
-  ) internal {
+  ) internal returns (uint256) {
     uint32[] memory exits = new uint32[](1);
     exits[0] = exitIndex;
 
-    vm.prank(deployer);
-    __RoomCreateSystem.executeTyped(location, index, name, "", exits);
+    return _createRoom(name, location, index, exits);
   }
 
   function _createRoom(
@@ -350,9 +359,32 @@ abstract contract SetupTemplate is TestSetupImports {
     Location memory location,
     uint32 index,
     uint32[] memory exits
-  ) internal {
+  ) internal returns (uint256) {
     vm.prank(deployer);
-    __RoomCreateSystem.executeTyped(location, index, name, "", exits);
+    return abi.decode(__RoomCreateSystem.executeTyped(location, index, name, "", exits), (uint256));
+  }
+
+  function _createRoomGate(
+    uint32 roomIndex,
+    uint32 sourceIndex,
+    uint32 conditionIndex,
+    uint256 conditionValue,
+    string memory logicType,
+    string memory type_
+  ) internal returns (uint256) {
+    vm.prank(deployer);
+    return
+      abi.decode(
+        __RoomCreateGateSystem.executeTyped(
+          roomIndex,
+          sourceIndex,
+          conditionIndex,
+          conditionValue,
+          logicType,
+          type_
+        ),
+        (uint256)
+      );
   }
 
   function _createHarvestingNode(
@@ -402,12 +434,11 @@ abstract contract SetupTemplate is TestSetupImports {
   /* ITEMS */
 
   // @notice creates and empty item index for testing
-  function _createGenericItem(uint32 index) public {
+  function _createGenericItem(uint32 index) public returns (uint256 id) {
     vm.startPrank(deployer);
 
-    uint256 id = world.getUniqueEntityId();
+    id = LibRegistryItem.genID(index);
     _IsRegistryComponent.set(id);
-    _IsFungibleComponent.set(id);
     _IndexItemComponent.set(id, index);
 
     vm.stopPrank();
@@ -425,15 +456,24 @@ abstract contract SetupTemplate is TestSetupImports {
 
   /* QUESTS */
 
-  function _createQuest(
-    uint32 index,
-    string memory name,
-    string memory description,
-    uint32 roomIndex,
-    uint duration
-  ) public {
+  function _createQuest(uint32 index, uint duration) public returns (uint256) {
+    return _createQuest(index, 0, duration);
+  }
+
+  function _createQuest(uint32 index, uint points, uint duration) public returns (uint256) {
     vm.prank(deployer);
-    __RegistryCreateQuestSystem.executeTyped(index, name, description, roomIndex, duration);
+    return
+      abi.decode(
+        __RegistryCreateQuestSystem.executeTyped(
+          index,
+          LibString.toString(index),
+          "DESCRIPTION",
+          "",
+          points,
+          duration
+        ),
+        (uint256)
+      );
   }
 
   function _createQuestObjective(
@@ -443,16 +483,20 @@ abstract contract SetupTemplate is TestSetupImports {
     string memory _type,
     uint32 index, // can be empty
     uint value // can be empty
-  ) public {
+  ) public returns (uint256) {
     vm.prank(deployer);
-    __RegistryCreateQuestObjectiveSystem.executeTyped(
-      questIndex,
-      name,
-      logicType,
-      _type,
-      index,
-      value
-    );
+    return
+      abi.decode(
+        __RegistryCreateQuestObjectiveSystem.executeTyped(
+          questIndex,
+          name,
+          logicType,
+          _type,
+          index,
+          value
+        ),
+        (uint256)
+      );
   }
 
   function _createQuestRequirement(
@@ -461,9 +505,19 @@ abstract contract SetupTemplate is TestSetupImports {
     string memory _type,
     uint32 index, // can be empty
     uint value // can be empty
-  ) public {
+  ) public returns (uint256) {
     vm.prank(deployer);
-    __RegistryCreateQuestRequirementSystem.executeTyped(questIndex, logicType, _type, index, value);
+    return
+      abi.decode(
+        __RegistryCreateQuestRequirementSystem.executeTyped(
+          questIndex,
+          logicType,
+          _type,
+          index,
+          value
+        ),
+        (uint256)
+      );
   }
 
   function _createQuestReward(
@@ -471,9 +525,42 @@ abstract contract SetupTemplate is TestSetupImports {
     string memory _type,
     uint32 itemIndex, // can be empty
     uint value // can be empty
-  ) public {
+  ) public returns (uint256) {
     vm.prank(deployer);
-    __RegistryCreateQuestRewardSystem.executeTyped(questIndex, _type, itemIndex, value);
+    return
+      abi.decode(
+        __RegistryCreateQuestRewardSystem.executeTyped(questIndex, _type, itemIndex, value),
+        (uint256)
+      );
+  }
+
+  /* RELATIONSHIP */
+
+  function _createRelationship(uint32 npcIndex, uint32 relIndex) internal returns (uint256) {
+    uint32[] memory whitelist = new uint32[](0);
+    uint32[] memory blacklist = new uint32[](0);
+    return _createRelationship(npcIndex, relIndex, "relationship name", whitelist, blacklist);
+  }
+
+  function _createRelationship(
+    uint32 npcIndex,
+    uint32 relIndex,
+    string memory name,
+    uint32[] memory whitelist,
+    uint32[] memory blacklist
+  ) internal returns (uint256) {
+    vm.prank(deployer);
+    return
+      abi.decode(
+        __RegistryCreateRelationshipSystem.executeTyped(
+          npcIndex,
+          relIndex,
+          name,
+          whitelist,
+          blacklist
+        ),
+        (uint256)
+      );
   }
 
   /* SKILLS */
@@ -747,23 +834,19 @@ abstract contract SetupTemplate is TestSetupImports {
   /////////////////
   // CONFIGS
 
-  function _getConfig(string memory key) internal view returns (uint) {
-    return LibConfig.getValueOf(components, key);
-  }
-
   function _setConfig(string memory key, uint value) internal {
     vm.prank(deployer);
-    __ConfigSetSystem.executeTyped(key, value);
+    __ConfigSetSystem.setValue(key, value);
+  }
+
+  function _setConfigArray(string memory key, uint32[8] memory values) internal {
+    vm.prank(deployer);
+    __ConfigSetSystem.setValueArray(key, values);
   }
 
   function _setConfigString(string memory key, string memory value) internal {
     vm.prank(deployer);
-    __ConfigSetStringSystem.executeTyped(key, value);
-  }
-
-  function _setConfigWei(string memory key, uint value) internal {
-    vm.prank(deployer);
-    __ConfigSetWeiSystem.executeTyped(key, value);
+    __ConfigSetSystem.setValueString(key, value);
   }
 
   function _initAllConfigs() internal {
@@ -801,15 +884,14 @@ abstract contract SetupTemplate is TestSetupImports {
   // Kami Leveling Curve
   function _initLevelingConfigs() internal {
     _setConfig("KAMI_LVL_REQ_BASE", 40);
-    _setConfig("KAMI_LVL_REQ_MULT_BASE", 1259);
-    _setConfig("KAMI_LVL_REQ_MULT_BASE_PREC", 3);
+    _setConfigArray("KAMI_LVL_REQ_MULT_BASE", [uint32(1259), 3, 0, 0, 0, 0, 0, 0]);
   }
 
   function _initMintConfigs() internal {
     _setConfig("MINT_ACCOUNT_MAX", 500);
     _setConfig("MINT_INITIAL_MAX", 1111);
     _setConfig("MINT_PRICE", 0);
-    _setConfigWei("GACHA_REROLL_PRICE", 0);
+    _setConfig("GACHA_REROLL_PRICE", 0);
     _setConfig("MINT_LEGACY_ENABLED", 0);
   }
 
@@ -827,39 +909,31 @@ abstract contract SetupTemplate is TestSetupImports {
 
   function _initHealthConfigs() internal {
     // Kami Health Drain Rates
-    _setConfig("HEALTH_RATE_DRAIN_BASE", 1000); // in respect to harvest rate
-    _setConfig("HEALTH_RATE_DRAIN_BASE_PREC", 3);
+    _setConfigArray("HEALTH_RATE_DRAIN_BASE", [uint32(1000), 3, 0, 0, 0, 0, 0, 0]);
 
     // Kami Health Heal Rates
-    _setConfig("HEALTH_RATE_HEAL_PREC", 6);
-    _setConfig("HEALTH_RATE_HEAL_BASE", 1000); // in respect to harmony
-    _setConfig("HEALTH_RATE_HEAL_BASE_PREC", 3);
+    // (prec, base, base_prec)
+    _setConfigArray("HEALTH_RATE_HEAL_BASE", [uint32(6), 1000, 3, 0, 0, 0, 0, 0]);
   }
 
   function _initHarvestConfigs() internal {
     // Harvest Rates
-    _setConfig("HARVEST_RATE_PREC", 9);
-    _setConfig("HARVEST_RATE_BASE", 1000);
-    _setConfig("HARVEST_RATE_BASE_PREC", 3);
-    _setConfig("HARVEST_RATE_MULT_PREC", 7);
-    _setConfig("HARVEST_RATE_MULT_AFF_BASE", 100);
-    _setConfig("HARVEST_RATE_MULT_AFF_UP", 150);
-    _setConfig("HARVEST_RATE_MULT_AFF_DOWN", 50);
+    // [prec, base, base_prec, mult_prec]
+    _setConfigArray("HARVEST_RATE", [uint32(9), 1000, 3, 7, 0, 0, 0, 0]);
+    // [base, up, down]
+    _setConfigArray("HARVEST_RATE_MULT_AFF", [uint32(100), 150, 50, 0, 0, 0, 0, 0]);
     _setConfig("HARVEST_RATE_MULT_AFF_PREC", 2);
   }
 
   function _initLiquidationConfigs() internal {
     // Liquidation Calcs
-    _setConfig("LIQ_THRESH_BASE", 20);
-    _setConfig("LIQ_THRESH_BASE_PREC", 2);
-    _setConfig("LIQ_THRESH_MULT_AFF_BASE", 100);
-    _setConfig("LIQ_THRESH_MULT_AFF_UP", 200);
-    _setConfig("LIQ_THRESH_MULT_AFF_DOWN", 50);
+    _setConfigArray("LIQ_THRESH_BASE", [uint32(20), 2, 0, 0, 0, 0, 0, 0]);
+    // [base, up, down]
+    _setConfigArray("LIQ_THRESH_MULT_AFF", [uint32(100), 200, 50, 0, 0, 0, 0, 0]);
     _setConfig("LIQ_THRESH_MULT_AFF_PREC", 2);
 
     // Liquidation Bounty
-    _setConfig("LIQ_BOUNTY_BASE", 50);
-    _setConfig("LIQ_BOUNTY_BASE_PREC", 3);
+    _setConfigArray("LIQ_BOUNTY_BASE", [uint32(50), 3, 0, 0, 0, 0, 0, 0]);
   }
 
   ///////////////////////

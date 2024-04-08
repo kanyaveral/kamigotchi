@@ -30,12 +30,17 @@ import type {
 export interface LogicTypeComponentInterface extends utils.Interface {
   functions: {
     "authorizeWriter(address)": FunctionFragment;
+    "extract(uint256)": FunctionFragment;
+    "extractBatch(uint256[])": FunctionFragment;
+    "extractRaw(uint256)": FunctionFragment;
+    "extractRawBatch(uint256[])": FunctionFragment;
+    "get(uint256)": FunctionFragment;
+    "getBatch(uint256[])": FunctionFragment;
     "getEntities()": FunctionFragment;
     "getEntitiesWithValue(bytes)": FunctionFragment;
-    "getEntitiesWithValue(string)": FunctionFragment;
-    "getRawValue(uint256)": FunctionFragment;
+    "getRaw(uint256)": FunctionFragment;
+    "getRawBatch(uint256[])": FunctionFragment;
     "getSchema()": FunctionFragment;
-    "getValue(uint256)": FunctionFragment;
     "has(uint256)": FunctionFragment;
     "hasValue(uint256,string)": FunctionFragment;
     "id()": FunctionFragment;
@@ -43,8 +48,11 @@ export interface LogicTypeComponentInterface extends utils.Interface {
     "registerIndexer(address)": FunctionFragment;
     "registerWorld(address)": FunctionFragment;
     "remove(uint256)": FunctionFragment;
+    "removeBatch(uint256[])": FunctionFragment;
     "set(uint256,string)": FunctionFragment;
     "set(uint256,bytes)": FunctionFragment;
+    "setBatch(uint256[],bytes[])": FunctionFragment;
+    "setBatch(uint256[],string[])": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unauthorizeWriter(address)": FunctionFragment;
     "world()": FunctionFragment;
@@ -54,12 +62,17 @@ export interface LogicTypeComponentInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "authorizeWriter"
+      | "extract"
+      | "extractBatch"
+      | "extractRaw"
+      | "extractRawBatch"
+      | "get"
+      | "getBatch"
       | "getEntities"
-      | "getEntitiesWithValue(bytes)"
-      | "getEntitiesWithValue(string)"
-      | "getRawValue"
+      | "getEntitiesWithValue"
+      | "getRaw"
+      | "getRawBatch"
       | "getSchema"
-      | "getValue"
       | "has"
       | "hasValue"
       | "id"
@@ -67,8 +80,11 @@ export interface LogicTypeComponentInterface extends utils.Interface {
       | "registerIndexer"
       | "registerWorld"
       | "remove"
+      | "removeBatch"
       | "set(uint256,string)"
       | "set(uint256,bytes)"
+      | "setBatch(uint256[],bytes[])"
+      | "setBatch(uint256[],string[])"
       | "transferOwnership"
       | "unauthorizeWriter"
       | "world"
@@ -80,26 +96,46 @@ export interface LogicTypeComponentInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "extract",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "extractBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "extractRaw",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "extractRawBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "get",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getEntities",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getEntitiesWithValue(bytes)",
+    functionFragment: "getEntitiesWithValue",
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getEntitiesWithValue(string)",
-    values: [PromiseOrValue<string>]
+    functionFragment: "getRaw",
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getRawValue",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "getRawBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
   ): string;
   encodeFunctionData(functionFragment: "getSchema", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "getValue",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
   encodeFunctionData(
     functionFragment: "has",
     values: [PromiseOrValue<BigNumberish>]
@@ -123,12 +159,24 @@ export interface LogicTypeComponentInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "removeBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "set(uint256,string)",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "set(uint256,bytes)",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setBatch(uint256[],bytes[])",
+    values: [PromiseOrValue<BigNumberish>[], PromiseOrValue<BytesLike>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setBatch(uint256[],string[])",
+    values: [PromiseOrValue<BigNumberish>[], PromiseOrValue<string>[]]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -148,24 +196,32 @@ export interface LogicTypeComponentInterface extends utils.Interface {
     functionFragment: "authorizeWriter",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "extract", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "extractBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "extractRaw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "extractRawBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "get", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getBatch", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getEntities",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getEntitiesWithValue(bytes)",
+    functionFragment: "getEntitiesWithValue",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getRaw", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getEntitiesWithValue(string)",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRawValue",
+    functionFragment: "getRawBatch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getSchema", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getValue", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "has", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasValue", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "id", data: BytesLike): Result;
@@ -180,11 +236,23 @@ export interface LogicTypeComponentInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "remove", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "removeBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "set(uint256,string)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "set(uint256,bytes)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setBatch(uint256[],bytes[])",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setBatch(uint256[],string[])",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -252,31 +320,56 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    getEntities(overrides?: CallOverrides): Promise<[BigNumber[]]>;
+    extract(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]]>;
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]]>;
+    extractRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
-    getRawValue(
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    get(
       entity: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
+
+    getEntities(overrides?: CallOverrides): Promise<[BigNumber[]]>;
+
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
+
+    getRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
 
     getSchema(
       overrides?: CallOverrides
     ): Promise<[string[], number[]] & { keys: string[]; values: number[] }>;
-
-    getValue(
-      entity: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -294,7 +387,7 @@ export interface LogicTypeComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -308,6 +401,11 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<string>,
@@ -317,6 +415,18 @@ export interface LogicTypeComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "setBatch(uint256[],string[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -343,31 +453,56 @@ export interface LogicTypeComponent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
+  extract(
+    entity: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
-  "getEntitiesWithValue(bytes)"(
-    value: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
+  extractBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
-  "getEntitiesWithValue(string)"(
-    value: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
+  extractRaw(
+    entity: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
-  getRawValue(
+  extractRawBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  get(
     entity: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<string>;
+
+  getBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
+  getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
+  getEntitiesWithValue(
+    arg0: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
+  getRaw(
+    entity: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  getRawBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: CallOverrides
+  ): Promise<string[]>;
 
   getSchema(
     overrides?: CallOverrides
   ): Promise<[string[], number[]] & { keys: string[]; values: number[] }>;
-
-  getValue(
-    entity: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
 
   has(
     entity: PromiseOrValue<BigNumberish>,
@@ -385,7 +520,7 @@ export interface LogicTypeComponent extends BaseContract {
   owner(overrides?: CallOverrides): Promise<string>;
 
   registerIndexer(
-    indexer: PromiseOrValue<string>,
+    arg0: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -399,6 +534,11 @@ export interface LogicTypeComponent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  removeBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   "set(uint256,string)"(
     entity: PromiseOrValue<BigNumberish>,
     value: PromiseOrValue<string>,
@@ -408,6 +548,18 @@ export interface LogicTypeComponent extends BaseContract {
   "set(uint256,bytes)"(
     entity: PromiseOrValue<BigNumberish>,
     value: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "setBatch(uint256[],bytes[])"(
+    entities: PromiseOrValue<BigNumberish>[],
+    values: PromiseOrValue<BytesLike>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "setBatch(uint256[],string[])"(
+    entities: PromiseOrValue<BigNumberish>[],
+    values: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -434,31 +586,56 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
-
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    getRawValue(
+    extract(
       entity: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    extractRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    get(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
+    getRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
 
     getSchema(
       overrides?: CallOverrides
     ): Promise<[string[], number[]] & { keys: string[]; values: number[] }>;
-
-    getValue(
-      entity: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -476,7 +653,7 @@ export interface LogicTypeComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -490,6 +667,11 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<string>,
@@ -499,6 +681,18 @@ export interface LogicTypeComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setBatch(uint256[],string[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -537,29 +731,54 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    extract(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    extractRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    get(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getEntities(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getRawValue(
+    getRaw(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getSchema(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getValue(
-      entity: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -577,7 +796,7 @@ export interface LogicTypeComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -591,6 +810,11 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<string>,
@@ -600,6 +824,18 @@ export interface LogicTypeComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "setBatch(uint256[],string[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -627,29 +863,54 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    extract(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    extractRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    get(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getEntities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getRawValue(
+    getRaw(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getSchema(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getValue(
-      entity: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -667,7 +928,7 @@ export interface LogicTypeComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -681,6 +942,11 @@ export interface LogicTypeComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     "set(uint256,string)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<string>,
@@ -690,6 +956,18 @@ export interface LogicTypeComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "setBatch(uint256[],string[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

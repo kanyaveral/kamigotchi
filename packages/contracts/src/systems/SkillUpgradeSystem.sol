@@ -57,7 +57,7 @@ contract SkillUpgradeSystem is System {
 
     // create the skill if it doesnt exist and increment it
     uint256 skillID = LibSkill.get(components, holderID, skillIndex);
-    if (skillID == 0) skillID = LibSkill.create(world, components, holderID, skillIndex);
+    if (skillID == 0) skillID = LibSkill.create(components, holderID, skillIndex);
     LibSkill.inc(components, skillID, 1);
 
     // get the skill's effects and update the holder's bonuses accordingly
@@ -72,6 +72,7 @@ contract SkillUpgradeSystem is System {
     if (isPet) LibPet.sync(components, holderID);
 
     // standard logging and tracking
+    LibSkill.logUsePoint(components, accountID);
     LibAccount.updateLastTs(components, accountID);
     return "";
   }

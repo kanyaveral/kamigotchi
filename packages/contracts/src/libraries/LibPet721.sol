@@ -7,6 +7,7 @@ import { getAddressById } from "solecs/utils.sol";
 
 import { Base64 } from "solady/utils/Base64.sol";
 import { LibString } from "solady/utils/LibString.sol";
+import { LibPack } from "libraries/utils/LibPack.sol";
 
 import { Pet721ProxySystem, ID as ProxyID } from "systems/Pet721ProxySystem.sol";
 import { Pet721 } from "tokens/Pet721.sol";
@@ -15,7 +16,7 @@ import { LibExperience } from "libraries/LibExperience.sol";
 import { LibPet } from "libraries/LibPet.sol";
 import { LibRegistryTrait } from "libraries/LibRegistryTrait.sol";
 import { LibStat } from "libraries/LibStat.sol";
-import { LibRandom } from "libraries/LibRandom.sol";
+import { LibRandom } from "libraries/utils/LibRandom.sol";
 
 uint256 constant NUM_TRAITS = 5;
 
@@ -48,7 +49,7 @@ library LibPet721 {
     updateEvent(world, LibPet.getIndex(components, petID));
 
     // returns packed traits
-    packed = LibRandom.packArray(traits, 8);
+    packed = LibPack.packArr(traits, 8);
   }
 
   /// @notice  mints a pet with ERC721 for in-game kamis, with the ERC721 contract as owner

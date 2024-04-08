@@ -37,9 +37,9 @@ contract _RegistryCreateQuestRequirementSystem is System {
       type_
     );
     if (index != 0) LibRegistryQuests.setIndex(components, id, index);
-    if (value != 0) LibRegistryQuests.setValue(components, id, value);
+    if (value != 0) LibRegistryQuests.setBalance(components, id, value);
 
-    return "";
+    return abi.encode(id);
   }
 
   function executeTyped(

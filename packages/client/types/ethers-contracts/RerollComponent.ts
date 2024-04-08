@@ -30,20 +30,28 @@ import type {
 export interface RerollComponentInterface extends utils.Interface {
   functions: {
     "authorizeWriter(address)": FunctionFragment;
+    "extract(uint256)": FunctionFragment;
+    "extractBatch(uint256[])": FunctionFragment;
+    "extractRaw(uint256)": FunctionFragment;
+    "extractRawBatch(uint256[])": FunctionFragment;
+    "get(uint256)": FunctionFragment;
+    "getBatch(uint256[])": FunctionFragment;
     "getEntities()": FunctionFragment;
     "getEntitiesWithValue(bytes)": FunctionFragment;
-    "getEntitiesWithValue(uint256)": FunctionFragment;
-    "getRawValue(uint256)": FunctionFragment;
+    "getRaw(uint256)": FunctionFragment;
+    "getRawBatch(uint256[])": FunctionFragment;
     "getSchema()": FunctionFragment;
-    "getValue(uint256)": FunctionFragment;
     "has(uint256)": FunctionFragment;
     "id()": FunctionFragment;
     "owner()": FunctionFragment;
     "registerIndexer(address)": FunctionFragment;
     "registerWorld(address)": FunctionFragment;
     "remove(uint256)": FunctionFragment;
+    "removeBatch(uint256[])": FunctionFragment;
     "set(uint256,uint256)": FunctionFragment;
     "set(uint256,bytes)": FunctionFragment;
+    "setBatch(uint256[],bytes[])": FunctionFragment;
+    "setBatch(uint256[],uint256[])": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unauthorizeWriter(address)": FunctionFragment;
     "world()": FunctionFragment;
@@ -53,20 +61,28 @@ export interface RerollComponentInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "authorizeWriter"
+      | "extract"
+      | "extractBatch"
+      | "extractRaw"
+      | "extractRawBatch"
+      | "get"
+      | "getBatch"
       | "getEntities"
-      | "getEntitiesWithValue(bytes)"
-      | "getEntitiesWithValue(uint256)"
-      | "getRawValue"
+      | "getEntitiesWithValue"
+      | "getRaw"
+      | "getRawBatch"
       | "getSchema"
-      | "getValue"
       | "has"
       | "id"
       | "owner"
       | "registerIndexer"
       | "registerWorld"
       | "remove"
+      | "removeBatch"
       | "set(uint256,uint256)"
       | "set(uint256,bytes)"
+      | "setBatch(uint256[],bytes[])"
+      | "setBatch(uint256[],uint256[])"
       | "transferOwnership"
       | "unauthorizeWriter"
       | "world"
@@ -78,26 +94,46 @@ export interface RerollComponentInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "extract",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "extractBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "extractRaw",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "extractRawBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "get",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getEntities",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getEntitiesWithValue(bytes)",
+    functionFragment: "getEntitiesWithValue",
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getEntitiesWithValue(uint256)",
+    functionFragment: "getRaw",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getRawValue",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "getRawBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
   ): string;
   encodeFunctionData(functionFragment: "getSchema", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "getValue",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
   encodeFunctionData(
     functionFragment: "has",
     values: [PromiseOrValue<BigNumberish>]
@@ -117,12 +153,24 @@ export interface RerollComponentInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "removeBatch",
+    values: [PromiseOrValue<BigNumberish>[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "set(uint256,uint256)",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "set(uint256,bytes)",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setBatch(uint256[],bytes[])",
+    values: [PromiseOrValue<BigNumberish>[], PromiseOrValue<BytesLike>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setBatch(uint256[],uint256[])",
+    values: [PromiseOrValue<BigNumberish>[], PromiseOrValue<BigNumberish>[]]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -142,24 +190,32 @@ export interface RerollComponentInterface extends utils.Interface {
     functionFragment: "authorizeWriter",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "extract", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "extractBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "extractRaw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "extractRawBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "get", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getBatch", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getEntities",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getEntitiesWithValue(bytes)",
+    functionFragment: "getEntitiesWithValue",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getRaw", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getEntitiesWithValue(uint256)",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRawValue",
+    functionFragment: "getRawBatch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getSchema", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getValue", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "has", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "id", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -173,11 +229,23 @@ export interface RerollComponentInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "remove", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "removeBatch",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "set(uint256,uint256)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "set(uint256,bytes)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setBatch(uint256[],bytes[])",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setBatch(uint256[],uint256[])",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -245,31 +313,56 @@ export interface RerollComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    extract(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    extractRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    get(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
+
     getEntities(overrides?: CallOverrides): Promise<[BigNumber[]]>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[BigNumber[]]>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]]>;
-
-    getRawValue(
+    getRaw(
       entity: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
+
     getSchema(
       overrides?: CallOverrides
     ): Promise<[string[], number[]] & { keys: string[]; values: number[] }>;
-
-    getValue(
-      entity: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -281,7 +374,7 @@ export interface RerollComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -295,6 +388,11 @@ export interface RerollComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     "set(uint256,uint256)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
@@ -304,6 +402,18 @@ export interface RerollComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    "setBatch(uint256[],uint256[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -330,31 +440,56 @@ export interface RerollComponent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  extract(
+    entity: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  extractBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  extractRaw(
+    entity: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  extractRawBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  get(
+    entity: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
   getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
-  "getEntitiesWithValue(bytes)"(
-    value: PromiseOrValue<BytesLike>,
+  getEntitiesWithValue(
+    arg0: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<BigNumber[]>;
 
-  "getEntitiesWithValue(uint256)"(
-    value: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
-
-  getRawValue(
+  getRaw(
     entity: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<string>;
 
+  getRawBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
   getSchema(
     overrides?: CallOverrides
   ): Promise<[string[], number[]] & { keys: string[]; values: number[] }>;
-
-  getValue(
-    entity: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   has(
     entity: PromiseOrValue<BigNumberish>,
@@ -366,7 +501,7 @@ export interface RerollComponent extends BaseContract {
   owner(overrides?: CallOverrides): Promise<string>;
 
   registerIndexer(
-    indexer: PromiseOrValue<string>,
+    arg0: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -380,6 +515,11 @@ export interface RerollComponent extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  removeBatch(
+    entities: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   "set(uint256,uint256)"(
     entity: PromiseOrValue<BigNumberish>,
     value: PromiseOrValue<BigNumberish>,
@@ -389,6 +529,18 @@ export interface RerollComponent extends BaseContract {
   "set(uint256,bytes)"(
     entity: PromiseOrValue<BigNumberish>,
     value: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "setBatch(uint256[],bytes[])"(
+    entities: PromiseOrValue<BigNumberish>[],
+    values: PromiseOrValue<BytesLike>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  "setBatch(uint256[],uint256[])"(
+    entities: PromiseOrValue<BigNumberish>[],
+    values: PromiseOrValue<BigNumberish>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -415,31 +567,56 @@ export interface RerollComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
+    extract(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<BigNumber[]>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    getRawValue(
+    extractRaw(
       entity: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    getSchema(
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
-    ): Promise<[string[], number[]] & { keys: string[]; values: number[] }>;
+    ): Promise<string[]>;
 
-    getValue(
+    get(
       entity: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
+    getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
+
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
+    getRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<string[]>;
+
+    getSchema(
+      overrides?: CallOverrides
+    ): Promise<[string[], number[]] & { keys: string[]; values: number[] }>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -451,7 +628,7 @@ export interface RerollComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<string>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -465,6 +642,11 @@ export interface RerollComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     "set(uint256,uint256)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
@@ -474,6 +656,18 @@ export interface RerollComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "setBatch(uint256[],uint256[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -512,29 +706,54 @@ export interface RerollComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    extract(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    extractRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    get(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getEntities(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getRawValue(
+    getRaw(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getSchema(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getValue(
-      entity: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -546,7 +765,7 @@ export interface RerollComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -560,6 +779,11 @@ export interface RerollComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     "set(uint256,uint256)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
@@ -569,6 +793,18 @@ export interface RerollComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    "setBatch(uint256[],uint256[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -596,29 +832,54 @@ export interface RerollComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    extract(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    extractBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    extractRaw(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    extractRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    get(
+      entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getEntities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "getEntitiesWithValue(uint256)"(
-      value: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getRawValue(
+    getRaw(
       entity: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getRawBatch(
+      entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getSchema(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getValue(
-      entity: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     has(
       entity: PromiseOrValue<BigNumberish>,
@@ -630,7 +891,7 @@ export interface RerollComponent extends BaseContract {
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     registerIndexer(
-      indexer: PromiseOrValue<string>,
+      arg0: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -644,6 +905,11 @@ export interface RerollComponent extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    removeBatch(
+      entities: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     "set(uint256,uint256)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
@@ -653,6 +919,18 @@ export interface RerollComponent extends BaseContract {
     "set(uint256,bytes)"(
       entity: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "setBatch(uint256[],bytes[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "setBatch(uint256[],uint256[])"(
+      entities: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

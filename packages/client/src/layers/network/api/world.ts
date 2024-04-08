@@ -1,15 +1,17 @@
 import { utils } from 'ethers';
 
-import droptablesCSV from 'assets/data/items/droptables2.csv';
-import itemsCSV from 'assets/data/items/items2.csv';
-import nodesCSV from 'assets/data/nodes/nodes2.csv';
-import roomsCSV from 'assets/data/rooms/rooms2.csv';
-import backgroundCSV from 'assets/data/traits/backgrounds2.csv';
-import bodyCSV from 'assets/data/traits/bodies2.csv';
-import colorCSV from 'assets/data/traits/colors2.csv';
-import faceCSV from 'assets/data/traits/faces2.csv';
-import handCSV from 'assets/data/traits/hands2.csv';
+import droptablesCSV from 'assets/data/items/droptables.csv';
+import itemsCSV from 'assets/data/items/items.csv';
+import nodesCSV from 'assets/data/nodes/nodes.csv';
+import questCSV from 'assets/data/quests/quests.csv';
+import roomsCSV from 'assets/data/rooms/rooms.csv';
+import backgroundCSV from 'assets/data/traits/backgrounds.csv';
+import bodyCSV from 'assets/data/traits/bodies.csv';
+import colorCSV from 'assets/data/traits/colors.csv';
+import faceCSV from 'assets/data/traits/faces.csv';
+import handCSV from 'assets/data/traits/hands.csv';
 
+import { parseToLogicType } from 'layers/network/shapes/Quest';
 import { createAdminAPI } from './admin';
 import { createPlayerAPI } from './player';
 
@@ -31,9 +33,10 @@ export function setupWorldAPI(systems: any, provider: any) {
     await initTraits();
     await initRelationships();
 
-    if (!import.meta.env.MODE || import.meta.env.MODE == 'development') {
+    if (!import.meta.env.MODE || import.meta.env.DEV) {
       await initLocalConfig();
       await initGachaPool(333);
+      await initLocalQuests();
     } else {
       await initGachaPool(3333);
     }
@@ -62,7 +65,7 @@ export function setupWorldAPI(systems: any, provider: any) {
     await api.config.set.number('ACCOUNT_STAMINA_RECOVERY_PERIOD', 300);
 
     // Friends
-    await api.config.set.number('FRIENDS_BASE_LIMIT', 10);
+    await api.config.set.number('BASE_FRIENDS_LIMIT', 10);
     await api.config.set.number('FRIENDS_REQUEST_LIMIT', 10);
 
     // Kami Idle Requirement
@@ -74,7 +77,7 @@ export function setupWorldAPI(systems: any, provider: any) {
     await api.config.set.number('MINT_INITIAL_MAX', 1111);
     await api.config.set.number('MINT_TOTAL_MAX', 4444);
     await api.config.set.number('MINT_PRICE', utils.parseEther('0.0'));
-    await api.config.set.wei('GACHA_REROLL_PRICE', utils.parseEther('0.0001'));
+    await api.config.set.number('GACHA_REROLL_PRICE', utils.parseEther('0.0001'));
 
     // Kami Base Stats
     await api.config.set.number('KAMI_BASE_HEALTH', 50);
@@ -85,20 +88,16 @@ export function setupWorldAPI(systems: any, provider: any) {
 
     // Kami Leveling Curve
     await api.config.set.number('KAMI_LVL_REQ_BASE', 40); // experience required for level 1->2
-    await api.config.set.number('KAMI_LVL_REQ_MULT_BASE', 1259); // compounding increase per level
-    await api.config.set.number('KAMI_LVL_REQ_MULT_BASE_PREC', 3); // precision of compounding increase
+    await api.config.set.array('KAMI_LVL_REQ_MULT_BASE', [1259, 3]);
 
     // Harvest Rates
     // HarvestRate = power * base * multiplier
     // NOTE: precisions are represented as powers of 10 (e.g. 3 => 10^3 = 1000)
     // so BASE=100 and BASE_PREC=3 means 100/1e3 = 0.1
-    await api.config.set.number('HARVEST_RATE_PREC', 9); // ignore this
-    await api.config.set.number('HARVEST_RATE_BASE', 250); // in respect to power
-    await api.config.set.number('HARVEST_RATE_BASE_PREC', 2); // i.e. x/100
-    await api.config.set.number('HARVEST_RATE_MULT_PREC', 7); // 2 affinities and 1 bonus multiplier with precision of 2
-    await api.config.set.number('HARVEST_RATE_MULT_AFF_BASE', 100);
-    await api.config.set.number('HARVEST_RATE_MULT_AFF_UP', 150);
-    await api.config.set.number('HARVEST_RATE_MULT_AFF_DOWN', 50);
+    // [prec, base, base_prec, mult_prec]
+    await api.config.set.array('HARVEST_RATE', [9, 250, 2, 7]);
+    // [base, up, down]
+    await api.config.set.array('HARVEST_RATE_MULT_AFF', [100, 150, 50]);
     await api.config.set.number('HARVEST_RATE_MULT_AFF_PREC', 2); // 2, not actually used
 
     // Kami Health Drain/Heal Rates
@@ -106,32 +105,28 @@ export function setupWorldAPI(systems: any, provider: any) {
     // DrainBaseRate = HEALTH_RATE_DRAIN_BASE / 10^HEALTH_RATE_DRAIN_BASE_PREC
     // HealRate = Harmony * HealBaseRate
     // HealBaseRate = HEALTH_RATE_HEAL_BASE / 10^HEALTH_RATE_HEAL_BASE_PREC
-    await api.config.set.number('HEALTH_RATE_DRAIN_BASE', 20); // in respect to harvest rate
-    await api.config.set.number('HEALTH_RATE_DRAIN_BASE_PREC', 2); // i.e. x/100
-    await api.config.set.number('HEALTH_RATE_HEAL_PREC', 9); // ignore this, for consistent math on SC
-    await api.config.set.number('HEALTH_RATE_HEAL_BASE', 120); // in respect to harmony
-    await api.config.set.number('HEALTH_RATE_HEAL_BASE_PREC', 2); // i.e. x/100
+    await api.config.set.array('HEALTH_RATE_DRAIN_BASE', [20, 2]);
+    // (prec, base, base_prec)
+    await api.config.set.array('HEALTH_RATE_HEAL_BASE', [9, 120, 2]);
 
     // Liquidation Calcs
-    await api.config.set.number('LIQ_THRESH_BASE', 40);
-    await api.config.set.number('LIQ_THRESH_BASE_PREC', 2);
-    await api.config.set.number('LIQ_THRESH_MULT_AFF_BASE', 100);
-    await api.config.set.number('LIQ_THRESH_MULT_AFF_UP', 200);
-    await api.config.set.number('LIQ_THRESH_MULT_AFF_DOWN', 50);
+    await api.config.set.array('LIQ_THRESH_BASE', [40, 2]);
+    // [base, up, down]
+    await api.config.set.array('LIQ_THRESH_MULT_AFF', [100, 200, 50]);
     await api.config.set.number('LIQ_THRESH_MULT_AFF_PREC', 2);
 
     // Liquidation Bounty
-    await api.config.set.number('LIQ_BOUNTY_BASE', 50);
-    await api.config.set.number('LIQ_BOUNTY_BASE_PREC', 2);
+    await api.config.set.array('LIQ_BOUNTY_BASE', [50, 2]);
   }
 
   // local config settings for faster testing
   async function initLocalConfig() {
+    await api.config.set.number('MINT_ACCOUNT_MAX', 50000000);
     await api.config.set.number('ACCOUNT_STAMINA_RECOVERY_PERIOD', 10);
     await api.config.set.number('KAMI_IDLE_REQ', 10);
     await api.config.set.number('KAMI_LVL_REQ_BASE', 5); // experience required for level 1->2
-    await api.config.set.number('HARVEST_RATE_BASE', 10000); // in respect to power
-    await api.config.set.number('HEALTH_RATE_HEAL_BASE', 10000); // in respect to harmony
+    await api.config.set.array('HARVEST_RATE', [9, 10000, 2, 7]); // in respect to power
+    await api.config.set.array('HEALTH_RATE_HEAL_BASE', [9, 10000, 2]); // in respect to harmony
   }
 
   ////////////////////
@@ -140,7 +135,7 @@ export function setupWorldAPI(systems: any, provider: any) {
   async function initRooms() {
     for (let i = 0; i < roomsCSV.length; i++) {
       await sleepIf();
-      console.log(roomsCSV[i]);
+      // console.log(roomsCSV[i]);
       if (roomsCSV[i]['Enabled'] === 'Yes') {
         await api.room.create(
           {
@@ -179,13 +174,13 @@ export function setupWorldAPI(systems: any, provider: any) {
   // ITEMS
 
   async function initItems() {
-    console.log(roomsCSV);
-    console.log(itemsCSV);
+    // console.log(roomsCSV);
+    // console.log(itemsCSV);
     for (let i = 0; i < itemsCSV.length; i++) {
       await sleepIf();
       const item = itemsCSV[i];
       const type = item['Type'].toUpperCase();
-      console.log(itemsCSV[i]);
+      // console.log(itemsCSV[i]);
       try {
         if (type === 'FOOD') await setFood(item);
         else if (type === 'REVIVE') await setRevive(item);
@@ -239,7 +234,15 @@ export function setupWorldAPI(systems: any, provider: any) {
   }
 
   async function setLootbox(item: any, droptables: any) {
-    return; // skip lootboxes for now. similar challenges in representation to rooms
+    await api.registry.item.create.lootbox(
+      Number(item['Index']),
+      item['Name'],
+      item['Description'],
+      [1, 2, 3],
+      [9, 9, 7],
+      item['MediaURI']
+    );
+    return; // using placeholder lootboxes for now. similar challenges in representation to rooms
     await api.registry.item.create.lootbox(
       Number(item['Index']),
       item['Name'],
@@ -318,130 +321,89 @@ export function setupWorldAPI(systems: any, provider: any) {
   // QUESTS
 
   async function initQuests() {
-    // create quests
+    for (let i = 0; i < questCSV.length; i++) {
+      const quest = questCSV[i];
+      await sleepIf();
+      try {
+        if (quest['Status'] !== 'For Implementation') continue;
+        if (quest['Class'] === 'Quest' || quest['Class'] === '') await initQuest(quest);
+        else if (quest['Class'] === 'Requirement') await initQuestRequirement(quest);
+        else if (quest['Class'] === 'Objective') await initQuestObjective(quest);
+        else if (quest['Class'] === 'Reward') await initQuestReward(quest);
+      } catch {}
+    }
+  }
 
-    // quest 1
-    await api.registry.quest.create(
-      1,
-      'Welcome',
-      "Welcome to Kamigotchi World.\n\nYou can move by opening the map menu - try the buttons on the top right. If you can work out how to move to room 4, we'll give you something special.",
-      1,
-      0
-    );
-    await api.registry.quest.add.objective(1, 'Find the vending machine', 'BOOL_IS', 'ROOM', 4, 0);
-    await api.registry.quest.add.reward(1, 'MINT20', 0, 5);
-    await api.registry.quest.add.reward(1, 'QUEST_POINTS', 0, 1);
-
-    // quest 2
-    await api.registry.quest.create(
-      2,
-      'Mint',
-      "Well done.\n\nNow you've worked out how to move.But you won't be able to do much here unless you're able to get yourself a Kamigotchi.\n\nFind the vending machine.",
-      2,
-      0
-    );
-    await api.registry.quest.add.requirement(2, 'COMPLETE', 'QUEST', 1, 0);
-    await api.registry.quest.add.objective(2, 'Mint a Kami', 'CURR_MIN', 'KAMI', 0, 1);
-    await api.registry.quest.add.reward(2, 'ITEM', 2, 1);
-    await api.registry.quest.add.reward(2, 'QUEST_POINTS', 0, 2);
-
-    // quest 3
-    await api.registry.quest.create(
-      3,
-      'Harvest',
-      'With your Kamigotchi, your existence now has meaning.\n\nSeek out a Node if you also wish for your existence to have MUSU.',
-      4,
-      0
-    );
-    await api.registry.quest.add.requirement(3, 'COMPLETE', 'QUEST', 2, 0);
-    await api.registry.quest.add.objective(3, 'Harvest from a Node', 'INC_MIN', 'COIN_TOTAL', 0, 1);
-    await api.registry.quest.add.reward(3, 'ITEM', 1001, 1);
-    await api.registry.quest.add.reward(3, 'QUEST_POINTS', 0, 2);
-
-    // quest 4
-    await api.registry.quest.create(
-      4,
-      'Farming 1: A Pocketful of $MUSU',
-      "You've gotten a taste for harvesting now. Did you know you can leave your Kamigotchi to harvest while you explore? Just remember to come back in time....",
+  async function initLocalQuests() {
+    api.registry.quest.create(
+      1000000,
+      'The Chosen Taruchi',
+      'Hey there! You look like someone with good taste. Ever heard of a Kamigotchi?',
+      'Was it really worth it?',
       0,
       0
     );
-    await api.registry.quest.add.requirement(4, 'COMPLETE', 'QUEST', 3, 0);
-    await api.registry.quest.add.objective(4, 'Harvest 100 $MUSU', 'INC_MIN', 'COIN_TOTAL', 0, 100);
-    await api.registry.quest.add.reward(4, 'ITEM', 1001, 3);
-    await api.registry.quest.add.reward(4, 'QUEST_POINTS', 0, 3);
+    api.registry.quest.add.reward(1000000, 'MINT20', 0, 111);
+  }
 
-    // quest 5
+  async function initQuest(entry: any) {
+    // console.log('initQuest', entry['Index']);
     await api.registry.quest.create(
-      5,
-      'Farming 2: Stacking $MUSU',
-      "You're getting the hang of it. \n\nYour Kamigotchi will passively restore HP over time, but you can feed them if you want to get back to harvesting sooner…",
-      0,
-      0
+      Number(entry['Index']),
+      entry['Title'],
+      entry['Introduction text'],
+      entry['Resolution text'],
+      Number(entry['QP'] ?? 0),
+      entry['Daily'] === 'Yes' ? 64800 : 0
     );
-    await api.registry.quest.add.requirement(5, 'COMPLETE', 'QUEST', 4, 0);
+  }
+
+  async function initQuestRequirement(entry: any) {
+    // console.log('req', entry['Index']);
+    await api.registry.quest.add.requirement(
+      Number(entry['Index']),
+      parseToLogicType(entry['Operator']),
+      entry['SubType'],
+      Number(entry['IndexFor'] ?? 0),
+      Number(entry['ValueFor'] ?? 0)
+    );
+  }
+
+  async function initQuestObjective(entry: any) {
+    // console.log('obj', entry['Index']);
     await api.registry.quest.add.objective(
-      5,
-      'Harvest 1000 $MUSU',
-      'INC_MIN',
-      'COIN_TOTAL',
-      0,
-      1000
+      Number(entry['Index']),
+      entry['ConditionDescription'],
+      entry['DeltaType'] + '_' + entry['Operator'],
+      entry['SubType'],
+      Number(entry['IndexFor'] ?? 0),
+      Number(entry['ValueFor'] ?? 0)
     );
-    await api.registry.quest.add.reward(5, 'ITEM', 1001, 5);
-    await api.registry.quest.add.reward(5, 'QUEST_POINTS', 0, 4);
+  }
 
-    // quest 6
-    await api.registry.quest.create(
-      6,
-      'Farming 3: Accumulating $MUSU',
-      "Great, you're really taking this seriously. This one's a long haul. \n\nHope you're getting into a healthy routine with your Kamigotchi now. \n\nIf you haven't already noticed, there's plenty of secrets hidden around the world.",
-      0,
-      0
+  async function initQuestReward(entry: any) {
+    // console.log('reward', entry['Index']);
+    await api.registry.quest.add.reward(
+      Number(entry['Index']),
+      entry['SubType'],
+      Number(entry['IndexFor'] ?? 0),
+      Number(entry['ValueFor'] ?? 0)
     );
-    await api.registry.quest.add.requirement(6, 'COMPLETE', 'QUEST', 5, 0);
-    await api.registry.quest.add.objective(
-      6,
-      'Harvest 5000 $MUSU',
-      'INC_MIN',
-      'COIN_TOTAL',
-      0,
-      5000
-    );
-    await api.registry.quest.add.reward(6, 'ITEM', 1001, 10);
-    await api.registry.quest.add.reward(6, 'QUEST_POINTS', 0, 8);
+  }
 
-    // quest 7
-    await api.registry.quest.create(7, 'Daily quest: Harvesting', 'Harvest 200 $MUSU', 0, 64800);
-    await api.registry.quest.add.objective(7, 'Harvest 200 $MUSU', 'INC_MIN', 'COIN_TOTAL', 0, 200);
-    await api.registry.quest.add.reward(7, 'ITEM', 10001, 1);
-
-    // quest 8 and 9 have previously been repeatable quests for testing
-    // can't use for new non-repeatable quests for backwards compatibility
-
-    await api.registry.quest.create(
-      10,
-      "Liquidation 1: An Unforgiving World/You're Not Alone ",
-      "Your Kamigotchi has had enough of farming for now. Why don't you take it exploring? Remember to stock up on supplies and watch out. This is a Kami-eat-Kami world.\
-      \n\nIf Kamigotchi are reduced to 0 Health on a Node and get tired, the other Kamigotchi may see them as just another resource to be claimed.\
-      \n\nTry it out.If you have a Kamigotchi with a Violent nature, let it indulge.Liquidating exhausted Kami is another way to gain $MUSU.",
-      0,
-      0
-    );
-    await api.registry.quest.add.requirement(10, 'COMPLETE', 'QUEST', 3, 0);
-    await api.registry.quest.add.objective(10, 'Liquidate 1 Kami', 'INC_MIN', 'LIQUIDATE', 0, 1);
-    await api.registry.quest.add.reward(10, 'ITEM', 5, 1);
-
-    await api.registry.quest.create(
-      11,
-      'Liquidation 3: Getting used to it/Harden Your Heart',
-      'Liquidate ten more Kamigotchi and take their $MUSU. Kami lacking in spiritual Harmony will be your easiest targets.',
-      0,
-      0
-    );
-    await api.registry.quest.add.requirement(11, 'COMPLETE', 'QUEST', 10, 0);
-    await api.registry.quest.add.objective(11, 'Liquidate 10 Kamis', 'INC_MIN', 'LIQUIDATE', 0, 10);
-    await api.registry.quest.add.reward(11, 'ITEM', 4, 1);
+  async function initQuestByIndex(indices: number[]) {
+    for (let i = 0; i < questCSV.length; i++) {
+      const quest = questCSV[i];
+      if (!indices.includes(Number(quest['Index']))) continue;
+      await sleepIf();
+      try {
+        if (quest['Status'] !== 'For Implementation') continue;
+        if (quest['Class'] === 'Quest' || quest['Class'] === '') await initQuest(quest);
+        else if (quest['Class'] === 'Requirement') await initQuestRequirement(quest);
+        else if (quest['Class'] === 'Objective') await initQuestObjective(quest);
+        else if (quest['Class'] === 'Reward') await initQuestReward(quest);
+      } catch {}
+    }
   }
 
   async function deleteQuests(indices: number[]) {
@@ -793,6 +755,7 @@ export function setupWorldAPI(systems: any, provider: any) {
     },
     quests: {
       init: () => initQuests(),
+      initByIndex: (indices: number[]) => initQuestByIndex(indices),
       delete: (indices: number[]) => deleteQuests(indices),
     },
     relationships: {

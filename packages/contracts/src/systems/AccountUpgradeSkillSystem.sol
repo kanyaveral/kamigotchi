@@ -24,7 +24,6 @@ contract AccountUpgradeSkillSystem is System {
 
     // requirements
     require(registryID != 0, "AccountUpgradeSkill: skill not found");
-    require(accountID != 0, "AccountUpgradeSkill: calling account not found");
     require(
       LibSkill.meetsPrerequisites(components, accountID, registryID),
       "AccountUpgradeSkill: unmet prerequisites"
@@ -36,7 +35,7 @@ contract AccountUpgradeSkillSystem is System {
 
     // create the skill if it doesnt exist and increment it
     uint256 skillID = LibSkill.get(components, accountID, skillIndex);
-    if (skillID == 0) skillID = LibSkill.create(world, components, accountID, skillIndex);
+    if (skillID == 0) skillID = LibSkill.create(components, accountID, skillIndex);
     LibSkill.inc(components, skillID, 1);
 
     // get the skill's effects and update the holder's bonuses accordingly

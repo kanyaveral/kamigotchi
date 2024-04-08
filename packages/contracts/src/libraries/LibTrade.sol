@@ -3,8 +3,7 @@ pragma solidity ^0.8.0;
 
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
-import { LibQuery } from "solecs/LibQuery.sol";
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
 import { IdAccountComponent, ID as IdAccountCompID } from "components/IdAccountComponent.sol";
@@ -43,8 +42,8 @@ library LibTrade {
     IsRequestComponent(getAddressById(components, IsRequestCompID)).remove(id);
     StateComponent(getAddressById(components, StateCompID)).set(id, string("ACCEPTED"));
 
-    uint256 aliceID = IdRequesteeComponent(getAddressById(components, IdReqeeCompID)).getValue(id);
-    uint256 bobID = IdRequesterComponent(getAddressById(components, IdReqerCompID)).getValue(id);
+    uint256 aliceID = IdRequesteeComponent(getAddressById(components, IdReqeeCompID)).get(id);
+    uint256 bobID = IdRequesterComponent(getAddressById(components, IdReqerCompID)).get(id);
     LibRegister.create(world, components, aliceID, id);
     LibRegister.create(world, components, bobID, id);
   }
@@ -127,11 +126,11 @@ library LibTrade {
   // GETTERS
 
   function getRequestee(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IdRequesteeComponent(getAddressById(components, IdReqeeCompID)).getValue(id);
+    return IdRequesteeComponent(getAddressById(components, IdReqeeCompID)).get(id);
   }
 
   function getRequester(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IdRequesterComponent(getAddressById(components, IdReqerCompID)).getValue(id);
+    return IdRequesterComponent(getAddressById(components, IdReqerCompID)).get(id);
   }
 
   /////////////////
@@ -168,30 +167,34 @@ library LibTrade {
     if (!Strings.equal(state, "")) numFilters++;
 
     QueryFragment[] memory fragments = new QueryFragment[](numFilters + 1);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsTradeCompID), "");
 
     uint256 filterCount;
     if (aliceID != 0) {
-      fragments[++filterCount] = QueryFragment(
+      fragments[filterCount++] = QueryFragment(
         QueryType.HasValue,
         getComponentById(components, IdReqerCompID),
         abi.encode(aliceID)
       );
     }
     if (bobID != 0) {
-      fragments[++filterCount] = QueryFragment(
+      fragments[filterCount++] = QueryFragment(
         QueryType.HasValue,
         getComponentById(components, IdReqeeCompID),
         abi.encode(bobID)
       );
     }
     if (!Strings.equal(state, "")) {
-      fragments[++filterCount] = QueryFragment(
+      fragments[filterCount++] = QueryFragment(
         QueryType.HasValue,
         getComponentById(components, StateCompID),
         abi.encode(state)
       );
     }
+    fragments[filterCount] = QueryFragment(
+      QueryType.Has,
+      getComponentById(components, IsTradeCompID),
+      ""
+    );
 
     return LibQuery.query(fragments);
   }

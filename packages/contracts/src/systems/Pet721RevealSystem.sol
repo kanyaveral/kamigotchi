@@ -10,7 +10,7 @@ import { LibAccount } from "libraries/LibAccount.sol";
 import { LibConfig } from "libraries/LibConfig.sol";
 import { LibPet721 } from "libraries/LibPet721.sol";
 import { LibPet } from "libraries/LibPet.sol";
-import { LibRandom } from "libraries/LibRandom.sol";
+import { LibRandom } from "libraries/utils/LibRandom.sol";
 
 uint256 constant ID = uint256(keccak256("system.Pet721.Reveal"));
 
@@ -26,17 +26,13 @@ contract Pet721RevealSystem is System {
 
   /// @notice reveals a player's pet, called by operator
   function execute(bytes memory arguments) public returns (bytes memory) {
-    require(
-      LibConfig.getValueOf(components, "MINT_LEGACY_ENABLED") != 0,
-      "721 user mint: not enabled"
-    );
+    require(LibConfig.get(components, "MINT_LEGACY_ENABLED") != 0, "721 user mint: not enabled");
 
     uint32 petIndex = abi.decode(arguments, (uint32));
     uint256 petID = LibPet.getByIndex(components, petIndex);
 
     // checks
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
-    require(accountID != 0, "PetRevealSystem: no account");
     require(LibPet.getAccount(components, petID) == accountID, "Pet: not urs");
     require(LibPet.isUnrevealed(components, petID), "already revealed!");
 
@@ -71,7 +67,7 @@ contract Pet721RevealSystem is System {
   function reveal(uint256 petID, uint256 seed) internal returns (bytes memory) {
     uint256 packed = LibPet721.reveal(world, components, petID, seed); // uses packed array to generate image off-chain
 
-    string memory _baseURI = LibConfig.getValueStringOf(components, "BASE_URI");
+    string memory _baseURI = LibConfig.getString(components, "BASE_URI");
     string memory uri = LibString.concat(
       _baseURI,
       LibString.concat(LibString.toString(packed), ".gif")

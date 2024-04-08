@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "std-contracts/components/Uint256Component.sol";
+import "components/types/Uint256Component.sol";
 
-uint256 constant ID = uint256(keccak256("component.Id.Source"));
+uint256 constant ID = uint256(keccak256("component.id.source"));
 
 // the Source Entity of Something
 // in a commit-reveal, it is the source of data. in a kill log, it is the killer

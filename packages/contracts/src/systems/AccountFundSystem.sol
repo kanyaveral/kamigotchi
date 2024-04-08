@@ -22,8 +22,8 @@ contract AccountFundSystem is System {
     require(accountID != 0, "AccountFundSystem: no account");
 
     // update gas funded
-    LibScore.incBy(world, components, accountID, "OPERATOR_GAS", msg.value);
-    LibDataEntity.incFor(world, components, accountID, 0, "OPERATOR_GAS", msg.value);
+    LibScore.inc(components, accountID, "OPERATOR_GAS", msg.value);
+    LibDataEntity.inc(components, accountID, 0, "OPERATOR_GAS", msg.value);
     LibAccount.updateLastTs(components, accountID);
 
     address operator = LibAccount.getOperator(components, accountID);
@@ -35,11 +35,10 @@ contract AccountFundSystem is System {
   // msg.sender is operator wallet
   function operatorToOwner() public payable returns (bytes memory) {
     uint256 accountID = LibAccount.getByOperator(components, msg.sender);
-    require(accountID != 0, "AccountFundSystem: no account");
 
     // update gas funded
-    LibScore.decBy(world, components, accountID, "OPERATOR_GAS", msg.value);
-    LibDataEntity.decFor(world, components, accountID, 0, "OPERATOR_GAS", msg.value);
+    LibScore.dec(components, accountID, "OPERATOR_GAS", msg.value);
+    LibDataEntity.dec(components, accountID, 0, "OPERATOR_GAS", msg.value);
 
     address owner = LibAccount.getOwner(components, accountID);
     transfer(owner, msg.value);

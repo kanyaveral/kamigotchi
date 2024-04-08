@@ -1,32 +1,28 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "forge-std/console.sol";
-
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
-import { Uint32Component } from "std-contracts/components/Uint32Component.sol";
+import { Uint32Component } from "components/types/Uint32Component.sol";
 import { System } from "solecs/System.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
-import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
-import { LibQuery } from "solecs/LibQuery.sol";
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { LibString } from "solady/utils/LibString.sol";
+import { LibPack } from "libraries/utils/LibPack.sol";
 
 import { Stat, StatComponent } from "components/types/StatComponent.sol";
 import { AffinityComponent, ID as AffinityCompID } from "components/AffinityComponent.sol";
 import { BalanceComponent, ID as BalanceCompID } from "components/BalanceComponent.sol";
 import { CanNameComponent, ID as CanNameCompID } from "components/CanNameComponent.sol";
-import { GachaOrderComponent, ID as GachaOrderCompID } from "components/GachaOrderComponent.sol";
 import { HealthComponent, ID as HealthCompID } from "components/HealthComponent.sol";
 import { HarmonyComponent, ID as HarmonyCompID } from "components/HarmonyComponent.sol";
-import { IdAccountComponent, ID as IdAccCompID } from "components/IdAccountComponent.sol";
+import { IdOwnsPetComponent, ID as IdOwnsPetCompID } from "components/IdOwnsPetComponent.sol";
 import { IndexBodyComponent, ID as IndexBodyCompID } from "components/IndexBodyComponent.sol";
 import { IndexBackgroundComponent, ID as IndexBgCompID } from "components/IndexBackgroundComponent.sol";
 import { IndexColorComponent, ID as IndexColorCompID } from "components/IndexColorComponent.sol";
 import { IndexFaceComponent, ID as IndexFaceCompID } from "components/IndexFaceComponent.sol";
 import { IndexHandComponent, ID as IndexHandCompID } from "components/IndexHandComponent.sol";
 import { IndexPetComponent, ID as IndexPetCompID } from "components/IndexPetComponent.sol";
-import { IndexTraitComponent, ID as IndexTraitCompID } from "components/IndexTraitComponent.sol";
 import { IsPetComponent, ID as IsPetCompID } from "components/IsPetComponent.sol";
 import { IsRegistryComponent, ID as IsRegCompID } from "components/IsRegistryComponent.sol";
 import { ExperienceComponent, ID as ExperienceCompID } from "components/ExperienceComponent.sol";
@@ -47,10 +43,10 @@ import { Pet721 } from "tokens/Pet721.sol";
 
 import { LibAccount } from "libraries/LibAccount.sol";
 import { LibConfig } from "libraries/LibConfig.sol";
-import { GACHA_DATA_ID } from "libraries/LibGacha.sol";
+import { GACHA_ID, GACHA_DATA_ID } from "libraries/LibGacha.sol";
 import { LibPet721 } from "libraries/LibPet721.sol";
 import { LibPet } from "libraries/LibPet.sol";
-import { LibRandom } from "libraries/LibRandom.sol";
+import { LibRandom } from "libraries/utils/LibRandom.sol";
 import { LibRegistryTrait } from "libraries/LibRegistryTrait.sol";
 
 uint256 constant ID = uint256(keccak256("system.Pet721.BatchMint"));
@@ -191,17 +187,24 @@ abstract contract TraitHandler {
     traitComps[3] = indexBackgroundComp;
     traitComps[4] = indexColorComp;
 
+    string[] memory traitNames = new string[](5);
+    traitNames[0] = "FACE";
+    traitNames[1] = "HAND";
+    traitNames[2] = "BODY";
+    traitNames[3] = "BACKGROUND";
+    traitNames[4] = "COLOR";
+
     // get indices, rarities, and stats for each trait type
     for (uint256 i; i < 5; i++) {
-      uint256[] memory ids = queryTraitsOfType(traitComps[i]);
+      uint256[] memory ids = LibRegistryTrait.getAllOfType(components, traitNames[i]);
       uint32 length = uint32(ids.length);
 
       uint32[] memory keys = new uint32[](length);
       uint256[] memory weights = new uint256[](length);
 
       for (uint256 j; j < length; j++) {
-        keys[j] = traitComps[i].getValue(ids[j]);
-        weights[j] = rarityComp.has(ids[j]) ? 1 << (rarityComp.getValue(ids[j]) - 1) : 0;
+        keys[j] = traitComps[i].get(ids[j]);
+        weights[j] = rarityComp.has(ids[j]) ? 1 << (rarityComp.get(ids[j]) - 1) : 0;
 
         traitStats.push(_getTraitStats(ids[j]));
       }
@@ -210,7 +213,9 @@ abstract contract TraitHandler {
       if (i < 4) offsets[i + 1] = length + offsets[i];
     }
 
-    offsetsSum = LibRandom.packArray(offsets, OFFSET_BIT_SIZE);
+    require(traitWeights.length > 0, "batchmint: no traits detected");
+
+    offsetsSum = LibPack.packArr(offsets, OFFSET_BIT_SIZE);
   }
 
   ////////////////////
@@ -222,7 +227,7 @@ abstract contract TraitHandler {
     uint256 seed,
     uint256 id,
     TraitWeights[] memory weights
-  ) internal returns (uint32[] memory results) {
+  ) internal view returns (uint32[] memory results) {
     results = new uint32[](5);
     for (uint256 i; i < 5; i++) {
       uint256 randN = uint256(keccak256(abi.encode(seed, id, i)));
@@ -235,7 +240,7 @@ abstract contract TraitHandler {
     uint32[] memory traits,
     uint32[] memory offsets,
     TraitStats[] memory stats
-  ) internal returns (TraitStats memory delta) {
+  ) internal pure returns (TraitStats memory delta) {
     delta = TraitStats(0, 0, 0, 0, 0);
     for (uint256 i; i < 5; i++) {
       TraitStats memory curr = stats[offsets[i] + traits[i]];
@@ -247,30 +252,20 @@ abstract contract TraitHandler {
     }
   }
 
-  function _getTraitStats(uint256 id) public returns (TraitStats memory) {
+  function _getTraitStats(uint256 id) public view returns (TraitStats memory) {
     int32 health;
     int32 power;
     int32 violence;
     int32 harmony;
     int32 slots;
 
-    if (healthComp.has(id)) health = healthComp.getValue(id).base;
-    if (powerComp.has(id)) power = powerComp.getValue(id).base;
-    if (violenceComp.has(id)) violence = violenceComp.getValue(id).base;
-    if (harmonyComp.has(id)) harmony = harmonyComp.getValue(id).base;
-    if (slotsComp.has(id)) slots = slotsComp.getValue(id).base;
+    if (healthComp.has(id)) health = healthComp.get(id).base;
+    if (powerComp.has(id)) power = powerComp.get(id).base;
+    if (violenceComp.has(id)) violence = violenceComp.get(id).base;
+    if (harmonyComp.has(id)) harmony = harmonyComp.get(id).base;
+    if (slotsComp.has(id)) slots = slotsComp.get(id).base;
 
     return TraitStats(health, power, violence, harmony, slots);
-  }
-
-  /// @notice query all traits of a type (ie face) in registry. returns entityIDs
-  function queryTraitsOfType(Uint32Component comp) internal view returns (uint256[] memory) {
-    QueryFragment[] memory fragments = new QueryFragment[](3);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsRegCompID), "");
-    fragments[1] = QueryFragment(QueryType.Has, getComponentById(components, IndexTraitCompID), "");
-    fragments[2] = QueryFragment(QueryType.Has, comp, "");
-    uint256[] memory results = LibQuery.query(fragments);
-    return results;
   }
 }
 
@@ -292,7 +287,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
 
   Pet721 internal immutable pet721;
   CanNameComponent internal immutable canNameComp;
-  GachaOrderComponent internal immutable gachaOrderComp;
+  IdOwnsPetComponent internal immutable idOwnsPetComp;
   IsPetComponent internal immutable isPetComp;
   IndexPetComponent internal immutable indexPetComp;
   MediaURIComponent internal immutable mediaURIComp;
@@ -313,7 +308,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
 
     pet721 = LibPet721.getContract(world);
     canNameComp = CanNameComponent(getAddressById(components, CanNameCompID));
-    gachaOrderComp = GachaOrderComponent(getAddressById(components, GachaOrderCompID));
+    idOwnsPetComp = IdOwnsPetComponent(getAddressById(components, IdOwnsPetCompID));
     isPetComp = IsPetComponent(getAddressById(components, IsPetCompID));
     indexPetComp = IndexPetComponent(getAddressById(components, IndexPetCompID));
     mediaURIComp = MediaURIComponent(getAddressById(components, MediaURICompID));
@@ -332,7 +327,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
     // require(colorWeights.keys != 0, "traits not set");
 
     uint32 startIndex = uint32(pet721.totalSupply()) + 1; // starts from 1
-    uint256 startGacha = balanceComp.getValue(GACHA_DATA_ID); // starts from 0
+    uint256 startGacha = idOwnsPetComp.size(abi.encode(GACHA_ID)); // starts from 0
 
     /// @dev creating pets, unrevealed-ish state
     uint256[] memory ids = createPets(startIndex, startGacha, amount);
@@ -342,9 +337,6 @@ contract _721BatchMinterSystem is System, TraitHandler {
 
     /// @dev minting 721s
     mint721s(startIndex, amount);
-
-    // update gacha total
-    balanceComp.set(GACHA_DATA_ID, startGacha + amount);
 
     return ids;
   }
@@ -369,11 +361,11 @@ contract _721BatchMinterSystem is System, TraitHandler {
       ids[i] = id;
 
       canNameComp.set(id); // normally after reveal
-      gachaOrderComp.set(id, startGacha + i);
+      idOwnsPetComp.set(id, GACHA_ID); // seed in gacha
       isPetComp.set(id);
       indexPetComp.set(id, startIndex + i);
       nameComp.set(id, LibString.concat("kamigotchi ", LibString.toString(startIndex + i)));
-      stateComp.set(id, string("GACHA")); // seed in gacha
+      stateComp.set(id, string("RESTING"));
       timeStartComp.set(id, block.timestamp);
       timeLastComp.set(id, block.timestamp); // normally after reveal
       levelComp.set(id, 1);
@@ -385,12 +377,12 @@ contract _721BatchMinterSystem is System, TraitHandler {
   /// @notice reveal traits
   function revealPets(uint256[] memory ids, uint256 amount) internal {
     uint256 seed = baseSeed;
-    string memory _baseURI = LibConfig.getValueStringOf(components, "BASE_URI");
+    string memory _baseURI = LibConfig.getString(components, "BASE_URI");
 
     // memoized trait weight and stats
     TraitWeights[] memory weights = traitWeights;
     TraitStats[] memory stats = traitStats;
-    uint32[] memory offsets = LibRandom.unpackArray(offsetsSum, 5, OFFSET_BIT_SIZE);
+    uint32[] memory offsets = LibPack.unpackArr(offsetsSum, 5, OFFSET_BIT_SIZE);
 
     for (uint256 i; i < amount; i++) {
       uint32[] memory traits = _setPetTraits(seed, ids[i], weights);
@@ -401,7 +393,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
         ids[i],
         LibString.concat(
           _baseURI,
-          LibString.concat(LibString.toString(LibRandom.packArray(traits, 8)), ".gif")
+          LibString.concat(LibString.toString(LibPack.packArr(traits, 8)), ".gif")
         )
       );
     }

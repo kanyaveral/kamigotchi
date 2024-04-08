@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "std-contracts/components/BoolComponent.sol";
+import "components/types/BoolBareComponent.sol";
 
-uint256 constant ID = uint256(keccak256("component.Is.Lootbox"));
+uint256 constant ID = uint256(keccak256("component.is.lootbox"));
 
-contract IsLootboxComponent is BoolComponent {
-  constructor(address world) BoolComponent(world, ID) {}
+contract IsLootboxComponent is BoolBareComponent {
+  constructor(address world) BoolBareComponent(world, ID) {}
 }

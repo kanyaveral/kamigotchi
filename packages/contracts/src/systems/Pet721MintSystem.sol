@@ -10,7 +10,7 @@ import { LibConfig } from "libraries/LibConfig.sol";
 import { LibMint20 } from "libraries/LibMint20.sol";
 import { LibPet721 } from "libraries/LibPet721.sol";
 import { LibPet } from "libraries/LibPet.sol";
-import { LibRandom } from "libraries/LibRandom.sol";
+import { LibRandom } from "libraries/utils/LibRandom.sol";
 
 uint256 constant ID = uint256(keccak256("system.Pet721.Mint"));
 uint256 constant ROOM = 4;
@@ -29,10 +29,7 @@ contract Pet721MintSystem is System {
   constructor(IWorld _world, address _components) System(_world, _components) {}
 
   function execute(bytes memory arguments) public returns (bytes memory) {
-    require(
-      LibConfig.getValueOf(components, "MINT_LEGACY_ENABLED") != 0,
-      "721 user mint: not enabled"
-    );
+    require(LibConfig.get(components, "MINT_LEGACY_ENABLED") != 0, "721 user mint: not enabled");
 
     uint256 amount = abi.decode(arguments, (uint256));
     require(amount > 0, "Pet721Mint: must be > 0");

@@ -4,8 +4,7 @@ pragma solidity ^0.8.0;
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { getAddressById, getComponentById, addressToEntity } from "solecs/utils.sol";
-import { QueryFragment, QueryType } from "solecs/interfaces/Query.sol";
-import { LibQuery } from "solecs/LibQuery.sol";
+import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { LibString } from "solady/utils/LibString.sol";
 
 import { CostComponent, ID as CostCompID } from "components/CostComponent.sol";
@@ -20,7 +19,9 @@ import { TypeComponent, ID as TypeCompID } from "components/TypeComponent.sol";
 import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 
 import { LibAccount } from "libraries/LibAccount.sol";
+import { LibBoolean } from "libraries/utils/LibBoolean.sol";
 import { LibBonus } from "libraries/LibBonus.sol";
+import { LibDataEntity } from "libraries/LibDataEntity.sol";
 import { LibPet } from "libraries/LibPet.sol";
 import { LibRegistrySkill } from "libraries/LibRegistrySkill.sol";
 import { LibStat } from "libraries/LibStat.sol";
@@ -31,12 +32,11 @@ library LibSkill {
 
   // create a skill for an entity
   function create(
-    IWorld world,
     IUintComp components,
     uint256 targetID,
     uint32 skillIndex
   ) internal returns (uint256) {
-    uint256 id = world.getUniqueEntityId();
+    uint256 id = genID(targetID, skillIndex);
     setIsSkill(components, id);
     setHolder(components, id, targetID);
     setSkillIndex(components, id, skillIndex);
@@ -45,15 +45,17 @@ library LibSkill {
 
   // increase skill points of a skill by a specified value
   function inc(IUintComp components, uint256 id, uint256 value) internal {
-    uint256 curr = getPoints(components, id);
-    setPoints(components, id, curr + value);
+    SkillPointComponent pointComp = SkillPointComponent(getAddressById(components, SPCompID));
+    uint256 curr = pointComp.has(id) ? pointComp.get(id) : 0;
+    pointComp.set(id, curr + value);
   }
 
   // decrease skillPoints by a specified value
   function dec(IUintComp components, uint256 id, uint256 value) internal {
-    uint256 curr = getPoints(components, id);
+    SkillPointComponent pointComp = SkillPointComponent(getAddressById(components, SPCompID));
+    uint256 curr = pointComp.has(id) ? pointComp.get(id) : 0;
     require(curr >= value, "LibSkill: not enough points");
-    setPoints(components, id, curr - value);
+    pointComp.set(id, curr - value);
   }
 
   // process the upgrade of a skill (can be generic or stat skill)
@@ -85,10 +87,10 @@ library LibSkill {
     uint256 bonusID = LibBonus.get(components, holderID, bonusType);
     if (bonusID == 0) {
       bonusID = LibBonus.create(world, components, holderID, bonusType);
-      if (LibString.eq("COOLDOWN", subtype)) LibBonus.setValue(components, bonusID, 0);
+      if (LibString.eq("COOLDOWN", subtype)) LibBonus.setBalance(components, bonusID, 0);
     }
     string memory logicType = LibRegistrySkill.getLogicType(components, effectID);
-    uint256 value = LibRegistrySkill.getValue(components, effectID);
+    uint256 value = LibRegistrySkill.getBalance(components, effectID);
     if (LibString.eq(logicType, "INC")) LibBonus.inc(components, bonusID, value);
     else if (LibString.eq(logicType, "DEC")) LibBonus.dec(components, bonusID, value);
   }
@@ -103,7 +105,7 @@ library LibSkill {
   ) internal {
     string memory subtype = LibRegistrySkill.getSubtype(components, effectID);
     string memory logicType = LibRegistrySkill.getLogicType(components, effectID);
-    int32 amt = int32(int(LibRegistrySkill.getValue(components, effectID)));
+    int32 amt = int32(int(LibRegistrySkill.getBalance(components, effectID)));
     if (LibString.eq(logicType, "DEC")) amt *= -1;
     LibStat.shift(components, holderID, subtype, amt);
   }
@@ -135,32 +137,7 @@ library LibSkill {
 
     // check all other requirements
     uint256[] memory requirements = LibRegistrySkill.getRequirementsByIndex(components, skillIndex);
-    for (uint256 i; i < requirements.length; i++) {
-      if (!meetsRequirement(components, targetID, requirements[i])) return false;
-    }
-
-    return true;
-  }
-
-  // check whether a target meets a specific requirement of a skill
-  function meetsRequirement(
-    IUintComp components,
-    uint256 targetID,
-    uint256 requirementID
-  ) internal view returns (bool) {
-    string memory type_ = getType(components, requirementID);
-    if (LibString.eq(type_, "LEVEL")) {
-      return getLevel(components, targetID) >= getValue(components, requirementID);
-    }
-    if (LibString.eq(type_, "SKILL")) {
-      uint32 index = getIndex(components, requirementID);
-      return getPointsOf(components, targetID, index) >= getValue(components, requirementID);
-    }
-    if (LibString.eq(type_, "AFFINITY")) {
-      require(false, "LibSkill: affinity requirement not yet implemented");
-    }
-
-    return true;
+    return LibBoolean.checkConditions(components, requirements, targetID);
   }
 
   /////////////////
@@ -186,28 +163,28 @@ library LibSkill {
   // GETTERS
 
   function getIndex(IUintComp components, uint256 id) internal view returns (uint32) {
-    return IndexComponent(getAddressById(components, IndexCompID)).getValue(id);
+    return IndexComponent(getAddressById(components, IndexCompID)).get(id);
   }
 
   function getLevel(IUintComp components, uint256 id) internal view returns (uint256) {
-    return LevelComponent(getAddressById(components, LevelCompID)).getValue(id);
+    return LevelComponent(getAddressById(components, LevelCompID)).get(id);
   }
 
   function getPoints(IUintComp components, uint256 id) internal view returns (uint256) {
     if (!hasPoints(components, id)) return 0;
-    return SkillPointComponent(getAddressById(components, SPCompID)).getValue(id);
+    return SkillPointComponent(getAddressById(components, SPCompID)).get(id);
   }
 
   function getMax(IUintComp components, uint256 id) internal view returns (uint256) {
-    return MaxComponent(getAddressById(components, MaxCompID)).getValue(id);
+    return MaxComponent(getAddressById(components, MaxCompID)).get(id);
   }
 
   function getType(IUintComp components, uint256 id) internal view returns (string memory) {
-    return TypeComponent(getAddressById(components, TypeCompID)).getValue(id);
+    return TypeComponent(getAddressById(components, TypeCompID)).get(id);
   }
 
   function getValue(IUintComp components, uint256 id) internal view returns (uint256) {
-    return ValueComponent(getAddressById(components, ValueCompID)).getValue(id);
+    return ValueComponent(getAddressById(components, ValueCompID)).get(id);
   }
 
   // get the point value of a specific skill for a target
@@ -216,6 +193,9 @@ library LibSkill {
     uint256 holderID,
     uint32 index
   ) internal view returns (uint256) {
+    // // cheatcode to get account skill points (skill index never 0)
+    // if (index == 0) return getPoints(components, holderID);
+
     uint256 id = get(components, holderID, index);
     return getPoints(components, id);
   }
@@ -228,22 +208,21 @@ library LibSkill {
     uint256 holderID,
     uint32 index
   ) internal view returns (uint256) {
-    QueryFragment[] memory fragments = new QueryFragment[](3);
-    fragments[0] = QueryFragment(QueryType.Has, getComponentById(components, IsSkillCompID), "");
-    fragments[1] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, IdHolderCompID),
-      abi.encode(holderID)
-    );
-    fragments[2] = QueryFragment(
-      QueryType.HasValue,
-      getComponentById(components, IndexSkillCompID),
-      abi.encode(index)
-    );
+    uint256 id = genID(holderID, index);
+    return IsSkillComponent(getAddressById(components, IsSkillCompID)).has(id) ? id : 0;
+  }
 
-    uint256[] memory results = LibQuery.query(fragments);
+  //////////////////////
+  // LOGGING
 
-    if (results.length == 0) return 0;
-    return results[0];
+  function logUsePoint(IUintComp components, uint256 holderID) internal {
+    LibDataEntity.inc(components, holderID, 0, "SKILL_POINTS_USE", 1);
+  }
+
+  //////////////////////
+  // UTILS
+
+  function genID(uint256 holderID, uint32 index) internal pure returns (uint256) {
+    return uint256(keccak256(abi.encodePacked("skill.instance", holderID, index)));
   }
 }

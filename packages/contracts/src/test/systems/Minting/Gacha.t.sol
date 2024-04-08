@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
+import { GACHA_ID } from "libraries/LibGacha.sol";
 import "test/utils/SetupTemplate.t.sol";
 
 /** @dev
@@ -13,7 +14,7 @@ contract GachaTest is SetupTemplate {
 
     _initStockTraits();
 
-    _setConfigWei("GACHA_REROLL_PRICE", 1);
+    _setConfig("GACHA_REROLL_PRICE", 1);
   }
 
   function setUpMint() public override {
@@ -164,21 +165,20 @@ contract GachaTest is SetupTemplate {
 
   //   // checking results
   //   for (uint256 i; i < mint1; i++) {
-  //     assertEq(_IdAccountComponent.getValue(results[i]), _getAccount(1));
+  //     assertEq(_IdAccountComponent.get(results[i]), _getAccount(1));
   //   }
   //   for (uint256 i = mint1; i < mint1 + mint2; i++) {
-  //     assertEq(_IdAccountComponent.getValue(results[i]), _getAccount(2));
+  //     assertEq(_IdAccountComponent.get(results[i]), _getAccount(2));
   //   }
   //   for (uint256 i = mint1 + mint2; i < mint1 + mint2 + mint3; i++) {
-  //     assertEq(_IdAccountComponent.getValue(results[i]), _getAccount(3));
+  //     assertEq(_IdAccountComponent.get(results[i]), _getAccount(3));
   //   }
   // }
 
-  // Commented out to test faster - it takes a few minutes
   function testDistribution() public {
     uint256 length = 33;
     uint256[] memory ogPool = _batchMint(length);
-    uint256[] memory counts = new uint256[](length);
+    uint256[] memory counts = new uint256[](length + 1);
 
     address owner = _owners[0];
 
@@ -222,7 +222,7 @@ contract GachaTest is SetupTemplate {
       ogIndices[i] = uint256(keccak256(abi.encode(id, seed)));
 
       vm.prank(deployer);
-      _ValueComponent.set(id, ogIndices[i]);
+      _BareValueComponent.set(id, ogIndices[i]);
     }
 
     // sort
@@ -231,7 +231,7 @@ contract GachaTest is SetupTemplate {
     // check sort
     uint256 curr;
     for (uint256 i = 0; i < length; i++) {
-      uint256 val = _ValueComponent.getValue(sortedIDs[i]);
+      uint256 val = _BareValueComponent.get(sortedIDs[i]);
       assertTrue(val >= curr);
       curr = val;
     }
@@ -275,16 +275,15 @@ contract GachaTest is SetupTemplate {
   ////////////////
 
   function _assertInGacha(uint256 petID) internal {
-    assertTrue(!_IdAccountComponent.has(petID));
+    assertEq(_IdOwnsPetComponent.get(petID), GACHA_ID);
     assertTrue(!_RerollComponent.has(petID));
-    assertEq(_StateComponent.getValue(petID), "GACHA");
   }
 
   function _assertOutGacha(uint256 petID, uint256 account, uint256 rerolls) internal {
     account = _getAccount(account);
-    assertEq(_IdAccountComponent.getValue(petID), account);
-    assertEq(_RerollComponent.getValue(petID), rerolls);
-    assertEq(_StateComponent.getValue(petID), "RESTING");
+    assertEq(_IdOwnsPetComponent.get(petID), account);
+    assertEq(_RerollComponent.get(petID), rerolls);
+    assertEq(_StateComponent.get(petID), "RESTING");
   }
 
   function _assertCommit(
@@ -294,17 +293,10 @@ contract GachaTest is SetupTemplate {
     uint256 rerolls
   ) internal {
     account = _getAccount(account);
-    assertTrue(rerolls == 0 ? !_RerollComponent.has(id) : _RerollComponent.getValue(id) == rerolls);
-    assertTrue(_ValueComponent.has(id));
-    assertEq(_IdAccountComponent.getValue(id), account);
-    assertEq(_BlockRevealComponent.getValue(id), revealBlock);
-    assertEq(_TypeComponent.getValue(id), "GACHA_COMMIT");
-  }
-
-  /// @notice
-  function _assertGachaOrder(uint256[] memory pool) internal {
-    uint256[] memory occurances = new uint256[](pool.length);
-    for (uint256 i = 0; i < pool.length; i++) occurances[_GachaOrderComponent.getValue(pool[i])]++;
-    for (uint256 i = 0; i < pool.length; i++) assertEq(occurances[i], 1);
+    assertTrue(rerolls == 0 ? !_RerollComponent.has(id) : _RerollComponent.get(id) == rerolls);
+    assertTrue(_BareValueComponent.has(id));
+    assertEq(_IdAccountComponent.get(id), account);
+    assertEq(_BlockRevealComponent.get(id), revealBlock);
+    assertEq(_TypeComponent.get(id), "GACHA_COMMIT");
   }
 }

@@ -36,8 +36,8 @@ contract TimelockComponent is Component {
     set(entity, abi.encode(value));
   }
 
-  function getValue(uint256 entity) public view virtual returns (TimelockOp memory) {
-    TimelockOp memory value = abi.decode(getRawValue(entity), (TimelockOp));
+  function get(uint256 entity) public view virtual returns (TimelockOp memory) {
+    TimelockOp memory value = abi.decode(getRaw(entity), (TimelockOp));
     return value;
   }
 
