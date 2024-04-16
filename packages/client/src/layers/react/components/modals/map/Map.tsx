@@ -21,7 +21,7 @@ export function registerMapModal() {
       colStart: 2,
       colEnd: 33,
       rowStart: 8,
-      rowEnd: 60,
+      rowEnd: 50,
     },
 
     // Requirement
@@ -82,6 +82,15 @@ export function registerMapModal() {
         });
       };
 
+      const Footer = () => {
+        return (
+          <FooterRow>
+            <Exits index={displayedRoom} rooms={roomMap} actions={{ move }} />
+            <Players index={displayedRoom} rooms={roomMap} />
+          </FooterRow>
+        );
+      };
+
       ///////////////////
       // RENDER
 
@@ -90,8 +99,9 @@ export function registerMapModal() {
           id='world_map'
           divName='map'
           header={<ModalHeader title={roomMap.get(selectedRoom)?.name ?? 'Map'} icon={mapIcon} />}
-          footer={<Players index={displayedRoom} rooms={roomMap} />}
+          footer={Footer()}
           canExit
+          noPadding
         >
           <Container>
             <Column>
@@ -99,7 +109,6 @@ export function registerMapModal() {
             </Column>
             <Column>
               <RoomInfo index={displayedRoom} rooms={roomMap} />
-              <Exits index={displayedRoom} rooms={roomMap} actions={{ move }} />
             </Column>
           </Container>
         </ModalWrapper>
@@ -110,15 +119,22 @@ export function registerMapModal() {
 
 const Container = styled.div`
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-
-  padding: 1vw;
 `;
 
 const Column = styled.div`
+  width: auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  flex-grow: 1;
+`;
+
+const FooterRow = styled.div`
+  display: flex;
+  flex-direction: row;
 `;
