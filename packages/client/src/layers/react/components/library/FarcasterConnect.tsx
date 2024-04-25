@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { farcasterLogo } from 'assets/images/logos';
@@ -6,7 +6,7 @@ import { Account } from 'layers/network/shapes/Account';
 import { ActionSystem } from 'layers/network/systems/ActionSystem';
 import { IconButton, Tooltip } from 'layers/react/components/library';
 import { useAccount, useNetwork } from 'layers/react/store';
-import { FarcasterUser, client, emptyFaracasterUser, handleSignIn } from 'src/clients/neynar';
+import { FarcasterUser, emptyFaracasterUser, handleSignIn } from 'src/clients/neynar';
 
 interface Props {
   actionSystem: ActionSystem;
@@ -14,82 +14,46 @@ interface Props {
   size?: 'small' | 'medium' | 'large';
 }
 
+// This component populates the fid / neynar signer populated in the kami
+// account in Account Store with the Farcaster Account in Localstorage.
+// It's a bit of a bad pattern as we may reuse this component in multple
+// places. We'll fix it eventually.. pls no copy.
 export const FarcasterConnect = (props: Props) => {
   const { actionSystem, account, size } = props;
   const { selectedAddress, apis } = useNetwork();
-  const [farcasterUser, setFarcasterUser] = useLocalStorage<FarcasterUser>(
-    'farcasterUser',
-    emptyFaracasterUser
-  );
-  const { account: kamiAccount } = useAccount();
+  const [fUser, _] = useLocalStorage<FarcasterUser>('farcasterUser', emptyFaracasterUser);
+  const { account: kamiAccount, setAccount: setKamiAccount } = useAccount();
 
-  // update farcaster user in localstorage when the account store value changes
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  /////////////////
+  // SUBSCRIPTION
+
+  // on load, copy the farcaster details from localstorage to the Kami Account in Store
   useEffect(() => {
-    const isValidated = kamiAccount.fid && kamiAccount.neynar_signer; // whether set in localstorage
-    const isMismatched =
-      farcasterUser.fid != kamiAccount.fid ||
-      farcasterUser.signer_uuid !== kamiAccount.neynar_signer;
-    if (isValidated && isMismatched) {
-      console.log('updating farcaster id and/or signer');
-      updateLocalStorageFUser();
-    }
-  }, [kamiAccount.fid, kamiAccount.neynar_signer]);
+    if (!fUser) return;
+    if (kamiAccount.farcaster.id === fUser.fid) return;
+    const neynarDetails = { id: fUser.fid, signer: fUser.signer_uuid ?? '' };
+    setKamiAccount({ ...kamiAccount, farcaster: neynarDetails });
+  }, [fUser]);
+
+  // check whether the client is authenticated through neynar
+  useEffect(() => {
+    const fAccount = kamiAccount.farcaster;
+    const isAuthenticated = !!fAccount.id && !!fAccount.signer;
+    setIsAuthenticated(isAuthenticated);
+  }, [kamiAccount.farcaster]);
+
+  // check whether this kami account is linked to the authenticated farcaster account
+  useEffect(() => {
+    const fAccount = kamiAccount.farcaster;
+    const isAuthorized = isAuthenticated && fAccount.id == account.fid;
+    setIsAuthorized(isAuthorized);
+  }, [isAuthenticated, kamiAccount.farcaster, account.fid]);
 
   /////////////////
-  // INTERPRETATION
-
-  const getColor = () => {
-    if (!farcasterUser.fid) return 'orange';
-    if (!account?.fid) return 'blue';
-    if (farcasterUser.fid !== account.fid) return 'red';
-    return 'purple';
-  };
-
-  const getTooltipText = () => {
-    if (!farcasterUser.fid) return ['Connect to Farcaster'];
-    if (!account?.fid) return ['Link Farcaster Account to Kami Account'];
-    if (farcasterUser.fid !== account.fid)
-      return [`fid mismatch!`, `client: ${farcasterUser.fid}`, `server: ${account.fid}`];
-    return [`Connected to Farcaster`, `FID: ${farcasterUser.fid}`];
-  };
-
-  const getOnClick = () => {
-    if (!farcasterUser.fid) return () => handleSignIn();
-    if (!account?.fid) return () => connectFarcaster(farcasterUser.fid, farcasterUser.pfp_url);
-    if (farcasterUser.fid !== account.fid)
-      return () => connectFarcaster(farcasterUser.fid, farcasterUser.pfp_url);
-    return () => {};
-  };
-
-  /////////////////
-  // RENDERING
-
-  return (
-    <Tooltip text={getTooltipText()}>
-      <IconButton
-        size={size ?? 'small'}
-        img={farcasterLogo}
-        color={getColor()}
-        onClick={getOnClick()}
-      />
-    </Tooltip>
-  );
-
-  /////////////////
-  // HELPERS
-
-  // set the farcaster user in localstorage, based on the fid found in Account Store
-  async function updateLocalStorageFUser() {
-    const fid = kamiAccount.fid!;
-    const signer_uuid = kamiAccount.neynar_signer!;
-    const response = await client.fetchBulkUsers([fid], {});
-    if (response.users.length > 0) {
-      const user = response.users[0] as FarcasterUser;
-      console.log('setting farcaster user in localstorage', user);
-      user.signer_uuid = signer_uuid;
-      setFarcasterUser(user);
-    }
-  }
+  // ACTION
 
   // connect the farcaster account found in localstorage to the onchain kami account
   function connectFarcaster(fid: number, pfpURI: string) {
@@ -105,4 +69,51 @@ export const FarcasterConnect = (props: Props) => {
       },
     });
   }
+
+  /////////////////
+  // INTERACTION
+
+  const logout = () => {
+    console.log('logging out');
+    localStorage.removeItem('farcasterUser');
+    window.dispatchEvent(new StorageEvent('local-storage', { key: 'farcasterUser' }));
+  };
+
+  /////////////////
+  // INTERPRETATION
+
+  const getColor = () => {
+    if (!isAuthenticated) return 'orange';
+    if (!isAuthorized) return 'blue';
+    if (fUser.fid !== account.fid) return 'red';
+    return 'purple';
+  };
+
+  const getTooltipText = () => {
+    if (!isAuthenticated) return ['Connect to Farcaster'];
+    if (!isAuthorized) return ['Link Farcaster Account to Kami Account'];
+    if (fUser.fid !== account.fid)
+      return [`fid mismatch!`, `client: ${fUser.fid}`, `server: ${account.fid}`];
+    return [`Connected to Farcaster`, `FID: ${fUser.fid}`];
+  };
+
+  const getOnClick = () => {
+    if (!isAuthenticated) return () => handleSignIn();
+    if (fUser.fid !== account.fid) return () => connectFarcaster(fUser.fid, fUser.pfp_url ?? '');
+    return () => logout();
+  };
+
+  /////////////////
+  // RENDERING
+
+  return (
+    <Tooltip text={getTooltipText()}>
+      <IconButton
+        size={size ?? 'small'}
+        img={farcasterLogo}
+        color={getColor()}
+        onClick={getOnClick()}
+      />
+    </Tooltip>
+  );
 };

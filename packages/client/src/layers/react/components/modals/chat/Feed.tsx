@@ -3,14 +3,12 @@ import moment from 'moment';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { Account } from 'layers/network/shapes/Account';
 import { ActionButton, Tooltip } from 'layers/react/components/library';
-import { FarcasterUser, emptyFaracasterUser, client as neynarClient } from 'src/clients/neynar';
-import { useLocalStorage } from 'usehooks-ts';
+import { useAccount } from 'layers/react/store';
+import { likeCast, pollChannelCasts, unlikeCast } from 'src/clients/neynar';
 import { playClick } from 'utils/sounds';
 
 interface Props {
-  account: Account;
   max: number; // max number of casts to disable polling at
   casts: CastWithInteractions[];
   setCasts: (casts: CastWithInteractions[]) => void;
@@ -18,15 +16,16 @@ interface Props {
 
 export const Feed = (props: Props) => {
   const baseUrl = 'https://warpcast.com';
-  const { account, max, casts, setCasts } = props;
-  const [farcasterUser, _] = useLocalStorage<FarcasterUser>('farcasterUser', emptyFaracasterUser);
+  const { max, casts, setCasts } = props;
+  const { account } = useAccount();
+
   const [scrollBottom, setScrollBottom] = useState(0);
   const [feed, setFeed] = useState<FeedResponse>();
   const [isPolling, setIsPolling] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
 
   /////////////////
-  // DATA HANDLING
+  // SUBSCRIPTION
 
   useEffect(() => {
     pollMore();
@@ -70,8 +69,9 @@ export const Feed = (props: Props) => {
 
   // checks whether the cast has been liked by the current user
   const isLiked = (cast: CastWithInteractions) => {
-    if (account.fid == 0) return false;
-    return !!cast.reactions.likes.find((l) => l.fid == account.fid);
+    const fAccount = account.farcaster;
+    if (fAccount.id == 0) return false;
+    return !!cast.reactions.likes.find((l) => l.fid == fAccount.id);
   };
 
   /////////////////
@@ -79,8 +79,8 @@ export const Feed = (props: Props) => {
 
   const handleLike = (cast: CastWithInteractions) => {
     playClick();
-    if (isLiked(cast)) unlikeCast(cast);
-    else likeCast(cast);
+    if (isLiked(cast)) handleCastUnlike(cast);
+    else handleCastLike(cast);
   };
 
   /////////////////
@@ -124,17 +124,14 @@ export const Feed = (props: Props) => {
   // HELPERS
 
   // trigger a like of a cast
-  async function likeCast(cast: CastWithInteractions) {
-    if (!farcasterUser.signer_uuid) return;
-    const response = await neynarClient.publishReactionToCast(
-      farcasterUser.signer_uuid,
-      'like',
-      cast.hash
-    );
+  async function handleCastLike(cast: CastWithInteractions) {
+    const fAccount = account.farcaster;
+    if (!fAccount.signer) return;
+    const response = await likeCast(fAccount.signer, cast.hash);
 
     // update the list of casts
     if (response.success) {
-      cast.reactions.likes.push({ fid: farcasterUser.fid });
+      cast.reactions.likes.push({ fid: fAccount.id });
       for (const [i, cast] of casts.entries()) {
         if (casts.find((c) => c.hash === cast.hash)) {
           casts[i] = cast;
@@ -146,17 +143,14 @@ export const Feed = (props: Props) => {
   }
 
   // trigger an unlike of a cast
-  async function unlikeCast(cast: CastWithInteractions) {
-    if (!farcasterUser.signer_uuid) return;
-    const response = await neynarClient.deleteReactionFromCast(
-      farcasterUser.signer_uuid,
-      'like',
-      cast.hash
-    );
+  async function handleCastUnlike(cast: CastWithInteractions) {
+    const fAccount = account.farcaster;
+    if (!fAccount.signer) return;
+    const response = await unlikeCast(fAccount.signer, cast.hash);
 
     // update the list of casts
     if (response.success) {
-      const index = cast.reactions.likes.findIndex((l) => l.fid == farcasterUser.fid);
+      const index = cast.reactions.likes.findIndex((l) => l.fid == fAccount.id);
       if (index > -1) cast.reactions.likes.splice(index, 1);
       for (const [i, cast] of casts.entries()) {
         if (casts.find((c) => c.hash === cast.hash)) {
@@ -174,12 +168,9 @@ export const Feed = (props: Props) => {
     if (casts.length > 0 && feed?.next.cursor === '') return;
 
     setIsPolling(true);
-    const newFeed = await neynarClient.fetchFeed('filter', {
-      filterType: 'channel_id',
-      channelId: 'kamigotchi',
-      cursor: feed?.next.cursor ?? '',
-      limit: 10, // defaults to 25, max 100
-    });
+
+    const cursor = feed?.next.cursor ?? '';
+    const newFeed = await pollChannelCasts('kamigotchi', cursor);
     setFeed(newFeed);
 
     // adds new casts to the current list, with preference for new data, and sorts the list
@@ -195,12 +186,8 @@ export const Feed = (props: Props) => {
 
   // poll for new messages from the feed and update the list of current casts. do not update the Feed state
   async function pollNew() {
-    const newFeed = await neynarClient.fetchFeed('filter', {
-      filterType: 'channel_id',
-      channelId: 'kamigotchi',
-      cursor: feed?.next.cursor ?? '',
-      limit: 5, // defaults to 25, max 100
-    });
+    const cursor = feed?.next.cursor ?? '';
+    const newFeed = await pollChannelCasts('kamigotchi', cursor, 5);
 
     // adds new casts to the current list, with preference for new data, and sorts the list
     const currCasts = [...casts];
@@ -306,8 +293,8 @@ const Body = styled.div`
 
 const Heart = styled.div<{ color: string }>`
   width: 1.2vw;
-  background: radial-gradient(circle at 60% 65%, ${(props) => props.color} 64%, transparent 65%) top
-      left,
+  background:
+    radial-gradient(circle at 60% 65%, ${(props) => props.color} 64%, transparent 65%) top left,
     radial-gradient(circle at 40% 65%, ${(props) => props.color} 64%, transparent 65%) top right,
     linear-gradient(to bottom left, ${(props) => props.color} 43%, transparent 43%) bottom left,
     linear-gradient(to bottom right, ${(props) => props.color} 43%, transparent 43%) bottom right;
