@@ -6,8 +6,9 @@ import { chatIcon } from 'assets/images/icons/menu';
 import { getAccountFromBurner } from 'layers/network/shapes/Account';
 import { ModalHeader, ModalWrapper } from 'layers/react/components/library';
 import { registerUIComponent } from 'layers/react/engine/store';
-import { Feed } from './Feed';
+import moment from 'moment';
 import { InputRow } from './InputRow';
+import { Feed } from './feed/Feed';
 
 // make sure to set your NEYNAR_API_KEY .env
 
@@ -44,10 +45,21 @@ export function registerChatModal() {
         setCasts([cast, ...casts]);
       };
 
-      // filter out duplicates and sort by timestamp
-      // possibly limit the length of the list
-      const setCastsFiltered = (newCasts: CastWithInteractions[]) => {
-        setCasts(newCasts.filter((cast) => !casts.find((c) => c.hash === cast.hash)));
+      const pushCasts = (newCasts: CastWithInteractions[]) => {
+        const oldCasts = [...casts];
+
+        // split the new casts into unique and duplicates
+        const uniqueCasts = [];
+        for (const [_, newCast] of newCasts.entries()) {
+          const collisionIndex = oldCasts.findIndex((c) => c.hash === newCast.hash);
+          if (collisionIndex != -1) oldCasts[collisionIndex] = newCast;
+          else uniqueCasts.push(newCast);
+        }
+
+        // sort the full set of casts by timestamp
+        const allCasts = [...uniqueCasts, ...oldCasts];
+        allCasts.sort((a, b) => moment(b.timestamp).diff(moment(a.timestamp)));
+        setCasts(allCasts);
       };
 
       return (
@@ -58,7 +70,7 @@ export function registerChatModal() {
           footer={<InputRow account={account} actions={{ pushCast }} actionSystem={actions} />}
           canExit
         >
-          <Feed max={maxCasts} casts={casts} setCasts={setCasts} />
+          <Feed max={maxCasts} casts={casts} actions={{ setCasts, pushCasts }} />
         </ModalWrapper>
       );
     }
