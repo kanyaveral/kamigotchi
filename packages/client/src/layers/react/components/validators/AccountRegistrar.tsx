@@ -48,7 +48,6 @@ import { playSignup } from 'utils/sounds';
  * abomination birthed out of necessity and should be treated as such.
  */
 
-// TODO: check for whether an account with the burner address already exists
 export function registerAccountRegistrar() {
   registerUIComponent(
     'AccountRegistrar',
@@ -107,6 +106,8 @@ export function registerAccountRegistrar() {
 
       return merge(
         IsAccount.update$,
+        AccountIndex.update$,
+        FarcasterIndex.update$,
         Name.update$,
         OperatorAddress.update$,
         OwnerAddress.update$
@@ -158,6 +159,7 @@ export function registerAccountRegistrar() {
         const accountExists = !!account;
         setAccountExists(accountExists);
         setValidations({ ...validations, accountExists });
+        console.log(accountExists);
         if (accountExists) setKamiAccount(getKamiAccount(account, kamiAccount));
       }, [selectedAddress, accountFromWorldUpdate]);
 
