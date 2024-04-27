@@ -1,7 +1,7 @@
 import { JsonRpcProvider, TransactionReceipt } from '@ethersproject/providers';
 import { awaitValue, cacheUntilReady, deferred, mapObject, uuid } from '@mud-classic/utils';
 import { Mutex } from 'async-mutex';
-import { BaseContract, BigNumberish, CallOverrides, Overrides } from 'ethers';
+import { BaseContract, BigNumber, BigNumberish, CallOverrides, Overrides } from 'ethers';
 import { IComputedValue, IObservableValue, autorun, computed, observable, runInAction } from 'mobx';
 
 import { ConnectionState } from '../providers/createProvider';
@@ -130,9 +130,11 @@ export function createTxQueue<C extends Contracts>(
 
         // Populate tx
         const populatedTx = await member(...argsWithoutOverrides, configOverrides);
-        populatedTx.nonce = nonce;
-        populatedTx.chainId = network.config.chainId;
-        // populatedTx.maxPriorityFeePerGas = utils.parseUnits("2", "gwei");
+        populatedTx.maxPriorityFeePerGas = BigNumber.from(
+          await (target.provider as JsonRpcProvider).send('eth_maxPriorityFeePerGas', [])
+        )
+          .mul(125)
+          .div(100);
 
         // Execute tx
         let hash: string;
@@ -154,7 +156,7 @@ export function createTxQueue<C extends Contracts>(
         // This promise is awaited asynchronously in the tx queue and the action queue to catch errors
         // const wait = async () => (await response).wait();
         const wait = async () => {
-          const txConfirmed = await target.provider.waitForTransaction(hash, 1, 8000);
+          const txConfirmed = await target.provider.waitForTransaction(hash, 1, 45000);
           if (txConfirmed?.status === 0) {
             // if tx did not complete, initiate tx.wait() to throw regular error
             return (await response).wait();
