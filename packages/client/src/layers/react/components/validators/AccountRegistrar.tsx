@@ -14,7 +14,12 @@ import { map, merge } from 'rxjs';
 import styled from 'styled-components';
 import { v4 as uuid } from 'uuid';
 
-import { Account, getAccountByOwner, getAccountIndexByName } from 'layers/network/shapes/Account';
+import {
+  Account,
+  getAccount,
+  getAccountEntityIndexByName,
+  getAccountEntityIndexByOwner,
+} from 'layers/network/shapes/Account';
 import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { CopyButton } from 'layers/react/components/library/CopyButton';
 import { Tooltip } from 'layers/react/components/library/Tooltip';
@@ -147,40 +152,44 @@ export function registerAccountRegistrar() {
       const { account: kamiAccount, setAccount: setKamiAccount } = useAccount();
       const { validations, setValidations } = useAccount();
 
-      const [isVisible, setIsVisible] = useState(false);
-      const [accountExists, setAccountExists] = useState(false);
       const [step, setStep] = useState(0);
       const [name, setName] = useState('');
 
-      // run the primary check(s) for this validator
-      // track in store for easy access and update any local state variables accordingly
+      // update the Kami Account and validation based on changes to the
+      // connected address and detected account in the world
       useEffect(() => {
-        const account = getAccountByOwner(world, components, selectedAddress);
-        const accountExists = !!account;
-        setAccountExists(accountExists);
-        setValidations({ ...validations, accountExists });
-        console.log(accountExists);
-        if (accountExists) setKamiAccount(getKamiAccount(account, kamiAccount));
+        const accountEntityIndex = getAccountEntityIndexByOwner(components, selectedAddress);
+        if (!!accountEntityIndex == validations.accountExists) return; // no change
+        if (!!accountEntityIndex) {
+          const account = getAccount(world, components, accountEntityIndex);
+          setKamiAccount(getKamiAccount(account, kamiAccount));
+          setValidations({ ...validations, accountExists: true });
+        } else {
+          setKamiAccount(emptyAccountDetails());
+          setValidations({ accountExists: false, operatorMatches: false, operatorHasGas: false });
+        }
       }, [selectedAddress, accountFromWorldUpdate]);
 
-      // determine visibility based on above/prev checks
+      // adjust visibility of windows based on above determination
       useEffect(() => {
-        const validated = Object.values(networkValidations).every(Boolean);
-        setIsVisible(validated && !accountExists);
-      }, [networkValidations, selectedAddress, accountExists]);
+        const isVisible =
+          networkValidations.authenticated &&
+          networkValidations.chainMatches &&
+          !validations.accountExists;
 
-      // adjust actual visibility of windows based on above determination
-      useEffect(() => {
         if (isVisible) {
           toggleModals(false);
           toggleButtons(false);
+          toggleFixtures(false);
+        } else if (!validators.walletConnector) {
+          toggleButtons(true);
+          toggleFixtures(true);
         }
-        toggleFixtures(!isVisible && !validators.walletConnector);
+
         if (isVisible != validators.accountRegistrar) {
-          const { validators } = useVisibility.getState();
           setValidators({ ...validators, accountRegistrar: isVisible });
         }
-      }, [isVisible, validators.walletConnector]);
+      }, [networkValidations, validations.accountExists, validators.walletConnector]);
 
       /////////////////
       // ACTION
@@ -241,7 +250,7 @@ export function registerAccountRegistrar() {
       // INTERPRETATION
 
       const isNameTaken = () => {
-        const account = getAccountIndexByName(components, name);
+        const account = getAccountEntityIndexByName(components, name);
         return !!account;
       };
 

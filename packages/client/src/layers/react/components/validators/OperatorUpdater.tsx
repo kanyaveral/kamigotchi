@@ -1,6 +1,6 @@
 import { EntityID, EntityIndex } from '@mud-classic/recs';
 import { waitForActionCompletion } from 'layers/network/utils';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { of } from 'rxjs';
 import styled from 'styled-components';
 import { v4 as uuid } from 'uuid';
@@ -9,7 +9,6 @@ import { ActionButton } from 'layers/react/components/library/ActionButton';
 import { ValidatorWrapper } from 'layers/react/components/library/ValidatorWrapper';
 import { registerUIComponent } from 'layers/react/engine/store';
 import { useAccount, useNetwork, useVisibility } from 'layers/react/store';
-
 import { playScribble, playSuccess } from 'utils/sounds';
 
 // TODO: check for whether an account with the burner address already exists
@@ -30,38 +29,32 @@ export function registerOperatorUpdater() {
       const { account: kamiAccount, validations, setValidations } = useAccount();
       const { burnerAddress, selectedAddress } = useNetwork();
       const { apis, validations: networkValidations } = useNetwork();
-      const { toggleButtons, toggleModals } = useVisibility();
+      const { toggleModals } = useVisibility();
       const { validators, setValidators } = useVisibility();
 
-      const [operatorMatches, setOperatorMatches] = useState(false);
-      const [isVisible, setIsVisible] = useState(false);
-
-      // run the primary check(s) for this validator, track in store for easy access
+      // run the primary check(s) for this validator, track in store for easy saccess
       useEffect(() => {
-        const operatorMatches = kamiAccount.operatorAddress === burnerAddress;
-        setOperatorMatches(operatorMatches);
+        if (!validations.accountExists) return;
+
+        const operatorMatches = kamiAccount.operatorAddress === burnerAddress && !!burnerAddress;
+        if (operatorMatches == validations.operatorMatches) return; // no change
+
         setValidations({ ...validations, operatorMatches });
-      }, [burnerAddress, kamiAccount.operatorAddress]);
-
-      // determine visibility of this validator based on above checks
-      useEffect(() => {
-        setIsVisible(
-          networkValidations.authenticated &&
-            networkValidations.chainMatches &&
-            validations.accountExists &&
-            !operatorMatches
-        );
-      }, [networkValidations, validations, operatorMatches]);
+      }, [validations.accountExists, burnerAddress, kamiAccount.operatorAddress]);
 
       // adjust visibility of visual components based on above determination
       useEffect(() => {
+        const isVisible =
+          networkValidations.authenticated &&
+          networkValidations.chainMatches &&
+          validations.accountExists &&
+          !validations.operatorMatches;
+
         if (isVisible) toggleModals(false);
-        toggleButtons(!isVisible && !validators.walletConnector && !validators.accountRegistrar);
         if (isVisible != validators.operatorUpdater) {
-          const { validators } = useVisibility.getState();
           setValidators({ ...validators, operatorUpdater: isVisible });
         }
-      }, [isVisible, validators.walletConnector, validators.accountRegistrar]);
+      }, [networkValidations, validations.operatorMatches, validators.accountRegistrar]);
 
       /////////////////
       // ACTIONS
