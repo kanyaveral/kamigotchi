@@ -1,32 +1,34 @@
-import ErrorIcon from '@mui/icons-material/Error';
+import { useState } from 'react';
 import styled from 'styled-components';
+import { formatEther } from 'viem';
 import { useBalance, useWatchBlockNumber } from 'wagmi';
 
 import { triggerIcons } from 'assets/images/icons/triggers';
 import { GasConstants } from 'constants/gas';
-import { NetworkLayer } from 'layers/network';
-import { IconButton, Tooltip } from 'layers/react/components/library/';
-import { useAccount, useVisibility } from 'layers/react/store';
-import { playClick } from 'utils/sounds';
-import { formatUnits } from 'viem';
+import { GasGauge, IconButton, Tooltip } from 'layers/react/components/library';
+import { useAccount } from 'layers/react/store';
+import { parseTokenBalance } from 'utils/balances';
 
 interface Props {
   mode: number;
   setMode: Function;
-  network: NetworkLayer;
 }
 
 export const Controls = (props: Props) => {
   const { mode, setMode } = props;
   const { account: kamiAccount } = useAccount();
-  const { modals, setModals } = useVisibility();
   const iconMapping = [triggerIcons.eyeClosed, triggerIcons.eyeHalf, triggerIcons.eyeOpen];
+
+  const [burnerGasBalance, setBurnerGasBalance] = useState<number>(0);
 
   /////////////////
   // SUBSCRIPTION
 
   useWatchBlockNumber({
-    onBlockNumber: (n) => refetchOperatorBalance(),
+    onBlockNumber: (n) => {
+      refetchOperatorBalance();
+      setBurnerGasBalance(parseTokenBalance(operatorBalance?.value, operatorBalance?.decimals));
+    },
   });
 
   // Operator Eth Balance
@@ -41,63 +43,45 @@ export const Controls = (props: Props) => {
     setMode((mode + 1) % 3);
   };
 
-  const clickGasIcon = () => {
-    playClick();
-    setModals({
-      ...modals,
-      operatorFund: !modals.operatorFund,
-    });
-  };
-
   /////////////////
   // INTERPRETATION
 
-  // parses a wagmi FetchBalanceResult
-  // TODO: boot this to utils
-  const parseTokenBalance = (balance: bigint = BigInt(0), decimals: number = 18) => {
-    const formatted = formatUnits(balance, decimals);
-    return Number(formatted);
+  // calculated the gas gauge level
+  const calcGaugeSetting = (balance: bigint = BigInt(0)): number => {
+    const formatted = Number(formatEther(balance));
+    const level = formatted / GasConstants.Full;
+    return Math.min(level, 1.0);
+  };
+
+  const getGaugeTooltip = (balance: number) => {
+    const tooltip = ['Gas Tank', ''];
+    let description = '';
+
+    if (balance < GasConstants.Low) description = 'Tank STARVING T-T feed NAO';
+    else if (balance < GasConstants.Quarter) description = 'Tank Hongry :| feed soon?';
+    else if (balance < GasConstants.Half) description = 'Tank.. kinda hongry ._.';
+    else if (balance < GasConstants.Full) description = 'Tank ok ^^ could eat';
+    else description = 'Tank Full ^-^ Happy';
+    return [...tooltip, description];
+  };
+
+  const getBalanceTooltip = (balance: number) => {
+    const eth = balance.toFixed(5);
+    return ['1 ETH = 1000 milliETH', '', `${eth}Ξ`];
   };
 
   //////////////////
   // CONTENT
 
-  // gas warning icon, becomes more prominent as gas is depleted
-  const GasWarning = () => {
-    const balance = parseTokenBalance(operatorBalance?.value, operatorBalance?.decimals);
-
-    let warning = '';
-    let color = '';
-    if (balance < GasConstants.Low) {
-      color = 'red';
-      warning = 'Your Operator is STARVING. Click to top up NOW.';
-    } else if (balance < GasConstants.Quarter) {
-      color = 'orange';
-      warning = 'Your Operator is Hungry. Please feed it.';
-    } else if (balance < GasConstants.Half) {
-      color = 'db9';
-      warning = 'Your Operator could eat. Consider topping up on gas soon.';
-    } else if (balance < GasConstants.Full) {
-      color = 'ddd';
-      warning = 'Your Operator is chugging along happily. Nothing to see here ^.^';
-    }
-
-    return (
-      <Tooltip text={[warning]}>
-        <ErrorIcon
-          style={{ color, width: '1.8vw' }}
-          cursor='pointer'
-          onClick={() => clickGasIcon()}
-        />
-      </Tooltip>
-    );
-  };
-
   return (
     <Row>
       <RowPrefix>
-        <GasWarning />
-        <Text>TX Queue</Text>
+        <Tooltip text={getGaugeTooltip(burnerGasBalance)}>
+          <GasGauge level={calcGaugeSetting(operatorBalance?.value)} />
+        </Tooltip>
+        <Tooltip text={getBalanceTooltip(burnerGasBalance)}>
+          <Text>{(burnerGasBalance * 1000).toFixed(2)}mETH</Text>
+        </Tooltip>
       </RowPrefix>
       <IconButton onClick={() => toggleMode()} img={iconMapping[mode]} />
     </Row>
@@ -105,26 +89,28 @@ export const Controls = (props: Props) => {
 };
 
 const Row = styled.div`
-  padding: 0.3vw;
-  padding-left: 0.5vw;
-  gap: 0.7vw;
-
   display: flex;
   flex-flow: row nowrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
 `;
 
 const RowPrefix = styled.div`
+  border-left: 0.15vw solid #333;
+  border-bottom: 0.15vw solid #333;
+  border-radius: 0 0 0 0.4vw;
+  margin 0.2vw;
+  padding: 0.3vw;
   display: flex;
   flex-flow: row nowrap;
-  align-items: center;
-  gap: 0.5vw;
+  align-items: flex-end;
+  gap: 0.6vw;
 `;
 
 const Text = styled.div`
-  font-size: 1vw;
   color: #333;
+  padding-bottom: 0.09vw;
   text-align: left;
   font-family: Pixel;
+  font-size: 0.75vw;
 `;
