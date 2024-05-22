@@ -98,8 +98,8 @@ importers:
         specifier: ^1.19.0
         version: 1.19.3(debug@4.3.4)(typescript@5.4.2)(utf-8-validate@5.0.10)
       '@privy-io/react-auth':
-        specifier: 1.66.0-beta-20240517192624
-        version: 1.66.0-beta-20240517192624(@babel/core@7.24.3)(@types/react@17.0.78)(react-dom@18.2.0)(react-is@16.13.1)(react@18.2.0)(typescript@5.4.2)(utf-8-validate@5.0.10)
+        specifier: 1.66.0-beta-20240522004706
+        version: 1.66.0-beta-20240522004706(@babel/core@7.24.3)(@types/react@17.0.78)(react-dom@18.2.0)(react-is@16.13.1)(react@18.2.0)(typescript@5.4.2)(utf-8-validate@5.0.10)
       '@protobuf-ts/grpcweb-transport':
         specifier: ^2.7.0
         version: 2.9.4
@@ -3807,8 +3807,8 @@ packages:
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
     dev: false
 
-  /@privy-io/react-auth@1.66.0-beta-20240517192624(@babel/core@7.24.3)(@types/react@17.0.78)(react-dom@18.2.0)(react-is@16.13.1)(react@18.2.0)(typescript@5.4.2)(utf-8-validate@5.0.10):
-    resolution: {integrity: sha512-KekKPNKu3a3LN5ZIk4JhUUzecgGEJvlJ4ANWWwDg2fpgQSuQhj1GWcjpPro9HYA/N94JlSJGS61oA1fHkrxnqg==}
+  /@privy-io/react-auth@1.66.0-beta-20240522004706(@babel/core@7.24.3)(@types/react@17.0.78)(react-dom@18.2.0)(react-is@16.13.1)(react@18.2.0)(typescript@5.4.2)(utf-8-validate@5.0.10):
+    resolution: {integrity: sha512-G7q8H4DFZgXtgQL581Gr/K6EsCv7DCM1u2GloK55vg9s5SIdxEF7olicWWOdON8WpXUjPAPeMic+kSnx4XLRIw==}
     peerDependencies:
       react: ^18
       react-dom: ^18
