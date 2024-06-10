@@ -74,7 +74,7 @@ export const sortRewards = (rewards: Reward[]): Map<string, Reward[]> => {
 
   const tiers = new Map<string, Reward[]>();
   for (let i = 0; i < rewards.length; i++) {
-    if (rewards[i].value.logic === 'DISPLAY_ONLY') {
+    if (rewards[i].Reward.logic === 'DISPLAY_ONLY') {
       // set display only rewards to the front
       // because their cutoff is 0, will be brought front during sort
       tiers.set(rewards[i].name, [rewards[i]]);
@@ -115,7 +115,7 @@ export const canClaim = (goal: Goal, contribution: Contribution | undefined): [b
 // SHAPES
 
 export const getGoal = (world: World, components: Components, entityIndex: EntityIndex): Goal => {
-  const { Balance, Description, Index, IsComplete, Name, RoomIndex } = components;
+  const { Value, Description, Index, IsComplete, Name, RoomIndex } = components;
   const goalID = world.entities[entityIndex];
   const goalIndex = getComponentValue(Index, entityIndex)?.value || (0 as number);
 
@@ -124,7 +124,7 @@ export const getGoal = (world: World, components: Components, entityIndex: Entit
     index: goalIndex,
     name: getComponentValue(Name, entityIndex)?.value || ('' as string),
     description: getComponentValue(Description, entityIndex)?.value || ('' as string),
-    currBalance: getComponentValue(Balance, entityIndex)?.value || (0 as number),
+    currBalance: getComponentValue(Value, entityIndex)?.value || (0 as number),
     objective: getCondition(world, components, getObjEntityIndex(world, goalID)),
     requirements: queryGoalRequirements(world, components, goalIndex),
     rewards: queryGoalRewards(world, components, goalIndex),
@@ -161,12 +161,12 @@ const getContribution = (
   entityIndex: EntityIndex,
   account: Account
 ): Contribution => {
-  const { Balance, IsComplete } = components;
+  const { Value, IsComplete } = components;
 
   return {
     account: account,
     claimed: getComponentValue(IsComplete, entityIndex)?.value || (false as boolean),
-    score: getComponentValue(Balance, entityIndex)?.value || (0 as number),
+    score: getComponentValue(Value, entityIndex)?.value || (0 as number),
   };
 };
 
@@ -191,22 +191,22 @@ const queryGoalRequirements = (
   components: Components,
   goalIndex: number
 ): Condition[] => {
-  const { OwnsConditionID } = components;
+  const { PointerID } = components;
 
   const pointerID = getReqPtr(goalIndex);
 
-  const queryFragments = [HasValue(OwnsConditionID, { value: pointerID })];
+  const queryFragments = [HasValue(PointerID, { value: pointerID })];
   const raw = Array.from(runQuery(queryFragments));
 
   return raw.map((index): Condition => getCondition(world, components, index));
 };
 
 const queryGoalRewards = (world: World, components: Components, goalIndex: number): Reward[] => {
-  const { OwnsConditionID } = components;
+  const { PointerID } = components;
 
   const pointerID = getRwdPtr(goalIndex);
 
-  const queryFragments = [HasValue(OwnsConditionID, { value: pointerID })];
+  const queryFragments = [HasValue(PointerID, { value: pointerID })];
   const raw = Array.from(runQuery(queryFragments));
 
   return raw.map((index): Reward => getReward(world, components, index));

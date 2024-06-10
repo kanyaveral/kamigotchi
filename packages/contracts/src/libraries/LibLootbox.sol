@@ -5,8 +5,6 @@ import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
 import { getAddressById } from "solecs/utils.sol";
 
-import { BalanceComponent, ID as BalanceCompID } from "components/BalanceComponent.sol";
-import { BalancesComponent, ID as BalancesCompID } from "components/BalancesComponent.sol";
 import { IdHolderComponent, ID as IdHolderCompID } from "components/IdHolderComponent.sol";
 import { IndexItemComponent, ID as IndexItemCompID } from "components/IndexItemComponent.sol";
 import { IsLogComponent, ID as IsLogCompID } from "components/IsLogComponent.sol";
@@ -14,6 +12,8 @@ import { IsLootboxComponent, ID as IsLootboxCompID } from "components/IsLootboxC
 import { TimeComponent, ID as TimeCompID } from "components/TimeComponent.sol";
 import { KeysComponent, ID as KeysCompID } from "components/KeysComponent.sol";
 import { WeightsComponent, ID as WeightsCompID } from "components/WeightsComponent.sol";
+import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
+import { ValuesComponent, ID as ValuesCompID } from "components/ValuesComponent.sol";
 
 import { LibDataEntity } from "libraries/LibDataEntity.sol";
 import { LibInventory } from "libraries/LibInventory.sol";
@@ -99,12 +99,7 @@ library LibLootbox {
     uint256 count
   ) internal {
     if (count == 0) return;
-
-    uint256 invID = LibInventory.get(components, holderID, index);
-    if (invID == 0) {
-      invID = LibInventory.create(components, holderID, index);
-    }
-    LibInventory.inc(components, invID, count);
+    else LibInventory.incFor(components, holderID, index, count);
   }
 
   /// @notice logs the reveal result, deleting unessary fields
@@ -126,7 +121,7 @@ library LibLootbox {
   }
 
   function getBalance(IUintComp components, uint256 id) internal view returns (uint256) {
-    return BalanceComponent(getAddressById(components, BalanceCompID)).get(id);
+    return ValueComponent(getAddressById(components, ValueCompID)).get(id);
   }
 
   function getHolder(IUintComp components, uint256 id) internal view returns (uint256) {
@@ -149,11 +144,11 @@ library LibLootbox {
   // SETTERS
 
   function setBalance(IUintComp components, uint256 id, uint256 balance) internal {
-    BalanceComponent(getAddressById(components, BalanceCompID)).set(id, balance);
+    ValueComponent(getAddressById(components, ValueCompID)).set(id, balance);
   }
 
   function setBalances(IUintComp components, uint256 id, uint256[] memory balances) internal {
-    BalancesComponent(getAddressById(components, BalancesCompID)).set(id, balances);
+    ValuesComponent(getAddressById(components, ValuesCompID)).set(id, balances);
   }
 
   function setHolder(IUintComp components, uint256 id, uint256 holderID) internal {
@@ -177,7 +172,7 @@ library LibLootbox {
   }
 
   function unsetBalance(IUintComp components, uint256 id) internal {
-    BalanceComponent(getAddressById(components, BalanceCompID)).remove(id);
+    ValueComponent(getAddressById(components, ValueCompID)).remove(id);
   }
 
   function unsetHolder(IUintComp components, uint256 id) internal {

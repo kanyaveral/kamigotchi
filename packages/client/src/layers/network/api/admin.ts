@@ -3,13 +3,6 @@ import { BigNumberish } from 'ethers';
 export type AdminAPI = Awaited<ReturnType<typeof createAdminAPI>>;
 
 export function createAdminAPI(systems: any) {
-  /// NOTE: do not use in production
-  // @dev give coins for testing
-  // @param amount      amount
-  async function giveCoins(addy: string, amount: number) {
-    return systems['system._devGiveTokens'].executeTyped(addy, amount);
-  }
-
   // @dev admin reveal for pet if blockhash has lapsed. only called by admin
   // @param tokenId     ERC721 tokenId of the pet
   async function petForceReveal(commitIDs: BigNumberish[]) {
@@ -62,12 +55,16 @@ export function createAdminAPI(systems: any) {
     conValue: number
   ) {
     await sleepIf();
-    return systems['system.Goal.Create'].executeTyped(goalIndex, name, description, roomIndex, [
+    return systems['system.Goal.Create'].executeTyped(
+      goalIndex,
+      name,
+      description,
+      roomIndex,
       type,
       logic,
       conIndex,
-      conValue,
-    ]);
+      conValue
+    );
   }
 
   async function createGoalRequirement(
@@ -78,12 +75,13 @@ export function createAdminAPI(systems: any) {
     conValue: number
   ) {
     await sleepIf();
-    return systems['system.Goal.Create.Requirement'].executeTyped(goalIndex, [
+    return systems['system.Goal.Create.Requirement'].executeTyped(
+      goalIndex,
       type,
       logic,
       conIndex,
-      conValue,
-    ]);
+      conValue
+    );
   }
 
   async function createGoalReward(
@@ -96,12 +94,15 @@ export function createAdminAPI(systems: any) {
     conValue: number
   ) {
     await sleepIf();
-    return systems['system.Goal.Create.Reward'].executeTyped(goalIndex, name, cutoff, [
+    return systems['system.Goal.Create.Reward'].executeTyped(
+      goalIndex,
+      name,
+      cutoff,
       type,
       logic,
       conIndex,
-      conValue,
-    ]);
+      conValue
+    );
   }
 
   async function deleteGoal(goalIndex: number) {
@@ -143,7 +144,7 @@ export function createAdminAPI(systems: any) {
 
   async function initGachaIncrement() {
     await sleepIf();
-    return systems['system.Pet.Gacha.Mint'].init(0);
+    return systems['system.Pet.Gacha.Mint'].init();
   }
 
   // sets the prices for the merchant at the specified roomIndex
@@ -280,7 +281,9 @@ export function createAdminAPI(systems: any) {
 
   // @dev creates a room with name, roomIndex and exits. cannot overwrite room at roomIndex
   async function createRoom(
-    location: { x: number; y: number; z: number },
+    x: number,
+    y: number,
+    z: number,
     roomIndex: number,
     name: string,
     description: string,
@@ -288,7 +291,9 @@ export function createAdminAPI(systems: any) {
   ) {
     await sleepIf();
     return systems['system._Room.Create'].executeTyped(
-      location,
+      x,
+      y,
+      z,
       roomIndex,
       name,
       description,
@@ -556,7 +561,6 @@ export function createAdminAPI(systems: any) {
   }
 
   return {
-    giveCoins,
     bridge: {
       cancel: cancelBridgeTx,
     },

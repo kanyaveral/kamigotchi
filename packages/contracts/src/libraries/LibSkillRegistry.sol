@@ -11,14 +11,14 @@ import { IndexQuestComponent, ID as IndexQuestCompID } from "components/IndexQue
 import { IndexSkillComponent, ID as IndexSkillCompID } from "components/IndexSkillComponent.sol";
 import { ID as IsAccountCompID } from "components/IsAccountComponent.sol";
 import { ID as IsPetCompID } from "components/IsPetComponent.sol";
-import { IdOwnsConditionComponent, ID as IdOwnsCondCompID } from "components/IdOwnsConditionComponent.sol";
+import { IDPointerComponent, ID as IDPointerCompID } from "components/IDPointerComponent.sol";
 import { IsEffectComponent, ID as IsEffectCompID } from "components/IsEffectComponent.sol";
 import { IsRegistryComponent, ID as IsRegCompID } from "components/IsRegistryComponent.sol";
 import { IsRequirementComponent, ID as IsReqCompID } from "components/IsRequirementComponent.sol";
 import { IsSkillComponent, ID as IsSkillCompID } from "components/IsSkillComponent.sol";
 
-import { BalanceSignedComponent, ID as BalSignedCompID } from "components/BalanceSignedComponent.sol";
-import { BalanceComponent, ID as BalCompID } from "components/BalanceComponent.sol";
+import { ValueSignedComponent, ID as ValueSignedCompID } from "components/ValueSignedComponent.sol";
+import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 import { CostComponent, ID as CostCompID } from "components/CostComponent.sol";
 import { DescriptionComponent, ID as DescCompID } from "components/DescriptionComponent.sol";
 import { ForComponent, ID as ForCompID } from "components/ForComponent.sol";
@@ -93,7 +93,7 @@ library LibSkillRegistry {
     setIsEffect(components, id);
     setSkillIndex(components, id, skillIndex);
     setType(components, id, type_);
-    BalanceSignedComponent(getAddressById(components, BalSignedCompID)).set(id, value);
+    ValueSignedComponent(getAddressById(components, ValueSignedCompID)).set(id, value);
 
     return id;
   }
@@ -155,7 +155,7 @@ library LibSkillRegistry {
   // SETTERS
 
   function setConditionOwner(IUintComp components, uint256 id, uint256 ownerID) internal {
-    IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).set(id, ownerID);
+    IDPointerComponent(getAddressById(components, IDPointerCompID)).set(id, ownerID);
   }
 
   function setIsEffect(IUintComp components, uint256 id) internal {
@@ -222,14 +222,14 @@ library LibSkillRegistry {
   }
 
   function setBalance(IUintComp components, uint256 id, uint256 value) internal {
-    BalanceComponent(getAddressById(components, BalCompID)).set(id, value);
+    ValueComponent(getAddressById(components, ValueCompID)).set(id, value);
   }
 
   /////////////////
   // UNSETTERS
 
   function unsetConditionOwner(IUintComp components, uint256 id) internal {
-    IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).remove(id);
+    IDPointerComponent(getAddressById(components, IDPointerCompID)).remove(id);
   }
 
   function unsetIsEffect(IUintComp components, uint256 id) internal {
@@ -305,14 +305,14 @@ library LibSkillRegistry {
   }
 
   function unsetBalance(IUintComp components, uint256 id) internal {
-    if (BalanceComponent(getAddressById(components, BalCompID)).has(id)) {
-      BalanceComponent(getAddressById(components, BalCompID)).remove(id);
+    if (ValueComponent(getAddressById(components, ValueCompID)).has(id)) {
+      ValueComponent(getAddressById(components, ValueCompID)).remove(id);
     }
   }
 
   function unsetBalanceSigned(IUintComp components, uint256 id) internal {
-    if (BalanceSignedComponent(getAddressById(components, BalSignedCompID)).has(id)) {
-      BalanceSignedComponent(getAddressById(components, BalSignedCompID)).remove(id);
+    if (ValueSignedComponent(getAddressById(components, ValueSignedCompID)).has(id)) {
+      ValueSignedComponent(getAddressById(components, ValueSignedCompID)).remove(id);
     }
   }
 
@@ -320,11 +320,11 @@ library LibSkillRegistry {
   // GETTERS
 
   function getBalance(IUintComp components, uint256 id) internal view returns (uint256) {
-    return BalanceComponent(getAddressById(components, BalCompID)).get(id);
+    return ValueComponent(getAddressById(components, ValueCompID)).get(id);
   }
 
   function getBalanceSigned(IUintComp components, uint256 id) internal view returns (int256) {
-    return BalanceSignedComponent(getAddressById(components, BalSignedCompID)).get(id);
+    return ValueSignedComponent(getAddressById(components, ValueSignedCompID)).get(id);
   }
 
   function getIndex(IUintComp components, uint256 id) internal view returns (uint32) {
@@ -383,7 +383,7 @@ library LibSkillRegistry {
     uint32 index
   ) internal view returns (uint256[] memory) {
     return
-      IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).getEntitiesWithValue(
+      IDPointerComponent(getAddressById(components, IDPointerCompID)).getEntitiesWithValue(
         genEffectPtr(index)
       );
   }
@@ -394,7 +394,7 @@ library LibSkillRegistry {
     uint32 index
   ) internal view returns (uint256[] memory) {
     return
-      IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).getEntitiesWithValue(
+      IDPointerComponent(getAddressById(components, IDPointerCompID)).getEntitiesWithValue(
         genReqPtr(index)
       );
   }

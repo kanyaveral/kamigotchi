@@ -6,13 +6,12 @@ import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Compon
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById, addressToEntity } from "solecs/utils.sol";
+import { Stat } from "components/types/Stat.sol";
 
 import { IsAccountComponent, ID as IsAccCompID } from "components/IsAccountComponent.sol";
-import { IsPetComponent, ID as IsPetCompID } from "components/IsPetComponent.sol";
-import { IdAccountComponent, ID as IdAccountCompID } from "components/IdAccountComponent.sol";
-import { IdOwnsPetComponent, ID as IdOwnsPetCompID } from "components/IdOwnsPetComponent.sol";
+import { IDOwnsPetComponent, ID as IDOwnsPetCompID } from "components/IDOwnsPetComponent.sol";
 import { IndexAccountComponent, ID as IndexAccCompID } from "components/IndexAccountComponent.sol";
-import { IndexFarcasterComponent, ID as IndexFarcasterCompID } from "components/IndexFarcasterComponent.sol";
+import { FarcasterIndexComponent, ID as FarcarsterIndexCompID } from "components/FarcasterIndexComponent.sol";
 import { AddressOwnerComponent, ID as AddrOwnerCompID } from "components/AddressOwnerComponent.sol";
 import { AddressOperatorComponent, ID as AddrOperatorCompID } from "components/AddressOperatorComponent.sol";
 import { CacheOperatorComponent, ID as CacheOperatorCompID } from "components/CacheOperatorComponent.sol";
@@ -25,13 +24,12 @@ import { TimeLastActionComponent, ID as TimeLastActCompID } from "components/Tim
 import { TimeLastComponent, ID as TimeLastCompID } from "components/TimeLastComponent.sol";
 import { TimeStartComponent, ID as TimeStartCompID } from "components/TimeStartComponent.sol";
 
-import { LibCoin } from "libraries/LibCoin.sol";
 import { LibConfig } from "libraries/LibConfig.sol";
 import { LibDataEntity } from "libraries/LibDataEntity.sol";
 import { LibInventory } from "libraries/LibInventory.sol";
 import { LibMint20 } from "libraries/LibMint20.sol";
 import { LibRoom } from "libraries/LibRoom.sol";
-import { Stat, LibStat } from "libraries/LibStat.sol";
+import { LibStat } from "libraries/LibStat.sol";
 
 library LibAccount {
   /////////////////
@@ -100,27 +98,21 @@ library LibAccount {
   function incBalanceOf(
     IWorld world,
     IUintComp components,
-    uint256 id,
+    uint256 holderID,
     string memory _type,
     uint32 index,
     uint256 amount
   ) public {
-    uint256 inventoryID;
     if (LibString.eq(_type, "ITEM")) {
-      inventoryID = LibInventory.get(components, id, index);
-      if (inventoryID == 0) inventoryID = LibInventory.create(components, id, index);
-      LibInventory.inc(components, inventoryID, amount);
-      LibInventory.logIncItemTotal(components, id, index, amount);
-    } else if (LibString.eq(_type, "COIN")) {
-      LibCoin.inc(components, id, amount);
+      LibInventory.incFor(components, holderID, index, amount);
     } else if (LibString.eq(_type, "MINT20")) {
-      uint256 accountMinted = getMint20Minted(components, id);
+      uint256 accountMinted = getMint20Minted(components, holderID);
       require(
         accountMinted + amount <= LibConfig.get(components, "MINT_ACCOUNT_MAX"),
         "Mint20Mint: account limit exceeded"
       );
-      address to = getOwner(components, id);
-      setMint20Minted(world, components, id, accountMinted + amount);
+      address to = getOwner(components, holderID);
+      setMint20Minted(world, components, holderID, accountMinted + amount);
       LibMint20.mint(world, to, amount);
     } else {
       require(false, "LibAccount: unknown type");
@@ -130,18 +122,13 @@ library LibAccount {
   // decreases the balance of X (type+index) of an account
   function decBalanceOf(
     IUintComp components,
-    uint256 id,
+    uint256 holderID,
     string memory _type,
     uint32 index,
     uint256 amount
   ) public {
-    uint256 inventoryID;
     if (LibString.eq(_type, "ITEM")) {
-      inventoryID = LibInventory.get(components, id, index);
-      if (inventoryID == 0) inventoryID = LibInventory.create(components, id, index);
-      LibInventory.dec(components, inventoryID, amount);
-    } else if (LibString.eq(_type, "COIN")) {
-      LibCoin.dec(components, id, amount);
+      LibInventory.decFor(components, holderID, index, amount);
     } else {
       require(false, "LibAccount: unknown type");
     }
@@ -160,7 +147,7 @@ library LibAccount {
   }
 
   function setFarcasterIndex(IUintComp components, uint256 id, uint32 fid) internal {
-    IndexFarcasterComponent(getAddressById(components, IndexFarcasterCompID)).set(id, fid);
+    FarcasterIndexComponent(getAddressById(components, FarcarsterIndexCompID)).set(id, fid);
   }
 
   function setMediaURI(IUintComp components, uint256 id, string memory uri) internal {
@@ -263,7 +250,7 @@ library LibAccount {
   // retrieves the account with farcaster index
   function getByFarcasterIndex(IUintComp components, uint32 fid) internal view returns (uint256) {
     uint256[] memory results = LibQuery.getIsWithValue(
-      getComponentById(components, IndexFarcasterCompID),
+      getComponentById(components, FarcarsterIndexCompID),
       getComponentById(components, IsAccCompID),
       abi.encode(fid)
     );
@@ -306,7 +293,7 @@ library LibAccount {
     uint256 accountID
   ) internal view returns (uint256[] memory) {
     return
-      IdOwnsPetComponent(getAddressById(components, IdOwnsPetCompID)).getEntitiesWithValue(
+      IDOwnsPetComponent(getAddressById(components, IDOwnsPetCompID)).getEntitiesWithValue(
         accountID
       );
   }

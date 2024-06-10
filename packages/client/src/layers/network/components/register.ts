@@ -3,7 +3,6 @@ import { World } from '@mud-classic/recs';
 import {
   defineBoolComponent,
   defineLoadingStateComponent,
-  defineLocationComponent,
   defineNumberArrayComponent,
   defineNumberComponent,
   defineStatComponent,
@@ -67,17 +66,16 @@ export function createComponents(world: World) {
 
     // IDs
     AccountID: defineStringEZ('AccountID', 'component.id.account'),
-    BareHolderID: defineStringEZ('BareHolderID', 'component.id.holder.bare'),
     DelegateeID: defineStringEZ('DelegateeID', 'component.id.delegatee'),
     DelegatorID: defineStringEZ('DelegatorID', 'component.id.delegator'),
     HolderID: defineStringEZ('HolderID', 'component.id.holder'),
     NodeID: defineStringEZ('NodeID', 'component.id.node'),
-    OwnsConditionID: defineStringEZ('OwnsConditionID', 'component.id.condition.owns'),
     OwnsInventoryID: defineStringEZ('OwnsInventoryID', 'component.id.inventory.owns'),
     OwnsPetID: defineStringEZ('OwnsPetID', 'component.id.pet.owns'),
     OwnsQuestID: defineStringEZ('OwnsQuestID', 'component.id.quest.owns'),
     OwnsRelationshipID: defineStringEZ('OwnsRelationshipID', 'component.id.relationship.owns'),
     PetID: defineStringEZ('PetID', 'component.id.pet'),
+    PointerID: defineStringEZ('PointerID', 'component.id.pointer'),
     RequesteeID: defineStringEZ('RequesteeID', 'component.id.requestee'),
     RequesterID: defineStringEZ('RequesterID', 'component.id.requester'),
     RoomID: defineStringEZ('RoomID', 'component.id.room'),
@@ -117,20 +115,14 @@ export function createComponents(world: World) {
 
     // General Attributes
     Affinity: defineStringEZ('Affinity', 'component.affiinity'),
-    Balance: defineNumberEZ('Balance', 'component.balance'),
-    Balances: defineNumberArrayComponent(world, 'Balances', 'component.balances'),
-    BalanceSigned: defineNumberEZ('Balance', 'component.balance.signed'),
-    BareValue: defineNumberEZ('BareValue', 'component.barevalue'),
-    Coin: defineNumberEZ('Coin', 'component.coin'),
     Cost: defineNumberEZ('Cost', 'component.cost'),
     Description: defineStringEZ('Description', 'component.description'),
     DescriptionAlt: defineStringEZ('Description', 'component.description.alt'),
-    Epoch: defineNumberEZ('Epoch', 'component.epoch'),
     Experience: defineNumberEZ('Experience', 'component.experience'),
     For: defineNumberEZ('For', 'component.for'),
     Hash: defineStringEZ('Hash', 'component.hash'),
     Level: defineNumberEZ('Level', 'component.level'),
-    Location: defineLocationComponent(world, 'Location', 'component.location'),
+    Location: defineStringEZ('Location', 'component.location'),
     LogicType: defineStringEZ('LogicType', 'component.logictype'),
     Max: defineNumberEZ('Max', 'component.max'),
     Name: defineStringEZ('Name', 'component.name'),
@@ -144,6 +136,8 @@ export function createComponents(world: World) {
     Subtype: defineStringEZ('Subtype', 'component.subtype'),
     Type: defineStringEZ('Type', 'component.type'),
     Value: defineNumberEZ('Value', 'component.value'),
+    Values: defineNumberArrayComponent(world, 'Values', 'component.values'),
+    ValueSigned: defineNumberEZ('ValueSigned', 'component.value.signed'),
     Weights: defineNumberArrayComponent(world, 'Weights', 'component.weights'),
 
     // Time/Block Tracking

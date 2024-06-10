@@ -8,10 +8,9 @@ import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 
-import { BalanceComponent, ID as BalCompID } from "components/BalanceComponent.sol";
+import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 import { HashComponent, ID as HashCompID } from "components/HashComponent.sol";
-import { IdHolderComponent, ID as HolderCompID } from "components/IdHolderComponent.sol";
-import { IdOwnsQuestComponent, ID as OwnQuestCompID } from "components/IdOwnsQuestComponent.sol";
+import { IDOwnsQuestComponent, ID as OwnQuestCompID } from "components/IDOwnsQuestComponent.sol";
 import { IsObjectiveComponent, ID as IsObjectiveCompID } from "components/IsObjectiveComponent.sol";
 import { IsRepeatableComponent, ID as IsRepeatableCompID } from "components/IsRepeatableComponent.sol";
 import { IsRewardComponent, ID as IsRewardCompID } from "components/IsRewardComponent.sol";
@@ -389,7 +388,7 @@ library LibQuests {
   // SETTERS
 
   function setBalance(IUintComp components, uint256 id, uint256 value) internal {
-    BalanceComponent(getAddressById(components, BalCompID)).set(id, value);
+    ValueComponent(getAddressById(components, ValueCompID)).set(id, value);
   }
 
   function setCompleted(IUintComp components, uint256 id) internal {
@@ -397,7 +396,7 @@ library LibQuests {
   }
 
   function setOwner(IUintComp components, uint256 id, uint256 value) internal {
-    IdOwnsQuestComponent(getAddressById(components, OwnQuestCompID)).set(id, value);
+    IDOwnsQuestComponent(getAddressById(components, OwnQuestCompID)).set(id, value);
   }
 
   function setIsQuest(IUintComp components, uint256 id) internal {
@@ -433,7 +432,7 @@ library LibQuests {
   }
 
   function unsetBalance(IUintComp components, uint256 id) internal {
-    BalanceComponent(getAddressById(components, BalCompID)).remove(id);
+    ValueComponent(getAddressById(components, ValueCompID)).remove(id);
   }
 
   function unsetCompleted(IUintComp components, uint256 id) internal {
@@ -453,7 +452,7 @@ library LibQuests {
   }
 
   function unsetOwner(IUintComp components, uint256 id) internal {
-    IdOwnsQuestComponent(getAddressById(components, OwnQuestCompID)).remove(id);
+    IDOwnsQuestComponent(getAddressById(components, OwnQuestCompID)).remove(id);
   }
 
   function unsetQuestIndex(IUintComp components, uint256 id) internal {
@@ -468,7 +467,7 @@ library LibQuests {
   // GETTERS
 
   function getBalance(IUintComp components, uint256 id) internal view returns (uint256) {
-    BalanceComponent comp = BalanceComponent(getAddressById(components, BalCompID));
+    ValueComponent comp = ValueComponent(getAddressById(components, ValueCompID));
     return comp.has(id) ? comp.get(id) : 0;
   }
 
@@ -481,7 +480,7 @@ library LibQuests {
   }
 
   function getOwner(IUintComp components, uint256 id) internal view returns (uint256) {
-    return IdOwnsQuestComponent(getAddressById(components, OwnQuestCompID)).get(id);
+    return IDOwnsQuestComponent(getAddressById(components, OwnQuestCompID)).get(id);
   }
 
   function getType(IUintComp components, uint256 id) internal view returns (string memory) {

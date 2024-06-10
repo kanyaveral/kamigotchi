@@ -35,11 +35,9 @@ export interface StateComponentInterface extends utils.Interface {
     "extractRaw(uint256)": FunctionFragment;
     "extractRawBatch(uint256[])": FunctionFragment;
     "get(uint256)": FunctionFragment;
-    "getAt(bytes,uint256)": FunctionFragment;
     "getBatch(uint256[])": FunctionFragment;
     "getEntities()": FunctionFragment;
     "getEntitiesWithValue(bytes)": FunctionFragment;
-    "getEntitiesWithValue(string)": FunctionFragment;
     "getRaw(uint256)": FunctionFragment;
     "getRawBatch(uint256[])": FunctionFragment;
     "getSchema()": FunctionFragment;
@@ -47,7 +45,6 @@ export interface StateComponentInterface extends utils.Interface {
     "hasValue(uint256,string)": FunctionFragment;
     "id()": FunctionFragment;
     "owner()": FunctionFragment;
-    "registerIndexer(address)": FunctionFragment;
     "registerWorld(address)": FunctionFragment;
     "remove(uint256)": FunctionFragment;
     "removeBatch(uint256[])": FunctionFragment;
@@ -55,7 +52,6 @@ export interface StateComponentInterface extends utils.Interface {
     "set(uint256,bytes)": FunctionFragment;
     "setBatch(uint256[],bytes[])": FunctionFragment;
     "setBatch(uint256[],string[])": FunctionFragment;
-    "size(bytes)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unauthorizeWriter(address)": FunctionFragment;
     "world()": FunctionFragment;
@@ -70,11 +66,9 @@ export interface StateComponentInterface extends utils.Interface {
       | "extractRaw"
       | "extractRawBatch"
       | "get"
-      | "getAt"
       | "getBatch"
       | "getEntities"
-      | "getEntitiesWithValue(bytes)"
-      | "getEntitiesWithValue(string)"
+      | "getEntitiesWithValue"
       | "getRaw"
       | "getRawBatch"
       | "getSchema"
@@ -82,7 +76,6 @@ export interface StateComponentInterface extends utils.Interface {
       | "hasValue"
       | "id"
       | "owner"
-      | "registerIndexer"
       | "registerWorld"
       | "remove"
       | "removeBatch"
@@ -90,7 +83,6 @@ export interface StateComponentInterface extends utils.Interface {
       | "set(uint256,bytes)"
       | "setBatch(uint256[],bytes[])"
       | "setBatch(uint256[],string[])"
-      | "size"
       | "transferOwnership"
       | "unauthorizeWriter"
       | "world"
@@ -122,10 +114,6 @@ export interface StateComponentInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getAt",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getBatch",
     values: [PromiseOrValue<BigNumberish>[]]
   ): string;
@@ -134,12 +122,8 @@ export interface StateComponentInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getEntitiesWithValue(bytes)",
+    functionFragment: "getEntitiesWithValue",
     values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getEntitiesWithValue(string)",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getRaw",
@@ -160,10 +144,6 @@ export interface StateComponentInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "id", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "registerIndexer",
-    values: [PromiseOrValue<string>]
-  ): string;
   encodeFunctionData(
     functionFragment: "registerWorld",
     values: [PromiseOrValue<string>]
@@ -191,10 +171,6 @@ export interface StateComponentInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setBatch(uint256[],string[])",
     values: [PromiseOrValue<BigNumberish>[], PromiseOrValue<string>[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "size",
-    values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
@@ -225,18 +201,13 @@ export interface StateComponentInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "get", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getAt", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getBatch", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getEntities",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getEntitiesWithValue(bytes)",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getEntitiesWithValue(string)",
+    functionFragment: "getEntitiesWithValue",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getRaw", data: BytesLike): Result;
@@ -249,10 +220,6 @@ export interface StateComponentInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "hasValue", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "id", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "registerIndexer",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "registerWorld",
     data: BytesLike
@@ -278,7 +245,6 @@ export interface StateComponentInterface extends utils.Interface {
     functionFragment: "setBatch(uint256[],string[])",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "size", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -369,12 +335,6 @@ export interface StateComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    getAt(
-      value: PromiseOrValue<BytesLike>,
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     getBatch(
       entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
@@ -382,13 +342,8 @@ export interface StateComponent extends BaseContract {
 
     getEntities(overrides?: CallOverrides): Promise<[BigNumber[]]>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]]>;
-
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<[BigNumber[]]>;
 
@@ -420,11 +375,6 @@ export interface StateComponent extends BaseContract {
     id(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
-
-    registerIndexer(
-      indexer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     registerWorld(
       _world: PromiseOrValue<string>,
@@ -464,11 +414,6 @@ export interface StateComponent extends BaseContract {
       values: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    size(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     transferOwnership(
       account: PromiseOrValue<string>,
@@ -518,12 +463,6 @@ export interface StateComponent extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  getAt(
-    value: PromiseOrValue<BytesLike>,
-    index: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   getBatch(
     entities: PromiseOrValue<BigNumberish>[],
     overrides?: CallOverrides
@@ -531,13 +470,8 @@ export interface StateComponent extends BaseContract {
 
   getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
-  "getEntitiesWithValue(bytes)"(
-    value: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
-
-  "getEntitiesWithValue(string)"(
-    value: PromiseOrValue<string>,
+  getEntitiesWithValue(
+    arg0: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<BigNumber[]>;
 
@@ -569,11 +503,6 @@ export interface StateComponent extends BaseContract {
   id(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
-
-  registerIndexer(
-    indexer: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   registerWorld(
     _world: PromiseOrValue<string>,
@@ -613,11 +542,6 @@ export interface StateComponent extends BaseContract {
     values: PromiseOrValue<string>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  size(
-    value: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   transferOwnership(
     account: PromiseOrValue<string>,
@@ -667,12 +591,6 @@ export interface StateComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
-    getAt(
-      value: PromiseOrValue<BytesLike>,
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getBatch(
       entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
@@ -680,13 +598,8 @@ export interface StateComponent extends BaseContract {
 
     getEntities(overrides?: CallOverrides): Promise<BigNumber[]>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber[]>;
 
@@ -718,11 +631,6 @@ export interface StateComponent extends BaseContract {
     id(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
-
-    registerIndexer(
-      indexer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     registerWorld(
       _world: PromiseOrValue<string>,
@@ -762,11 +670,6 @@ export interface StateComponent extends BaseContract {
       values: PromiseOrValue<string>[],
       overrides?: CallOverrides
     ): Promise<void>;
-
-    size(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     transferOwnership(
       account: PromiseOrValue<string>,
@@ -828,12 +731,6 @@ export interface StateComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getAt(
-      value: PromiseOrValue<BytesLike>,
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getBatch(
       entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
@@ -841,13 +738,8 @@ export interface StateComponent extends BaseContract {
 
     getEntities(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -877,11 +769,6 @@ export interface StateComponent extends BaseContract {
     id(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    registerIndexer(
-      indexer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
 
     registerWorld(
       _world: PromiseOrValue<string>,
@@ -920,11 +807,6 @@ export interface StateComponent extends BaseContract {
       entities: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    size(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     transferOwnership(
@@ -976,12 +858,6 @@ export interface StateComponent extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getAt(
-      value: PromiseOrValue<BytesLike>,
-      index: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getBatch(
       entities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
@@ -989,13 +865,8 @@ export interface StateComponent extends BaseContract {
 
     getEntities(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "getEntitiesWithValue(bytes)"(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "getEntitiesWithValue(string)"(
-      value: PromiseOrValue<string>,
+    getEntitiesWithValue(
+      arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -1025,11 +896,6 @@ export interface StateComponent extends BaseContract {
     id(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    registerIndexer(
-      indexer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     registerWorld(
       _world: PromiseOrValue<string>,
@@ -1068,11 +934,6 @@ export interface StateComponent extends BaseContract {
       entities: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<string>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    size(
-      value: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(

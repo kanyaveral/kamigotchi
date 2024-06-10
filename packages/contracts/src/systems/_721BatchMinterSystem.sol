@@ -3,20 +3,20 @@ pragma solidity ^0.8.0;
 
 import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { IUint256Component as IUintComp } from "solecs/interfaces/IUint256Component.sol";
-import { Uint32Component } from "components/types/Uint32Component.sol";
+import { Uint32BareComponent } from "components/base/Uint32BareComponent.sol";
 import { System } from "solecs/System.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 import { LibString } from "solady/utils/LibString.sol";
 import { LibPack } from "libraries/utils/LibPack.sol";
+import { Stat } from "components/types/Stat.sol";
 
-import { Stat, StatComponent } from "components/types/StatComponent.sol";
+import { StatComponent } from "components/base/StatComponent.sol";
 import { AffinityComponent, ID as AffinityCompID } from "components/AffinityComponent.sol";
-import { BalanceComponent, ID as BalanceCompID } from "components/BalanceComponent.sol";
 import { CanNameComponent, ID as CanNameCompID } from "components/CanNameComponent.sol";
 import { HealthComponent, ID as HealthCompID } from "components/HealthComponent.sol";
 import { HarmonyComponent, ID as HarmonyCompID } from "components/HarmonyComponent.sol";
-import { IdOwnsPetComponent, ID as IdOwnsPetCompID } from "components/IdOwnsPetComponent.sol";
+import { IDOwnsPetComponent, ID as IDOwnsPetCompID } from "components/IDOwnsPetComponent.sol";
 import { IndexBodyComponent, ID as IndexBodyCompID } from "components/IndexBodyComponent.sol";
 import { IndexBackgroundComponent, ID as IndexBgCompID } from "components/IndexBackgroundComponent.sol";
 import { IndexColorComponent, ID as IndexColorCompID } from "components/IndexColorComponent.sol";
@@ -38,6 +38,7 @@ import { TimeLastActionComponent, ID as TimeLastActCompID } from "components/Tim
 import { TimeLastComponent, ID as TimeLastCompID } from "components/TimeLastComponent.sol";
 import { TimeStartComponent, ID as TimeStartCompID } from "components/TimeStartComponent.sol";
 import { ViolenceComponent, ID as ViolenceCompID } from "components/ViolenceComponent.sol";
+import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 
 import { Pet721 } from "tokens/Pet721.sol";
 
@@ -180,7 +181,7 @@ abstract contract TraitHandler {
     uint32[] memory offsets = new uint32[](5);
     offsets[0] = 0;
 
-    Uint32Component[] memory traitComps = new Uint32Component[](5);
+    Uint32BareComponent[] memory traitComps = new Uint32BareComponent[](5);
     traitComps[0] = indexFaceComp;
     traitComps[1] = indexHandComp;
     traitComps[2] = indexBodyComp;
@@ -287,7 +288,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
 
   Pet721 internal immutable pet721;
   CanNameComponent internal immutable canNameComp;
-  IdOwnsPetComponent internal immutable idOwnsPetComp;
+  IDOwnsPetComponent internal immutable idOwnsPetComp;
   IsPetComponent internal immutable isPetComp;
   IndexPetComponent internal immutable indexPetComp;
   MediaURIComponent internal immutable mediaURIComp;
@@ -298,7 +299,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
   LevelComponent internal immutable levelComp;
   ExperienceComponent internal immutable expComp;
   SkillPointComponent internal immutable skillPointComp;
-  BalanceComponent internal immutable balanceComp;
+  ValueComponent internal immutable balanceComp;
 
   constructor(
     IWorld _world,
@@ -308,7 +309,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
 
     pet721 = LibPet721.getContract(world);
     canNameComp = CanNameComponent(getAddressById(components, CanNameCompID));
-    idOwnsPetComp = IdOwnsPetComponent(getAddressById(components, IdOwnsPetCompID));
+    idOwnsPetComp = IDOwnsPetComponent(getAddressById(components, IDOwnsPetCompID));
     isPetComp = IsPetComponent(getAddressById(components, IsPetCompID));
     indexPetComp = IndexPetComponent(getAddressById(components, IndexPetCompID));
     mediaURIComp = MediaURIComponent(getAddressById(components, MediaURICompID));
@@ -319,7 +320,7 @@ contract _721BatchMinterSystem is System, TraitHandler {
     levelComp = LevelComponent(getAddressById(components, LevelCompID));
     expComp = ExperienceComponent(getAddressById(components, ExperienceCompID));
     skillPointComp = SkillPointComponent(getAddressById(components, SkillPointCompID));
-    balanceComp = BalanceComponent(getAddressById(components, BalanceCompID));
+    balanceComp = ValueComponent(getAddressById(components, ValueCompID));
   }
 
   /// @dev if calling many times, reduce call data by memozing address / bitpacking
@@ -357,13 +358,14 @@ contract _721BatchMinterSystem is System, TraitHandler {
   ) internal returns (uint256[] memory ids) {
     ids = new uint256[](amount);
     for (uint32 i; i < amount; i++) {
-      uint256 id = world.getUniqueEntityId();
+      uint32 index = startIndex + i;
+      uint256 id = LibPet.genID(index);
       ids[i] = id;
 
       canNameComp.set(id); // normally after reveal
       idOwnsPetComp.set(id, GACHA_ID); // seed in gacha
       isPetComp.set(id);
-      indexPetComp.set(id, startIndex + i);
+      indexPetComp.set(id, index);
       nameComp.set(id, LibString.concat("kamigotchi ", LibString.toString(startIndex + i)));
       stateComp.set(id, string("RESTING"));
       timeStartComp.set(id, block.timestamp);

@@ -1,9 +1,11 @@
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
-import { JsonRpcProvider } from '@ethersproject/providers';
 import dotenv from 'dotenv';
-import { generateAndDeploy } from './utils/deploy';
 const openurl = require('openurl');
+
+import { generateAndDeploy } from './utils/deployer';
+import { getDeployerKey, getRpc, getWorld, setAutoMine, setTimestamp } from './utils/utils';
+import { generateInitScript, initWorld } from './utils/worldIniter';
 
 const argv = yargs(hideBin(process.argv)).argv;
 dotenv.config();
@@ -21,6 +23,12 @@ const run = async () => {
 
   await setAutoMine(mode, true);
 
+  // todo: separate generate files, put them into one chunk
+  if (argv.init) {
+    // generate init script
+    generateInitScript(mode, [], 'init');
+  }
+
   const result = await generateAndDeploy({
     config: config,
     rpc: getRpc(mode)!,
@@ -31,12 +39,19 @@ const run = async () => {
     forgeOpts: argv.forgeOpts,
   });
 
-  /// foundry implementation of world.ts - not in use
-  // const initResult = await executeCallFromStream(
-  //   getRpc(mode)!,
-  //   getDeployerKey(mode)!,
-  //   "0x610178da211fef7d417bc0e6fed39f05609ad788"
-  // );
+  // world state
+  if (argv.init) {
+    await initWorld(
+      getDeployerKey(mode)!,
+      getRpc(mode)!,
+      result.deployedWorldAddress!,
+      argv.forgeOpts
+    );
+
+    console.log('---------------------------------------------\n');
+    console.log('World state initialized ');
+    console.log('\n---------------------------------------------');
+  }
 
   openurl.open(
     'http://localhost:3000/?worldAddress=' +
@@ -46,29 +61,7 @@ const run = async () => {
   );
 
   await setAutoMine(mode, false);
-};
-
-const getDeployerKey = (mode: string) => {
-  if (mode === 'TEST') return process.env.TEST_DEPLOYER_PRIV;
-  else return process.env.DEV_DEPLOYER_PRIV;
-};
-
-const getRpc = (mode: string) => {
-  if (mode === 'TEST') return process.env.TEST_RPC;
-  else return process.env.DEV_RPC;
-};
-
-const getWorld = (mode: string) => {
-  if (mode === 'TEST') return process.env.TEST_WORLD;
-  else return process.env.DEV_WORLD;
-};
-
-const setAutoMine = async (mode: string, on: boolean) => {
-  console.log(`** Setting automine to ${on} **`);
-  if (mode === 'DEV') {
-    const provider = new JsonRpcProvider(process.env.DEV_RPC!);
-    await provider.send(`${on ? 'anvil_setAutomine' : 'evm_setIntervalMining'}`, [on ? true : 1]);
-  }
+  await setTimestamp(mode);
 };
 
 run();

@@ -10,7 +10,7 @@ import { DescriptionAltComponent, ID as DescAltCompID } from "components/Descrip
 import { DescriptionComponent, ID as DescCompID } from "components/DescriptionComponent.sol";
 import { IndexComponent, ID as IndexCompID } from "components/IndexComponent.sol";
 import { IndexQuestComponent, ID as IndexQuestCompID } from "components/IndexQuestComponent.sol";
-import { IdOwnsConditionComponent, ID as IdOwnsCondCompID } from "components/IdOwnsConditionComponent.sol";
+import { IDPointerComponent, ID as IDPointerCompID } from "components/IDPointerComponent.sol";
 import { IsRegistryComponent, ID as IsRegCompID } from "components/IsRegistryComponent.sol";
 import { IsObjectiveComponent, ID as IsObjectiveCompID } from "components/IsObjectiveComponent.sol";
 import { IsRepeatableComponent, ID as IsRepeatableCompID } from "components/IsRepeatableComponent.sol";
@@ -22,11 +22,10 @@ import { LogicTypeComponent, ID as LogicTypeCompID } from "components/LogicTypeC
 import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
 import { TimeComponent, ID as TimeCompID } from "components/TimeComponent.sol";
 import { TypeComponent, ID as TypeCompID } from "components/TypeComponent.sol";
-import { BalanceComponent, ID as BalanceCompID } from "components/BalanceComponent.sol";
+import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 
 import { LibArray } from "libraries/utils/LibArray.sol";
 import { LibHash } from "libraries/utils/LibHash.sol";
-import { LibCoin } from "libraries/LibCoin.sol";
 import { LibInventory } from "libraries/LibInventory.sol";
 
 // A registry for Quest related entities
@@ -204,11 +203,11 @@ library LibQuestRegistry {
   // SETTERS
 
   function setBalance(IUintComp components, uint256 id, uint256 value) internal {
-    BalanceComponent(getAddressById(components, BalanceCompID)).set(id, value);
+    ValueComponent(getAddressById(components, ValueCompID)).set(id, value);
   }
 
   function setConditionOwner(IUintComp components, uint256 id, uint256 ownerID) internal {
-    IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).set(id, ownerID);
+    IDPointerComponent(getAddressById(components, IDPointerCompID)).set(id, ownerID);
   }
 
   function setIsRegistry(IUintComp components, uint256 id) internal {
@@ -263,14 +262,14 @@ library LibQuestRegistry {
   // UNSETTERS
 
   function unsetBalance(IUintComp components, uint256 id) internal {
-    if (BalanceComponent(getAddressById(components, BalanceCompID)).has(id)) {
-      BalanceComponent(getAddressById(components, BalanceCompID)).remove(id);
+    if (ValueComponent(getAddressById(components, ValueCompID)).has(id)) {
+      ValueComponent(getAddressById(components, ValueCompID)).remove(id);
     }
   }
 
   function unsetConditionOwner(IUintComp components, uint256 id) internal {
-    if (IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).has(id)) {
-      IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).remove(id);
+    if (IDPointerComponent(getAddressById(components, IDPointerCompID)).has(id)) {
+      IDPointerComponent(getAddressById(components, IDPointerCompID)).remove(id);
     }
   }
 
@@ -387,9 +386,7 @@ library LibQuestRegistry {
     uint256 pointer
   ) internal view returns (uint256[] memory) {
     return
-      IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).getEntitiesWithValue(
-        pointer
-      );
+      IDPointerComponent(getAddressById(components, IDPointerCompID)).getEntitiesWithValue(pointer);
   }
 
   /////////////////

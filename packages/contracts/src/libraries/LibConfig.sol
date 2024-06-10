@@ -9,10 +9,9 @@ import { getAddressById, getComponentById } from "solecs/utils.sol";
 import { LibString } from "solady/utils/LibString.sol";
 import { LibPack } from "libraries/utils/LibPack.sol";
 
-import { NameComponent, ID as NameCompID } from "components/NameComponent.sol";
-import { BareValueComponent, ID as ValueCompID } from "components/BareValueComponent.sol";
+import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 
-/// @notice a config entity is a global config of field values, identified by its NameComponent
+/// @notice a config entity is a global config of field values, identified deterministically
 /** @dev
  * There are 3 types of configs, all packed and stored into a single uint256.
  * - uint256
@@ -30,7 +29,7 @@ library LibConfig {
 
   /// @notice Set a value of a global config field entity
   function setValue(IUintComp components, uint256 id, uint256 value) internal {
-    BareValueComponent(getAddressById(components, ValueCompID)).set(id, value);
+    ValueComponent(getAddressById(components, ValueCompID)).set(id, value);
   }
 
   /// @notice Set an array of values of a global config field entity
@@ -80,7 +79,7 @@ library LibConfig {
     uint256[] memory values = new uint256[](names.length);
     for (uint256 i = 0; i < names.length; i++) values[i] = getID(names[i]);
 
-    BareValueComponent valueComp = BareValueComponent(getAddressById(components, ValueCompID));
+    ValueComponent valueComp = ValueComponent(getAddressById(components, ValueCompID));
     for (uint256 i = 0; i < names.length; i++)
       if (values[i] != 0) values[i] = uint256(uint32(valueComp.get(values[i])));
 
@@ -89,7 +88,7 @@ library LibConfig {
 
   /// @notice Retrieve the value (without precision) of a global config field entity. Assumes it exists
   function getValue(IUintComp components, uint256 id) internal view returns (uint256) {
-    return BareValueComponent(getAddressById(components, ValueCompID)).get(id);
+    return ValueComponent(getAddressById(components, ValueCompID)).get(id);
   }
 
   /// @notice Retrieve an array of values. Assumes it exists

@@ -7,9 +7,9 @@ import { IWorld } from "solecs/interfaces/IWorld.sol";
 import { getAddressById, getComponentById } from "solecs/utils.sol";
 import { LibQuery } from "solecs/LibQuery.sol";
 
-import { BalanceComponent, ID as BalCompID } from "components/BalanceComponent.sol";
+import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
 import { DescriptionComponent, ID as DescriptionCompID } from "components/DescriptionComponent.sol";
-import { IdOwnsConditionComponent, ID as IdOwnsCondCompID } from "components/IdOwnsConditionComponent.sol";
+import { IDPointerComponent, ID as IDPointerCompID } from "components/IDPointerComponent.sol";
 import { IsGoalComponent, ID as IsGoalCompID } from "components/IsGoalComponent.sol";
 import { IsRequirementComponent, ID as IsRequirementCompID } from "components/IsRequirementComponent.sol";
 import { IsRewardComponent, ID as IsRewardCompID } from "components/IsRewardComponent.sol";
@@ -50,7 +50,7 @@ import { LibScore } from "libraries/LibScore.sol";
  * Contributing to goals results in a Contribution Entity (goal+account)
  * - Contributions uses LibScore to track points for leaderboard compatibility
  *   - epoch is not used
- * - stores Contribution Points in BalanceComponent (via score)
+ * - stores Contribution Points in ValueComponent (via score)
  * - stores whether the goal has been completed in IsCompleteComponent
  */
 library LibGoals {
@@ -90,10 +90,7 @@ library LibGoals {
     Condition memory requirement
   ) internal returns (uint256 id) {
     id = world.getUniqueEntityId();
-    IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).set(
-      id,
-      genReqPtr(goalIndex)
-    );
+    IDPointerComponent(getAddressById(components, IDPointerCompID)).set(id, genReqPtr(goalIndex));
 
     IsRequirementComponent(getAddressById(components, IsRequirementCompID)).set(id);
     LibBoolean.create(components, id, requirement);
@@ -120,10 +117,7 @@ library LibGoals {
     Condition memory reward
   ) internal returns (uint256 id) {
     id = world.getUniqueEntityId();
-    IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).set(
-      id,
-      genRwdPtr(goalIndex)
-    );
+    IDPointerComponent(getAddressById(components, IDPointerCompID)).set(id, genRwdPtr(goalIndex));
 
     IsRewardComponent(getAddressById(components, IsRewardCompID)).set(id);
     NameComponent(getAddressById(components, NameCompID)).set(id, name);
@@ -153,7 +147,7 @@ library LibGoals {
     uint256[] memory reqIDs = getRequirements(components, index);
     for (uint256 i = 0; i < reqIDs.length; i++) {
       LibBoolean.unsetAll(components, reqIDs[i]);
-      IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).remove(reqIDs[i]);
+      IDPointerComponent(getAddressById(components, IDPointerCompID)).remove(reqIDs[i]);
       NameComponent(getAddressById(components, NameCompID)).remove(reqIDs[i]);
       LevelComponent(getAddressById(components, LevelCompID)).remove(reqIDs[i]);
     }
@@ -162,7 +156,7 @@ library LibGoals {
     uint256[] memory rewIDs = getRewards(components, index);
     for (uint256 i = 0; i < rewIDs.length; i++) {
       LibBoolean.unsetAll(components, rewIDs[i]);
-      IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).remove(rewIDs[i]);
+      IDPointerComponent(getAddressById(components, IDPointerCompID)).remove(rewIDs[i]);
     }
   }
 
@@ -177,7 +171,7 @@ library LibGoals {
     uint256 amt
   ) internal returns (uint256) {
     uint256 objID = genObjID(goalID);
-    IUintComp balComp = IUintComp(getAddressById(components, BalCompID));
+    IUintComp balComp = IUintComp(getAddressById(components, ValueCompID));
     uint256 currBal = balComp.safeGetUint256(goalID);
     uint256 targetBal = balComp.safeGetUint256(objID);
 
@@ -210,7 +204,7 @@ library LibGoals {
     // filters out DISPLAY_ONLY rewards via Level check
     uint256[] memory rewardIDs = queryActiveRewards(components, goalIndex);
 
-    BalanceComponent balComp = BalanceComponent(getAddressById(components, BalCompID));
+    ValueComponent balComp = ValueComponent(getAddressById(components, ValueCompID));
     uint256 accCont = balComp.get(genContributionID(goalID, accID));
 
     _distributeRewards(world, components, balComp, accCont, accID, rewardIDs);
@@ -220,7 +214,7 @@ library LibGoals {
   function _distributeRewards(
     IWorld world,
     IUintComp components,
-    BalanceComponent balComp,
+    ValueComponent balComp,
     uint256 accCont,
     uint256 accID,
     uint256[] memory rewardIDs
@@ -261,7 +255,7 @@ library LibGoals {
     bool goalCompleted = completeComp.has(goalID);
     bool accClaimed = completeComp.has(contributionID);
 
-    bool accContributed = BalanceComponent(getAddressById(components, BalCompID)).has(
+    bool accContributed = ValueComponent(getAddressById(components, ValueCompID)).has(
       contributionID
     );
     // true if goal completed, account contributed, account hasnt claimed reward
@@ -356,9 +350,7 @@ library LibGoals {
     uint256 pointer
   ) internal view returns (uint256[] memory) {
     return
-      IdOwnsConditionComponent(getAddressById(components, IdOwnsCondCompID)).getEntitiesWithValue(
-        pointer
-      );
+      IDPointerComponent(getAddressById(components, IDPointerCompID)).getEntitiesWithValue(pointer);
   }
 
   ////////////////////
@@ -373,7 +365,7 @@ library LibGoals {
     uint256 pointer = genRwdPtr(goalIndex);
     return
       LibQuery.getIsWithValue(
-        getComponentById(components, IdOwnsCondCompID),
+        getComponentById(components, IDPointerCompID),
         getComponentById(components, LevelCompID),
         abi.encode(pointer)
       );

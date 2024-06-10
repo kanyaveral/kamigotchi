@@ -2,11 +2,19 @@ import { EntityIndex, Has, HasValue, QueryFragment, World, runQuery } from '@mud
 import { Components } from 'layers/network';
 
 import { Condition, getCondition } from 'layers/network/shapes/utils/Conditionals';
-import { Location, Room, RoomOptions, getGateFromPtr, getGateToPtr, getRoom } from './types';
+import {
+  Coord,
+  Room,
+  RoomOptions,
+  coordToBigInt,
+  getGateFromPtr,
+  getGateToPtr,
+  getRoom,
+} from './types';
 
 export type QueryOptions = {
   index?: number;
-  location?: Location;
+  location?: Coord;
 };
 
 export const queryGates = (
@@ -15,11 +23,11 @@ export const queryGates = (
   toIndex: number,
   fromIndex: number
 ): Condition[] => {
-  const { RoomID, SourceID } = components;
+  const { RoomID, PointerID } = components;
 
   const toQuery = [
     HasValue(RoomID, { value: getGateToPtr(toIndex) }),
-    HasValue(SourceID, { value: fromIndex == 0 ? '0x00' : getGateFromPtr(fromIndex) }),
+    HasValue(PointerID, { value: fromIndex == 0 ? '0x00' : getGateFromPtr(fromIndex) }),
   ];
 
   const raw = Array.from(runQuery(toQuery));
@@ -50,14 +58,13 @@ export const queryRoomsEntitiesX = (
 
   if (options?.index) toQuery.push(HasValue(RoomIndex, { value: options.index }));
 
-  if (options?.location)
+  if (options?.location) {
     toQuery.push(
       HasValue(Location, {
-        x: options.location.x,
-        y: options.location.y,
-        z: options.location.z,
+        value: '0x' + ('0' + coordToBigInt(options.location).toString(16)).slice(-48),
       })
     );
+  }
 
   return Array.from(runQuery(toQuery));
 };

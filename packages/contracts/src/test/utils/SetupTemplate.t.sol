@@ -3,12 +3,13 @@ pragma solidity ^0.8.0;
 
 import { LibString } from "solady/utils/LibString.sol";
 import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
-
-import "./TestSetupImports.sol";
+import { Stat } from "components/types/Stat.sol";
 
 import { Condition } from "libraries/utils/LibBoolean.sol";
-import { Location } from "libraries/LibRoom.sol";
-import { Stat } from "components/types/StatComponent.sol";
+import { Coord } from "libraries/LibRoom.sol";
+import { MUSU_INDEX } from "libraries/LibInventory.sol";
+
+import "./TestSetupImports.sol";
 
 abstract contract SetupTemplate is TestSetupImports {
   using LibString for string;
@@ -43,7 +44,7 @@ abstract contract SetupTemplate is TestSetupImports {
     setUpTime();
 
     vm.prank(deployer);
-    _PetGachaMintSystem.init(abi.encode(0)); // todo: make deploy script call `init()`
+    _PetGachaMintSystem.init(); // todo: make deploy script call `init()`
 
     setUpAccounts();
     setUpMint();
@@ -75,16 +76,22 @@ abstract contract SetupTemplate is TestSetupImports {
 
   // sets up items to a default state. override to change/remove behaviour if needed
   function setUpItems() public virtual {
-    _initItems();
+    // food (foodIndex, name, health)
+    _createFood(1, "Gum", "DESCRIPTION", 25, 0, ""); // itemIndex 1
+    _createFood(2, "Candy", "DESCRIPTION", 50, 0, ""); // itemIndex 2
+    _createFood(3, "Cookie Sticks", "DESCRIPTION", 100, 0, ""); // itemIndex 3
+
+    // revives (reviveIndex, name, health)
+    _createRevive(1000, "Ribbon", "DESCRIPTION", 10, ""); // itemIndex 1000
   }
 
   // sets up rooms to a default state. override to change/remove behaviour if needed
   // is a big square with every room connected to each other
   function setUpRooms() public virtual {
-    _createRoom("testRoom1", Location(1, 1, 0), 1, 4);
-    _createRoom("testRoom2", Location(2, 1, 0), 2, 3);
-    _createRoom("testRoom3", Location(1, 2, 0), 3, 2);
-    _createRoom("testRoom4", Location(2, 2, 0), 4, 1);
+    _createRoom("testRoom1", Coord(1, 1, 0), 1, 4);
+    _createRoom("testRoom2", Coord(2, 1, 0), 2, 3);
+    _createRoom("testRoom3", Coord(1, 2, 0), 3, 2);
+    _createRoom("testRoom4", Coord(2, 2, 0), 4, 1);
   }
 
   function setUpTime() public virtual {
@@ -131,15 +138,16 @@ abstract contract SetupTemplate is TestSetupImports {
   // ACCOUNT MANAGEMENT
 
   function _fundAccount(uint playerIndex, uint amount) internal {
-    address operator = _getOperator(playerIndex);
-
-    vm.prank(deployer);
-    __devGiveTokensSystem.executeTyped(operator, amount);
+    uint256 accountID = _getAccount(playerIndex);
+    vm.startPrank(deployer);
+    LibInventory.incFor(components, accountID, MUSU_INDEX, amount);
+    LibInventory.logIncItemTotal(components, accountID, MUSU_INDEX, amount);
+    vm.stopPrank();
   }
 
   function _getAccountBalance(uint playerIndex) internal view returns (uint) {
     uint accountID = _getAccount(playerIndex);
-    return LibCoin.get(components, accountID);
+    return LibInventory.getBalanceOf(components, accountID, MUSU_INDEX);
   }
 
   // get an account by the Owner address' testing playerIndex
@@ -212,7 +220,7 @@ abstract contract SetupTemplate is TestSetupImports {
     }
   }
 
-  function _moveAccount(uint playerIndex, Location memory location) internal {
+  function _moveAccount(uint playerIndex, Coord memory location) internal {
     uint256 roomID = LibRoom.queryByLocation(components, location);
     return _moveAccount(playerIndex, LibRoom.getIndex(components, roomID));
   }
@@ -383,7 +391,16 @@ abstract contract SetupTemplate is TestSetupImports {
     vm.prank(deployer);
     return
       abi.decode(
-        __GoalCreateSystem.executeTyped(index, "name", "description", roomIndex, condition),
+        __GoalCreateSystem.executeTyped(
+          index,
+          "name",
+          "description",
+          roomIndex,
+          condition.type_,
+          condition.logic,
+          condition.index,
+          condition.value
+        ),
         (uint256)
       );
   }
@@ -393,7 +410,17 @@ abstract contract SetupTemplate is TestSetupImports {
     Condition memory condition
   ) internal returns (uint256) {
     vm.prank(deployer);
-    return abi.decode(__GoalCreateRequirementSystem.executeTyped(index, condition), (uint256));
+    return
+      abi.decode(
+        __GoalCreateRequirementSystem.executeTyped(
+          index,
+          condition.type_,
+          condition.logic,
+          condition.index,
+          condition.value
+        ),
+        (uint256)
+      );
   }
 
   function _createGoalReward(
@@ -404,14 +431,22 @@ abstract contract SetupTemplate is TestSetupImports {
     vm.prank(deployer);
     return
       abi.decode(
-        __GoalCreateRewardSystem.executeTyped(index, "name", minCont, condition),
+        __GoalCreateRewardSystem.executeTyped(
+          index,
+          "name",
+          minCont,
+          condition.type_,
+          condition.logic,
+          condition.index,
+          condition.value
+        ),
         (uint256)
       );
   }
 
   function _createRoom(
     string memory name,
-    Location memory location,
+    Coord memory location,
     uint32 index
   ) internal returns (uint256) {
     uint32[] memory exits = new uint32[](0);
@@ -420,7 +455,7 @@ abstract contract SetupTemplate is TestSetupImports {
 
   function _createRoom(
     string memory name,
-    Location memory location,
+    Coord memory location,
     uint32 index,
     uint32 exitIndex
   ) internal returns (uint256) {
@@ -432,12 +467,16 @@ abstract contract SetupTemplate is TestSetupImports {
 
   function _createRoom(
     string memory name,
-    Location memory location,
+    Coord memory location,
     uint32 index,
     uint32[] memory exits
   ) internal returns (uint256) {
     vm.prank(deployer);
-    return abi.decode(__RoomCreateSystem.executeTyped(location, index, name, "", exits), (uint256));
+    return
+      abi.decode(
+        __RoomCreateSystem.executeTyped(location.x, location.y, location.z, index, name, "", exits),
+        (uint256)
+      );
   }
 
   function _createRoomGate(
@@ -509,7 +548,7 @@ abstract contract SetupTemplate is TestSetupImports {
 
   /* ITEMS */
 
-  // @notice creates and empty item index for testing
+  /// @notice creates and empty item index for testing
   function _createGenericItem(uint32 index) public returns (uint256 id) {
     vm.startPrank(deployer);
 
@@ -518,6 +557,44 @@ abstract contract SetupTemplate is TestSetupImports {
     _IndexItemComponent.set(id, index);
 
     vm.stopPrank();
+  }
+
+  function _createFood(
+    uint32 index,
+    string memory name,
+    string memory description,
+    int32 health,
+    uint256 experience,
+    string memory mediaURI
+  ) public returns (uint256 id) {
+    vm.prank(deployer);
+    return
+      abi.decode(
+        __RegistryCreateFoodSystem.executeTyped(
+          index,
+          name,
+          description,
+          health,
+          experience,
+          mediaURI
+        ),
+        (uint256)
+      );
+  }
+
+  function _createRevive(
+    uint32 index,
+    string memory name,
+    string memory description,
+    int32 health,
+    string memory mediaURI
+  ) public returns (uint256 id) {
+    vm.prank(deployer);
+    return
+      abi.decode(
+        __RegistryCreateReviveSystem.executeTyped(index, name, description, health, mediaURI),
+        (uint256)
+      );
   }
 
   function _createLootbox(
@@ -932,20 +1009,6 @@ abstract contract SetupTemplate is TestSetupImports {
     registerTrait(13, 0, 0, 5, 5, 0, 5, "EERIE", "Eerie Hands Mythic", "HAND");
   }
 
-  function _initItems() internal {
-    vm.startPrank(deployer);
-
-    // food (foodIndex, name, health)
-    __RegistryCreateFoodSystem.executeTyped(1, "Gum", "DESCRIPTION", 25, 0, ""); // itemIndex 1
-    __RegistryCreateFoodSystem.executeTyped(2, "Candy", "DESCRIPTION", 50, 0, ""); // itemIndex 2
-    __RegistryCreateFoodSystem.executeTyped(3, "Cookie Sticks", "DESCRIPTION", 100, 0, ""); // itemIndex 3
-
-    // revives (reviveIndex, name, health)
-    __RegistryCreateReviveSystem.executeTyped(1000, "Ribbon", "DESCRIPTION", 10, ""); // itemIndex 4
-
-    vm.stopPrank();
-  }
-
   /////////////////
   // CONFIGS
 
@@ -1053,7 +1116,7 @@ abstract contract SetupTemplate is TestSetupImports {
   ///////////////////////
   // UTILS
 
-  function assertEq(Location memory a, Location memory b) public {
+  function assertEq(Coord memory a, Coord memory b) public {
     assertTrue(a.x == b.x && a.y == b.y && a.z == b.z);
   }
 }

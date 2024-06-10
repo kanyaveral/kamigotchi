@@ -121,30 +121,6 @@
     },
     {
       "type": "function",
-      "name": "getAt",
-      "inputs": [
-        {
-          "name": "value",
-          "type": "bytes",
-          "internalType": "bytes"
-        },
-        {
-          "name": "index",
-          "type": "uint256",
-          "internalType": "uint256"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256",
-          "internalType": "uint256"
-        }
-      ],
-      "stateMutability": "view"
-    },
-    {
-      "type": "function",
       "name": "getBatch",
       "inputs": [
         {
@@ -180,28 +156,9 @@
       "name": "getEntitiesWithValue",
       "inputs": [
         {
-          "name": "value",
+          "name": "",
           "type": "bytes",
           "internalType": "bytes"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256[]",
-          "internalType": "uint256[]"
-        }
-      ],
-      "stateMutability": "view"
-    },
-    {
-      "type": "function",
-      "name": "getEntitiesWithValue",
-      "inputs": [
-        {
-          "name": "value",
-          "type": "string",
-          "internalType": "string"
         }
       ],
       "outputs": [
@@ -340,19 +297,6 @@
     },
     {
       "type": "function",
-      "name": "registerIndexer",
-      "inputs": [
-        {
-          "name": "indexer",
-          "type": "address",
-          "internalType": "address"
-        }
-      ],
-      "outputs": [],
-      "stateMutability": "nonpayable"
-    },
-    {
-      "type": "function",
       "name": "registerWorld",
       "inputs": [
         {
@@ -461,25 +405,6 @@
       ],
       "outputs": [],
       "stateMutability": "nonpayable"
-    },
-    {
-      "type": "function",
-      "name": "size",
-      "inputs": [
-        {
-          "name": "value",
-          "type": "bytes",
-          "internalType": "bytes"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256",
-          "internalType": "uint256"
-        }
-      ],
-      "stateMutability": "view"
     },
     {
       "type": "function",
@@ -596,11 +521,9 @@
     "extractRaw(uint256)": "e9ff6c76",
     "extractRawBatch(uint256[])": "12b11155",
     "get(uint256)": "9507d39a",
-    "getAt(bytes,uint256)": "6f9aa155",
     "getBatch(uint256[])": "088dd0b9",
     "getEntities()": "31b933b9",
     "getEntitiesWithValue(bytes)": "b361be46",
-    "getEntitiesWithValue(string)": "f94655da",
     "getRaw(uint256)": "dd98e3c9",
     "getRawBatch(uint256[])": "4323c4ef",
     "getSchema()": "6b122fe0",
@@ -608,7 +531,6 @@
     "hasValue(uint256,string)": "9d72b0e1",
     "id()": "af640d0f",
     "owner()": "8da5cb5b",
-    "registerIndexer(address)": "75c0669c",
     "registerWorld(address)": "9d2c76b4",
     "remove(uint256)": "4cc82215",
     "removeBatch(uint256[])": "8482643e",
@@ -616,7 +538,6 @@
     "set(uint256,string)": "64371977",
     "setBatch(uint256[],bytes[])": "13ca8b6a",
     "setBatch(uint256[],string[])": "e4b6aecf",
-    "size(bytes)": "1c5ee10c",
     "transferOwnership(address)": "f2fde38b",
     "unauthorizeWriter(address)": "bf4fe57e",
     "world()": "30b67baa",

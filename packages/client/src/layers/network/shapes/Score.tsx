@@ -30,7 +30,7 @@ export const getScoreFromHash = (
   epoch: number,
   type: string
 ): Score => {
-  const { Balance } = components;
+  const { Value } = components;
 
   // populate the holder
   const index = getEntityIndex(world, holderID, epoch, type);
@@ -39,22 +39,22 @@ export const getScoreFromHash = (
 
   return {
     account,
-    score: index ? (getComponentValue(Balance, index)?.value as number) : 0,
+    score: index ? (getComponentValue(Value, index)?.value as number) : 0,
   };
 };
 
 // get a Score object from its EnityIndex
 export const getScore = (world: World, components: Components, index: EntityIndex): Score => {
-  const { BareHolderID, Balance } = components;
+  const { HolderID, Value } = components;
 
   // populate the holder
-  const accountID = getComponentValue(BareHolderID, index)?.value as EntityID;
+  const accountID = getComponentValue(HolderID, index)?.value as EntityID;
   const accountEntityIndex = world.entityToIndex.get(accountID) as EntityIndex;
   const account = getAccount(world, components, accountEntityIndex);
 
   return {
     account,
-    score: (getComponentValue(Balance, index)?.value as number) * 1,
+    score: (getComponentValue(Value, index)?.value as number) * 1,
   };
 };
 
