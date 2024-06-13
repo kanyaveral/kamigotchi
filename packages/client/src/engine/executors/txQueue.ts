@@ -135,7 +135,7 @@ export function createTxQueue<C extends Contracts>(
             'eth_maxPriorityFeePerGas',
             []
           );
-          const maxPriorityFee = BigNumber.from(maxPriorityFeeResponse).mul(125).div(100);
+          const maxPriorityFee = BigNumber.from(maxPriorityFeeResponse); //.mul(125).div(100);
           populatedTx.maxPriorityFeePerGas = maxPriorityFee;
         } catch (e) {
           console.warn('[TXQueue] Failed to get maxPriorityFeePerGas', e);

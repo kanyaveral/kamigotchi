@@ -52,7 +52,7 @@ export function createConfig(externalProvider?: ExternalProvider): SetupContract
   // resolve the network config based on the environment mode
   let mode = import.meta.env.MODE;
   if (mode === 'development') config = createConfigRawLocal(externalProvider);
-  else if (mode === 'staging') config = createConfigRawOPSepolia(externalProvider);
+  else if (mode === 'staging') config = createConfigRawYominet(externalProvider);
   else config = createConfigRawLocal(externalProvider);
 
   if (
@@ -85,21 +85,19 @@ function createConfigRawLocal(externalProvider?: ExternalProvider): NetworkConfi
   return config;
 }
 
-// Get the network config of a deployment to Optimism testnet
-function createConfigRawOPSepolia(externalProvider?: ExternalProvider): NetworkConfig {
+// Get the network config of a deployment to kami testnet
+function createConfigRawYominet(externalProvider?: ExternalProvider): NetworkConfig {
   let config: NetworkConfig = <NetworkConfig>{
     devMode: false,
-    jsonRpc: 'https://go.getblock.io/19cc856d2ae14db5907bfad3688d59b7',
-    wsRpc: 'wss://go.getblock.io/b32c8ea4f9a94c41837c68df4881d52f',
-    snapshotServiceUrl: 'https://op-snapshot-lb.test.asphodel.io',
+    jsonRpc: 'https://yominet.rpc.caldera.xyz/http/',
+    wsRpc: 'wss://yominet.rpc.caldera.xyz/ws/',
+    snapshotServiceUrl: 'https://snapshot-lb.test.asphodel.io',
 
-    chainId: 11155420,
-    worldAddress: '0x5E5C181ccc3E2759B45fb775877146F7BF6d9227',
-    initialBlockNumber: 12971933,
+    chainId: 5264468217,
+    worldAddress: '0xeb2DB9B4900fcA1D3B7b130967E4b5D1e68c2bFa',
+    initialBlockNumber: 1661,
   };
 
-  // EOAs and privatekey
-  // TODO: make sure it's safe then rug all the below
   if (externalProvider) config.externalProvider = externalProvider;
   else {
     // either pull or set up local burner
