@@ -109,21 +109,16 @@ export const Grid = (props: Props) => {
                   }}
                 />
               );
-              if (isRoom)
+
+              if (isRoom) {
+                const name = `${room.name} ${isBlocked ? '(blocked)' : ''}`;
+                const description = [name, '', room.description, ''];
                 tile = (
-                  <Tooltip
-                    key={j}
-                    text={[
-                      `${room.name} ${isBlocked ? '(blocked)' : ''}`,
-                      '',
-                      room.description,
-                      '',
-                    ]}
-                    grow
-                  >
+                  <Tooltip key={j} text={description} grow>
                     {tile}
                   </Tooltip>
                 );
+              }
               return tile;
             })}
           </Row>
@@ -144,6 +139,7 @@ const Container = styled.div`
 const Background = styled.img`
   width: 100%;
   height: 100%;
+  border-radius: 0px 0px 0.45vw 0.45vw;
 `;
 
 const Overlay = styled.div`

@@ -12,17 +12,18 @@ interface Props {
   canExit?: boolean;
   overlay?: boolean;
   noPadding?: boolean;
+  truncate?: boolean;
 }
 
 // ModalWrapper is an animated wrapper around all modals.
 // It includes and exit button with a click sound as well as Content formatting.
 export const ModalWrapper = (props: Props) => {
-  const { id, children, header, footer, canExit, overlay, noPadding } = props;
+  const { id, children, header, footer, canExit, overlay, noPadding, truncate } = props;
   const { modals } = useVisibility();
 
   return (
     <Wrapper id={id} isOpen={modals[id]} overlay={!!overlay}>
-      <Content>
+      <Content truncate={truncate}>
         {canExit && (
           <ButtonRow>
             <ExitButton divName={id} />
@@ -53,14 +54,14 @@ const Wrapper = styled.div<Wrapper>`
   align-items: center;
 `;
 
-const Content = styled.div`
+const Content = styled.div<{ truncate?: boolean }>`
   position: relative;
   border: solid black 0.15vw;
   border-radius: 0.6vw;
 
   background-color: white;
   width: 99%;
-  height: 99%;
+  ${({ truncate }) => (truncate ? `` : `height: 99%;`)}
 
   display: flex;
   flex-flow: column nowrap;
@@ -77,15 +78,15 @@ const ButtonRow = styled.div`
 `;
 
 const Header = styled.div`
-  border-radius: 10px 10px 0px 0px;
   border-bottom: solid black 0.15vw;
+  border-radius: 0.45vw 0.45vw 0 0;
   display: flex;
   flex-flow: column nowrap;
 `;
 
 const Footer = styled.div`
-  border-radius: 0px 0px 10px 10px;
   border-top: solid black 0.15vw;
+  border-radius: 0 0 0.45vw 0.45vw;
   display: flex;
   flex-flow: column nowrap;
 `;
