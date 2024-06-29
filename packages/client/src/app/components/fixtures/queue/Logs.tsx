@@ -38,20 +38,29 @@ export const Logs = (props: Props) => {
     let details = metadata;
     if (/\S/.test(metadata)) {
       const bodyStart = metadata.indexOf('body=');
-      if (bodyStart != -1) {
-        const errorStart = metadata.indexOf('error='); // used to determine end of body segment
-        const body = metadata.substring(bodyStart + 6, errorStart - 5).replaceAll('\\"', '"');
-        const response = JSON.parse(body);
+      const errorStart = metadata.indexOf('error='); // used to determine end of body segment
+      if (bodyStart != -1 && errorStart != -1) {
+        let response: any;
+        try {
+          const body = metadata.substring(bodyStart + 6, errorStart - 3).replaceAll('\\"', '"');
+          response = JSON.parse(body);
+        } catch (e) {
+          const body = metadata.substring(bodyStart + 6, errorStart - 5).replaceAll('\\"', '"');
+          response = JSON.parse(body);
+        }
+
         const responseMessage = response?.error?.message ?? response?.message;
         const splitIndex = responseMessage.indexOf(':');
         if (splitIndex != -1) {
           event = responseMessage.substring(0, splitIndex);
           details = responseMessage.substring(splitIndex + 1);
+        } else {
+          details = responseMessage;
         }
       }
     }
 
-    const tooltip = [`${status} (${event})`, '', details];
+    const tooltip = status === 'Complete' ? [status] : [`${status} (${event})`, '', details];
     return <Tooltip text={tooltip}>{icon}</Tooltip>;
   };
 
