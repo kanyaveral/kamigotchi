@@ -6,7 +6,6 @@ import { ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
 import { useSelected } from 'app/stores';
 import { getAccountFromBurner } from 'network/shapes/Account';
-import { getKamiConfig } from 'network/shapes/Config';
 import { Kami } from 'network/shapes/Kami';
 import { Node, getNodeByIndex } from 'network/shapes/Node';
 import { Banner } from './Banner';
@@ -49,7 +48,6 @@ export function registerNodeModal() {
           const { roomIndex } = useSelected.getState();
 
           const account = getAccountFromBurner(network, { kamis: true, inventory: true });
-          const kamiConfig = getKamiConfig(world, components);
           let node = getNodeByIndex(world, components, roomIndex, {
             kamis: true,
             accountID: account?.id,
@@ -58,14 +56,14 @@ export function registerNodeModal() {
 
           return {
             network,
-            data: { account, kamiConfig, node },
+            data: { account, node },
           };
         })
       ),
 
     // Render
     ({ data, network }) => {
-      const { account, kamiConfig } = data;
+      const { account } = data;
       const { actions, api, components, world } = network;
       const [tab, setTab] = useState('allies');
       const { roomIndex } = useSelected();
@@ -90,7 +88,7 @@ export function registerNodeModal() {
       // collects on an existing production
       const collect = (kami: Kami) => {
         actions.add({
-          action: 'ProductionCollect',
+          action: 'HarvestCollect',
           params: [kami.id],
           description: `Collecting ${kami.name}'s Harvest`,
           execute: async () => {
@@ -115,7 +113,7 @@ export function registerNodeModal() {
       // assume this function is only called with two kamis that have productions
       const liquidate = (myKami: Kami, enemyKami: Kami) => {
         actions.add({
-          action: 'ProductionLiquidate',
+          action: 'HarvestLiquidate',
           params: [enemyKami.production!.id, myKami.id],
           description: `Liquidating ${enemyKami.name} with ${myKami.name}`,
           execute: async () => {
@@ -127,7 +125,7 @@ export function registerNodeModal() {
       // starts a production for the given pet and node
       const start = (kami: Kami, node: Node) => {
         actions.add({
-          action: 'ProductionStart',
+          action: 'HarvestStart',
           params: [kami.id, node.id],
           description: `Placing ${kami.name} on ${node.name}`,
           execute: async () => {
@@ -139,7 +137,7 @@ export function registerNodeModal() {
       // stops a production
       const stop = (kami: Kami) => {
         actions.add({
-          action: 'ProductionStop',
+          action: 'HarvestStop',
           params: [kami.production!.id],
           description: `Removing ${kami.name} from ${kami.production!.node?.name}`,
           execute: async () => {
@@ -171,7 +169,6 @@ export function registerNodeModal() {
             allies={node.kamis?.allies!}
             enemies={node.kamis?.enemies!}
             actions={{ collect, feed, liquidate, stop }}
-            kamiConfig={kamiConfig}
             tab={tab}
           />
         </ModalWrapper>
