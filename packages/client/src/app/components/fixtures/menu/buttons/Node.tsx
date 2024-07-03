@@ -1,8 +1,13 @@
-import { MenuButton } from 'app/components/library';
 import { Modals, useSelected } from 'app/stores';
 import { harvestIcon } from 'assets/images/icons/actions';
+import { MenuButton } from './MenuButton';
 
-export const NodeMenuButton = () => {
+interface Props {
+  disabled?: boolean;
+}
+
+export const NodeMenuButton = (props: Props) => {
+  const { disabled } = props;
   const { roomIndex, setNode } = useSelected(); // roomIndex == nodeIndex
 
   const modalsToHide: Partial<Modals> = {
@@ -19,11 +24,11 @@ export const NodeMenuButton = () => {
     <MenuButton
       id='party_button'
       image={harvestIcon}
-      tooltip='Harvest'
+      tooltip={disabled ? 'There is no node here.' : 'Harvest'}
       targetModal='node'
       hideModals={modalsToHide}
-      // nodeModal relies on roomIndex; leaving here for now
-      // onClick={() => setNode(roomIndex)}
+      onClick={() => setNode(roomIndex)}
+      disabled={disabled}
     />
   );
 };
