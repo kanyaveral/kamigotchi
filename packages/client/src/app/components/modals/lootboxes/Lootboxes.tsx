@@ -202,7 +202,6 @@ export function registerLootboxesModal() {
                 inventory: accLootboxes[0],
                 lootbox: selectedBox,
               }}
-              utils={{ setState }}
             />
           );
         } else if (state === 'REVEALING') {
