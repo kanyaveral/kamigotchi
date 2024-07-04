@@ -8,7 +8,6 @@ import {
 } from '@mud-classic/recs';
 import InfoIcon from '@mui/icons-material/Info';
 import { IconButton } from '@mui/material';
-import { waitForActionCompletion } from 'network/utils';
 import { useEffect, useState } from 'react';
 import { map, merge } from 'rxjs';
 import styled from 'styled-components';
@@ -29,6 +28,7 @@ import {
   getAccountEntityIndexByName,
   getAccountEntityIndexByOwner,
 } from 'network/shapes/Account';
+import { waitForActionCompletion } from 'network/utils';
 import { playSignup } from 'utils/sounds';
 
 /**
@@ -179,7 +179,7 @@ export function registerAccountRegistrar() {
             gasHarasser: false,
           });
         }
-      }, [networkValidations, validations.accountExists]);
+      }, [networkValidations, validations.accountExists, validators.walletConnector]);
 
       /////////////////
       // ACTION
@@ -207,7 +207,7 @@ export function registerAccountRegistrar() {
       // INTERACTION
 
       const catchKeys = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && !isNameTaken()) {
           handleAccountCreation(name);
         }
       };
@@ -228,7 +228,7 @@ export function registerAccountRegistrar() {
             world.entityToIndex.get(actionID) as EntityIndex
           );
         } catch (e) {
-          console.log('ERROR CREATING ACCOUNT:', e);
+          console.error('ERROR CREATING ACCOUNT:', e);
         }
       };
 
@@ -239,6 +239,12 @@ export function registerAccountRegistrar() {
       /////////////////
       // INTERPRETATION
 
+      const getAbbrevAddrStr = (addr: string) => {
+        const addrPrefix = addr.slice(0, 6);
+        const addrSuffix = addr.slice(-4);
+        return `${addrPrefix}...${addrSuffix}`;
+      };
+
       const isNameTaken = () => {
         const account = getAccountEntityIndexByName(components, name);
         return !!account;
@@ -248,39 +254,22 @@ export function registerAccountRegistrar() {
       // RENDERING
 
       const OperatorDisplay = () => {
-        const address = burnerAddress;
-        const addrPrefix = address.slice(0, 6);
-        const addrSuffix = address.slice(-4);
-        const addressTaken = operatorAddresses.has(address);
-
-        let color;
-        let infoText;
-        if (addressTaken) {
-          color = '#b22';
-          infoText = [
-            'This burner address references an Avatar already taken by another Account.',
-            '',
-            'But the odds of someone generating the same address are 1 in 10^48.',
-            '',
-            'Fascinating. You can take a look at localstorage..',
-          ];
-        } else {
-          color = '#666';
-          infoText = [
-            'The private key to this address is generated and stored in the browser. It behaves like a session key and is used to approve in-game actions without the need for explicit signatures.',
-            '',
-            'It cannot make account level changes or migrate your assets in and out of the game.',
-            '',
-            'Copy the private key locally and do not share it. Consider it replaceable and only store modest sums on it at a time.',
-          ];
-        }
+        const infoText = [
+          'The embedded wallet (operator address) to this account is managed by Privy.',
+          '',
+          'It behaves like a session key and is used to approve in-game actions without the need for explicit signatures.',
+          '',
+          'It cannot make account level changes or migrate your assets in and out of the game.',
+        ];
 
         return (
           <AddressRow>
-            <Description>Avatar: {`${addrPrefix}...${addrSuffix}`}</Description>
+            <Tooltip text={[burnerAddress]}>
+              <Description>Operator: {getAbbrevAddrStr(burnerAddress)}</Description>
+            </Tooltip>
             <Tooltip text={infoText}>
               <IconButton size='small'>
-                <InfoIcon fontSize='small' style={{ color }} />
+                <InfoIcon fontSize='small' style={{ color: '#666' }} />
               </IconButton>
             </Tooltip>
             <Tooltip text={['copy address']}>
@@ -291,12 +280,11 @@ export function registerAccountRegistrar() {
       };
 
       const OwnerDisplay = () => {
-        const addrPrefix = selectedAddress.slice(0, 6);
-        const addrSuffix = selectedAddress.slice(-4);
-
         return (
           <AddressRow>
-            <Description>Owner: {`${addrPrefix}...${addrSuffix}`}</Description>
+            <Tooltip text={[selectedAddress]}>
+              <Description>Owner: {getAbbrevAddrStr(selectedAddress)}</Description>
+            </Tooltip>
           </AddressRow>
         );
       };
@@ -356,7 +344,7 @@ export function registerAccountRegistrar() {
           );
 
           let tooltip: string[] = [];
-          if (addressTaken) tooltip = ['That Avatar is already taken.'];
+          if (addressTaken) tooltip = ['That Operator address is already taken.'];
           else if (name === '') tooltip = [`Name cannot be empty.`];
           else if (isNameTaken()) tooltip = ['That name is already taken.'];
           else if (/\s/.test(name)) tooltip = [`Name cannot contain whitespace.`];
@@ -367,9 +355,6 @@ export function registerAccountRegistrar() {
 
         return (
           <>
-            <Description>You will be assigned an avatar.</Description>
-            <Description>Please give it a name.</Description>
-            <br />
             {OwnerDisplay()}
             {OperatorDisplay()}
             <Input
