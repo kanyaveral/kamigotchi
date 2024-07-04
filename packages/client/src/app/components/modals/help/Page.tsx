@@ -4,30 +4,29 @@ interface Props {
   body: string[];
 }
 
-export const SectionContent = (props: Props) => {
+export const Page = (props: Props) => {
   const { body } = props;
   return (
-    <Body>
-      {body.map((line: string) => {
+    <Container>
+      {body.map((line: string, i: number) => {
         return (
-          <Line key={line}>
+          <Line key={i}>
             {line}
             <br />
           </Line>
         );
       })}
-    </Body>
+    </Container>
   );
 };
 
-const Body = styled.div`
+const Container = styled.div`
   color: #333;
   padding: 1.5vw;
 `;
 
 const Line = styled.div`
-  font-family: Pixel;
-  font-size: 1vw;
-  line-height: 110%;
+  font-size: 0.9vw;
+  line-height: 150%;
   text-align: left;
 `;
