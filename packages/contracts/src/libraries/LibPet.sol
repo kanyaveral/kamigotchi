@@ -560,6 +560,10 @@ library LibPet {
     LibDataEntity.inc(components, accountID, 0, "KAMI_REVIVE", 1);
   }
 
+  function logNameChange(IUintComp components, uint256 accountID) internal {
+    LibDataEntity.inc(components, accountID, 0, "KAMI_NAME", 1);
+  }
+
   ////////////////////
   // UTILS
 
