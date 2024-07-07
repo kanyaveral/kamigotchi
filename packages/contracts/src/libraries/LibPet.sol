@@ -104,6 +104,27 @@ library LibPet {
     HealthComponent(getAddressById(components, HealthCompID)).sync(id, -1 * amt);
   }
 
+  // apply the effects of a consumable item to the pet
+  // assume all requisite checks are run in advance
+  // TODO: add support for experience, revives and holy dust
+  function feed(IUintComp components, uint256 id, uint32 itemIndex) internal {
+    uint256 registryID = LibItemRegistry.getByIndex(components, itemIndex);
+    string memory type_ = LibItemRegistry.getType(components, registryID);
+
+    // handle revives
+    if (LibString.eq(type_, "REVIVE") && isDead(components, id)) {
+      revive(components, id);
+      LibPet.logRevive(components, id);
+    }
+
+    // handle experience boosts
+    if (LibExperience.has(components, registryID)) {
+      LibExperience.inc(components, id, LibExperience.get(components, registryID));
+    }
+
+    LibStat.applyy(components, registryID, id);
+  }
+
   // heal the pet by a given amount
   function heal(IUintComp components, uint256 id, int32 amt) internal {
     if (amt == 0) return; // skip if no healing
@@ -205,8 +226,11 @@ library LibPet {
     return (healthBudget * precision) / (core * boost);
   }
 
-  // Calculate and return the total harmony of a pet (including equips)
+  /////////////////
+  // STAT CALCS
   // TODO: implement equipment stats with new stat shapes
+
+  // Calculate and return the total harmony of a pet (including equips)
   function calcTotalHarmony(IUintComp components, uint256 id) internal view returns (int32) {
     int32 total = LibStat.getHarmonyTotal(components, id);
     // uint256[] memory equipment = LibEquipment.getForPet(components, id);
@@ -217,7 +241,6 @@ library LibPet {
   }
 
   // Calculate and return the total health of a pet (including equips)
-  // TODO: implement equipment stats with new stat shapes
   function calcTotalHealth(IUintComp components, uint256 id) internal view returns (int32) {
     int32 total = LibStat.getHealthTotal(components, id);
 
@@ -229,7 +252,6 @@ library LibPet {
   }
 
   // Calculate and return the total power of a pet (including equips)
-  // TODO: implement equipment stats with new stat shapes
   function calcTotalPower(IUintComp components, uint256 id) internal view returns (int32) {
     int32 total = LibStat.getPowerTotal(components, id);
     // uint256[] memory equipment = LibEquipment.getForPet(components, id);
@@ -240,7 +262,6 @@ library LibPet {
   }
 
   // Calculate and return the total violence of a pet (including equips)
-  // TODO: implement equipment stats with new stat shapes
   function calcTotalViolence(IUintComp components, uint256 id) internal view returns (int32) {
     int32 total = LibStat.getViolenceTotal(components, id);
     // uint256[] memory equipment = LibEquipment.getForPet(components, id);
@@ -556,7 +577,8 @@ library LibPet {
   ////////////////////
   // LOGGING
 
-  function logRevive(IUintComp components, uint256 accountID) internal {
+  function logRevive(IUintComp components, uint256 id) internal {
+    uint256 accountID = LibPet.getAccount(components, id);
     LibDataEntity.inc(components, accountID, 0, "KAMI_REVIVE", 1);
   }
 

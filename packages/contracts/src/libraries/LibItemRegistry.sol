@@ -106,12 +106,13 @@ library LibItemRegistry {
 
   /// @notice adds a stat to an item
   function addStat(IUintComp components, uint256 id, string memory type_, int32 value) internal {
-    if (type_.eq("XP")) setExperience(components, id, value.toUint256());
+    if (type_.eq("XP"))
+      setExperience(components, id, value.toUint256()); // TODO: convert this to Stat shape
     else if (type_.eq("HEALTH")) LibStat.setHealth(components, id, Stat(0, 0, 0, value));
-    else if (type_.eq("MAXHEALTH")) LibStat.setHealth(components, id, Stat(value, 0, 0, 0));
-    else if (type_.eq("POWER")) LibStat.setPower(components, id, Stat(value, 0, 0, 0));
-    else if (type_.eq("VIOLENCE")) LibStat.setViolence(components, id, Stat(value, 0, 0, 0));
-    else if (type_.eq("HARMONY")) LibStat.setHarmony(components, id, Stat(value, 0, 0, 0));
+    else if (type_.eq("MAXHEALTH")) LibStat.setHealth(components, id, Stat(0, value, 0, 0));
+    else if (type_.eq("POWER")) LibStat.setPower(components, id, Stat(0, value, 0, 0));
+    else if (type_.eq("VIOLENCE")) LibStat.setViolence(components, id, Stat(0, value, 0, 0));
+    else if (type_.eq("HARMONY")) LibStat.setHarmony(components, id, Stat(0, value, 0, 0));
     else if (type_.eq("STAMINA")) LibStat.setStamina(components, id, Stat(0, 0, 0, value));
     else revert("LibItemRegistry: invalid stat");
   }
@@ -144,18 +145,50 @@ library LibItemRegistry {
   /////////////////
   // CHECKERS
 
+  // check whether an entity is an item
   function isItem(IUintComp components, uint256 id) internal view returns (bool) {
     return IndexItemComponent(getAddressById(components, IndexItemCompID)).has(id);
   }
 
-  function hasType(IUintComp components, uint256 id) internal view returns (bool) {
-    return TypeComponent(getAddressById(components, TypeCompID)).has(id);
+  // // check whether an entity is consumable by its ID
+  // // NOTE: collides with index-based override due to auto type-conversion from uint32->uint256
+  // function isConsumable(IUintComp components, uint256 id) internal view returns (bool) {
+  //   return getComponentById(components, IsConsumableCompID).has(id);
+  // }
+
+  // check whether an entity is consumable by its index
+  function isConsumable(IUintComp components, uint32 index) internal view returns (bool) {
+    uint256 id = genID(index);
+    return getComponentById(components, IsConsumableCompID).has(id);
   }
 
+  function isForAccount(IUintComp components, uint32 index) internal view returns (bool) {
+    return isFor(components, index, IsAccountCompID);
+  }
+
+  function isForPet(IUintComp components, uint32 index) internal view returns (bool) {
+    return isFor(components, index, IsPetCompID);
+  }
+
+  function isFor(IUintComp components, uint32 index, uint256 for_) internal view returns (bool) {
+    uint256 id = genID(index);
+    ForComponent comp = ForComponent(getAddressById(components, ForCompID));
+    return comp.has(id) && comp.get(id) == for_;
+  }
+
+  // NOTE: temporary function as we decide how to identify revives with out type_
+  function isRevive(IUintComp components, uint32 index) internal view returns (bool) {
+    uint256 id = genID(index);
+    string memory type_ = getType(components, id);
+    return LibString.eq(type_, "REVIVE");
+  }
+
+  // check whether an entity is an Item Registry instance
   function isInstance(IUintComp components, uint256 id) internal view returns (bool) {
     return isRegistry(components, id) && isItem(components, id);
   }
 
+  // check whether an entity is part of a Registry
   function isRegistry(IUintComp components, uint256 id) internal view returns (bool) {
     return IsRegistryComponent(getAddressById(components, IsRegCompID)).has(id);
   }
