@@ -12,6 +12,7 @@ import {
 } from '@mud-classic/recs';
 
 import { Components } from 'network/';
+import { Account } from './Account';
 import {
   Condition,
   Status,
@@ -20,9 +21,8 @@ import {
   checkCurrent,
   checkLogicOperator,
   checkerSwitch,
-} from 'network/shapes/utils/Conditionals';
-import { Account } from './Account';
-import { getData } from './Data';
+  getData,
+} from './utils';
 
 /////////////////
 // GETTERS
