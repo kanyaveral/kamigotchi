@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import { ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
-import { useSelected } from 'app/stores';
+import { useSelected, useVisibility } from 'app/stores';
 import { getAccountFromBurner } from 'network/shapes/Account';
 import { parseConditionalText } from 'network/shapes/Conditional';
 import { Kami } from 'network/shapes/Kami';
@@ -52,15 +52,19 @@ export function registerNodeModal() {
       // console.log('Node Modal Data', data);
       const { account } = data;
       const { actions, api, components, world } = network;
-      const [tab, setTab] = useState('allies');
       const { nodeIndex } = useSelected();
+      const { modals, setModals } = useVisibility();
       const [node, setNode] = useState<Node>(data.node);
 
       // updates from selected Node updates
       useEffect(() => {
         const nodeOptions = { kamis: true, accountID: account.id };
         let node = getNodeByIndex(world, components, nodeIndex, nodeOptions);
-        if (!node) node = NullNode;
+        if (!node) {
+          node = NullNode;
+          setModals({ ...modals, node: false });
+        }
+
         setNode(node);
       }, [nodeIndex]);
 
@@ -168,7 +172,6 @@ export function registerNodeModal() {
               allies={node.kamis?.allies!}
               enemies={node.kamis?.enemies!}
               actions={{ collect, feed, liquidate, stop }}
-              tab={tab}
             />
           ) : (
             <EmptyText>
