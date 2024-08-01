@@ -61,7 +61,7 @@ const Content = styled.div<{ truncate?: boolean }>`
   position: relative;
   background-color: white;
   border: solid black 0.15vw;
-  border-radius: 0.6vw;
+  border-radius: 1.2vw;
 
   width: 100%;
   ${({ truncate }) => (truncate ? `max-height: 100%;` : `height: 100%;`)}
@@ -73,6 +73,7 @@ const Content = styled.div<{ truncate?: boolean }>`
 
 const ButtonRow = styled.div`
   position: absolute;
+  padding: 0.6vw;
 
   display: inline-flex;
   flex-flow: row nowrap;
@@ -103,7 +104,7 @@ const Children = styled.div<{ noPadding?: boolean }>`
   flex-flow: column nowrap;
   font-family: Pixel;
 
-  ${({ noPadding }) => (noPadding ? `padding: 0;` : `padding: .4vw;`)}
+  padding: ${({ noPadding }) => (noPadding ? `0` : `.6vw`)};
 `;
 
 const fadeIn = keyframes`

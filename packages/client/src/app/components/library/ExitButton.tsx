@@ -23,20 +23,15 @@ export const ExitButton = (props: Props) => {
 
 const Button = styled.button`
   background-color: #ffffff;
-  border-radius: 0.4vw;
   border: 0.15vw solid black;
+  border-radius: 0.6vw;
 
   color: black;
-  justify-self: right;
   padding: 0.3vw 0.4vw;
-  margin: 0.7vw;
   z-index: 1;
 
-  font-family: Pixel;
   font-size: 0.9vw;
-
   cursor: pointer;
-  pointer-events: auto;
 
   &:hover {
     background-color: #e8e8e8;
