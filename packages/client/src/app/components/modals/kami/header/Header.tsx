@@ -12,6 +12,8 @@ import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
 import { KamiImage } from './KamiImage';
 
+const excludedStats = ['stamina', 'slots'];
+
 interface Props {
   data: {
     account: Account;
@@ -22,15 +24,10 @@ interface Props {
   };
 }
 
-export const Banner = (props: Props) => {
+export const Header = (props: Props) => {
   const { account, kami } = props.data;
   const { setAccount } = useSelected();
   const { modals, setModals } = useVisibility();
-
-  const traits = kami.traits!;
-  const bodyAffinity = traits.body.affinity.toLowerCase() as keyof typeof AffinityColors;
-  const handAffinity = traits.hand.affinity.toLowerCase() as keyof typeof AffinityColors;
-  const excludedStats = ['stamina', 'slots'];
 
   const isMine = (kami: Kami) => {
     return kami.account?.index === account.index;
@@ -82,7 +79,7 @@ export const Banner = (props: Props) => {
             <AffinityCard trait='body' />
             <AffinityCard trait='hand' />
           </AffinityContainer>
-          <StatsContainer onMouseDown={playClick}>
+          <StatsContainer>
             {Object.entries(kami.stats)
               .filter(([key]) => !excludedStats.includes(key))
               .map(([name, value]) => {
@@ -96,7 +93,7 @@ export const Banner = (props: Props) => {
                     text={[`${name} (${value.base} + ${value.shift})`, '', description]}
                     grow
                   >
-                    <StatPairing key={name} color={color}>
+                    <StatPairing key={name} color={color} onMouseDown={playClick}>
                       <Icon size={2.1} src={icon} />
                       <Text size={1.1}>{value.total}</Text>
                     </StatPairing>
@@ -134,7 +131,36 @@ const Content = styled.div`
 const Title = styled.div<{ size: number }>`
   font-size: ${(props) => props.size}vw;
   padding: ${(props) => `${props.size * 0.75}vw ${props.size * 0.45}vw`};
+  text-shadow: ${(props) => `1.2vw .3vw ${props.size * 0.2}vw gray`};
+
+  align-self: flex-start;
+  user-select: none;
+  cursor: pointer;
+  &:active {
+    text-shadow: ${(props) => `1vw 1vw ${props.size * 0.05}vw gray`};
+  }
 `;
+
+// // an attempt to trigger random shadow/glimmer effect
+// const glimmerAnim = css(['', ' 0.9s linear infinite'] as any as TemplateStringsArray, glimmerFx);
+// const Title = styled.div<{ size: number; rand: number }>`
+//   font-size: ${(props) => props.size}vw;
+//   padding: ${(props) => `${props.size * 0.75}vw ${props.size * 0.45}vw`};
+//   text-shadow: ${(props) => `3vw .4vw ${props.size * 0.3}vw gray`};
+
+//   cursor: pointer;
+//   user-select: none;
+//   &:active {
+//     text-shadow: ${(props) => `2vw 1.2vw ${props.size * 0.2}vw gray`};
+
+//     ${({ rand }) =>
+//       (rand * 1000) % 1000 < 100 &&
+//       `
+//       background: linear-gradient(to right, black 0, white 10%, black 20%, white 30%, black 40%);
+//       animation: ${glimmerFx} 0.9s linear infinite;
+//       animation: ${glimmerAnim};
+//       `}
+// `;
 
 const Row = styled.div`
   height: 10vw;
@@ -164,7 +190,7 @@ const AffinityPairing = styled.div<{ color?: string }>`
   width: 12vw;
   padding: 0.9vw;
   gap: 0.6vw;
-  filter: drop-shadow(-0.05vw 0.1vw 0.15vw black);
+  filter: drop-shadow(0.5vw 0.1vw 0.15vw black);
 
   flex-grow: 1;
   display: flex;
@@ -182,7 +208,7 @@ const StatsContainer = styled.div`
   background-color: #999;
   border: solid black 0.15vw;
   border-radius: 1.2vw;
-  filter: drop-shadow(-0.05vw 0.1vw 0.15vw black);
+  filter: drop-shadow(0.6vw 0.12vw 0.15vw black);
 
   height: 100%;
   width: 19.3vw;
@@ -199,7 +225,7 @@ const StatPairing = styled.div<{ color?: string }>`
   background-color: ${({ color }) => color ?? '#fff'};
   border: solid black 0.15vw;
   border-radius: 0.6vw;
-  filter: drop-shadow(-0.05vw 0.1vw 0.15vw black);
+  filter: drop-shadow(0.4vw 0.08vw 0.14vw black);
 
   padding: 0.75vw;
   gap: 0.45vw;
@@ -214,7 +240,7 @@ const StatPairing = styled.div<{ color?: string }>`
   user-select: none;
   pointer-events: auto;
   &:hover {
-    opacity: 0.6;
+    opacity: 0.8;
   }
   &:active {
     animation: ${() => depressFx(0.1)} 0.2s;
