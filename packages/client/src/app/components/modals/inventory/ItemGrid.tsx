@@ -13,13 +13,14 @@ interface Props {
   actions: {
     feedKami: (kami: Kami, item: Item) => void;
     feedAccount: (item: Item) => void;
+    openLootbox: (item: Item, amount: number) => void;
   };
 }
 
 // get the row of consumable items to display in the player inventory
 export const ItemGrid = (props: Props) => {
   const { account, inventories, actions } = props;
-  const { feedKami, feedAccount } = actions;
+  const { feedKami, feedAccount, openLootbox } = actions;
   const { modals, setModals } = useVisibility();
 
   /////////////////
@@ -30,7 +31,11 @@ export const ItemGrid = (props: Props) => {
     let options: Option[] = [];
 
     if (item.is.lootbox) {
-      options = [{ text: 'Open', onClick: () => setModals({ ...modals, lootboxes: true }) }];
+      const count = Math.min(Math.max(inv.balance, 3), 10);
+      options = [
+        { text: 'Open', onClick: () => openLootbox(item, 1) },
+        { text: `Open ${count}`, onClick: () => openLootbox(item, count) },
+      ];
     } else if (item.for && item.for === 'ACCOUNT') {
       options = [{ text: 'Consume', onClick: () => feedAccount(inv.item) }];
     } else if (item.for && item.for === 'KAMI') {
