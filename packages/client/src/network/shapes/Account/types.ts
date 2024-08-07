@@ -13,14 +13,13 @@ import {
   getAccOutgoingRequests,
 } from '../Friendship';
 import { Inventory, cleanInventories, getMusuBalance, queryInventoriesByAccount } from '../Item';
-import { Kami, KamiOptions, queryKamisX } from '../Kami';
-import { Quest, getCompletedQuests, getOngoingQuests, parseQuestsStatus } from '../Quest';
+import { Kami, KamiOptions, queryKamis } from '../Kami';
 import { Skill } from '../Skill';
 import { Stat, getStat } from '../Stats';
 import { getData } from '../utils';
 
 // account shape with minimal fields
-export interface BareAccount {
+export interface BaseAccount {
   id: EntityID;
   index: number;
   entityIndex: EntityIndex;
@@ -31,7 +30,7 @@ export interface BareAccount {
 }
 
 // standardized shape of an Account Entity
-export interface Account extends BareAccount {
+export interface Account extends BaseAccount {
   fid: number;
   coin: number;
   roomIndex: number;
@@ -49,10 +48,6 @@ export interface Account extends BareAccount {
   kamis: Kami[];
   friends?: Friends;
   inventories?: Inventory[];
-  quests?: {
-    ongoing: Quest[];
-    completed: Quest[];
-  };
   skills?: Skill[]; // unimplemented for now
   stats?: {
     kills: number;
@@ -61,10 +56,9 @@ export interface Account extends BareAccount {
 }
 
 export interface AccountOptions {
-  kamis?: boolean | KamiOptions;
   friends?: boolean;
   inventory?: boolean;
-  quests?: boolean;
+  kamis?: boolean | KamiOptions;
   stats?: boolean;
 }
 
@@ -105,11 +99,11 @@ export const NullAccount: Account = {
   kamis: [],
 };
 
-export const getBareAccount = (
+export const getBaseAccount = (
   world: World,
   components: Components,
   entityIndex: EntityIndex
-): BareAccount => {
+): BaseAccount => {
   const { AccountIndex, MediaURI, Name, OperatorAddress, OwnerAddress } = components;
 
   return {
@@ -132,7 +126,7 @@ export const getAccount = (
 ): Account => {
   const { FarcasterIndex, LastActionTime, LastTime, RoomIndex, Stamina, StartTime } = components;
 
-  const bareAcc = getBareAccount(world, components, entityIndex);
+  const bareAcc = getBaseAccount(world, components, entityIndex);
   const id = bareAcc.id;
 
   let account: Account = {
@@ -173,7 +167,7 @@ export const getAccount = (
   // populate Kamis
   if (options?.kamis) {
     const kamiOptions = typeof options.kamis === 'boolean' ? {} : options.kamis;
-    account.kamis = queryKamisX(world, components, { account: account.id }, kamiOptions);
+    account.kamis = queryKamis(world, components, { account: account.id }, kamiOptions);
   }
 
   // populate Friends
@@ -189,24 +183,6 @@ export const getAccount = (
           (getBonusValue(world, components, account.id, 'FRIENDS_LIMIT') ?? 0),
         requests: getConfigFieldValue(world, components, 'FRIENDS_REQUEST_LIMIT') * 1,
       },
-    };
-  }
-
-  // populate Quests
-  if (options?.quests) {
-    account.quests = {
-      ongoing: parseQuestsStatus(
-        world,
-        components,
-        account,
-        getOngoingQuests(world, components, account.id)
-      ),
-      completed: parseQuestsStatus(
-        world,
-        components,
-        account,
-        getCompletedQuests(world, components, account.id)
-      ),
     };
   }
 

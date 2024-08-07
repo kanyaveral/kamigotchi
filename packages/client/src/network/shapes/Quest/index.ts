@@ -1,6 +1,19 @@
-export { checkObjective, hasCompletedQuest, parseQuestsStatus } from './functions';
+export {
+  checkObjective,
+  filterAvailable as filterAvailableQuests,
+  hasCompleted as hasCompletedQuest,
+  meetsObjectives,
+  meetsRequirements,
+  parseStatuses as parseQuestStatuses,
+  sortOngoing as sortOngoingQuests,
+} from './functions';
 export { getObjective, queryQuestObjectives, querySnapshotObjective } from './objective';
-export { getCompletedQuests, getOngoingQuests, getQuestByIndex, getRegistryQuests } from './quest';
+export {
+  getCompleted as getCompletedQuests,
+  getOngoing as getOngoingQuests,
+  getByIndex as getQuestByIndex,
+  getRegistry as getRegistryQuests,
+} from './quest';
 export { checkRequirement, queryQuestRequirements } from './requirement';
 export { queryQuestRewards } from './reward';
 
