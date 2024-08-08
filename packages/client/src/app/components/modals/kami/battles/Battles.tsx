@@ -6,12 +6,13 @@ import { Overlay } from 'app/components/library/styles';
 import { useSelected, useVisibility } from 'app/stores';
 import { DeathIcon, KillIcon } from 'assets/images/icons/battles';
 import { Kami, KillLog } from 'network/shapes/Kami';
+import { getAffinityImage } from 'network/shapes/utils';
 import { useEffect, useState } from 'react';
 import { playClick } from 'utils/sounds';
-import { getDateString, getKamiTime, getPhaseIcon, getPhaseOf } from 'utils/time';
+import { getDateString, getKamiDate, getKamiTime, getPhaseIcon, getPhaseOf } from 'utils/time';
 
-const cellStyle = { fontFamily: 'Pixel', fontSize: '.8vw', border: 0 };
-const headerStyle = { ...cellStyle, fontSize: '1vw' };
+const cellStyle = { fontFamily: 'Pixel', fontSize: '.75vw', padding: '0.5vw', border: 0 };
+const headerStyle = { ...cellStyle, fontSize: '.9vw' };
 
 interface Props {
   kami: Kami;
@@ -53,9 +54,9 @@ export const Battles = (props: Props) => {
 
   const Head = () => (
     <TableHead>
-      <TableRow key='header'>
+      <TableRow key='header' sx={{ padding: '5vw' }}>
         <TableCell sx={headerStyle}>Event</TableCell>
-        <TableCell sx={headerStyle}>Time</TableCell>
+        <TableCell sx={headerStyle}>Occurrence</TableCell>
         <TableCell sx={headerStyle}>Adversary</TableCell>
         <TableCell sx={headerStyle}>Location</TableCell>
       </TableRow>
@@ -80,11 +81,13 @@ export const Battles = (props: Props) => {
   // display the time when it happened
   const TimeCell = (log: KillLog) => {
     const date = getDateString(log.time, 0);
+    const kamiDate = getKamiDate(log.time, 0);
     const kamiTime = getKamiTime(log.time, 0);
     return (
       <TableCell sx={cellStyle}>
         <Tooltip text={[`${date}`, `on your plebeian calendar`]}>
           <Cell>
+            {kamiDate}
             <Icon src={getPhaseIcon(getPhaseOf(log.time, 0))} />
             {kamiTime}
           </Cell>
@@ -111,16 +114,21 @@ export const Battles = (props: Props) => {
 
   // display the details of the node
   const NodeCell = (log: KillLog) => {
+    const node = log.node;
+    const affinityIcon = getAffinityImage(node.affinity);
     return (
       <TableCell
         sx={{ ...cellStyle, cursor: 'pointer', '&:hover': { color: 'grey' } }}
         onClick={() => {
-          setNode(log.node.index);
+          setNode(node.index);
           setModals({ ...modals, kami: false, node: true });
           playClick();
         }}
       >
-        {log.node.name}
+        <Cell>
+          <Icon src={affinityIcon} />
+          {node.name}
+        </Cell>
       </TableCell>
     );
   };
@@ -173,7 +181,7 @@ const Cell = styled.div`
   flex-flow: row nowrap;
   align-items: center;
   justify-content: flex-start;
-  gap: 0.6vw;
+  gap: 0.3vw;
 `;
 
 const Text = styled.div<{ color?: string }>`
