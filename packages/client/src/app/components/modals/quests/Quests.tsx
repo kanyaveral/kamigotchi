@@ -1,4 +1,4 @@
-import { EntityID } from '@mud-classic/recs';
+import { EntityID, EntityIndex } from '@mud-classic/recs';
 import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 
@@ -9,15 +9,22 @@ import { questsIcon } from 'assets/images/icons/menu';
 import { getAccountFromBurner } from 'network/shapes/Account';
 import {
   Quest,
-  filterAvailableQuests,
-  getCompletedQuests,
-  getOngoingQuests,
-  getRegistryQuests,
-  parseQuestStatuses,
+  filterQuestsByAvailable,
+  filterQuestsByNotObjective,
+  filterQuestsByObjective,
+  getBaseQuest,
+  parseQuestObjectives,
+  parseQuestRequirements,
+  parseQuestStatus,
+  populateQuest,
+  queryCompletedQuests,
+  queryOngoingQuests,
+  queryRegistryQuests,
 } from 'network/shapes/Quest';
+import { BaseQuest } from 'network/shapes/Quest/quest';
 import { getDescribedEntity } from 'network/shapes/utils/parse';
 import { Footer } from './Footer';
-import { List } from './List';
+import { List } from './list/List';
 import { Tabs } from './Tabs';
 
 export function registerQuestsModal() {
@@ -31,7 +38,7 @@ export function registerQuestsModal() {
     },
 
     (layers) =>
-      interval(1000).pipe(
+      interval(3000).pipe(
         map(() => {
           const { network } = layers;
           const { world, components } = network;
@@ -40,50 +47,83 @@ export function registerQuestsModal() {
             inventory: true,
           });
 
-          // NOTE(jb): ideally we only update when these shapes change but for
-          // the time being we'll update on every tick to force a re-render.
-          // just separating these out to flatten our Account shapes
-          // TODO (jb): move inside effect hook once we have proper subscriptions
-          const ongoingQuests = getOngoingQuests(world, components, account.id);
-          const completedQuests = getCompletedQuests(world, components, account.id);
-          const ongoingParsed = parseQuestStatuses(world, components, account, ongoingQuests);
-          const completedParsed = parseQuestStatuses(world, components, account, completedQuests);
+          const registry = queryRegistryQuests(components).map((entityIndex) =>
+            getBaseQuest(world, components, entityIndex)
+          );
+          const completed = queryCompletedQuests(components, account.id).map((entityIndex) =>
+            getBaseQuest(world, components, entityIndex)
+          );
+          const ongoing = queryOngoingQuests(components, account.id).map((entityIndex) =>
+            getBaseQuest(world, components, entityIndex)
+          );
 
           return {
             network,
             data: {
               account,
-              ongoing: ongoingParsed,
-              completed: completedParsed,
-              registry: getRegistryQuests(world, components),
+              quests: {
+                registry,
+                ongoing,
+                completed,
+              },
+            },
+            utils: {
+              describeEntity: (type: string, index: number) =>
+                getDescribedEntity(world, components, type, index),
+              getBase: (entityIndex: EntityIndex) => getBaseQuest(world, components, entityIndex),
+              filterByAvailable: (
+                registry: BaseQuest[],
+                ongoing: BaseQuest[],
+                completed: BaseQuest[]
+              ) =>
+                filterQuestsByAvailable(world, components, account, registry, ongoing, completed),
+              filterForBattlePass: (quests: Quest[]) => filterQuestsByObjective(quests, 1),
+              filterOutBattlePass: (quests: Quest[]) => filterQuestsByNotObjective(quests, 1),
+              parseObjectives: (quest: Quest) =>
+                parseQuestObjectives(world, components, account, quest),
+              parseRequirements: (quest: Quest) =>
+                parseQuestRequirements(world, components, account, quest),
+              parseStatus: (quest: Quest) => parseQuestStatus(world, components, account, quest),
+              populate: (base: BaseQuest) => populateQuest(world, components, base),
             },
           };
         })
       ),
-    ({ network, data }) => {
-      const { actions, api, components, notifications, world } = network;
-      const [tab, setTab] = useState<TabType>('ONGOING');
+    ({ network, data, utils }) => {
+      const { actions, api, notifications } = network;
+      const { account, quests } = data;
+      const { ongoing, completed, registry } = quests;
+      const { populate, filterByAvailable, filterOutBattlePass } = utils;
       const { modals } = useVisibility();
+
+      const [tab, setTab] = useState<TabType>('ONGOING');
       const [available, setAvailable] = useState<Quest[]>([]);
 
       /////////////////
       // SUBSCRIPTIONS
 
-      // update the State-based (Parsed) Quest Registry when we detect a change
-      // in the Props-based (UnParsed) Quest Registry. recheck the number of
-      // available quests for the Notification bar as well
+      // update Available Quests alongside the Registry whenever quests are
+      // added/removed. also respond to updates in Ongoing/Completed Quests
+      // TODO: figure out a trigger for repeatable quests
       useEffect(() => {
-        const parsedRegistry = parseQuestStatuses(world, components, data.account, data.registry);
-        const availableQuests = filterAvailableQuests(parsedRegistry, data.completed, data.ongoing);
-
-        if (availableQuests.length > 0) setTab('AVAILABLE');
-        setAvailable(availableQuests);
-      }, [data.registry.length, modals.quests]);
+        const newAvailable = filterByAvailable(registry, ongoing, completed);
+        const populated = newAvailable.map((q) => populate(q));
+        setAvailable(populated);
+      }, [modals.quests, registry.length, completed.length, ongoing.length]);
 
       // update the Notifications when the number of available quests changes
       useEffect(() => {
+        updateNotifications();
+      }, [available.length]);
+
+      /////////////////
+      // HELPERS
+
+      // Q(jb): do we want this in a react component or on an independent hook?
+      const updateNotifications = () => {
         const id = 'Available Quests';
         const numAvail = available.length;
+        if (available.length > 0) setTab('AVAILABLE');
 
         if (notifications.has(id as EntityID)) {
           if (numAvail == 0) notifications.remove(id as EntityID);
@@ -104,12 +144,12 @@ export function registerQuestsModal() {
               modal: 'quests',
             });
         }
-      }, [available.length]);
+      };
 
       /////////////////
       // ACTIONS
 
-      const acceptQuest = async (quest: Quest) => {
+      const acceptQuest = async (quest: BaseQuest) => {
         actions.add({
           action: 'QuestAccept',
           params: [quest.index * 1],
@@ -120,7 +160,7 @@ export function registerQuestsModal() {
         });
       };
 
-      const completeQuest = async (quest: Quest) => {
+      const completeQuest = async (quest: BaseQuest) => {
         actions.add({
           action: 'QuestComplete',
           params: [quest.id],
@@ -138,19 +178,27 @@ export function registerQuestsModal() {
             <ModalHeader key='header' title='Quests' icon={questsIcon} />,
             <Tabs key='tabs' tab={tab} setTab={setTab} />,
           ]}
-          footer={<Footer balance={data.account.reputation.agency} />}
+          footer={
+            <Footer
+              account={account}
+              quests={{
+                registry: registry,
+                ongoing: ongoing,
+                completed: completed,
+              }}
+              actions={{ acceptQuest, completeQuest }}
+              utils={utils}
+            />
+          }
           canExit
           truncate
           noPadding
         >
           <List
-            quests={{ available, ongoing: data.ongoing, completed: data.completed }}
+            quests={{ available: filterOutBattlePass(available), ongoing, completed }}
             mode={tab}
             actions={{ acceptQuest, completeQuest }}
-            utils={{
-              getDescribedEntity: (type: string, index: number) =>
-                getDescribedEntity(world, components, type, index),
-            }}
+            utils={utils}
           />
         </ModalWrapper>
       );
