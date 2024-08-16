@@ -21,5 +21,5 @@ export function boot() {
   const root = ReactDOM.createRoot(rootElement);
   root.render(<Root setLayers={setLayers} mountReact={mountReact} />);
   registerLoadingState();
-  registerUIComponents(); // possibly should run this on a delayed callback once fully booted
+  registerUIComponents();
 }
