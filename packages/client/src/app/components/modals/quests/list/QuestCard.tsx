@@ -37,12 +37,46 @@ export const QuestCard = (props: Props) => {
     return `${prefix} ${objective.name}`;
   };
 
+  // get the Faction image of a Quest based on whether it has a REPUTATION reward
+  // NOTE: hardcoded to agency for now
+  const getFactionStamp = (quest: Quest) => {
+    const reward = quest.rewards.find((r) => r.target.type === 'REPUTATION');
+    if (!reward) return <></>;
+
+    const key = `faction-${reward.target.type}-${reward.target.index}`;
+    if (!imageCache.has(key)) {
+      const icon = getFactionImage('agency');
+      const component = <Image src={icon} size={1.8} />;
+      imageCache.set(key, component);
+    }
+
+    return imageCache.get(key);
+  };
+
+  // get the Reward image component of a Quest
+  const getRewardImage = (reward: Reward) => {
+    if (reward.target.type === 'NFT') return <div />;
+
+    const key = `reward-${reward.target.type}-${reward.target.index}`;
+    if (!imageCache.has(key)) {
+      const entity = describeEntity(reward.target.type, reward.target.index || 0);
+      const component = (
+        <Tooltip key={key} text={[entity.name]} direction='row'>
+          <Image src={entity.image} size={1.5} />
+        </Tooltip>
+      );
+      imageCache.set(key, component);
+    }
+
+    return imageCache.get(key);
+  };
+
   /////////////////
   // DISPLAY
 
   const AcceptButton = (quest: Quest) => {
     return (
-      <Overlay bottom={0.8} right={0.8}>
+      <Overlay key={'accept-button'} bottom={0.8} right={0.8}>
         <ActionButton onClick={() => accept(quest)} text='Accept' noMargin />
       </Overlay>
     );
@@ -50,7 +84,7 @@ export const QuestCard = (props: Props) => {
 
   const CompleteButton = (quest: Quest) => {
     return (
-      <Overlay bottom={0.8} right={0.8}>
+      <Overlay key={'complete-button'} bottom={0.8} right={0.8}>
         <ActionButton
           onClick={() => complete(quest)}
           text='Complete'
@@ -96,88 +130,38 @@ export const QuestCard = (props: Props) => {
     );
   };
 
-  // get the Faction image of a Quest based on whether it has a REPUTATION reward
-  // NOTE: hardcoded to agency for now
-  const FactionImage = (quest: Quest) => {
-    const reward = quest.rewards.find((r) => r.target.type === 'REPUTATION');
-    if (!reward) return <></>;
+  /////////////////
+  // RENDER
 
-    const key = `faction-${reward.target.type}-${reward.target.index}`;
-    if (imageCache.has(key)) return imageCache.get(key);
-
-    const icon = getFactionImage('agency');
-    const component = <Image src={icon} size={1.8} />;
-
-    imageCache.set(key, component);
-    return component;
-  };
-
-  // get the Reward image component of a Quest
-  const RewardImage = (reward: Reward) => {
-    if (reward.target.type === 'NFT') return <div />;
-    const key = `reward-${reward.target.type}-${reward.target.index}`;
-    if (imageCache.has(key)) return imageCache.get(key);
-
-    const entity = describeEntity(reward.target.type, reward.target.index || 0);
-    const component = (
-      <Tooltip key={key} text={[entity.name]} direction='row'>
-        <Image src={entity.image} size={1.5} />
-      </Tooltip>
-    );
-
-    imageCache.set(key, component);
-    return component;
-  };
-
-  const ObjectiveRow = (objective: Objective) => {
-    const text = getObjectiveText(objective);
-
-    return (
-      <Row>
-        <ConditionText key={objective.id}>{text}</ConditionText>
-        {ItemBurnButton(objective)}
-      </Row>
-    );
-  };
-
-  const Objectives = (quest: Quest) => {
-    if (quest.objectives.length === 0) return null;
-    return (
-      <Section key='objectives'>
+  return (
+    <Container key={quest.id} completed={status === 'COMPLETED'}>
+      <Overlay key={'faction-image'} top={0.6} right={0.6}>
+        {getFactionStamp(quest)}
+      </Overlay>
+      <Title>{quest.name}</Title>
+      <Description>{quest.description}</Description>
+      <Section key='objectives' style={{ display: quest.objectives.length > 0 ? 'block' : 'none' }}>
         <SubTitle>Objectives</SubTitle>
-        {quest.objectives.map((o) => ObjectiveRow(o))}
+        {quest.objectives.map((o) => (
+          <Row key={o.id}>
+            <ConditionText>{getObjectiveText(o)}</ConditionText>
+            {ItemBurnButton(o)}
+          </Row>
+        ))}
       </Section>
-    );
-  };
-
-  const Rewards = (quest: Quest) => {
-    if (quest.rewards.length === 0) return null;
-    return (
-      <Section key='rewards'>
+      <Section key='rewards' style={{ display: quest.rewards.length > 0 ? 'block' : 'none' }}>
         <SubTitle>Rewards</SubTitle>
         <Row>
           {quest.rewards.map((r) => (
             <Row key={r.id}>
-              <ConditionText key={r.id}>
-                {RewardImage(r)}
+              <ConditionText>
+                {getRewardImage(r)}
                 {`x${(r.target.value ?? 0) * 1}`}
               </ConditionText>
             </Row>
           ))}
         </Row>
       </Section>
-    );
-  };
-
-  return (
-    <Container key={quest.id} completed={status === 'COMPLETED'}>
-      <Overlay top={0.6} right={0.6}>
-        {FactionImage(quest)}
-      </Overlay>
-      <Title>{quest.name}</Title>
-      <Description>{quest.description}</Description>
-      {Objectives(quest)}
-      {Rewards(quest)}
       {status === 'AVAILABLE' && AcceptButton(quest)}
       {status === 'ONGOING' && CompleteButton(quest)}
     </Container>
