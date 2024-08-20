@@ -1,23 +1,20 @@
+import { EntityID, EntityIndex } from '@mud-classic/recs';
 import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
-import styled from 'styled-components';
+import { v4 as uuid } from 'uuid';
 
-import { EntityID, EntityIndex } from '@mud-classic/recs';
-import { uuid } from '@mud-classic/utils';
-import { ModalWrapper } from 'app/components/library';
+import { EmptyText, ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
 import { useSelected, useVisibility } from 'app/stores';
 import { getAccountFromBurner } from 'network/shapes/Account';
-import { parseConditionalText } from 'network/shapes/Conditional';
-import { NullDT, getDTDetails, queryDTCommits } from 'network/shapes/Droptable';
-import { Kami } from 'network/shapes/Kami';
-import { Node, NullNode, getNodeByIndex } from 'network/shapes/Node';
-import { passesNodeReqs } from 'network/shapes/Node/functions';
+import { Condition, parseConditionalText } from 'network/shapes/Conditional';
+import { Droptable, getDTDetails, queryDTCommits } from 'network/shapes/Droptable';
+import { Kami, getKamiAccount } from 'network/shapes/Kami';
+import { Node, NullNode, getNodeByIndex, passesNodeReqs } from 'network/shapes/Node';
 import { ScavBar, getScavBarFromHash, getScavPoints } from 'network/shapes/Scavenge';
 import { waitForActionCompletion } from 'network/utils';
-import { Banner } from './Banner';
-import { Kards } from './Kards';
-import { ScavengeBar } from './ScavengeBar';
+import { Banner } from './header/Banner';
+import { Kards } from './kards/Kards';
 
 export function registerNodeModal() {
   registerUIComponent(
@@ -40,10 +37,7 @@ export function registerNodeModal() {
           const { nodeIndex } = useSelected.getState();
 
           const account = getAccountFromBurner(network, { kamis: true, inventory: true });
-          let node = getNodeByIndex(world, components, nodeIndex, {
-            kamis: true,
-            accountID: account?.id,
-          });
+          let node = getNodeByIndex(world, components, nodeIndex, { kamis: true });
           if (!node) node = NullNode;
 
           // reveal flow
@@ -52,12 +46,24 @@ export function registerNodeModal() {
           return {
             network,
             data: { account, node, commits },
+            utils: {
+              getOwner: (kamiIndex: number) => getKamiAccount(world, components, kamiIndex),
+              getScavPoints: (nodeIndex: number) =>
+                getScavPoints(world, components, 'node', nodeIndex, account.id),
+              passesNodeReqs: (kami: Kami) =>
+                passesNodeReqs(world, components, node, account, kami),
+              parseConditionalText: (condition: Condition, tracking?: boolean) =>
+                parseConditionalText(world, components, condition, tracking),
+              getScavBarFromHash: (nodeIndex: number) =>
+                getScavBarFromHash(world, components, 'node', nodeIndex),
+              getDTDetails: (dt: Droptable) => getDTDetails(world, components, dt),
+            },
           };
         })
       ),
 
     // Render
-    ({ data, network }) => {
+    ({ data, network, utils }) => {
       // console.log('Node Modal Data', data);
       const { account } = data;
       const {
@@ -70,20 +76,11 @@ export function registerNodeModal() {
       const { nodeIndex } = useSelected();
       const { modals, setModals } = useVisibility();
       const [node, setNode] = useState<Node>(data.node);
-      const [scavBar, setScavBar] = useState<ScavBar | undefined>(undefined);
 
       // updates from selected Node updates
       useEffect(() => {
-        const nodeOptions = { kamis: true, accountID: account.id };
-        let node = getNodeByIndex(world, components, nodeIndex, nodeOptions);
-        if (!node) {
-          node = NullNode;
-          setModals({ ...modals, node: false });
-        }
-
-        const scav = getScavBarFromHash(world, components, 'node', node.index);
-
-        setScavBar(scav);
+        let node = getNodeByIndex(world, components, nodeIndex, { kamis: true });
+        if (node.index == 0) setModals({ ...modals, node: false }); // NullNode
         setNode(node);
       }, [nodeIndex]);
 
@@ -92,18 +89,7 @@ export function registerNodeModal() {
         setNode(data.node);
       }, [data.node]);
 
-      const getTotalKamis = () => {
-        return (node.kamis?.allies ?? []).length + (node.kamis?.enemies ?? []).length;
-      };
-
-      const getDrops = () => {
-        return {
-          node: node.drops ?? [],
-          scavenge: getDTDetails(world, components, scavBar?.rewards[0]?.droptable ?? NullDT),
-        };
-      };
-
-      ///////////////////
+      /////////////////
       // ACTIONS
 
       // collects on an existing harvest
@@ -196,55 +182,35 @@ export function registerNodeModal() {
             <Banner
               key='banner'
               account={account}
-              drops={getDrops()}
               node={node}
               kamis={account.kamis}
-              addKami={(kami) => start(kami, node)}
+              actions={{ scavClaim, addKami: (kami) => start(kami, node) }}
               utils={{
-                passesNodeReqs: (kami: Kami) =>
-                  passesNodeReqs(world, components, node, account, kami),
-                parseConditionalText: (condition, tracking?) =>
-                  parseConditionalText(world, components, condition, tracking),
+                ...utils,
+                getScavPoints: () => utils.getScavPoints(node.index),
+                getScavBar: () => utils.getScavBarFromHash(node.index),
               }}
-              scavBarDisplay={
-                <ScavengeBar
-                  scavBar={scavBar}
-                  currPoints={getScavPoints(world, components, 'node', node.index, account.id)}
-                  actions={{ claim: scavClaim }}
-                />
-              }
             />,
           ]}
           canExit
           truncate
+          noPadding
         >
-          {getTotalKamis() > 0 ? (
+          {node.kamis.length > 0 ? (
             <Kards
               account={account}
-              allies={node.kamis?.allies!}
-              enemies={node.kamis?.enemies!}
+              kamis={node.kamis}
               actions={{ collect, feed, liquidate, stop }}
+              utils={utils}
             />
           ) : (
-            <EmptyText>
-              There are no Kamis on this node. <br />
-              Maybe that's an opportunity..
-            </EmptyText>
+            <EmptyText
+              text={['There are no Kamis on this node.', "Maybe that's an opportunity.."]}
+              size={1}
+            />
           )}
         </ModalWrapper>
       );
     }
   );
 }
-
-const EmptyText = styled.div`
-  height: 100%;
-  margin: 1.5vh;
-  padding: 1.2vh 0vw;
-
-  color: #333;
-  font-family: Pixel;
-  font-size: 1.8vh;
-  line-height: 4.5vh;
-  text-align: center;
-`;

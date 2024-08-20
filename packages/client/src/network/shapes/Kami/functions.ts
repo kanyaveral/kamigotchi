@@ -1,17 +1,24 @@
-import { calcHarvestIdleTime, calcHarvestNetBounty, getHarvestRoomIndex } from '../Harvest';
+import { getComponentValue, Has, HasValue, runQuery, World } from '@mud-classic/recs';
+
+import { formatEntityID } from 'engine/utils';
+import { Components } from 'network/components';
+import { BaseAccount, getBaseAccount, NullAccount } from '../Account';
+import { calcHarvestIdleTime, calcHarvestNetBounty } from '../Harvest';
 import { Kami } from './types';
 
-// interpret the roomIndex of the kami based on the kami's state (using Account and Harvest Node)
-// return 0 if the roomIndex cannot be determined from information provided
-export const getRoomIndex = (kami: Kami): number => {
-  let roomIndex = 0;
-  if (isOffWorld(kami)) roomIndex = 0;
-  else if (isHarvesting(kami)) return getHarvestRoomIndex(kami.production);
-  else {
-    if (!kami.account) roomIndex = 0;
-    else roomIndex = kami.account.roomIndex;
-  }
-  return roomIndex;
+// get the BaseAccount entity that owns a Kami
+export const getAccount = (world: World, components: Components, index: number): BaseAccount => {
+  const { IsPet, PetIndex, OwnsPetID } = components;
+  const kamiEntity = Array.from(runQuery([HasValue(PetIndex, { value: index }), Has(IsPet)]))[0];
+
+  const rawAccID = getComponentValue(OwnsPetID, kamiEntity)?.value ?? '';
+  if (!rawAccID) return NullAccount;
+
+  const accID = formatEntityID(rawAccID);
+  const accEntity = world.entityToIndex.get(accID);
+  if (!accEntity) return NullAccount;
+
+  return getBaseAccount(world, components, accEntity);
 };
 
 ////////////////
@@ -56,19 +63,6 @@ export const isOffWorld = (kami: Kami): boolean => {
   return kami.state === '721_EXTERNAL';
 };
 
-// checks whether a kami is with its owner
-export const isWithAccount = (kami: Kami): boolean => {
-  if (isDead(kami) || isResting(kami) || isUnrevealed(kami)) return true;
-  if (isOffWorld(kami)) return false;
-  if (isHarvesting(kami)) {
-    const accLoc = kami.account?.roomIndex ?? 0;
-    const kamiLoc = kami.production?.node?.roomIndex ?? 0;
-    return accLoc === kamiLoc;
-  }
-  console.warn(`Invalid State ${kami.state} for kami ${kami.index * 1}`);
-  return false;
-};
-
 // determine whether the kami is still on cooldown
 export const onCooldown = (kami: Kami): boolean => {
   return calcCooldown(kami) > 0;
@@ -111,6 +105,13 @@ export const calcHealth = (kami: Kami): number => {
   health = Math.floor(Math.max(health, 0));
   health = Math.min(health, kami.stats.health.total);
   return health;
+};
+
+// calculate a kami's health as a percentage of total health
+export const calcHealthPercent = (kami: Kami): number => {
+  const health = calcHealth(kami);
+  const total = kami.stats.health.total;
+  return (health / total) * 100;
 };
 
 // calculate a kami's rate of health change based on its current state

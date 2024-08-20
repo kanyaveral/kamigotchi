@@ -7,7 +7,7 @@ export {
   calcOutput,
   calcStrainFromBalance,
   canHarvest,
-  getRoomIndex,
+  getAccount as getKamiAccount,
   isDead,
   isFull,
   isHarvesting,
@@ -15,7 +15,6 @@ export {
   isResting,
   isStarving,
   isUnrevealed,
-  isWithAccount,
   onCooldown,
 } from './functions';
 export {

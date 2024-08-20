@@ -7,52 +7,47 @@ import { getRarities } from 'constants/rarities';
 import { rooms } from 'constants/rooms';
 import { Account } from 'network/shapes/Account';
 import { Condition } from 'network/shapes/Conditional';
-import { DTDetails } from 'network/shapes/Droptable';
-import { Item } from 'network/shapes/Item';
-import { Kami, canHarvest, isResting, onCooldown } from 'network/shapes/Kami';
-import { Node, NullNode } from 'network/shapes/Node';
+import { Droptable, DTDetails, NullDT } from 'network/shapes/Droptable';
+import { canHarvest, isResting, Kami, onCooldown } from 'network/shapes/Kami';
+import { Node } from 'network/shapes/Node';
+import { ScavBar } from 'network/shapes/Scavenge';
 import { getAffinityImage } from 'network/shapes/utils';
+import { ScavengeBar } from './ScavengeBar';
 
 interface Props {
   account: Account;
-  drops: {
-    node: Item[];
-    scavenge: DTDetails[];
-  };
-  node: Node | undefined;
+  node: Node;
   kamis: Kami[];
-  addKami: (kami: Kami) => void;
+  actions: {
+    scavClaim: (scavBar: ScavBar) => void;
+    addKami: (kami: Kami) => void;
+  };
   utils: {
     passesNodeReqs: (kami: Kami) => boolean;
     parseConditionalText: (condition: Condition, tracking?: boolean) => string;
+    getScavPoints: () => number;
+    getScavBar: () => ScavBar | undefined;
+    getDTDetails: (dt: Droptable) => DTDetails[];
   };
-  scavBarDisplay: React.JSX.Element;
 }
 
 // KamiCard is a card that displays information about a Kami. It is designed to display
 // information ranging from current production or death as well as support common actions.
 export const Banner = (props: Props) => {
-  const [_, setLastRefresh] = useState(Date.now());
-  const { account, drops, node: rawNode, kamis, utils } = props;
-  const [node, setNode] = useState<Node>(NullNode);
+  const { account, node, kamis, utils, actions } = props;
+  const { scavClaim, addKami } = actions;
+  const [scavBar, setScavBar] = useState<ScavBar | undefined>(undefined);
 
   /////////////////
   // TRACKING
 
-  // ticking
+  // update the scav bar whenever the node changes
   useEffect(() => {
-    const refreshClock = () => {
-      setLastRefresh(Date.now());
-    };
-    const timerId = setInterval(refreshClock, 1000);
-    return function cleanup() {
-      clearInterval(timerId);
-    };
-  }, []);
+    const newScavBar = utils.getScavBar();
+    setScavBar(newScavBar);
+  }, [node.index]);
 
-  useEffect(() => {
-    setNode(rawNode === undefined ? NullNode : rawNode);
-  }, [rawNode]);
+  // update the scavbar for its points every onc
 
   /////////////////
   // INTERPRETATION
@@ -87,7 +82,7 @@ export const Banner = (props: Props) => {
   const AddButton = (kamis: Kami[]) => {
     const options = kamis.filter((kami) => canAdd(kami));
     const actionOptions = options.map((kami) => {
-      return { text: `${kami.name}`, onClick: () => props.addKami(kami) };
+      return { text: `${kami.name}`, onClick: () => addKami(kami) };
     });
 
     return (
@@ -122,21 +117,24 @@ export const Banner = (props: Props) => {
   };
 
   const ItemDrops = () => {
+    const nodeDrops = node.drops;
+    const dt = utils.getDTDetails(scavBar?.rewards[0]?.droptable ?? NullDT);
+
     const DTtext = [
       'Potential scavenge drops:',
       '',
-      ...drops.scavenge.map((entry) => `${entry.object.name} [${getRarities(entry.rarity).title}]`),
+      ...dt.map((entry) => `${entry.object.name} [${getRarities(entry.rarity).title}]`),
     ];
     return (
       <Row>
         <Label>Drops: </Label>
-        <Tooltip text={[drops.node[0]?.name ?? '']}>
-          <Icon key={'node-' + drops.node[0]?.name ?? ''} src={drops.node[0]?.image ?? ''} />
+        <Tooltip text={[nodeDrops[0]?.name ?? '']}>
+          <Icon key={'node-' + nodeDrops[0]?.name ?? ''} src={nodeDrops[0]?.image ?? ''} />
         </Tooltip>
 
         <Tooltip text={DTtext}>
           <Row style={{ borderLeft: 'solid #666 1px', paddingLeft: '0.3vw' }}>
-            {drops.scavenge.map((entry) => (
+            {dt.map((entry) => (
               <Icon key={'scav-' + entry.object.name ?? ''} src={entry.object.image} />
             ))}
           </Row>
@@ -163,7 +161,13 @@ export const Banner = (props: Props) => {
         {RequirementText()}
       </Content>
       <ButtonRow>{AddButton(kamis)}</ButtonRow>
-      {props.scavBarDisplay}
+      {scavBar && (
+        <ScavengeBar
+          scavBar={scavBar}
+          actions={{ claim: scavClaim }}
+          utils={{ getPoints: utils.getScavPoints }}
+        />
+      )}
     </Container>
   );
 };
