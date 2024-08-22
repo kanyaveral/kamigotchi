@@ -1,9 +1,10 @@
+import { EntityID, EntityIndex } from '@mud-classic/recs';
+import { uuid } from '@mud-classic/utils';
+import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 import { erc20Abi, formatUnits } from 'viem';
 import { useReadContract, useReadContracts } from 'wagmi';
 
-import { EntityID, EntityIndex } from '@mud-classic/recs';
-import { uuid } from '@mud-classic/utils';
 import { abi as Mint20ProxySystemABI } from 'abi/Mint20ProxySystem.json';
 import { ModalHeader, ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
@@ -45,6 +46,7 @@ export function registerInventoryModal() {
       const { actions, api, systems, world, localSystems } = network;
       const { DTRevealer } = localSystems;
       const { account } = data;
+      const [numTickets, setNumTickets] = useState<number>(0);
 
       /////////////////
       // SUBSCRIPTIONS
@@ -72,6 +74,15 @@ export function registerInventoryModal() {
           },
         ],
       });
+
+      // update the state with the number of tickets whenever that number changes
+      useEffect(() => {
+        if (!ticketBal) return;
+        const numRaw = ticketBal[0].result ?? 0n;
+        const decimals = ticketBal[1].result ?? 18;
+        const balance = Number(formatUnits(numRaw, decimals));
+        if (balance != numTickets) setNumTickets(balance);
+      }, [ticketBal]);
 
       /////////////////
       // ACTIONS
@@ -122,18 +133,17 @@ export function registerInventoryModal() {
       /////////////////
       // INTERPRETATION
 
+      // get the list of inventories for an account including gacha tickets
       const getInventories = () => {
-        const inventories = [...(account.inventories ?? [])];
-        if (ticketBal) {
-          const numTicketsRaw = ticketBal[0].result ?? 0n;
-          const numTicketsDecimals = ticketBal[1].result ?? 18;
-          if (numTicketsRaw > 0) {
-            const ticketInventory = GachaTicketInventory;
-            ticketInventory.balance = Number(formatUnits(numTicketsRaw, numTicketsDecimals));
-            inventories.unshift(ticketInventory);
-          }
+        const raw = [...(account.inventories ?? [])];
+        const cleaned = raw.filter((inv) => !!inv.item.index);
+
+        if (numTickets > 0) {
+          const ticketInventory = GachaTicketInventory;
+          ticketInventory.balance = numTickets;
+          cleaned.unshift(ticketInventory);
         }
-        return inventories;
+        return cleaned;
       };
 
       /////////////////
