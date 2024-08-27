@@ -1,6 +1,6 @@
 export { ActionButton } from './ActionButton';
 export { ActionListButton } from './ActionListButton';
-export { ExitButton } from './ExitButton';
+export { CircleExitButton } from './CircleExitButton';
 export { IconButton } from './IconButton';
 export { IconListButton } from './IconListButton';
 

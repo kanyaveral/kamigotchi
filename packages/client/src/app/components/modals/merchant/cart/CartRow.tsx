@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { Tooltip } from 'app/components/library';
 import { ItemImages } from 'assets/images/items';
-import { Listing } from 'network/shapes/Listing';
+import { Listing } from 'network/shapes/Listings';
 import { playClick } from 'utils/sounds';
 
 export interface Props {
@@ -104,7 +104,6 @@ const Image = styled.img`
   padding: 0.3vw;
   font-family: Pixel;
   image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
 `;
 
 const Quantity = styled.input`
