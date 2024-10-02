@@ -92,7 +92,7 @@ export function registerCraftingModal() {
       return (
         <ModalWrapper
           id='crafting'
-          header={[<ModalHeader title='Crafting' icon={craftIcon} />]}
+          header={<ModalHeader title='Crafting' icon={craftIcon} />}
           canExit
         >
           <Content>
@@ -102,7 +102,7 @@ export function registerCraftingModal() {
                   key={`recipe-${recipe.index}`}
                   recipe={recipe}
                   data={data}
-                  actions={{ craft: craft }}
+                  actions={{ craft }}
                   utils={utils}
                 />
               ))
