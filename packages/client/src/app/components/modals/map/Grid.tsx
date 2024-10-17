@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import { Tooltip } from 'app/components/library';
 import { mapBackgrounds } from 'assets/images/map';
+import { Node } from 'network/shapes/Node';
 import { Room, emptyRoom } from 'network/shapes/Room';
 import { playClick } from 'utils/sounds';
 
@@ -14,10 +15,13 @@ interface Props {
     move: (roomIndex: number) => void;
     setHoveredRoom: (roomIndex: number) => void;
   };
+  utils: { getNode: (roomIndex: number) => Node };
 }
 export const Grid = (props: Props) => {
-  const { index, zone, rooms, actions } = props;
+  const { index, zone, rooms, actions, utils } = props;
   const [grid, setGrid] = useState<Room[][]>([]);
+  const [numberOfKamis, setNumberOfKamis] = useState('0');
+  const [numberOfPlayers, setNumberOfPlayers] = useState('0');
 
   useEffect(() => {
     const z = rooms.get(index)?.location.z;
@@ -59,6 +63,7 @@ export const Grid = (props: Props) => {
 
     setGrid(grid);
   }, [zone]);
+  //
 
   /////////////////
   // INTERACTIONS
@@ -108,6 +113,9 @@ export const Grid = (props: Props) => {
                   isHighlighted={isCurrRoom || isExit}
                   onMouseEnter={() => {
                     if (isRoom) actions.setHoveredRoom(room.index);
+                    const node = utils.getNode(room.index);
+                    setNumberOfPlayers(room.players?.length.toString() ?? '0');
+                    setNumberOfKamis(node.kamis.length.toString());
                   }}
                   onMouseLeave={() => {
                     if (isRoom) actions.setHoveredRoom(0);
@@ -117,7 +125,15 @@ export const Grid = (props: Props) => {
 
               if (isRoom) {
                 const name = `${room.name} ${isBlocked ? '(blocked)' : ''}`;
-                const description = [name, '', room.description, ''];
+                const description = [
+                  name,
+                  '',
+                  room.description,
+                  '',
+                  `${numberOfKamis} kamis harvesting`,
+                  `${numberOfPlayers} players on this tile`,
+                ];
+
                 tile = (
                   <Tooltip key={j} text={description} grow>
                     {tile}
