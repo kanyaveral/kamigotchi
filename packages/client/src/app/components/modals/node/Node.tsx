@@ -9,8 +9,20 @@ import { useSelected, useVisibility } from 'app/stores';
 import { getAccountFromBurner } from 'network/shapes/Account';
 import { Condition, parseConditionalText } from 'network/shapes/Conditional';
 import { Droptable, getDTDetails, queryDTCommits } from 'network/shapes/Droptable';
-import { Kami, getKamiAccount } from 'network/shapes/Kami';
-import { Node, NullNode, getNodeByIndex, passesNodeReqs } from 'network/shapes/Node';
+import {
+  Kami,
+  KamiOptions,
+  getKami,
+  getKamiAccount,
+  queryKamisByAccount,
+} from 'network/shapes/Kami';
+import {
+  Node,
+  NullNode,
+  getNodeByIndex,
+  passesNodeReqs,
+  queryNodeKamis,
+} from 'network/shapes/Node';
 import { ScavBar, getScavBarFromHash, getScavPoints } from 'network/shapes/Scavenge';
 import { waitForActionCompletion } from 'network/utils';
 import { Banner } from './header/Banner';
@@ -36,22 +48,26 @@ export function registerNodeModal() {
           const { world, components } = network;
           const { nodeIndex } = useSelected.getState();
 
-          const account = getAccountFromBurner(network, { kamis: true, inventory: true });
-          let node = getNodeByIndex(world, components, nodeIndex, { kamis: true });
-          if (!node) node = NullNode;
-
-          // reveal flow
-          const commits = queryDTCommits(world, components, account.id);
+          const account = getAccountFromBurner(network, { inventory: true });
 
           return {
             network,
-            data: { account, node, commits },
+            data: {
+              account,
+              kamiEntities: {
+                account: queryKamisByAccount(components, account.id),
+                node: queryNodeKamis(world, components, nodeIndex),
+              },
+              commits: queryDTCommits(world, components, account.id),
+            },
             utils: {
+              getKami: (entity: EntityIndex, options?: KamiOptions) =>
+                getKami(world, components, entity, options),
               getOwner: (kamiIndex: number) => getKamiAccount(world, components, kamiIndex),
               getScavPoints: (nodeIndex: number) =>
                 getScavPoints(world, components, 'node', nodeIndex, account.id),
               passesNodeReqs: (kami: Kami) =>
-                passesNodeReqs(world, components, node, account, kami),
+                passesNodeReqs(world, components, nodeIndex, account, kami),
               parseConditionalText: (condition: Condition, tracking?: boolean) =>
                 parseConditionalText(world, components, condition, tracking),
               getScavBarFromHash: (nodeIndex: number) =>
@@ -65,7 +81,7 @@ export function registerNodeModal() {
     // Render
     ({ data, network, utils }) => {
       // console.log('Node Modal Data', data);
-      const { account } = data;
+      const { account, kamiEntities } = data;
       const {
         actions,
         api,
@@ -74,20 +90,15 @@ export function registerNodeModal() {
         localSystems: { DTRevealer },
       } = network;
       const { nodeIndex } = useSelected();
-      const { modals, setModals } = useVisibility();
-      const [node, setNode] = useState<Node>(data.node);
+      const { setModals } = useVisibility();
+      const [node, setNode] = useState<Node>(NullNode);
 
       // updates from selected Node updates
       useEffect(() => {
-        let node = getNodeByIndex(world, components, nodeIndex, { kamis: true });
+        let node = getNodeByIndex(world, components, nodeIndex);
         if (node.index == 0) setModals({ node: false }); // NullNode
         setNode(node);
       }, [nodeIndex]);
-
-      // updates from component subscription updates
-      useEffect(() => {
-        setNode(data.node);
-      }, [data.node]);
 
       /////////////////
       // ACTIONS
@@ -196,7 +207,7 @@ export function registerNodeModal() {
           truncate
           noPadding
         >
-          {node.kamis.length === 0 && (
+          {kamiEntities.node.length === 0 && (
             <EmptyText
               text={['There are no Kamis on this node.', "Maybe that's an opportunity.."]}
               size={1}
@@ -204,7 +215,7 @@ export function registerNodeModal() {
           )}
           <Kards
             account={account}
-            kamis={node.kamis}
+            kamiEntities={kamiEntities}
             actions={{ collect, feed, liquidate, stop }}
             utils={utils}
           />
