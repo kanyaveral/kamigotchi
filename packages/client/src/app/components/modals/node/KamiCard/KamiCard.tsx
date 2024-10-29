@@ -2,24 +2,29 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { useSelected, useVisibility } from 'app/stores';
-import { BaseAccount } from 'network/shapes/Account';
+import { Kami, calcCooldown, calcHealth } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
-import { Card, Tooltip } from './base';
+import { Card } from '../../../library/base';
+import { Cooldown } from './Cooldown';
+import { Health } from './Health';
 
 interface Props {
-  account: BaseAccount;
+  kami: Kami;
   description: string[];
   descriptionOnClick?: () => void;
   subtext?: string;
   subtextOnClick?: () => void;
   actions?: React.ReactNode;
+  showBattery?: boolean;
+  showCooldown?: boolean;
 }
 
-// AccountCard is a Card that displays information about an Account
-export const AccountCard = (props: Props) => {
-  const { account, description, subtext, actions } = props;
+// KamiCard is a card that displays information about a Kami. It is designed to display
+// information ranging from current harvest or death as well as support common actions.
+export const KamiCard = (props: Props) => {
+  const { kami, description, subtext, actions, showBattery, showCooldown } = props;
   const { modals, setModals } = useVisibility();
-  const { setAccount } = useSelected();
+  const { kamiIndex, setKami } = useSelected();
 
   // ticking
   const [_, setLastRefresh] = useState(Date.now());
@@ -27,7 +32,7 @@ export const AccountCard = (props: Props) => {
     const refreshClock = () => {
       setLastRefresh(Date.now());
     };
-    const timerId = setInterval(refreshClock, 3333);
+    const timerId = setInterval(refreshClock, 1000);
     return function cleanup() {
       clearInterval(timerId);
     };
@@ -37,9 +42,12 @@ export const AccountCard = (props: Props) => {
   // INTERACTION
 
   // toggle the kami modal settings depending on its current state
-  const handleClick = () => {
-    setAccount(account.index);
-    if (!modals.account) setModals({ account: true });
+  const handleKamiClick = () => {
+    const sameKami = kamiIndex === kami.index;
+    setKami(kami.index);
+
+    if (modals.kami && sameKami) setModals({ kami: false });
+    else setModals({ kami: true });
     playClick();
   };
 
@@ -61,35 +69,33 @@ export const AccountCard = (props: Props) => {
     return <>{[header, ...details]}</>;
   };
 
-  const Title = () => {
+  const CornerContent = (kami: Kami) => {
+    const cooldown = calcCooldown(kami);
+    const totalHealth = kami.stats.health.total;
+
     return (
-      <Tooltip text={[account.ownerEOA]}>
-        <TitleText key='title' onClick={() => handleClick()}>
-          {account.name}
-        </TitleText>
-      </Tooltip>
+      <TitleCorner key='corner'>
+        {showCooldown && <Cooldown total={kami.time.cooldown.requirement} current={cooldown} />}
+        {showBattery && <Health current={calcHealth(kami)} total={totalHealth} />}
+      </TitleCorner>
     );
   };
 
   return (
-    <Card
-      image={account.pfpURI ?? 'https://miladymaker.net/milady/8365.png'}
-      imageOnClick={() => handleClick()}
-      fullWidth
-      scale={6}
-    >
+    <Card image={kami.image} imageOnClick={() => handleKamiClick()}>
       <TitleBar>
-        <Title key='title' />
+        <TitleText key='title' onClick={() => handleKamiClick()}>
+          {kami.name}
+        </TitleText>
+        {CornerContent(kami)}
       </TitleBar>
       <Content>
-        <ContentColumn key='col-1'>
+        <ContentColumn key='column-1'>
           <Description />
         </ContentColumn>
-        <ContentColumn key='col-2'>
-          <ContentSubtext key='subtext' onClick={props.subtextOnClick}>
-            {subtext}
-          </ContentSubtext>
-          <ContentActions key='actions'>{actions}</ContentActions>
+        <ContentColumn key='column-2'>
+          <ContentSubtext onClick={props.subtextOnClick}>{subtext}</ContentSubtext>
+          <ContentActions>{actions}</ContentActions>
         </ContentColumn>
       </Content>
     </Card>
@@ -120,6 +126,19 @@ const TitleText = styled.div`
   }
 `;
 
+const TitleCorner = styled.div`
+  flex-grow: 1;
+
+  font-family: Pixel;
+  font-size: 1vw;
+  text-align: right;
+  gap: 0.3vw;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+`;
+
 const Content = styled.div`
   flex-grow: 1;
   padding: 0.2vw;
@@ -131,6 +150,8 @@ const Content = styled.div`
 
 const ContentColumn = styled.div`
   flex-grow: 1;
+  margin: 0.2vw;
+  padding-top: 0.2vw;
   display: flex;
   flex-flow: column nowrap;
 `;
@@ -158,13 +179,15 @@ const ContentActions = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-end;
+  gap: 0.4vw;
 `;
 
 const TextBig = styled.p`
-  padding-bottom: 0.05vw;
+  padding: 0.2vw;
 
-  font-size: 0.9vw;
   font-family: Pixel;
+  font-size: 0.75vw;
+  line-height: 0.9vw;
   text-align: left;
 
   ${({ onClick }) =>
@@ -179,9 +202,9 @@ const TextBig = styled.p`
 `;
 
 const TextMedium = styled.p`
-  font-size: 0.7vw;
+  font-size: 0.6vw;
   font-family: Pixel;
+  line-height: 1vw;
   text-align: left;
-  padding-top: 0.4vw;
-  padding-left: 0.2vw;
+  padding-left: 0.5vw;
 `;
