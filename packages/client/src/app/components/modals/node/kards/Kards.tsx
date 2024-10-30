@@ -2,9 +2,9 @@ import { EntityIndex } from '@mud-classic/recs';
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import { useVisibility } from 'app/stores';
 import { Account, BaseAccount } from 'network/shapes/Account';
-import { Kami, KamiOptions } from 'network/shapes/Kami';
-import { Traits } from 'network/shapes/Trait';
+import { Kami } from 'network/shapes/Kami';
 import { AllyKards } from './AllyKards';
 import { EnemyCards } from './EnemyKards';
 
@@ -21,32 +21,60 @@ interface Props {
     stop: (kami: Kami) => void;
   };
   utils: {
-    getKami: (entity: EntityIndex, options?: KamiOptions) => Kami;
-    getKamiTraits: (entity: EntityIndex) => Traits;
-    getLastTime: (entity: EntityIndex) => number;
-    getOwner: (index: number) => BaseAccount;
+    getKami: (entity: EntityIndex) => Kami;
+    refreshKami: (kami: Kami) => Kami;
+    getOwner: (kami: Kami) => BaseAccount;
   };
 }
 
 export const Kards = (props: Props) => {
   const { actions, kamiEntities, account, utils } = props;
-  const [allies, setAllies] = useState<EntityIndex[]>([]);
-  const [enemies, setEnemies] = useState<EntityIndex[]>([]);
-  const [visibleEnemies, setVisibleEnemies] = useState(0);
+  const { modals } = useVisibility();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [allies, setAllies] = useState<Kami[]>([]);
+  const [alliesUpdating, setAlliesUpdating] = useState(false);
+  const [allyEntities, setAllyEntities] = useState<EntityIndex[]>([]);
+  const [enemyEntities, setEnemyEntities] = useState<EntityIndex[]>([]);
+  const [visibleEnemies, setVisibleEnemies] = useState(0);
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+
+  // ticking
+  useEffect(() => {
+    const timerId = setInterval(() => setLastRefresh(Date.now()), 250);
+    return () => clearInterval(timerId);
+  }, []);
 
   // identify ally vs enemy kamis whenever the list of kamis changes
   useEffect(() => {
-    const allyEntities: EntityIndex[] = [];
-    const enemyEntities: EntityIndex[] = [];
+    const allies: EntityIndex[] = [];
+    const enemies: EntityIndex[] = [];
     kamiEntities.node.forEach((entity) => {
-      const party = kamiEntities.account;
-      if (party.includes(entity)) allyEntities.push(entity);
-      else enemyEntities.push(entity);
+      if (kamiEntities.account.includes(entity)) allies.push(entity);
+      else enemies.push(entity);
     });
-    setAllies(allyEntities);
-    setEnemies(enemyEntities);
+    setAllyEntities(allies);
+    setEnemyEntities(enemies);
   }, [kamiEntities]);
+
+  // populate the ally kami data as new ones come in
+  useEffect(() => {
+    if (!modals.node) return;
+    setAlliesUpdating(true);
+    setAllies(allyEntities.map((entity) => utils.getKami(entity)));
+    setAlliesUpdating(false);
+  }, [modals.node, allyEntities]);
+
+  // check to refresh ally data at each interval
+  useEffect(() => {
+    if (!modals.node || alliesUpdating) return;
+    let alliesStale = false;
+    const newAllies = allies.map((kami) => utils.refreshKami(kami));
+    for (let i = 0; i < allies.length; i++) {
+      if (newAllies[i] != allies[i]) alliesStale = true;
+    }
+    if (alliesStale) setAllies(newAllies);
+  }, [modals.node, lastRefresh]);
 
   // scrolling effects for enemy kards
   useEffect(() => {
@@ -55,7 +83,7 @@ export const Kards = (props: Props) => {
       container.addEventListener('scroll', handleScroll);
       return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, [enemies.length, visibleEnemies]);
+  }, [enemyEntities.length, visibleEnemies]);
 
   /////////////////
   // INTERACTION
@@ -63,9 +91,8 @@ export const Kards = (props: Props) => {
   // when scrolling, load more kamis when nearing the bottom of the container
   const handleScroll = () => {
     if (isScrolledToBottom()) {
-      const newLimit = Math.min(visibleEnemies + 5, enemies.length);
-      console.log('newLimit', { visibleEnemies, enemies: enemies.length, newLimit });
-      setVisibleEnemies(newLimit);
+      const newLimit = Math.min(visibleEnemies + 5, enemyEntities.length);
+      if (newLimit != visibleEnemies) setVisibleEnemies(newLimit);
     }
   };
 
@@ -88,9 +115,10 @@ export const Kards = (props: Props) => {
       ref={containerRef}
       style={{ display: kamiEntities.node.length > 0 ? 'flex' : 'none' }}
     >
-      <AllyKards account={account} entities={allies} actions={actions} utils={utils} />
+      <AllyKards account={account} kamis={allies} actions={actions} utils={utils} />
       <EnemyCards
-        entities={{ allies, enemies }}
+        allies={allies}
+        enemyEntities={enemyEntities}
         actions={actions}
         utils={utils}
         limit={{ val: visibleEnemies, set: setVisibleEnemies }}

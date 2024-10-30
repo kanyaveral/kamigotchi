@@ -1,14 +1,14 @@
 import { EntityIndex } from '@mud-classic/recs';
 import styled from 'styled-components';
 
-import { KamiCard } from 'app/components/library';
 import { CollectButton, FeedButton, StopButton } from 'app/components/library/actions';
 import { Account } from 'network/shapes/Account';
 import { Kami, KamiOptions, calcHealth, calcOutput } from 'network/shapes/Kami';
+import { KamiCard } from '../KamiCard/KamiCard';
 
 interface Props {
   account: Account;
-  entities: EntityIndex[]; // ally kami entities
+  kamis: Kami[]; // ally kami entities
   actions: {
     collect: (kami: Kami) => void;
     feed: (kami: Kami, itemIndex: number) => void;
@@ -16,13 +16,17 @@ interface Props {
   };
   utils: {
     getKami: (entity: EntityIndex, options?: KamiOptions) => Kami;
+    refreshKami: (kami: Kami) => Kami;
   };
 }
 
 // rendering of an ally kami on this node
 export const AllyKards = (props: Props) => {
-  const { actions, utils, entities, account } = props;
+  const { actions, account, kamis } = props;
   const { collect, feed, stop } = actions;
+
+  /////////////////
+  // INTERPRETATION
 
   // get the description on the card
   const getDescription = (kami: Kami): string[] => {
@@ -37,27 +41,23 @@ export const AllyKards = (props: Props) => {
   };
 
   return (
-    <Container style={{ display: entities.length > 0 ? 'flex' : 'none' }}>
+    <Container style={{ display: kamis.length > 0 ? 'flex' : 'none' }}>
       <Title>Allies</Title>
-      {entities.map((entity: EntityIndex) => {
-        // TODO: optimize this. dont recompute all kami data indiscriminately
-        const kami = utils.getKami(entity, { harvest: true, traits: true });
-        return (
-          <KamiCard
-            key={kami.index}
-            kami={kami}
-            description={getDescription(kami)}
-            subtext={`yours (\$${calcOutput(kami)})`}
-            actions={[
-              FeedButton(kami, account, feed),
-              CollectButton(kami, account, collect),
-              StopButton(kami, account, stop),
-            ]}
-            showBattery
-            showCooldown
-          />
-        );
-      })}
+      {kamis.map((kami: Kami) => (
+        <KamiCard
+          key={kami.index}
+          kami={kami}
+          description={getDescription(kami)}
+          subtext={`yours (\$${calcOutput(kami)})`}
+          actions={[
+            FeedButton(kami, account, feed),
+            CollectButton(kami, account, collect),
+            StopButton(kami, account, stop),
+          ]}
+          showBattery
+          showCooldown
+        />
+      ))}
     </Container>
   );
 };

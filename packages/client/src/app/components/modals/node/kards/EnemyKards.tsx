@@ -9,8 +9,7 @@ import { ActionIcons } from 'assets/images/icons/actions';
 import { kamiIcon } from 'assets/images/icons/menu';
 import { healthIcon } from 'assets/images/icons/stats';
 import { BaseAccount } from 'network/shapes/Account';
-import { Kami, KamiOptions, calcHealth, calcHealthPercent, calcOutput } from 'network/shapes/Kami';
-import { Traits } from 'network/shapes/Trait';
+import { Kami, calcHealth, calcHealthPercent, calcOutput } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
 import { KamiCard } from '../KamiCard/KamiCard';
 
@@ -24,41 +23,34 @@ const SortMap: Record<KamiSort, string> = {
   cooldown: ActionIcons.harvest,
 };
 
-// cache for harvest rates of enemy kamis
-const KamiCache = new Map<EntityIndex, Kami>();
-const KamiLastTs = new Map<EntityIndex, number>(); // kami index -> last update ts
-const OwnerCache = new Map<EntityIndex, BaseAccount>();
-
 interface Props {
+  allies: Kami[];
+  enemyEntities: EntityIndex[];
   limit: {
     val: number;
     set: (val: number) => void;
-  };
-  entities: {
-    allies: EntityIndex[];
-    enemies: EntityIndex[];
   };
   actions: {
     liquidate: (allyKami: Kami, enemyKami: Kami) => void;
   };
   utils: {
-    getKami: (entity: EntityIndex, options?: KamiOptions) => Kami;
-    getKamiTraits: (entity: EntityIndex) => Traits;
-    getLastTime: (entity: EntityIndex) => number;
-    getOwner: (index: number) => BaseAccount;
+    getKami: (entity: EntityIndex) => Kami;
+    refreshKami: (kami: Kami) => Kami;
+    getOwner: (kami: Kami) => BaseAccount;
   };
 }
 
 // rendering of enermy kamis on this node
 export const EnemyCards = (props: Props) => {
-  const { actions, utils, entities, limit } = props;
+  const { allies, enemyEntities, limit, actions, utils } = props;
+  const { getOwner, getKami, refreshKami } = utils;
   const { modals, setModals } = useVisibility();
   const { accountIndex, setAccount } = useSelected();
 
   const [isVisible, setIsVisible] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
 
-  const [allies, setAllies] = useState<Kami[]>([]);
   const [enemies, setEnemies] = useState<Kami[]>([]);
   const [sorted, setSorted] = useState<Kami[]>([]);
   const [sort, setSort] = useState<KamiSort>('cooldown');
@@ -74,65 +66,34 @@ export const EnemyCards = (props: Props) => {
     []
   );
 
-  // set visibility to skip data pulls
+  // set up ticking
   useEffect(() => {
-    if (!modals.node) setIsVisible(false);
-  }, [modals.node]);
-
-  // ticking
-  useEffect(() => {
-    const timerId = setInterval(() => setLastRefresh(Date.now()), 2000);
-    return function cleanup() {
-      clearInterval(timerId);
-    };
+    const timerId = setInterval(() => setLastRefresh(Date.now()), 250);
+    return () => clearInterval(timerId);
   }, []);
-
-  // populate the ally kami data as new ones come in
-  useEffect(() => {
-    if (!isVisible) return;
-    setAllies(entities.allies.map((entity) => getKami(entity)));
-  }, [isVisible, entities.allies.length]);
 
   // populate the enemy kami data as new ones come in
   useEffect(() => {
     if (!isVisible) return;
-    setEnemies(entities.enemies.map((entity) => getKami(entity)));
-  }, [isVisible, entities.enemies.length]);
+    setIsUpdating(true);
+    setEnemies(enemyEntities.map((entity) => getKami(entity)));
+    setIsUpdating(false);
+  }, [isVisible, enemyEntities]); // might need better triggers
 
   // check to see whether we should refresh each kami's data as needed
   useEffect(() => {
-    if (!isVisible) return;
-
-    // check for ally updates
-    let alliesStale = false;
-    const newAllies = allies.map((kami) => refreshKami(kami));
-    for (let i = 0; i < allies.length; i++) {
-      if (newAllies[i] != allies[i]) alliesStale = true;
-    }
-
-    // check for enemy updates
+    if (!isVisible || isUpdating) return;
     let enemiesStale = false;
-    const newEnemies = allies.map((kami) => refreshKami(kami));
-    for (let i = 0; i < allies.length; i++) {
-      if (newEnemies[i] != allies[i]) enemiesStale = true;
+    const newEnemies = enemies.map((kami) => refreshKami(kami));
+    for (let i = 0; i < enemies.length; i++) {
+      if (newEnemies[i] != enemies[i]) enemiesStale = true;
     }
-
-    // indicate updates to the kami object pointers
-    if (alliesStale) {
-      console.log('allies stale. refreshing..');
-      setAllies(newAllies);
-    }
-    if (enemiesStale) {
-      console.log('enemies stale. refreshing..');
-      setEnemies(newEnemies);
-    }
+    if (enemiesStale) setEnemies(newEnemies);
   }, [isVisible, lastRefresh]);
 
   // sort whenever the list of enemies changes or the sort changes
   useEffect(() => {
-    console.log('enemy update detected');
     if (!isVisible) return;
-    console.log('sorting enemies');
     const sorted = [...enemies].sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name);
       else if (sort === 'health') return calcHealth(a) - calcHealth(b);
@@ -148,41 +109,18 @@ export const EnemyCards = (props: Props) => {
     setSorted(sorted);
   }, [enemies, sort]);
 
-  /////////////////
-  // CACHE OPERATIONS
-
-  // get a kami from the cache or live pool
-  const getKami = (entity: EntityIndex) => {
-    if (!KamiLastTs.has(entity)) processKami(entity, true);
-    return KamiCache.get(entity)!;
-  };
-
-  // cache any persistent kami data
-  const processKami = (entity: EntityIndex, isNew = false) => {
-    const kamiOptions = { harvest: true, traits: isNew };
-    const kami = utils.getKami(entity, kamiOptions);
-    KamiCache.set(entity, kami);
-    KamiLastTs.set(entity, kami.time.last);
-    return kami;
-  };
-
-  // refresh a kami as needed and return the most recent instance
-  const refreshKami = (kami: Kami) => {
-    const lastTime = utils.getLastTime(kami.entityIndex);
-    const lastUpdate = KamiLastTs.get(kami.entityIndex)!;
-    if (lastTime > lastUpdate) {
-      kami = processKami(kami.entityIndex, true); // need to pull traits again. no way to replace atm
-      KamiCache.set(kami.entityIndex, kami);
-    }
-    return kami;
-  };
+  // set visibility whenever modal is closed
+  useEffect(() => {
+    if (!modals.node) setIsVisible(false);
+  }, [modals.node]);
 
   /////////////////
   // INTERACTION
 
   const handleToggle = () => {
     playClick();
-    if (!isVisible) limit.set(10); // Reset limit to 10 when toggling
+    if (!isVisible) limit.set(10);
+    else limit.set(0); // Reset limit to 0 when toggling
     setIsVisible(!isVisible);
   };
 
@@ -201,16 +139,6 @@ export const EnemyCards = (props: Props) => {
     return description;
   };
 
-  // get and cache owner lookups. if owner is null, update the cache
-  const getOwner = (kami: Kami) => {
-    const owner = OwnerCache.get(kami.entityIndex);
-    if (!owner || !owner.index) {
-      const updatedOwner = utils.getOwner(kami.index);
-      OwnerCache.set(kami.entityIndex, updatedOwner);
-    }
-    return OwnerCache.get(kami.entityIndex)!;
-  };
-
   // doing this for a bit of testing sanity
   const getActions = (kami: Kami) => {
     return [LiquidateButton(kami, allies, actions.liquidate)];
@@ -227,11 +155,11 @@ export const EnemyCards = (props: Props) => {
   };
 
   return (
-    <Container style={{ display: entities.enemies.length > 0 ? 'flex' : 'none' }}>
+    <Container style={{ display: enemyEntities.length > 0 ? 'flex' : 'none' }}>
       <Row>
         <Title
           onClick={handleToggle}
-        >{`${isVisible ? '▼' : '▶'} Enemies(${entities.enemies.length})`}</Title>
+        >{`${isVisible ? '▼' : '▶'} Enemies(${enemyEntities.length})`}</Title>
         <IconListButton img={SortMap[sort]} text={sort} options={sortOptions} radius={0.6} />
       </Row>
       {isVisible &&
