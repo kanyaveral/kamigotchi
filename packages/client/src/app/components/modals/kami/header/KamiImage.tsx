@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { Tooltip } from 'app/components/library';
 import { Overlay } from 'app/components/library/styles';
-import { clickFx, hoverFx } from 'app/styles/effects';
+import { clickFx, hoverFx, Shimmer } from 'app/styles/effects';
 import { Account, BaseAccount } from 'network/shapes/Account';
 import { isResting, Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
@@ -61,7 +61,7 @@ export const KamiImage = (props: Props) => {
         <Overlay bottom={0} right={0}>
           <Tooltip text={[getLevelTooltip()]}>
             <Button disabled={!canLevel} onClick={() => handleLevelUp()}>
-              ↑
+              ↑{canLevel && <Shimmer />}
             </Button>
           </Tooltip>
         </Overlay>
