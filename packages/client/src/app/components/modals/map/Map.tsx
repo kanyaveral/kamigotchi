@@ -6,8 +6,11 @@ import { registerUIComponent } from 'app/root';
 import { useSelected, useVisibility } from 'app/stores';
 import { mapIcon } from 'assets/images/icons/menu';
 import { getAccountFromBurner, queryAccountsByRoom } from 'network/shapes/Account';
+
+import { EntityIndex } from '@mud-classic/recs';
+import { getBaseKami, getKamiLocation, queryKamisByAccount } from 'network/shapes/Kami';
 import { queryNodeKamis } from 'network/shapes/Node';
-import { Room, getAllRooms, getRoomByIndex } from 'network/shapes/Room';
+import { getAllRooms, getRoomByIndex, Room } from 'network/shapes/Room';
 import { Grid } from './Grid';
 
 export function registerMapModal() {
@@ -34,6 +37,10 @@ export function registerMapModal() {
               queryNodeKamis: (nodeIndex: number) => queryNodeKamis(world, components, nodeIndex),
               queryAccountsByRoom: (roomIndex: number) =>
                 queryAccountsByRoom(components, roomIndex),
+              queryKamisByAccount: () => queryKamisByAccount(components, account.id),
+              getKamiLocation: (kamiIndex: EntityIndex) =>
+                getKamiLocation(world, components, kamiIndex),
+              getBaseKami: (kamiIndex: EntityIndex) => getBaseKami(world, components, kamiIndex),
             },
           };
         })
@@ -43,10 +50,8 @@ export function registerMapModal() {
     ({ network, data, utils }) => {
       const { account } = data;
       const { actions, api, components, world } = network;
-      const { queryNodeKamis, queryAccountsByRoom } = utils;
       const { roomIndex, setRoom: setRoomIndex } = useSelected();
       const { modals } = useVisibility();
-
       const [hoveredRoom, setHoveredRoom] = useState(0);
       const [roomMap, setRoomMap] = useState<Map<number, Room>>(new Map());
       const [zone, setZone] = useState(0);
@@ -91,6 +96,7 @@ export function registerMapModal() {
 
       ///////////////////
       // RENDER
+      const accountKamis = queryKamisByAccount(components, account.id);
 
       return (
         <ModalWrapper
@@ -104,8 +110,9 @@ export function registerMapModal() {
             index={roomIndex}
             zone={zone}
             rooms={roomMap}
+            accountKamis={accountKamis}
             actions={{ move }}
-            utils={{ setHoveredRoom, queryNodeKamis, queryAccountsByRoom }}
+            utils={{ ...utils, setHoveredRoom }}
           />
         </ModalWrapper>
       );
