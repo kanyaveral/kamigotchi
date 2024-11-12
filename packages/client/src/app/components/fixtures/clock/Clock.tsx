@@ -78,9 +78,19 @@ export function registerClock() {
         return () => clearInterval(interval);
       }, []);
 
+      const Ticks = () => {
+        let tickList = [];
+        for (let i = 0; i < 36; i++) {
+          tickList.push(<Tick rotationZ={i} />);
+        }
+        return tickList;
+      };
+
+      //Render
       return (
         <Container style={{ display: fixtures.menu ? 'flex' : 'none' }}>
           <Circle rotation={rotateClock}>
+            <TicksPosition>{Ticks()}</TicksPosition>
             <BandColor rotation={rotateBand} />
             <Tooltip text={getClockTooltip()}>
               <Phases>
@@ -94,9 +104,20 @@ export function registerClock() {
               </Phases>
             </Tooltip>
           </Circle>
+          <Time viewBox='0 0 30 4'>
+            <path id='MyPath' fill='none' d='M 2.5 3.7 Q 10.5 -4 25 1.8' pathLength='2' />
+            <text fill='white' fontSize='3' dominantBaseline='hanging' textAnchor='middle'>
+              <textPath href='#MyPath' startOffset='0.9'>
+                {getKamiTime(Date.now())}
+              </textPath>
+            </text>
+          </Time>
           <ClockOverlay />
           <Tooltip text={getStaminaTooltip(stamina)}>
             <SmallCircle>
+              <StaminaText>
+                {stamina.sync}/{stamina.total}
+              </StaminaText>
               <SmallCircleFill height={calcStaminaPercent(stamina)} />
             </SmallCircle>
           </Tooltip>
@@ -109,7 +130,7 @@ export function registerClock() {
 const Container = styled.div`
   pointer-events: auto;
   position: absolute;
-  left: 4;
+  left: 0vh;
   z-index: -1;
 `;
 
@@ -130,6 +151,52 @@ const Circle = styled.div<{ rotation: number }>`
   overflow: hidden;
   transform-origin: center;
   ${({ rotation }) => `transform: rotate(${rotation}deg);`}
+`;
+
+const TicksPosition = styled.div`
+  position: absolute;
+  left: 12.5vh;
+  bottom: 12.5vh;
+  transform: rotate(16deg);
+`;
+
+const Tick = styled.div<{ rotationZ: number }>`
+  width: 0.1vh;
+  height: 0.5vh;
+  background-color: grey;
+  position: absolute;
+  transform-origin: 0px 7.5vh;
+  transform: ${({ rotationZ }) => `translateY(-7.5vh) rotateZ(calc(${rotationZ} * 360deg / 36))`};
+  z-index: 1200;
+`;
+
+const Time = styled.svg`
+  text-shadow:
+    -1px 0 black,
+    0 1px black,
+    1px 0 black,
+    0 -1px black;
+  width: 14vh;
+  height: 4vh;
+  position: absolute;
+  top: 1.5vh;
+  left: 6vh;
+`;
+
+const StaminaText = styled.div`
+  position: absolute;
+  z-index: 1;
+  font-size: 1vh;
+  bottom: 3vh;
+  color: #efff1d;
+  --b: 165%;
+  right: calc(100% - var(--b) / 2);
+
+  text-shadow:
+    -1px 0 black,
+    0 1px black,
+    1px 0 black,
+    0 -1px black;
 `;
 
 const ClockOverlay = styled.div`
