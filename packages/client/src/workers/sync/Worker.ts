@@ -22,7 +22,7 @@ import {
   take,
 } from 'rxjs';
 
-import { VERSION as DB_VERSION } from 'cache/db';
+import { VERSION as IDB_VERSION } from 'cache/db';
 import { GodID, SyncState, SyncStatus } from 'engine/constants';
 import { createBlockNumberStream } from 'engine/executors';
 import { createReconnectingProvider } from 'engine/providers';
@@ -152,7 +152,7 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
       computed(() => computedConfig.get().provider)
     );
     const provider = providers.get().json;
-    const indexedDB = await getStateCache(chainId, worldContract.address, DB_VERSION);
+    const indexedDB = await getStateCache(chainId, worldContract.address, IDB_VERSION);
     const decode = createDecode();
     const fetchWorldEvents = createFetchWorldEventsInBlockRange(
       provider,
@@ -244,13 +244,22 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
 
       // NOTE(🥕) On the older version using the snapshot service is not mandatory so it can do the sync block by block
       // I removed it here just to make sure Kamigaze is working as expected
-      initialState = await fetchStateFromKamigaze(
-        initialState,
-        kamigazeClient,
-        decode,
-        config.snapshotNumChunks ?? 10,
-        (percentage: number) => this.setLoadingState({ percentage })
-      );
+      try {
+        initialState = await fetchStateFromKamigaze(
+          initialState,
+          kamigazeClient,
+          decode,
+          config.snapshotNumChunks ?? 10,
+          (percentage: number) => this.setLoadingState({ percentage })
+        );
+      } catch (e) {
+        console.error('failed to retrieve state', e);
+        this.setLoadingState({
+          state: SyncState.FAILED,
+          msg: `Failed to Retrieve State, Try Again Later`,
+        });
+        return;
+      }
       this.setLoadingState({ percentage: 100 }); // move % updates into fetchStateFromKamigaze
       console.log('INTIAL STATE (POST-SYNC)', getStateReport(initialState));
     }
