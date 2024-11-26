@@ -81,7 +81,7 @@ export function registerClock() {
       const Ticks = () => {
         let tickList = [];
         for (let i = 0; i < 36; i++) {
-          tickList.push(<Tick rotationZ={i} />);
+          tickList.push(<Tick key={i} rotationZ={i} />);
         }
         return tickList;
       };
@@ -89,10 +89,10 @@ export function registerClock() {
       //Render
       return (
         <Container style={{ display: fixtures.menu ? 'flex' : 'none' }}>
-          <Circle rotation={rotateClock}>
-            <TicksPosition>{Ticks()}</TicksPosition>
-            <BandColor rotation={rotateBand} />
-            <Tooltip text={getClockTooltip()}>
+          <Tooltip text={getClockTooltip()}>
+            <Circle rotation={rotateClock}>
+              <TicksPosition>{Ticks()}</TicksPosition>
+              <BandColor rotation={rotateBand} />
               <Phases>
                 <IconNight src={ClockIcons.night} iconColor={rotateBand} rotation={rotateClock} />
                 <IconTwilight
@@ -102,8 +102,8 @@ export function registerClock() {
                 />
                 <IconDay src={ClockIcons.day} iconColor={rotateBand} rotation={rotateClock} />
               </Phases>
-            </Tooltip>
-          </Circle>
+            </Circle>{' '}
+          </Tooltip>
           <Time viewBox='0 0 30 4'>
             <path id='MyPath' fill='none' d='M 2.5 3.7 Q 10.5 -4 25 1.8' pathLength='2' />
             <text fill='white' fontSize='3' dominantBaseline='hanging' textAnchor='middle'>
@@ -149,9 +149,9 @@ const Circle = styled.div<{ rotation: number }>`
   background-repeat: no-repeat;
   background-size: 17.5vh;
   z-index: -1;
-  overflow: hidden;
   transform-origin: center;
   ${({ rotation }) => `transform: rotate(${rotation}deg);`}
+  overflow:hidden;
 `;
 
 const TicksPosition = styled.div`
