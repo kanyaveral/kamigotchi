@@ -65,8 +65,7 @@ const Container = styled.div`
   position: relative;
   border: 0.15vw solid black;
   border-radius: 0.4vw;
-  margin: 0.4vw;
-  width: 18.5vw;
+  width: 100%;
 
   display: flex;
   flex-direction: row nowrap;

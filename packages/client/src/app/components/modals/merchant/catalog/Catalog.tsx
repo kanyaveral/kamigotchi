@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { Listing } from 'network/shapes/NPCs';
+import { Listing } from 'network/shapes/Listings';
 import { CartItem } from '../types';
 import { CatalogRow } from './CatalogRow';
 
@@ -43,11 +43,9 @@ export const Catalog = (props: Props) => {
 const Container = styled.div`
   position: relative;
   border-right: solid black 0.15vw;
-  height: 100%;
 
   display: flex;
   flex-flow: column nowrap;
-  overflow-y: scroll;
   flex-grow: 2;
 `;
 
@@ -56,20 +54,25 @@ const Title = styled.div`
   background-color: #ddd;
   border-radius: 0.25vw 0 0 0;
   width: 100%;
-  padding: 2.4vh 1.2vw;
+  padding: 1.2vw;
   opacity: 0.9;
 
   color: black;
-  font-family: Pixel;
   font-size: 1.2vw;
   text-align: left;
   z-index: 1;
 `;
 
 const Items = styled.div`
-  padding: 7.5vh 0.6vw 0.6vw 0.6vw;
+  padding: 0.6vw;
+  padding-top: 4.2vw;
+  gap: 0.6vw;
+
   display: flex;
   flex-flow: column nowrap;
-  justify-content: flex-start;
-  overflow-y: scroll;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
 `;

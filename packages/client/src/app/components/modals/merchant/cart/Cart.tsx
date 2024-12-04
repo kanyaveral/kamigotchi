@@ -77,12 +77,11 @@ export const Cart = (props: Props) => {
 
 const Container = styled.div`
   position: relative;
-  user-select: none;
+  width: 10%;
 
   display: flex;
   flex-flow: column nowrap;
-  overflow-y: scroll;
-  min-width: 15vw;
+  flex-grow: 2;
 `;
 
 const Title = styled.div`
@@ -90,22 +89,26 @@ const Title = styled.div`
   background-color: #ddd;
   border-radius: 0 0.25vw 0 0;
   width: 100%;
-  padding: 2.4vh 1.2vw;
+  padding: 1.2vw;
   opacity: 0.9;
 
   color: black;
-  font-family: Pixel;
   font-size: 1.2vw;
   text-align: left;
   z-index: 1;
 `;
 
 const Items = styled.div`
-  padding: 7.5vh 0.6vw;
+  padding: 4.2vw 0.3vw 3.5vw 0.9vw;
+  gap: 0.6vw;
+
   display: flex;
   flex-flow: column nowrap;
-  justify-content: flex-start;
-  overflow-y: scroll;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
 `;
 
 const Checkout = styled.div`
@@ -115,7 +118,7 @@ const Checkout = styled.div`
   height: 4.5vh;
   bottom: 0;
   right: 0;
-  padding: 1.8vw 0.6vw;
+  padding: 0 0.6vw 1.8vw 0;
 
   display: flex;
   flex-flow: row nowrap;
