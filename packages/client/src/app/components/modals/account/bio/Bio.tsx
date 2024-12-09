@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { FarcasterConnect, Tooltip } from 'app/components/library';
+import { MockupBar } from 'app/components/library/base/measures/ExperienceBar';
 import { Account } from 'network/shapes/Account';
 import { ActionSystem } from 'network/systems/ActionSystem';
 import { playClick } from 'utils/sounds';
@@ -110,6 +111,7 @@ export const Bio = (props: Props) => {
         <BirthdayRow />
         <KillsRow />
         <CoinRow />
+        <MockupBar />
       </Content>
       <PfpContainer>
         <Tooltip text={[getLastSeenString()]}>
