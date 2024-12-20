@@ -23,3 +23,8 @@ export const filter = (
     return forMatches && isMatches && inv.balance >= min;
   });
 };
+
+export const getBalance = (inventories: Inventory[], itemIndex: number): number => {
+  const filtered = inventories.filter((inv) => inv.item.index == itemIndex);
+  return filtered ? filtered[0]?.balance : 0;
+};
