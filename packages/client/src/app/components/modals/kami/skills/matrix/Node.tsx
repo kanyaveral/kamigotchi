@@ -1,6 +1,6 @@
 import styled, { keyframes } from 'styled-components';
 
-import { Skill, getSkillInstance } from 'app/cache/skill';
+import { Skill, getSkillInstance } from 'app/cache/skills';
 import { Tooltip } from 'app/components/library';
 import { SkillImages } from 'assets/images/skills';
 import { parseBonusText } from 'network/shapes/Bonus/interpretation';
@@ -26,12 +26,12 @@ export const Node = (props: Props) => {
 
   const imageKey = skill.name.toLowerCase().replaceAll(' ', '_') as keyof typeof SkillImages;
   const image = SkillImages[imageKey] ?? skill.image;
-  const kSkill = getSkillInstance(kami, skill);
+  const instance = getSkillInstance(kami, skill.index);
 
   const acquirable = upgradeError == undefined || upgradeError[0].startsWith('Maxed Out');
 
-  const currPoints = kSkill?.points.current ?? 0;
-  const maxPoints = skill.points.max;
+  const currPoints = instance?.points ?? 0;
+  const maxPoints = skill.max;
   const cost = skill.cost;
 
   const name = skill.name;

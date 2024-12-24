@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { parseRequirementText } from 'app/cache/skill/functions';
+import { getSkillInstance } from 'app/cache/skills';
 import { ActionButton, HelpChip, Tooltip } from 'app/components/library';
 import { Account, BaseAccount } from 'network/shapes/Account';
 import { parseBonusText } from 'network/shapes/Bonus';
+import { Condition } from 'network/shapes/Conditional';
 import { Kami } from 'network/shapes/Kami';
 import { Skill } from 'network/shapes/Skill';
 import { playClick } from 'utils/sounds';
@@ -16,31 +17,35 @@ interface Props {
     owner: BaseAccount;
   };
   index: number;
-  skills: Map<number, Skill>; // registry skills
   upgradeError: string[] | undefined;
   actions: { upgrade: (skill: Skill) => void };
   utils: {
+    getSkill: (index: number) => Skill;
     getSkillImage: (skill: Skill) => string;
     getTreePoints: (tree: string) => number;
     getTreeRequirement: (skill: Skill) => number;
+    parseSkillRequirement: (requirement: Condition) => string;
   };
 }
 
 // The leftside details panel of the Skills tab of the Kami Modal
 export const Details = (props: Props) => {
-  const { index, data, skills, upgradeError, actions, utils } = props;
+  const { index, data, upgradeError, actions, utils } = props;
   const { account, kami, owner } = data;
-  const { getSkillImage, getTreePoints, getTreeRequirement } = utils;
-  const [skill, setSkill] = useState<Skill | undefined>(skills.get(index)); // registry skill instance
-  const [kSkill, setKSkill] = useState<Skill | undefined>(undefined);
+  const { getSkill, getSkillImage, parseSkillRequirement } = utils;
+  const { getTreePoints, getTreeRequirement } = utils;
+  const [skill, setSkill] = useState<Skill | undefined>(getSkill(index)); // registry skill instance
+  const [investment, setInvestment] = useState<number>(0);
   const [disabledReason, setDisabledReason] = useState<string[] | undefined>(undefined);
 
   // update registry/kami skill instances when index changes
   useEffect(() => {
-    const skill = skills.get(index); // registry skill instance
-    const kamiSkill = kami.skills?.tree.find((s) => s.index == index);
+    const skill = getSkill(index);
     setSkill(skill);
-    setKSkill(kamiSkill);
+
+    const investment = getSkillInstance(kami, index);
+    setInvestment(investment?.points ?? 0);
+
     setDisabledReason(owner.index !== account.index ? ['not ur kami'] : upgradeError);
   }, [index, kami]);
 
@@ -57,9 +62,9 @@ export const Details = (props: Props) => {
   // INTERPRETATION
 
   const parseTreeRequirementText = (skill: Skill): string => {
-    if (skill.treeTier == 0) return '';
-    const tree = skill.tree;
-    const invested = getTreePoints(skill.tree);
+    if (skill.tier == 0) return '';
+    const tree = skill.type;
+    const invested = getTreePoints(skill.type);
     const min = getTreeRequirement(skill);
 
     let text = `Invest >${min} ${tree} points`;
@@ -72,7 +77,7 @@ export const Details = (props: Props) => {
     if (disabledReason) return disabledReason;
 
     const cost = skill?.cost ?? 1;
-    const currLevel = kSkill?.points.current ?? 0;
+    const currLevel = investment;
     const tooltipText = [
       `Upgrade Skill (${cost}pt${cost > 1 ? 's' : ''})`,
       '',
@@ -120,7 +125,7 @@ export const Details = (props: Props) => {
             tooltip={[
               `Skill Index: ${skill.index}`,
               `Cost: ${skill.cost} Skill Point(s)`,
-              `Max: Level ${skill.points.max}`,
+              `Max: Level ${skill.max}`,
             ]}
           />
         </div>
@@ -129,7 +134,7 @@ export const Details = (props: Props) => {
       <NameSection>
         <Name>{skill.name}</Name>
         <LevelText>
-          [{kSkill?.points.current ?? 0}/{skill.points.max}]
+          [{investment}/{skill.max}]
         </LevelText>
       </NameSection>
 
@@ -143,7 +148,7 @@ export const Details = (props: Props) => {
         label='Requirements'
         values={[
           parseTreeRequirementText(skill),
-          ...(skill.requirements ?? []).map((req) => parseRequirementText(req, skills)),
+          ...(skill.requirements ?? []).map((req) => parseSkillRequirement(req)),
         ]}
       />
     </Container>

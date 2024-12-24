@@ -1,11 +1,17 @@
+export { getBonuses as getSkillBonuses } from './bonuses';
+export { NullSkill } from './constants';
 export {
-  getHolderSkillByIndex,
+  getForHolderByIndex as getHolderSkillByIndex,
   getHolderSkillLevel,
-  getHolderSkills,
+  getForHolder as getHolderSkills,
   getRegistrySkills,
-  getSkillBonuses,
-  getSkillByIndex,
+  getByIndex as getSkillByIndex,
 } from './getters';
-export { queryHolderSkills, queryRegistrySkills, querySkillByIndex, querySkillsX } from './queries';
-export { getRequirement, getSkill, getInstanceEntity as getSkillInstanceEntity } from './types';
-export type { Requirement, Skill } from './types';
+export {
+  queryForHolder as queryHolderSkills,
+  queryByIndex as querySkillByIndex,
+  queryRegistry as querySkillRegistry,
+} from './queries';
+export { get as getSkill, getInstanceEntity as getSkillInstanceEntity } from './types';
+
+export type { Skill } from './types';
