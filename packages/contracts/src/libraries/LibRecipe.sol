@@ -68,7 +68,7 @@ library LibRecipe {
     IsRegistryComponent(getAddrByID(components, IsRegCompID)).set(id);
     IndexRecipeComponent(getAddrByID(components, IndexRecipeCompID)).set(id, recipeIndex);
     ExperienceComponent(getAddrByID(components, ExpCompID)).set(id, experience);
-    StaminaComponent(getAddrByID(components, StamCompID)).set(id, Stat(0, 0, 0, staminaCost * -1));
+    StaminaComponent(getAddrByID(components, StamCompID)).set(id, Stat(0, 0, 0, staminaCost));
 
     // set inputs
     uint256 inputID = genInputID(recipeIndex);
@@ -144,7 +144,7 @@ library LibRecipe {
   ) internal {
     // pay stamina cost
     int32 stCost = StaminaComponent(getAddrByID(components, StamCompID)).get(recipeID).sync;
-    LibAccount.syncAndUseStamina(components, accID, stCost * amt.toInt32());
+    LibAccount.depleteStamina(components, accID, uint32(stCost) * amt.toUint32());
   }
 
   function craft(

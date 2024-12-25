@@ -37,7 +37,12 @@ async function initLeaderboard(api: AdminAPI) {
 }
 
 async function initAccount(api: AdminAPI) {
-  //  Stamina
+  await api.config.set.array('ACCOUNT_STAMINA', [
+    100, // total stamina
+    60, // recovery period per point
+    5, // movement cost (in stamina)
+    5, // experience per move
+  ]);
   await api.config.set.number('ACCOUNT_STAMINA_BASE', 20);
   await api.config.set.number('ACCOUNT_STAMINA_RECOVERY_PERIOD', 300);
 }
