@@ -19,4 +19,8 @@ interface IWorld {
   function getUniqueEntityId() external returns (uint256);
 
   function init() external;
+
+  function _emitter() external view returns (address);
+
+  function updateEmitter(address emitter) external;
 }
