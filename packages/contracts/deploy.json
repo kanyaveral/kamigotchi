@@ -230,6 +230,10 @@
       "writeAccess": ["FarcasterIndex", "MediaURI", "TimeLast"]
     },
     {
+      "name": "ChatSystem",
+      "writeAccess": ["TimeLast", "Value"]
+    },
+    {
       "name": "CraftSystem",
       "writeAccess": [
         "EntityType",

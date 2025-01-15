@@ -15,4 +15,14 @@ library LibEmitter {
     address emitter = world._emitter();
     if (emitter != address(0)) IEmitter(emitter).emitSystemCalled(systemId, schema, values);
   }
+
+  function emitMessage(
+    IWorld world,
+    uint32 roomIndex,
+    uint256 accountId,
+    string memory message
+  ) internal {
+    address emitter = world._emitter();
+    if (emitter != address(0)) IEmitter(emitter).emitMessage(roomIndex, accountId, message);
+  }
 }
