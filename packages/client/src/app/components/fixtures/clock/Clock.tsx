@@ -211,7 +211,7 @@ const StaminaText = styled.div<{ position: number }>`
   bottom: 3vh;
   color: #dde390;
   top: 14.5vh;
-  left: ${({ position }) => (position === 2 ? `10.4vh` : `11.3vh`)};
+  left: ${({ position }) => 12 - 0.85 * position}vh;
   text-shadow:
     -1px 0 black,
     0 1px black,
