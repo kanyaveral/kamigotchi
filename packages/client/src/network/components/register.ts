@@ -23,6 +23,7 @@ export function createComponents(world: World) {
     RevealBlock: defineNumberComponent(world, 'RevealBlock', 'component.block.reveal'),
     OperatorCache: defineNumberComponent(world, 'OperatorCache', 'component.cache.operator'),
     Cost: defineNumberComponent(world, 'Cost', 'component.cost'),
+    Decay: defineNumberComponent(world, 'Decay', 'component.decay'),
     DescriptionAlt: defineStringComponent(world, 'DescriptionAlt', 'component.description.alt'),
     Description: defineStringComponent(world, 'Description', 'component.description'),
     EntityType: defineStringComponent(world, 'EntityType', 'component.type.entity', true),

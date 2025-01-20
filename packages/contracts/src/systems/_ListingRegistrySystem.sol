@@ -36,40 +36,55 @@ contract _ListingRegistrySystem is System {
   function remove(uint32 npcIndex, uint32 itemIndex) public onlyOwner {
     uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
     require(id != 0, "Listing does not exist");
-
     LibListingRegistry.remove(components, id);
+  }
+
+  // refresh a listing's tracked balance and start time
+  // optionally update the target value if a non-zero value is provided
+  function refresh(uint32 npcIndex, uint32 itemIndex, uint256 value) public onlyOwner {
+    uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
+    require(id != 0, "Listing does not exist");
+    LibListingRegistry.refresh(components, id, value);
   }
 
   /////////////////
   // PRICING
 
-  function setBuyFixed(uint256 id) public onlyOwner {
-    LibListingRegistry.setBuyFixed(components, id);
+  function removeBuy(uint32 npcIndex, uint32 itemIndex) public onlyOwner {
+    uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
+    require(id != 0, "Listing does not exist");
+    uint256 buyID = LibListingRegistry.genBuyID(id);
+    LibListingRegistry.removePrice(components, buyID);
+  }
+
+  function removeSell(uint32 npcIndex, uint32 itemIndex) public onlyOwner {
+    uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
+    require(id != 0, "Listing does not exist");
+    uint256 sellID = LibListingRegistry.genSellID(id);
+    LibListingRegistry.removePrice(components, sellID);
   }
 
   function setBuyFixed(uint32 npcIndex, uint32 itemIndex) public onlyOwner {
     uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
     require(id != 0, "Listing does not exist");
-    setBuyFixed(id);
+    LibListingRegistry.setBuyFixed(components, id);
   }
 
-  function setSellFixed(uint256 id) public onlyOwner {
-    LibListingRegistry.setSellFixed(components, id);
+  function setBuyGDA(uint32 npcIndex, uint32 itemIndex, int32 scale, int32 decay) public onlyOwner {
+    uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
+    require(id != 0, "Listing does not exist");
+    LibListingRegistry.setBuyGDA(components, id, scale, decay);
   }
 
   function setSellFixed(uint32 npcIndex, uint32 itemIndex) public onlyOwner {
     uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
     require(id != 0, "Listing does not exist");
-    setSellFixed(id);
+    LibListingRegistry.setSellFixed(components, id);
   }
 
   function setSellScaled(uint32 npcIndex, uint32 itemIndex, int32 scale) public onlyOwner {
     uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
     require(id != 0, "Listing does not exist");
-    setSellScaled(id, scale);
-  }
-
-  function setSellScaled(uint256 id, int32 scale) public onlyOwner {
     LibListingRegistry.setSellScaled(components, id, scale);
   }
 
@@ -93,7 +108,7 @@ contract _ListingRegistrySystem is System {
     uint256 id = LibListingRegistry.get(components, npcIndex, itemIndex);
     require(id != 0, "Listing does not exist");
 
-    LibListingRegistry.createRequirement(
+    LibListingRegistry.setRequirement(
       world,
       components,
       id,

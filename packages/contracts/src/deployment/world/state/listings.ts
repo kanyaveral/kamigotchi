@@ -3,36 +3,38 @@ import { AdminAPI } from '../api';
 import { generateRegID, readFile } from './utils';
 
 export async function initListings(api: AdminAPI, indices?: number[]) {
-  const create = api.listing.create;
-  const setBuy = api.listing.set.price.buy;
-  const setSell = api.listing.set.price.sell;
-  const setRequirement = api.listing.set.requirement;
-
   const listingCSV = await readFile('listings/listings.csv');
   const pricingCSV = await readFile('listings/pricing.csv');
   const requirementCSV = await readFile('listings/requirements.csv');
+  const setBuy = api.listing.set.price.buy;
+  const setSell = api.listing.set.price.sell;
 
   for (let i = 0; i < listingCSV.length; i++) {
     const row = listingCSV[i];
 
     // skip if indices are overridden and row isn't included
-    if (indices && !indices.includes(Number(row['Index']))) continue;
+    const itemIndex = Number(row['Item Index']);
+    if (indices && !indices.includes(itemIndex)) continue;
 
     // Initial creation
     const npcIndex = Number(row['NPC Index']);
-    const itemIndex = Number(row['Item Index']);
     const targetValue = Number(row['Value']);
-    await create(npcIndex, itemIndex, targetValue);
+    await api.listing.create(npcIndex, itemIndex, targetValue);
     console.log(`created listing for npc ${npcIndex} of item ${itemIndex}`);
 
     // Set Buy Pricing
     const buyRef = String(row['Buy Price']);
     if (buyRef) {
       const buyKey = buyRef.split(' (')[0];
-      const price = pricingCSV.find((p: any) => p['Shape'] === buyKey);
+      const price = pricingCSV.find((p: any) => p['Key'] === buyKey);
       if (price) {
         const type = String(price['Type']);
         if (type === 'FIXED') await setBuy.fixed(npcIndex, itemIndex);
+        else if (type === 'GDA') {
+          const scale = Math.round(Number(price['Scale']) * 1e9);
+          const decay = Math.round(Number(price['Decay']) * 1e9);
+          await setBuy.gda(npcIndex, itemIndex, scale, decay);
+        }
         console.log(`  set buy price ${buyKey}`);
       } else console.warn(`  Buy Price not found for ref ${buyRef}`);
     }
@@ -46,11 +48,11 @@ export async function initListings(api: AdminAPI, indices?: number[]) {
         const type = String(price['Type']);
         if (type === 'FIXED') await setSell.fixed(npcIndex, itemIndex);
         else if (type === 'SCALED') {
-          const scale = Number(price['Scale']) * 1e3;
+          const scale = Math.round(Number(price['Scale']) * 1e9);
           await setSell.scaled(npcIndex, itemIndex, scale);
         }
+        console.log(`  set sell price ${sellKey}`);
       } else console.warn(`  Sell Price not found for ref ${sellRef}`);
-      console.log(`  set sell price ${sellKey}`);
     }
 
     // Set Requirements
@@ -74,6 +76,7 @@ export async function initListings(api: AdminAPI, indices?: number[]) {
         reqValue = generateRegID(reqValueField, reqValueIndex);
       }
 
+      const setRequirement = api.listing.set.requirement;
       setRequirement(npcIndex, itemIndex, reqType, reqLogic, reqIndex, reqValue, '');
       console.log(`  set requirement ${key}`);
       console.log(`    type: ${reqType}, logic: ${reqLogic}`);
@@ -93,7 +96,7 @@ export async function deleteListings(api: AdminAPI, indices: number[]) {
   }
 }
 
-async function createListing(
+export async function createListing(
   api: AdminAPI,
   merchantIndex: number,
   itemIndex: number,
@@ -102,7 +105,17 @@ async function createListing(
   await api.listing.create(merchantIndex, itemIndex, value);
 }
 
-const initRequirement = async (
+export async function refreshListing(
+  api: AdminAPI,
+  npcIndex: number,
+  itemIndex: number,
+  value: number
+) {
+  console.log(`refreshing listing ${npcIndex}-${itemIndex} to ${value}`);
+  await api.listing.refresh(npcIndex, itemIndex, value);
+}
+
+export const setRequirement = async (
   api: AdminAPI,
   npcIndex: number,
   itemIndex: number,

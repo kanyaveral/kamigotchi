@@ -8,6 +8,7 @@ import { getAddrByID } from "solecs/utils.sol";
 import { IndexItemComponent, ID as IndexItemCompID } from "components/IndexItemComponent.sol";
 import { IndexNPCComponent, ID as IndexNPCComponentID } from "components/IndexNPCComponent.sol";
 import { BalanceComponent, ID as BalanceCompID } from "components/BalanceComponent.sol";
+import { DecayComponent, ID as DecayCompID } from "components/DecayComponent.sol";
 import { ScaleComponent, ID as ScaleCompID } from "components/ScaleComponent.sol";
 import { TimeStartComponent, ID as TimeStartCompID } from "components/TimeStartComponent.sol";
 import { TypeComponent, ID as TypeCompID } from "components/TypeComponent.sol";
@@ -39,62 +40,52 @@ library LibListingRegistry {
 
   /// @notice create a merchant listing with the specified parameters
   function create(
-    IUintComp components,
+    IUintComp comps,
     uint32 npcIndex,
     uint32 itemIndex,
     uint256 value // target base price
   ) internal returns (uint256 id) {
     id = genID(npcIndex, itemIndex);
-    LibEntityType.set(components, id, "LISTING");
-    IndexNPCComponent(getAddrByID(components, IndexNPCComponentID)).set(id, npcIndex);
-    IndexItemComponent(getAddrByID(components, IndexItemCompID)).set(id, itemIndex);
-    BalanceComponent(getAddrByID(components, BalanceCompID)).set(id, 0);
-    TimeStartComponent(getAddrByID(components, TimeStartCompID)).set(id, block.timestamp);
-    ValueComponent(getAddrByID(components, ValueCompID)).set(id, value);
+    LibEntityType.set(comps, id, "LISTING");
+    IndexNPCComponent(getAddrByID(comps, IndexNPCComponentID)).set(id, npcIndex);
+    IndexItemComponent(getAddrByID(comps, IndexItemCompID)).set(id, itemIndex);
+    BalanceComponent(getAddrByID(comps, BalanceCompID)).set(id, 0);
+    TimeStartComponent(getAddrByID(comps, TimeStartCompID)).set(id, block.timestamp);
+    ValueComponent(getAddrByID(comps, ValueCompID)).set(id, value);
   }
 
-  /// @notice create a requirement for a listing
-  /// @dev requirements apply equally to buy and sell
-  function createRequirement(
-    IWorld world,
-    IUintComp components,
-    uint256 regID,
-    Condition memory data
-  ) internal returns (uint256) {
-    return LibConditional.createFor(world, components, data, genReqAnchor(regID));
+  /// @notice refresh a listing's tracking data (balance, start time, value)
+  /// @dev target value is only updated if value != 0
+  function refresh(IUintComp comps, uint256 id, uint256 value) internal {
+    TimeStartComponent(getAddrByID(comps, TimeStartCompID)).set(id, block.timestamp);
+    BalanceComponent(getAddrByID(comps, BalanceCompID)).set(id, 0);
+    if (value != 0) ValueComponent(getAddrByID(comps, ValueCompID)).set(id, value);
   }
 
   /// @notice remove all data associated with a listing
-  function remove(IUintComp components, uint256 id) internal {
-    LibEntityType.remove(components, id);
-    IndexNPCComponent(getAddrByID(components, IndexNPCComponentID)).remove(id);
-    IndexItemComponent(getAddrByID(components, IndexItemCompID)).remove(id);
-    BalanceComponent(getAddrByID(components, BalanceCompID)).remove(id);
-    TimeStartComponent(getAddrByID(components, TimeStartCompID)).remove(id);
-    ValueComponent(getAddrByID(components, ValueCompID)).remove(id);
+  function remove(IUintComp comps, uint256 id) internal {
+    LibEntityType.remove(comps, id);
+    IndexNPCComponent(getAddrByID(comps, IndexNPCComponentID)).remove(id);
+    IndexItemComponent(getAddrByID(comps, IndexItemCompID)).remove(id);
+    BalanceComponent(getAddrByID(comps, BalanceCompID)).remove(id);
+    TimeStartComponent(getAddrByID(comps, TimeStartCompID)).remove(id);
+    ValueComponent(getAddrByID(comps, ValueCompID)).remove(id);
 
-    removeBuy(components, id);
-    removeSell(components, id);
+    removePrice(comps, genBuyID(id));
+    removePrice(comps, genSellID(id));
 
-    uint256[] memory requirements = LibConditional.queryFor(components, genReqAnchor(id));
+    uint256[] memory requirements = LibConditional.queryFor(comps, genReqAnchor(id));
     for (uint256 i; i < requirements.length; i++) {
-      LibConditional.remove(components, requirements[i]);
+      LibConditional.remove(comps, requirements[i]);
     }
   }
 
-  /// @notice remove the buy pricing
-  function removeBuy(IUintComp components, uint256 id) internal {
-    uint256 ptr = genBuyID(id);
-    TypeComponent(getAddrByID(components, TypeCompID)).remove(ptr);
-    ValueComponent(getAddrByID(components, ValueCompID)).remove(ptr);
-  }
-
-  /// @notice remove the sell pricing
-  function removeSell(IUintComp components, uint256 id) internal {
-    uint256 ptr = genSellID(id);
-    TypeComponent(getAddrByID(components, TypeCompID)).remove(ptr);
-    ValueComponent(getAddrByID(components, ValueCompID)).remove(ptr);
-    ScaleComponent(getAddrByID(components, ScaleCompID)).remove(ptr);
+  /// @notice clear out the component entries of a pricing entity
+  function removePrice(IUintComp comps, uint256 priceID) internal {
+    TypeComponent(getAddrByID(comps, TypeCompID)).remove(priceID);
+    DecayComponent(getAddrByID(comps, DecayCompID)).remove(priceID);
+    ScaleComponent(getAddrByID(comps, ScaleCompID)).remove(priceID);
+    ValueComponent(getAddrByID(comps, ValueCompID)).remove(priceID);
   }
 
   /////////////////
@@ -102,42 +93,64 @@ library LibListingRegistry {
 
   // gets an item listing from a merchant by its indices
   function get(
-    IUintComp components,
+    IUintComp comps,
     uint32 merchantIndex,
     uint32 itemIndex
   ) internal view returns (uint256 result) {
     uint256 id = genID(merchantIndex, itemIndex);
-    return LibEntityType.isShape(components, id, "LISTING") ? id : 0;
+    return LibEntityType.isShape(comps, id, "LISTING") ? id : 0;
   }
 
   //////////////////
   // SETTERS
 
-  function setType(IUintComp components, uint256 id, string memory type_) internal {
-    TypeComponent(getAddrByID(components, TypeCompID)).set(id, type_);
+  function setType(IUintComp comps, uint256 id, string memory type_) internal {
+    TypeComponent(getAddrByID(comps, TypeCompID)).set(id, type_);
   }
 
   // set the buy price of a listing as the Value of the Listing Entity
-  function setBuyFixed(IUintComp components, uint256 id) internal {
+  function setBuyFixed(IUintComp comps, uint256 id) internal {
     uint256 ptr = genBuyID(id);
-    setType(components, ptr, "FIXED");
+    setType(comps, ptr, "FIXED");
+  }
+
+  // set the requisite pricing variables for GDA price
+  // scale: 1e9 precision -- decay: 1e9 precision
+  function setBuyGDA(IUintComp comps, uint256 id, int32 scale, int32 decay) internal {
+    uint256 ptr = genBuyID(id);
+    setType(comps, ptr, "GDA");
+    require(scale >= 1e9, "LibListingRegistry: compound > 1 required");
+    require(decay >= 0, "LibListingRegistry: decay must be positive");
+    ScaleComponent(getAddrByID(comps, ScaleCompID)).set(ptr, scale);
+    DecayComponent(getAddrByID(comps, DecayCompID)).set(ptr, decay);
   }
 
   // set the sell price of a listing as the Value of the Listing Entity
-  function setSellFixed(IUintComp components, uint256 id) internal {
+  function setSellFixed(IUintComp comps, uint256 id) internal {
     uint256 ptr = genSellID(id);
-    setType(components, ptr, "FIXED");
+    setType(comps, ptr, "FIXED");
   }
 
   // set the sell price of a listing as a scaled value of the buy price
   // NOTE: scaled pricing is defined with 3 degrees of precision
   // NOTE: we ensure interpreted scale within bounds to avoid economic vulns
-  function setSellScaled(IUintComp components, uint256 id, int32 scale) internal {
+  function setSellScaled(IUintComp comps, uint256 id, int32 scale) internal {
     uint256 ptr = genSellID(id);
-    setType(components, ptr, "SCALED");
-    require(scale > 1e3, "LibListingRegistry: invalid sell scale > 1");
-    require(scale < 0, "LibListingRegistry: invalid sell scale < 0");
-    ScaleComponent(getAddrByID(components, ScaleCompID)).set(ptr, scale);
+    setType(comps, ptr, "SCALED");
+    require(scale <= 1e9, "LibListingRegistry: invalid sell scale > 1");
+    require(scale >= 0, "LibListingRegistry: invalid sell scale < 0");
+    ScaleComponent(getAddrByID(comps, ScaleCompID)).set(ptr, scale);
+  }
+
+  /// @notice create a requirement for a listing
+  /// @dev requirements apply equally to buy and sell
+  function setRequirement(
+    IWorld world,
+    IUintComp comps,
+    uint256 regID,
+    Condition memory data
+  ) internal returns (uint256) {
+    return LibConditional.createFor(world, comps, data, genReqAnchor(regID));
   }
 
   //////////////////
