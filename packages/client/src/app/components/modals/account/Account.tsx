@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 
-import { EntityIndex } from '@mud-classic/recs';
+import { EntityID, EntityIndex } from '@mud-classic/recs';
+import { uuid } from '@mud-classic/utils';
 import { getAccount, getAccountKamis } from 'app/cache/account';
 import { ModalHeader, ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
-import { useAccount, useSelected, useVisibility } from 'app/stores';
+import { useAccount, useNetwork, useSelected, useVisibility } from 'app/stores';
 import { OperatorIcon } from 'assets/images/icons/menu';
+import { BigNumberish } from 'ethers';
 import {
   Account,
   BaseAccount,
@@ -15,6 +17,8 @@ import {
   queryAccountByIndex,
 } from 'network/shapes/Account';
 import { Friendship } from 'network/shapes/Friendship';
+import { Kami } from 'network/shapes/Kami';
+import { waitForActionCompletion } from 'network/utils';
 import { Bottom } from './Bottom';
 import { Tabs } from './Tabs';
 import { Bio } from './bio/Bio';
@@ -36,7 +40,7 @@ export function registerAccountModal() {
 
       const accountOptions = {
         friends: 60,
-        stats: 60,
+        pfp: 1,
       };
 
       return interval(3333).pipe(
@@ -57,31 +61,31 @@ export function registerAccountModal() {
     ({ network, utils }) => {
       const { actions, api, components, world } = network;
       const { getAccount } = utils;
-
       const { account: player } = useAccount();
       const { accountIndex } = useSelected();
       const { modals } = useVisibility();
-
+      const { selectedAddress, apis } = useNetwork();
       const [tab, setTab] = useState('frens'); // party | frens | activity | requests | blocked
       const [account, setAccount] = useState<Account>(NullAccount);
+      const [isSelf, setIsSelf] = useState(false);
+      const [isLoading, setIsLoading] = useState(false);
 
+      console.log('account', account.pfpURI);
       // update data of the selected account when account index or data changes
       useEffect(() => {
         if (!modals.account) return;
         const accountEntity = queryAccountByIndex(components, accountIndex);
         const account = getAccount(accountEntity ?? (0 as EntityIndex));
         setAccount(account);
-      }, [accountIndex, modals.account]);
+      });
 
       // set the default tab when account index switches
       useEffect(() => {
-        if (isSelf()) setTab('frens');
+        const isSelf = player.index === accountIndex;
+        setIsSelf(isSelf);
+        if (isSelf) setTab('frens');
         else setTab('party');
       }, [accountIndex]);
-
-      const isSelf = () => {
-        return player.index === accountIndex;
-      };
 
       /////////////////
       // INTERACTION
@@ -133,6 +137,39 @@ export function registerAccountModal() {
         });
       };
 
+      const pfpTx = (kamiID: BigNumberish) => {
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
+        const actionID = uuid() as EntityID;
+        actions!.add({
+          id: actionID,
+          action: 'UpdatePfp',
+          params: [kamiID],
+          description: `Updating account pfp.`,
+          execute: async () => {
+            return api.player.account.set.pfp(kamiID);
+          },
+        });
+        return actionID;
+      };
+
+      const handlePfpChange = async (kami: Kami) => {
+        try {
+          setIsLoading(true);
+          const pfpTxActionID = pfpTx(kami.id);
+          if (!pfpTxActionID) {
+            setIsLoading(false);
+            throw new Error('Pfp change action failed');
+          }
+          await waitForActionCompletion(
+            actions!.Action,
+            world.entityToIndex.get(pfpTxActionID) as EntityIndex
+          );
+          setIsLoading(false);
+        } catch (e) {
+          setIsLoading(false);
+          console.log('Bio.tsx: handlePfpChange()  failed', e);
+        }
+      };
       /////////////////
       // RENDERING
 
@@ -147,13 +184,14 @@ export function registerAccountModal() {
           truncate
         >
           <Bio
+            isLoading={isLoading}
+            handlePfpChange={handlePfpChange}
             key='bio'
             account={account} // account selected for viewing
-            isSelf={isSelf()}
-            actionSystem={actions}
-            actions={{ sendRequest: requestFren, acceptRequest: acceptFren }}
+            isSelf={isSelf}
+            utils={utils}
           />
-          <Tabs tab={tab} setTab={setTab} isSelf={isSelf()} />
+          <Tabs tab={tab} setTab={setTab} isSelf={isSelf} />
           <Bottom
             key='bottom'
             tab={tab}
