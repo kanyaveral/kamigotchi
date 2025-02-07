@@ -49,7 +49,6 @@ export function registerClock() {
       const [rotateBand, setRotateBand] = useState(0);
       const [lastTick, setLastTick] = useState(Date.now());
       const [width, height] = useWindowSize();
-      console.log(`width ${width} height ${height}`);
 
       function useWindowSize() {
         const [size, setSize] = useState([0, 0]);
@@ -125,7 +124,11 @@ export function registerClock() {
       return (
         <>
           <Tooltip text={getClockTooltip()}>
-            <Container style={{ display: fixtures.menu ? 'flex' : 'none' }} resize={width}>
+            <Container
+              style={{ display: fixtures.menu ? 'flex' : 'none' }}
+              width={width}
+              height={height}
+            >
               <Circle rotation={rotateClock}>
                 <TicksPosition>{Ticks()}</TicksPosition>
                 <BandColor rotation={rotateBand} />
@@ -138,22 +141,29 @@ export function registerClock() {
                   />
                   <IconDay src={ClockIcons.day} iconColor={rotateBand} rotation={rotateClock} />
                 </Phases>
-              </Circle>{' '}
-            </Container>{' '}
+              </Circle>
+            </Container>
           </Tooltip>
           <Tooltip text={getStaminaTooltip()}>
-            <Container style={{ display: fixtures.menu ? 'flex' : 'none' }} resize={width}>
-              {' '}
+            <Container
+              style={{ display: fixtures.menu ? 'flex' : 'none' }}
+              width={width}
+              height={height}
+            >
               <StaminaText position={staminaCurr.toString().length}>
                 {staminaCurr}/{account.stamina.total}
               </StaminaText>
               <SmallCircle>
                 <SmallCircleFill height={calcPercent(staminaCurr, account.stamina.total)} />
-              </SmallCircle>{' '}
+              </SmallCircle>
               <ClockOverlay />
             </Container>
-          </Tooltip>{' '}
-          <Container style={{ display: fixtures.menu ? 'flex' : 'none' }} resize={width}>
+          </Tooltip>
+          <Container
+            style={{ display: fixtures.menu ? 'flex' : 'none' }}
+            width={width}
+            height={height}
+          >
             <Time viewBox='0 0 30 4'>
               <path id='MyPath' fill='none' d='M 2.5 3.7 Q 10.5 -4 25 1.8' pathLength='2' />
               <text fill='white' fontSize='3' dominantBaseline='hanging' textAnchor='middle'>
@@ -169,13 +179,27 @@ export function registerClock() {
   );
 }
 
-const Container = styled.div<{ resize: number }>`
+const Container = styled.div<{ width: number; height: number }>`
   pointer-events: auto;
   position: absolute;
   left: 0vh;
   z-index: -1;
   height: fit-content;
-  ${({ resize }) => `transform:  scale(${(resize / 24) * 0.01}); bottom:${resize * 0.0094}vh;`}
+  ${({ width, height }) => {
+    const baseWidth = screen.width;
+    const baseHeight = screen.height;
+    const scaleX = width / baseWidth;
+    const scaleY = height / baseHeight;
+    let scale = Math.min(scaleX, scaleY);
+    const xToY = scaleX / scaleY;
+    if (scale < 0.8 && scaleY < 0.76) {
+      scale = 0.8 + (0.8 - scaleY);
+      if (xToY < 0.75) {
+        scale = scale - (0.85 - xToY);
+      }
+    }
+    return `transform: scale(${scale});bottom: ${scale * 22}vh;`;
+  }}
 `;
 
 const Circle = styled.div<{ rotation: number }>`
