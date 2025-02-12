@@ -1,25 +1,22 @@
 import { EntityIndex } from '@mud-classic/recs';
 import styled from 'styled-components';
 
+import { Auction } from 'network/shapes/Auction';
 import { Kami } from 'network/shapes/Kami';
 import { GachaKami } from 'network/shapes/Kami/types';
-import { Commit } from 'network/shapes/utils';
-import { Commits } from '../reroll/Commits';
-import { Reroll } from '../reroll/Reroll';
-import { Filter, Sort, TabType } from '../types';
-import { Pool } from './Pool';
+import { AuctionMode, Filter, Sort, TabType } from '../types';
+import { AuctionDisplay } from './auction/Auction';
+import { Pool } from './mint/Pool';
+import { Reroll } from './reroll/Reroll';
 
 interface Props {
-  tab: TabType;
-  blockNumber: bigint;
   controls: {
     limit: number;
     filters: Filter[];
     sorts: Sort[];
   };
   actions: {
-    handleReroll: (kamis: Kami[], price: bigint) => Promise<void>;
-    revealTx: (commits: Commit[]) => Promise<void>;
+    reroll: (kamis: Kami[], price: bigint) => Promise<boolean>;
   };
   caches: {
     kamis: Map<EntityIndex, GachaKami>;
@@ -29,8 +26,16 @@ interface Props {
     accountEntity: EntityIndex;
     poolKamis: EntityIndex[];
     maxRerolls: number;
-    commits: Commit[];
     balance: bigint;
+    auctions: {
+      gacha: Auction;
+      reroll: Auction;
+    };
+  };
+  state: {
+    mode: AuctionMode;
+    setMode: (mode: AuctionMode) => void;
+    tab: TabType;
   };
   utils: {
     getGachaKami: (entity: EntityIndex) => GachaKami;
@@ -39,10 +44,11 @@ interface Props {
   };
 }
 
-export const MainDisplay = (props: Props) => {
-  const { tab, blockNumber, controls, actions, data, caches, utils } = props;
-  const { handleReroll, revealTx } = actions;
-  const { poolKamis, commits } = data;
+export const Display = (props: Props) => {
+  const { state, controls, actions, data, caches, utils } = props;
+  const { tab, mode, setMode } = state;
+  const { reroll } = actions;
+  const { auctions, poolKamis } = data;
 
   const Content = () => {
     switch (tab) {
@@ -57,9 +63,14 @@ export const MainDisplay = (props: Props) => {
           />
         );
       case 'REROLL':
-        return <Reroll tab={tab} actions={{ handleReroll }} data={data} utils={utils} />;
-      case 'REVEAL':
-        return <Commits actions={{ revealTx }} blockNumber={blockNumber} data={{ commits }} />;
+        return <Reroll tab={tab} actions={{ reroll }} data={data} utils={utils} />;
+      case 'AUCTION':
+        return (
+          <AuctionDisplay
+            data={{ auctions: { gacha: auctions.gacha, reroll: auctions.reroll } }}
+            state={{ mode, setMode, tab }}
+          />
+        );
       default:
         return null;
     }

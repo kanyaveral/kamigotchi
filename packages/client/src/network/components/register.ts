@@ -78,6 +78,7 @@ export function createComponents(world: World) {
     Max: defineNumberComponent(world, 'Max', 'component.max'),
     MediaURI: defineStringComponent(world, 'MediaURI', 'component.mediaURI'),
     Name: defineStringComponent(world, 'Name', 'component.name', true),
+    Period: defineNumberComponent(world, 'Period', 'component.period'),
     Power: defineStatComponent(world, 'Power', 'component.stat.power'),
     ProxyPermissionsERC721: defineBoolComponent(world, 'ProxyPermissionsERC721', 'components.proxy.Permissions.ERC721'),
     ProxyVIPScore: defineBoolComponent(world, 'ProxyVIPScore', 'component.proxy.vip.score'),

@@ -1,12 +1,10 @@
 import styled from 'styled-components';
 
 import { ActionListButton, CircleExitButton, EmptyText } from 'app/components/library';
-import { DefaultFilters, DefaultSorts, Filter, Sort } from '../types';
-import { Filter as FilterComponent } from './Filter';
-import { Sort as SortComponent } from './Sort';
+import { DefaultFilters, DefaultSorts, Filter, Sort } from '../../../types';
+import { Filter as FilterComponent, Sort as SortComponent } from './components';
 
 interface Props {
-  tab: string;
   controls: {
     filters: Filter[];
     setFilters: (filters: Filter[]) => void;
@@ -17,8 +15,8 @@ interface Props {
   };
 }
 
-export const Controls = (props: Props) => {
-  const { tab, controls } = props;
+export const Mint = (props: Props) => {
+  const { controls } = props;
   const { filters, setFilters, sorts, setSorts, limit, setLimit } = controls;
 
   //////////////////

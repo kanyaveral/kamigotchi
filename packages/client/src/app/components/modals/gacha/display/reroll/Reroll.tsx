@@ -5,13 +5,13 @@ import { EntityIndex } from '@mud-classic/recs';
 import { ActionButton } from 'app/components/library';
 import { useVisibility } from 'app/stores';
 import { Kami } from 'network/shapes/Kami';
-import { KamiGrid } from '../components/KamiGrid';
-import { TabType } from '../types';
+import { TabType } from '../../types';
+import { KamiGrid } from './KamiGrid';
 import { SideBalance } from './SideBalance';
 
 interface Props {
   actions: {
-    handleReroll: (kamis: Kami[], price: bigint) => Promise<void>;
+    reroll: (kamis: Kami[], price: bigint) => Promise<boolean>;
   };
   tab: TabType;
   data: {
@@ -27,6 +27,7 @@ interface Props {
 
 export const Reroll = (props: Props) => {
   const { actions, data, utils, tab } = props;
+  const { reroll } = actions;
   const { accountEntity, maxRerolls, balance } = data;
   const { getAccountKamis, getRerollCost } = utils;
   const { modals } = useVisibility();
@@ -61,7 +62,7 @@ export const Reroll = (props: Props) => {
   // INTERACTION
 
   const handleReroll = () => {
-    actions.handleReroll(selectedKamis, rerollPrice);
+    reroll(selectedKamis, rerollPrice);
     setSelectedKamis([]);
   };
 

@@ -1,23 +1,50 @@
-import { Pairing } from 'app/components/library';
-import { Overlay } from 'app/components/library/styles';
-import { ItemImages } from 'assets/images/items';
-import { useState } from 'react';
 import styled from 'styled-components';
+
+import { Tooltip } from 'app/components/library';
+import { Item } from 'network/shapes/Item';
+import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
-import { TabType } from '../types';
+import { AuctionMode, TabType } from '../types';
+
+// action labels for the purchase footer
+const ActionMap = new Map<TabType, string>([
+  ['MINT', 'Mint'],
+  ['REROLL', 'Reroll'],
+  ['AUCTION', 'Bid'],
+]);
 
 interface Props {
-  tab: TabType;
-  balance: number;
   actions: {
+    bid: (item: Item, amt: number) => void;
     mint: (amount: number) => Promise<boolean>;
+    reroll: (kamis: Kami[], price: bigint) => Promise<boolean>;
+  };
+  controls: {
+    quantity: number;
+    setQuantity: (quantity: number) => void;
+    price: number;
+    setPrice: (price: number) => void;
+  };
+  data: {
+    payItem: Item;
+    saleItem: Item;
+    balance: number;
+  };
+  state: {
+    tick: number;
+    tab: TabType;
+    mode: AuctionMode;
   };
 }
 
 export const Footer = (props: Props) => {
-  const { tab, balance, actions } = props;
-  const { mint } = actions;
-  const [quantity, setQuantity] = useState(0);
+  const { actions, controls, data, state } = props;
+  const { bid, mint, reroll } = actions;
+  const { quantity, setQuantity, price } = controls;
+  const { payItem, saleItem, balance } = data;
+  const { mode, tab, tick } = state;
+
+  const isDisabled = quantity <= 0 || price > balance;
 
   const handleInc = () => {
     playClick();
@@ -29,9 +56,12 @@ export const Footer = (props: Props) => {
     setQuantity(Math.max(0, quantity - 1));
   };
 
-  const handleMint = async () => {
+  const handleSubmit = async () => {
     playClick();
-    const success = await mint(quantity);
+    let success = false;
+    if (tab === 'MINT') success = await mint(quantity);
+    else if (tab === 'REROLL') success = await reroll([], BigInt(0));
+    else if (tab === 'AUCTION') bid(saleItem, quantity); // TODO: await on success
     if (success) setQuantity(0);
   };
 
@@ -42,31 +72,31 @@ export const Footer = (props: Props) => {
     setQuantity(quantity);
   };
 
+  const getSubmitTooltip = () => {
+    if (price > balance) return ['too poore'];
+    if (quantity <= 0) return ['no items to purchase'];
+
+    let saleDesc = `Purchase ${quantity} ${saleItem.name}`;
+    if (tab === 'MINT') saleDesc = `Mint ${quantity} Kami`;
+    if (tab === 'REROLL') saleDesc = `Reroll ${quantity} Kami`;
+    return [saleDesc, `for ${price} ${payItem.name}`];
+  };
+
   return (
     <Container>
-      <Overlay right={0.75} top={-2.4}>
-        <Pairing
-          icon={ItemImages.gacha_ticket}
-          text={balance.toFixed(1)}
-          tooltip={['Gacha Ticket']}
-          reverse
-        />
-      </Overlay>
       <Quantity type='string' value={quantity} onChange={(e) => handleChange(e)} />
       <Stepper>
-        <StepperButton
-          onClick={handleInc}
-          style={{ borderBottom: '0.15vw solid black' }}
-          disabled={quantity >= balance}
-        >
+        <StepperButton onClick={handleInc} disabled={tab === 'REROLL' || price > balance}>
           +
         </StepperButton>
-        <StepperButton onClick={handleDec} disabled={quantity <= 0}>
+        <StepperButton onClick={handleDec} disabled={tab === 'REROLL' || quantity <= 0}>
           -
         </StepperButton>
       </Stepper>
-      <Submit onClick={handleMint} disabled={quantity <= 0}>
-        Mint
+      <Submit onClick={isDisabled ? undefined : handleSubmit} disabled={isDisabled}>
+        <Tooltip text={getSubmitTooltip()} alignText='center' grow>
+          {ActionMap.get(tab) ?? 'Mint'}
+        </Tooltip>
       </Submit>
     </Container>
   );
@@ -103,6 +133,8 @@ const Quantity = styled.input`
 
 const Stepper = styled.div`
   border-right: 0.15vw solid black;
+  background-color: black;
+  gap: 0.12vw;
   height: 100%;
   width: 6vw;
   display: flex;
@@ -154,16 +186,16 @@ const Submit = styled.div<{ disabled?: boolean }>`
   user-select: none;
 
   ${({ disabled }) =>
-    disabled &&
-    `
-  background-color: #bbb; 
-  cursor: default; 
-  pointer-events: none;`}
-
-  &:hover {
-    background-color: #ddd;
-  }
-  &:active {
-    background-color: #bbb;
-  }
+    disabled
+      ? `
+        background-color: #bbb;
+        pointer-events: auto;
+        cursor: default; `
+      : `
+        &:hover {
+          background-color: #ddd;
+        }
+        &:active {
+          background-color: #bbb;
+        }`}
 `;

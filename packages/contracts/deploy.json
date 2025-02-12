@@ -63,6 +63,7 @@
     { "comp": "Max", "name": "Max", "type": "uint256" },
     { "comp": "MediaURI", "name": "MediaURI", "type": "string" },
     { "comp": "Name", "name": "Name", "type": "string", "indexed": true },
+    { "comp": "Period", "name": "Period", "type": "int32" },
     { "comp": "Power", "name": "Power", "type": "Stat" },
     { "comp": "ProxyPermissionsERC721", "name": "ProxyPermissionsERC721", "type": "bool" },
     { "comp": "ProxyVIPScore", "name": "ProxyVIPScore", "type": "bool" },
@@ -92,6 +93,7 @@
   ],
   "systems": [
     { "name": "_AdminGiveSystem", "writeAccess": ["*"] },
+    { "name": "_AuctionRegistrySystem", "writeAccess": ["*"] },
     {
       "name": "_AuthManageRoleSystem",
       "writeAccess": ["HasFlag", "IDOwnsFlag", "Type"]
@@ -235,6 +237,20 @@
     {
       "name": "AccountSetNameSystem",
       "writeAccess": ["Name", "TimeLast"]
+    },
+    {
+      "name": "AuctionBuySystem",
+      "writeAccess": [
+        "EntityType",
+        "IdHolder",
+        "IDOwnsInventory",
+        "IDType",
+        "Index",
+        "IndexItem",
+        "Balance",
+        "Type",
+        "Value"
+      ]
     },
     {
       "name": "ChatSystem",
@@ -640,6 +656,8 @@
   "libraries": [
     "LibAccount",
     "LibAllo",
+    "LibAuction",
+    "LibAuctionRegistry",
     "LibBonus",
     "LibConditional",
     "LibCommit",

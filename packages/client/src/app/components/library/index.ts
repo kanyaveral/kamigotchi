@@ -10,8 +10,10 @@ export {
   ModalHeader,
   ModalWrapper,
   Pairing,
+  Popover,
   Tooltip,
   ValidatorWrapper,
+  Warning,
 } from './base';
 
 export { Overlay } from './styles';
