@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { Overlay } from 'app/components/library/styles';
+import { Overlay } from 'app/components/library';
 import { GachaKami } from 'network/shapes/Kami';
 
 interface Props {
@@ -9,12 +9,12 @@ interface Props {
 }
 
 export const KamiBlock = (props: Props) => {
-  const { kami } = props;
+  const { kami, onClick } = props;
   const { index, level, name } = kami;
 
   return (
     <Container>
-      <Image src={kami.image} onClick={props.onClick} />
+      <Image src={kami.image} onClick={onClick} />
       <Overlay top={0.9} left={0.7}>
         <Grouping>
           <Text size={0.6}>Lvl</Text>
@@ -34,7 +34,6 @@ export const KamiBlock = (props: Props) => {
 const Container = styled.div`
   background-color: white;
   border-radius: 0.6vw;
-  height: 10vw;
   margin: 0.9vw;
   filter: drop-shadow(0.2vw 0.2vw 0.1vw black);
 `;
@@ -42,7 +41,7 @@ const Container = styled.div`
 const Image = styled.img<{ onClick?: () => void }>`
   border: solid black 0.15vw;
   border-radius: 0.6vw;
-  height: 100%;
+  width: 10vw;
   image-rendering: pixelated;
 
   cursor: ${({ onClick }) => (onClick ? 'pointer' : 'inherit')};
