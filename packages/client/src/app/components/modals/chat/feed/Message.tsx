@@ -1,114 +1,167 @@
-import { CastWithInteractions } from '@neynar/nodejs-sdk/build/neynar-api/v2';
 import moment from 'moment';
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { Farcaster } from 'app/stores';
-import { likeCast, unlikeCast } from 'src/clients/neynar';
-import { playClick } from 'utils/sounds';
+import { EntityID, EntityIndex } from '@mud-classic/recs';
+import { Account } from 'app/cache/account';
+
+import { useSelected, useVisibility } from 'app/stores';
+import { Message as KamiMessage } from 'engine/types/kamiden/kamiden';
+import { formatEntityID } from 'engine/utils';
+import { BaseAccount } from 'network/shapes/Account';
+
+import { Popover } from 'app/components/library';
+import { ActionSystem } from 'network/systems';
 
 interface Props {
-  data: {
-    account: Farcaster;
-    cast: CastWithInteractions;
-    casts: CastWithInteractions[];
+  previousEqual: boolean;
+  utils: {
+    getAccount: (entityIndex: EntityIndex) => Account;
+    getEntityIndex: (entity: EntityID) => EntityIndex;
   };
-  actions: {
-    setCasts: (casts: CastWithInteractions[]) => void;
+  data: {
+    message: KamiMessage;
+  };
+  player: Account;
+  actionSystem: ActionSystem;
+  api: {
+    player: {
+      social: {
+        friend: { block: (account: string) => void; request: (account: string) => void };
+      };
+    };
   };
 }
 
 export const Message = (props: Props) => {
-  const baseUrl = 'https://warpcast.com';
-  const { account, cast, casts } = props.data;
-  const { setCasts } = props.actions;
+  const { message } = props.data;
+  const { getAccount, getEntityIndex } = props.utils;
+  const { actionSystem, api, previousEqual } = props;
+
+  const { player } = props;
+  const [yours, setYours] = useState(false);
+  const { modals, setModals } = useVisibility();
+  const { setAccount } = useSelected();
+  const pfpRef = useRef<HTMLDivElement>(null);
 
   /////////////////
   // INTERPRETATION
+  const getAccountFunc = () => {
+    return getAccount(getEntityIndex(formatEntityID(message.AccountId)));
+  };
+  // TODO: fix this
+  useEffect(() => {
+    setYours(player.id !== getAccountFunc().id);
+  }, [message.AccountId, player.id]);
 
-  // checks whether the cast has been liked by the current user
-  const isLiked = (cast: CastWithInteractions) => {
-    const fAccount = account;
-    if (fAccount.id == 0) return false;
-    return !!cast.reactions.likes.find((l) => l.fid == fAccount.id);
+  const showUser = () => {
+    setAccount(getAccountFunc().index);
+    if (!modals.account) setModals({ account: true, party: false, map: false });
+  };
+
+  const blockFren = (account: BaseAccount) => {
+    actionSystem.add({
+      action: 'BlockFriend',
+      params: [account.ownerAddress],
+      description: `Blocking ${account.name}`,
+      execute: async () => {
+        return api.player.social.friend.block(account.ownerAddress);
+      },
+    });
+  };
+
+  const requestFren = (account: BaseAccount) => {
+    actionSystem.add({
+      action: 'RequestFriend',
+      params: [account.ownerAddress],
+      description: `Sending ${account.name} Friend Request`,
+      execute: async () => {
+        return api.player.social.friend.request(account.ownerAddress);
+      },
+    });
   };
 
   /////////////////
   // INTERACTION
 
-  const handleLike = (cast: CastWithInteractions) => {
-    playClick();
-    if (isLiked(cast)) handleCastUnlike(cast);
-    else handleCastLike(cast);
+  const options = [
+    {
+      text: 'Add',
+      onClick: () => requestFren(getAccountFunc()),
+    },
+
+    {
+      text: 'Block',
+      onClick: () => blockFren(getAccountFunc()),
+    },
+  ];
+  const optionsMap = () => {
+    return options.map((option, i) => (
+      <PopOverButtons key={i}>
+        <button style={{ padding: `0.4vw`, width: ` 100%` }} onClick={() => option.onClick()}>
+          {option.text}
+        </button>
+      </PopOverButtons>
+    ));
   };
 
   return (
     <Container>
-      <Pfp
-        src={cast.author.pfp_url}
-        onClick={() => window.open(`${baseUrl}/${cast.author.username}`)}
-      />
       <Content>
-        <Header>
-          <Author onClick={() => window.open(`${baseUrl}/${cast.author.username}`)}>
-            {cast.author.username}
-          </Author>
-          <Time>
-            {moment(cast.timestamp).format('MM/DD HH:mm')}
-            <Heart color={isLiked(cast) ? 'red' : 'gray'} onClick={() => handleLike(cast)} />
-          </Time>
-        </Header>
-        <Body onClick={() => window.open(`${baseUrl}/${cast.author.username}/${cast.hash}`)}>
-          {cast.text}
-        </Body>
+        {
+          <Header yours={yours}>
+            {player.id != getAccountFunc().id ? (
+              <>
+                <PfpAuthor id='pfp-author' ref={pfpRef}>
+                  <Popover content={optionsMap()} mouseButton={2}>
+                    <Pfp
+                      author={false}
+                      onClick={() => {
+                        showUser();
+                      }}
+                      src={getAccountFunc().pfpURI ?? 'https://miladymaker.net/milady/8365.png'}
+                    />
+                  </Popover>
+                  <Body previousEqual={previousEqual} yours={yours}>
+                    {' '}
+                    <Time>
+                      <Name>{getAccountFunc().name}</Name>{' '}
+                      {moment(message.Timestamp).format('MM/DD HH:mm')}
+                    </Time>
+                    {message.Message}
+                  </Body>
+                </PfpAuthor>
+              </>
+            ) : (
+              <>
+                <PfpAuthor>
+                  {' '}
+                  <Body previousEqual={previousEqual} yours={yours}>
+                    <Time>
+                      <Name>{getAccountFunc().name}</Name>{' '}
+                      {moment(message.Timestamp).format('MM/DD HH:mm')}
+                    </Time>
+                    {message.Message}
+                  </Body>
+                  <Pfp
+                    author={true}
+                    onClick={() => {
+                      showUser();
+                    }}
+                    src={getAccountFunc().pfpURI ?? 'https://miladymaker.net/milady/8365.png'}
+                  />
+                </PfpAuthor>
+              </>
+            )}
+          </Header>
+        }
       </Content>
     </Container>
   );
-
-  /////////////////
-  // HELPERS
-
-  // trigger a like of a cast
-  async function handleCastLike(cast: CastWithInteractions) {
-    const fAccount = account;
-    if (!fAccount.signer) return;
-    const response = await likeCast(fAccount.signer, cast.hash);
-
-    // update the list of casts
-    if (response.success) {
-      cast.reactions.likes.push({ fid: fAccount.id });
-      for (const [i, cast] of casts.entries()) {
-        if (casts.find((c) => c.hash === cast.hash)) {
-          casts[i] = cast;
-          break;
-        }
-      }
-      setCasts(casts);
-    }
-  }
-
-  // trigger an unlike of a cast
-  async function handleCastUnlike(cast: CastWithInteractions) {
-    const fAccount = account;
-    if (!fAccount.signer) return;
-    const response = await unlikeCast(fAccount.signer, cast.hash);
-
-    // update the list of casts
-    if (response.success) {
-      const index = cast.reactions.likes.findIndex((l) => l.fid == fAccount.id);
-      if (index > -1) cast.reactions.likes.splice(index, 1);
-      for (const [i, cast] of casts.entries()) {
-        if (casts.find((c) => c.hash === cast.hash)) {
-          casts[i] = cast;
-          break;
-        }
-      }
-      setCasts(casts);
-    }
-  }
 };
 
 const Container = styled.div`
-  padding: 0.9vw 0.9vw;
+  padding: 0vw 0.9vw;
   width: 100%;
 
   color: black;
@@ -116,97 +169,122 @@ const Container = styled.div`
   flex-flow: row nowrap;
   align-items: flex-start;
   gap: 0.4vw;
+  caret-color: transparent;
 `;
 
 const Content = styled.div`
-  width: 85%;
+  width: 100%;
   color: black;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 `;
 
-const Pfp = styled.img`
-  margin-right: 0.4vw;
+const Pfp = styled.img<{ author: boolean }>`
+  position: relative;
+  left: -0.5vw;
   width: 3.6vw;
   height: 3.6vw;
   border-radius: 50%;
-
   &:hover {
     opacity: 0.6;
     cursor: pointer;
   }
+
+  ${({ author }) =>
+    author &&
+    `  pointer-events: none;
+    left: 0vw;
+  `}
 `;
 
-const Header = styled.div`
-  padding-bottom: 0.6vw;
+const Header = styled.div<{ yours: boolean }>`
+  margin-top: 0.2vw;
   width: 100%;
   color: black;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.4vw;
+
+  gap: 0.6vw;
 `;
 
-const Author = styled.div`
-  color: orange;
-  font-family: Pixel;
-  font-size: 1vw;
-
-  &:hover {
-    opacity: 0.6;
-    cursor: pointer;
-  }
+const PfpAuthor = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5vw;
+  justify-content: flex-end;
+  align-items: flex-start;
 `;
 
 const Time = styled.div`
-  color: black;
-  font-family: Pixel;
-  font-size: 0.9vw;
-
+  color: #a3a3a3;
   display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  gap: 0.4vw;
+  flex-flow: row;
+  justify-content: flex-start;
 `;
 
-const Body = styled.div`
+const Name = styled.div`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 9ch;
+  margin-right: 0.5vw;
+  justify-content: flex-start;
   color: black;
-  width: 100%;
+  font-weight: bold;
+`;
 
-  font-family: Pixel;
-  font-size: 0.8vw;
+const PopOverButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const Body = styled.div<{ yours: boolean; previousEqual: boolean }>`
+  z-index: 0;
+  color: black;
+  width: 86%;
+
+  font-size: 0.6vw;
   line-height: 1.2vw;
   word-wrap: break-word;
 
-  &:hover {
-    opacity: 0.6;
-    cursor: pointer;
-  }
-`;
-
-const Heart = styled.div<{ color: string }>`
-  width: 1.2vw;
-  background:
-    radial-gradient(circle at 60% 65%, ${(props) => props.color} 64%, transparent 65%) top left,
-    radial-gradient(circle at 40% 65%, ${(props) => props.color} 64%, transparent 65%) top right,
-    linear-gradient(to bottom left, ${(props) => props.color} 43%, transparent 43%) bottom left,
-    linear-gradient(to bottom right, ${(props) => props.color} 43%, transparent 43%) bottom right;
-  background-size: 50% 50%;
-  background-repeat: no-repeat;
+  border-radius: 1vw;
+  padding: 0.4vw 0.4vw 0.4vw 0.8vw;
+  margin: 0.2vh 0 0.2vh 0;
   display: inline-block;
-  cursor: pointer;
+  align-items: flex-start;
 
-  margin-bottom: 0.1vw;
-  &::before {
+  background-color: #eee;
+  position: relative;
+
+  ${({ yours, previousEqual }) =>
+    yours
+      ? `
+  ::before {
+    z-index: -1;
     content: '';
-    padding-left: 0.3vw;
-    padding-top: 100%;
-    display: block;
-  }
-
-  &::hover {
-    cursor: pointer;
-  }
+    position: absolute;
+   top: 1.7vw;
+    min-height: 2vw;
+    width: 0.7vw;
+    background: rgb(238, 238, 238);
+    border-top-left-radius: 80%;
+    left: 0;    
+    rotate: -90deg;
+  }`
+      : ` ::before {
+    z-index: -1;
+    content: "";
+    position: absolute;
+    top: 1.7vw;
+    min-height: 2vw;
+    width: 0.7vw;
+    background: rgb(238, 238, 238);
+    border-top-right-radius: 80%;
+    right: 0;  
+    rotate: 90deg;
+  } `}
 `;

@@ -106,6 +106,12 @@ export function createPlayerAPI(txQueue: TxQueue) {
   }
 
   /////////////////
+  // CHAT
+  function sendMessage(message: string) {
+    return systems['system.chat'].executeTyped(message);
+  }
+
+  /////////////////
   // CRAFTING
 
   function craft(recipeIndex: number, amount: number) {
@@ -357,6 +363,9 @@ export function createPlayerAPI(txQueue: TxQueue) {
         block: blockAccount,
         cancel: cancelFriendship,
         request: sendFriendRequest,
+      },
+      chat: {
+        send: sendMessage,
       },
     },
     droptable: {

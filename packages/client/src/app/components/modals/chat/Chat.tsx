@@ -1,12 +1,17 @@
-import { CastWithInteractions } from '@neynar/nodejs-sdk/build/neynar-api/v2';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 
+import { EntityID, EntityIndex } from '@mud-classic/recs';
+import { getAccount } from 'app/cache/account';
+import { getKami } from 'app/cache/kami';
 import { ModalHeader, ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
+import { useVisibility } from 'app/stores';
 import { ChatIcon } from 'assets/images/icons/menu';
-import moment from 'moment';
-import { getAccountFromEmbedded } from 'network/shapes/Account';
+import { Message as KamiMessage } from 'engine/types/kamiden/kamiden';
+import { Account, NullAccount, queryAccountFromEmbedded } from 'network/shapes/Account';
+
+import { getRoomByIndex } from 'app/cache/room';
 import { InputRow } from './InputRow';
 import { Feed } from './feed/Feed';
 
@@ -27,49 +32,77 @@ export function registerChatModal() {
       const { network } = layers;
       return interval(3333).pipe(
         map(() => {
-          const account = getAccountFromEmbedded(network, { friends: true });
+          const accountEntity = queryAccountFromEmbedded(network);
+          const accountOptions = {
+            friends: 6,
+            live: 1,
+          };
+
+          const { world, components } = network;
           return {
-            data: { account },
+            data: { accountEntity, world, components },
+            utils: {
+              getAccount: (entity: EntityIndex) =>
+                getAccount(world, components, entity, accountOptions),
+              getRoomByIndex: (nodeIndex: number) => getRoomByIndex(world, components, nodeIndex),
+              getEntityIndex: (entity: EntityID) => world.entityToIndex.get(entity)!,
+              getKami: (entity: EntityIndex) => getKami(world, components, entity),
+            },
             network,
+            world,
           };
         })
       );
     },
-    ({ data, network }) => {
-      const { account } = data;
-      const { actions } = network;
-      const [casts, setCasts] = useState<CastWithInteractions[]>([]);
-      const maxCasts = 100;
+    ({ data, network, utils, world }) => {
+      const { accountEntity } = data;
+      const { actions, api } = network;
+      const { getAccount } = utils;
+      const { modals } = useVisibility();
 
-      const pushCast = (cast: CastWithInteractions) => {
-        setCasts([cast, ...casts]);
-      };
+      const [messages, setMessages] = useState<KamiMessage[]>([]);
+      const [blocked, setBlocked] = useState<EntityID[]>([]);
+      const BlockedList: EntityID[] = [];
+      const [account, setAccount] = useState<Account>(NullAccount); //0 Node
+      //1 Feed
+      const [activeTab, setActiveTab] = useState(0);
 
-      const pushCasts = (newCasts: CastWithInteractions[]) => {
-        const oldCasts = [...casts];
-
-        // split the new casts into unique and duplicates
-        const uniqueCasts = [];
-        for (const [_, newCast] of newCasts.entries()) {
-          const collisionIndex = oldCasts.findIndex((c) => c.hash === newCast.hash);
-          if (collisionIndex != -1) oldCasts[collisionIndex] = newCast;
-          else uniqueCasts.push(newCast);
+      // update data of the selected account when account index or data changes
+      useEffect(() => {
+        if (!modals.chat) return;
+        // const accountEntity = queryAccountByIndex(components, accountIndex);
+        const account = getAccount(accountEntity ?? (0 as EntityIndex));
+        setAccount(account);
+      }, [accountEntity, modals.chat]);
+      //TODO
+      useEffect(() => {
+        if (account.friends?.blocked) {
+          account.friends?.blocked.forEach((blockedFren) => {
+            BlockedList.push(blockedFren.target.id);
+          });
+          setBlocked(BlockedList);
+        } else {
+          setBlocked([]);
         }
-
-        // sort the full set of casts by timestamp
-        const allCasts = [...uniqueCasts, ...oldCasts];
-        allCasts.sort((a, b) => moment(b.timestamp).diff(moment(a.timestamp)));
-        setCasts(allCasts);
-      };
+      }, [account.friends?.blocked]);
 
       return (
         <ModalWrapper
           id='chat'
-          header={<ModalHeader title='Chat' icon={ChatIcon} />}
-          footer={<InputRow account={account} actions={{ pushCast }} actionSystem={actions} />}
+          header={<ModalHeader title={`Chat`} icon={ChatIcon} />}
+          footer={activeTab === 0 && <InputRow actionSystem={actions} api={api} world={world} />}
           canExit
         >
-          <Feed max={maxCasts} casts={casts} actions={{ setCasts, pushCasts }} />
+          <Feed
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            api={api}
+            actionSystem={actions}
+            blocked={blocked}
+            utils={utils}
+            player={account}
+            actions={{ setMessages }}
+          />
         </ModalWrapper>
       );
     }
