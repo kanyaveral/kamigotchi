@@ -109,6 +109,7 @@ const Container = styled.div`
   position: relative;
   width: auto;
   height: auto;
+  height: 100%;
 `;
 
 const Background = styled.img`

@@ -59,6 +59,7 @@ const Wrapper = styled.div<Wrapper>`
   margin: 0.2vw;
   align-items: center;
   justify-content: center;
+  height: 100%;
 `;
 
 const Content = styled.div<{ truncate?: boolean; width?: string }>`
