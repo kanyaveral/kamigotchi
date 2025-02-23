@@ -6,33 +6,69 @@ interface Props {
   content: any;
   cursor?: string;
   mouseButton?: 0 | 2;
+  closeOnClick?: boolean;
 }
 
 export const Popover = (props: Props) => {
   const { children, content } = props;
-  const [isVisible, setIsVisible] = useState(false);
-  const popoverRef = useRef<HTMLDivElement>(document.createElement('div'));
-  const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
-  const triggerRef = useRef<HTMLDivElement>(null);
   const cursor = props.cursor ?? 'pointer';
   const mouseButton = props.mouseButton ?? 0;
+  const closeOnClick = props.closeOnClick ?? true;
 
+  const popoverRef = useRef<HTMLDivElement>(document.createElement('div'));
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
+  const [clickedScrollBar, setClickedScrollBar] = useState(true);
+
+  // add interaction event listeners
+  useEffect(() => {
+    handlePosition();
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('wheel', handleScroll);
+    window.addEventListener('resize', handlePosition);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('wheel', handleScroll);
+      window.removeEventListener('resize', handlePosition);
+    };
+  }, []);
+
+  // add close listener (when clicking off the popover or selecting an option)
   useEffect(() => {
     const handleClickOutside = (event: any) => {
-      if (popoverRef.current && triggerRef.current) {
-        if (
-          !popoverRef.current.contains(event.target) &&
-          !triggerRef.current.contains(event.target)
-        ) {
-          setIsVisible(false);
-        }
+      const pRef = popoverRef.current;
+      const tRef = triggerRef.current;
+      if (!pRef || !tRef) return;
+
+      const didSelect = closeOnClick && pRef.contains(event.target) && !clickedScrollBar;
+      const didOffclick = !pRef.contains(event.target) && !tRef.contains(event.target);
+      if (didSelect || didOffclick) {
+        setTimeout(() => setIsVisible(false), 100);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  /////////////////
+  // EVENT HANDLERS
+
+  const handleClick = (event: any) => {
+    const clickX = event.clientX;
+    const pRef = popoverRef.current;
+
+    const rightBound = pRef.getBoundingClientRect().right;
+    const leftBound = rightBound - (pRef.offsetWidth - pRef.clientWidth);
+    if (clickX >= leftBound && clickX <= rightBound) setClickedScrollBar(true);
+    else setClickedScrollBar(false);
+
+    closeOnClick ? setIsVisible(false) : setIsVisible(true);
+  };
 
   const handlePosition = () => {
     const width = popoverRef.current?.offsetWidth || 0;
@@ -53,23 +89,16 @@ export const Popover = (props: Props) => {
     }
   };
 
-  const handleScroll = () => {
-    setIsVisible(false);
+  const handleScroll = (event: any) => {
+    if (popoverRef.current && triggerRef.current) {
+      if (
+        !popoverRef.current.contains(event.target) &&
+        !triggerRef.current.contains(event.target)
+      ) {
+        setIsVisible(false);
+      }
+    }
   };
-
-  useEffect(() => {
-    handlePosition();
-    document.body.style.overflow = 'unset';
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('wheel', handleScroll);
-    window.addEventListener('resize', handlePosition);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('wheel', handleScroll);
-      window.removeEventListener('resize', handlePosition);
-    };
-  }, []);
 
   return (
     <PopoverContainer onContextMenu={(e) => mouseButton === 2 && e.preventDefault()}>
@@ -89,9 +118,7 @@ export const Popover = (props: Props) => {
         isVisible={isVisible}
         ref={popoverRef}
         popoverPosition={popoverPosition}
-        onClick={(e) => {
-          setIsVisible(false);
-        }}
+        onClick={(e) => handleClick(e)}
       >
         {content}
       </PopoverContent>
@@ -117,6 +144,9 @@ const PopoverContent = styled.div<{
   isVisible?: boolean;
   popoverPosition: any;
 }>`
+  max-height: 22vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   visibility: ${({ isVisible }) => (isVisible ? `visible` : `hidden`)};
   position: fixed;
   margin-top: 1%;
@@ -130,4 +160,17 @@ const PopoverContent = styled.div<{
   font-size: 0.6vw;
   top: ${({ popoverPosition }) => popoverPosition.y};
   left: ${({ popoverPosition }) => popoverPosition.x};
+  ::-webkit-scrollbar {
+    background: transparent;
+    width: 0.9vw;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 0.2vw solid transparent;
+    background-clip: padding-box;
+    border-radius: 0.2vw;
+    background-color: rgba(0, 0, 0, 0.15);
+    &:hover {
+      cursor: auto;
+    }
+  }
 `;
