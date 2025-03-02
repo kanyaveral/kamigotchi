@@ -5,11 +5,11 @@ on:
     branches:
       - main # Change this if your default branch is "main"
     paths:
-      - 'packages/client/src/network/shapes/**' # Only trigger when files in this directory change
+      - 'packages/client/src/network/**' # Only trigger when files in this directory change
 
 env:
-  SOURCE_DIR: 'packages/client/src/network/shapes'
-  TARGET_DIR: 'shapes'
+  SOURCE_DIR: 'packages/client/src/network'
+  TARGET_DIR: 'network'
   TARGET_REPO_OWNER: 'Asphodel-OS'
   TARGET_REPO_NAME: 'kamigotchi-entity-shapes'
 
