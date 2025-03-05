@@ -73,10 +73,12 @@ export const AccountCard = (props: Props) => {
 
   return (
     <Card
-      image={account.pfpURI ?? 'https://miladymaker.net/milady/8365.png'}
-      imageOnClick={() => handleClick()}
+      image={{
+        icon: account.pfpURI ?? 'https://miladymaker.net/milady/8365.png',
+        scale: 6,
+        onClick: handleClick,
+      }}
       fullWidth
-      scale={6}
     >
       <TitleBar>
         <Title key='title' />
