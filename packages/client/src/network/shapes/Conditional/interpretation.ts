@@ -13,8 +13,8 @@ export const parseConditionalUnits = (con: Condition): [string, string] => {
   let tar = ((con.target.value ?? 0) * 1).toString();
   let curr = ((con.status?.current ?? 0) * 1).toString();
 
+  // hardcoding to visually remove t1 passports
   if (con.target.type == 'ITEM_COUNT_GLOBAL' && con.target.index == 3) {
-    // hardcoding to visually remove t1 passports
     tar = ((con.target.value ?? 0) * 1 - 209).toString();
     curr = ((con.status?.current ?? 0) * 1 - 210).toString(); // +1 t2 passport overshoot
   }
@@ -30,11 +30,12 @@ export const parseConditionalUnits = (con: Condition): [string, string] => {
   return [tar, curr];
 };
 
+const HIDE_PROGRESS_TYPES = ['QUEST', 'ROOM', 'ITEM_BURN'];
 export const parseConditionalTracking = (con: any): string => {
   const [tar, curr] = parseConditionalUnits(con);
 
   if (con.status?.completable) return ` ✓`;
-  const hideProgress = con.target.type == 'QUEST' || con.target.type == 'ROOM';
+  const hideProgress = HIDE_PROGRESS_TYPES.includes(con.target.type);
   return hideProgress ? '' : ` [${curr}/${tar}]`;
 };
 
