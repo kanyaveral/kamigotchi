@@ -99,6 +99,7 @@ library LibGetter {
       string memory state = LibKami.getState(components, targetID);
       return state.eq("RESTING") || state.eq("HARVESTING");
     } else {
+      // add an additional type - componentID ('component.xx.xx') to change registry flags to IsComponents
       return LibFlag.has(components, targetID, _type); // default to flag
     }
   }
