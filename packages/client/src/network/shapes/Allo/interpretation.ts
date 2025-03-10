@@ -116,7 +116,6 @@ const parseState = (details: DetailedEntity): string => {
 };
 
 const parseFlag = (allo: Allo): string => {
-  console.log(allo);
   if (allo.type.toUpperCase() === 'FLAG_NOT_NAMEABLE')
     return 'Enable kami renaming'; // rename potion, set namable
   else if (allo.type.toUpperCase() === 'FLAG_CAN_RESET_SKILLS')
