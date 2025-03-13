@@ -4,33 +4,38 @@ import { BigNumber } from 'ethers';
 import { Channel, createChannel, createClient } from 'nice-grpc-web';
 import { Observable, concatMap, from, map, of } from 'rxjs';
 
-import { createDecode } from 'engine/encoders';
+import {
+  KamigazeServiceClient,
+  KamigazeServiceDefinition,
+  StreamResponse,
+} from 'engine/types/kamigaze/kamigaze';
 import { formatComponentID, formatEntityID } from 'engine/utils';
-import { debug as parentDebug } from 'workers/debug';
-import { groupByTxHash } from 'workers/sync/utils';
+import { debug as parentDebug } from '../debug';
 import {
   NetworkComponentUpdate,
   NetworkEvent,
   NetworkEvents,
   SystemCall,
   SystemCallTransaction,
-} from 'workers/types';
-import { KamigazeServiceClient, KamigazeServiceDefinition, StreamResponse } from './proto';
+} from '../types';
+import { createDecode, groupByTxHash } from './utils';
 
 const debug = parentDebug.extend('syncUtils');
 
 let client: KamigazeServiceClient;
 let channel: Channel;
 
-export function createStreamClient(url: string): KamigazeServiceClient {
-  if (client) closeStream();
-  console.log('[kamigaze] createStreamClient');
+export function createKamigazeStreamClient(url: string): KamigazeServiceClient {
+  if (client) {
+    closeKamigazeStream();
+  }
+  console.log('[kamigaze] createKamigazeStreamClient client');
   channel = createChannel(url, grpc.WebsocketTransport());
   client = createClient(KamigazeServiceDefinition, channel);
+
   return client;
 }
-
-export function closeStream() {
+export function closeKamigazeStream() {
   debug('[kamigaze] Closing stream connection');
 
   channel = null as any;
@@ -52,7 +57,7 @@ export function createKamigazeStreamService(
   includeSystemCalls: boolean
 ): Observable<NetworkEvent> {
   return new Observable((subscriber) => {
-    const streamServiceClient = createStreamClient(streamServiceUrl);
+    const streamServiceClient = createKamigazeStreamClient(streamServiceUrl);
 
     const response = streamServiceClient.subscribeToStream({
       worldAddress,
@@ -135,24 +140,17 @@ export function createTransformWorldEventsFromStream(decode: ReturnType<typeof c
   };
 }
 
-// Parse the SystemCallTransasction from each component update.
-// All ECS events include the information needed to it parse out,
-// so it doesn't matter which one we use.
 export function parseSystemCallsFromStreamEvents(events: NetworkComponentUpdate[]) {
   const systemCalls: SystemCall[] = [];
   const transactionHashToEvents = groupByTxHash(events);
 
   for (const txHash of Object.keys(transactionHashToEvents)) {
-    const event = transactionHashToEvents[txHash]![0];
-    if (!event || !event.txMetadata) continue;
-
-    const { to, data, value } = event.txMetadata;
-    const tx = {
-      to,
-      data: BigNumber.from(data).toHexString(),
-      value: BigNumber.from(value),
-      hash: event.txHash,
-    } as SystemCallTransaction;
+    // All ECS events include the information needed to parse the SysytemCallTransasction out, so it doesn't
+    // matter which one we take here.
+    const tx = parseSystemCallTransactionFromStreamNetworkComponentUpdate(
+      transactionHashToEvents[txHash]![0]!
+    );
+    if (!tx) continue;
 
     systemCalls.push({
       type: NetworkEvents.SystemCall,
@@ -162,4 +160,17 @@ export function parseSystemCallsFromStreamEvents(events: NetworkComponentUpdate[
   }
 
   return systemCalls;
+}
+
+function parseSystemCallTransactionFromStreamNetworkComponentUpdate(event: NetworkComponentUpdate) {
+  if (!event.txMetadata) return null;
+
+  const { to, data, value } = event.txMetadata;
+
+  return {
+    to,
+    data: BigNumber.from(data).toHexString(),
+    value: BigNumber.from(value),
+    hash: event.txHash,
+  } as SystemCallTransaction;
 }
