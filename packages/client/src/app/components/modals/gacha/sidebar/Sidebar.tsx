@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { calcAuctionCost } from 'app/cache/auction';
-import { useVisibility } from 'app/stores';
+import { useTokens, useVisibility } from 'app/stores';
 import { GACHA_TICKET_INDEX, MUSU_INDEX, ONYX_INDEX, REROLL_TICKET_INDEX } from 'constants/items';
+import { toERC20DisplayUnits } from 'network/chain';
 import { Auction } from 'network/shapes/Auction';
 import { Commit } from 'network/shapes/Commit';
 import { Inventory } from 'network/shapes/Inventory';
@@ -16,6 +17,7 @@ import { Tabs } from './Tabs';
 
 interface Props {
   actions: {
+    approve: (payItem: Item, price: number) => void;
     bid: (item: Item, amt: number) => void;
     mint: (balance: number) => Promise<boolean>;
     reroll: (kamis: BaseKami[], price: bigint) => Promise<boolean>;
@@ -35,9 +37,6 @@ interface Props {
       reroll: Auction;
     };
   };
-  display: {
-    TokenButton: (token: Item) => JSX.Element;
-  };
   state: {
     tick: number;
     tab: TabType;
@@ -54,10 +53,11 @@ interface Props {
 }
 
 export const Sidebar = (props: Props) => {
-  const { actions, controls, data, display, state, utils } = props;
+  const { actions, controls, data, state, utils } = props;
   const { auctions, commits, inventories } = data;
-  const { tick, tab, setTab, mode, setMode } = state;
+  const { tick, tab, setTab, mode } = state;
   const { getItem, getGachaBalance, getRerollBalance, getMusuBalance } = utils;
+  const { balances: tokenBal } = useTokens(); // ERC20
   const { modals } = useVisibility();
 
   const [payItem, setPayItem] = useState<Item>(NullItem);
@@ -66,36 +66,64 @@ export const Sidebar = (props: Props) => {
   const [balance, setBalance] = useState(0);
   const [price, setPrice] = useState(0);
 
+  /////////////////
+  // HOOKS
+
   // maybe consider controlling this hook and the one below with a dedicated payItem vs buyItem
   useEffect(() => {
     if (!modals.gacha) return;
-    if (tab != 'AUCTION') setPrice(quantity);
-    else if (mode === 'GACHA') setPrice(calcAuctionCost(auctions.gacha, quantity));
-    else if (mode === 'REROLL') setPrice(calcAuctionCost(auctions.reroll, quantity));
-    else setPrice(0);
+    updatePrice();
   }, [tab, mode, quantity, tick]);
 
   useEffect(() => {
     if (!modals.gacha) return;
-    if (tab === 'MINT') {
-      setPayItem(getItem(GACHA_TICKET_INDEX));
-      setBalance(getGachaBalance(inventories));
-    } else if (tab === 'REROLL') {
-      setPayItem(getItem(REROLL_TICKET_INDEX));
-      setBalance(getRerollBalance(inventories));
-    } else {
-      // tab === 'AUCTION'
-      if (mode === 'GACHA') {
-        setPayItem(getItem(MUSU_INDEX));
-        setSaleItem(getItem(GACHA_TICKET_INDEX));
-        setBalance(getMusuBalance(inventories));
-      } else if (mode === 'REROLL') {
-        setPayItem(getItem(ONYX_INDEX));
-        setSaleItem(getItem(REROLL_TICKET_INDEX));
-        setBalance(0);
-      } else setBalance(0);
-    }
+    updateBalance();
   }, [tab, mode, tick]);
+
+  useEffect(() => {
+    if (!modals.gacha) return;
+    updatePayItem();
+    updateSaleItem();
+  }, [tab, mode]);
+
+  /////////////////
+  // STATE
+
+  // update the pay item according to tab/mode
+  const updatePayItem = () => {
+    if (tab === 'MINT') setPayItem(getItem(GACHA_TICKET_INDEX));
+    else if (tab === 'REROLL') setPayItem(getItem(REROLL_TICKET_INDEX));
+    else {
+      if (mode === 'GACHA') setPayItem(getItem(MUSU_INDEX));
+      else if (mode === 'REROLL') setPayItem(getItem(ONYX_INDEX));
+    }
+  };
+
+  // update the sale item according to tab/mode
+  const updateSaleItem = () => {
+    if (tab !== 'AUCTION') return;
+    if (mode === 'GACHA') setSaleItem(getItem(GACHA_TICKET_INDEX));
+    else if (mode === 'REROLL') setSaleItem(getItem(REROLL_TICKET_INDEX));
+  };
+
+  // update the balance according to tab/mode
+  const updateBalance = () => {
+    if (tab === 'MINT') setBalance(getGachaBalance(inventories));
+    else if (tab === 'REROLL') setBalance(getRerollBalance(inventories));
+    else if (tab === 'AUCTION') {
+      if (mode === 'GACHA') setBalance(getMusuBalance(inventories));
+      else if (mode === 'REROLL') setBalance(tokenBal.get(payItem.address || '')?.balance || 0);
+    } else setBalance(0);
+  };
+
+  // update the price according to tab/mode
+  const updatePrice = () => {
+    if (tab != 'AUCTION') setPrice(quantity);
+    else if (mode === 'GACHA') setPrice(calcAuctionCost(auctions.gacha, quantity));
+    else if (mode === 'REROLL')
+      setPrice(toERC20DisplayUnits(calcAuctionCost(auctions.reroll, quantity)));
+    else setPrice(0);
+  };
 
   return (
     <Container>
@@ -104,7 +132,6 @@ export const Sidebar = (props: Props) => {
         actions={actions}
         controls={{ ...controls, price, setPrice, quantity, setQuantity }}
         data={{ payItem, saleItem, balance, commits }}
-        display={display}
         state={state}
       />
       <Footer
