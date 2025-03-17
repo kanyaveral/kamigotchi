@@ -12,7 +12,6 @@ import { playSignup } from 'utils/sounds';
 import { BackButton, Description, Row } from './shared';
 
 type FaucetState = 'unclaimed' | 'claiming' | 'claimed';
-const TOTAL_FAUCETS = 2;
 
 interface Props {
   address: {
@@ -34,7 +33,7 @@ export const Registration = (props: Props) => {
   const [name, setName] = useState('');
   const [faucetState, setFaucetState] = useState<FaucetState>('unclaimed');
   const [faucetSymbol, setFaucetSymbol] = useState<string>('🚰');
-  const [faucetIndex, setFaucetIndex] = useState<number>(Math.floor(TOTAL_FAUCETS * Math.random()));
+  const [faucetIndex, setFaucetIndex] = useState<number>(1);
 
   const isNameTaken = (username: string) => {
     return NameCache.has(username);
@@ -88,7 +87,7 @@ export const Registration = (props: Props) => {
       console.error('Faucet Error', e.response.status, e.response.data);
       setFaucetState('unclaimed');
       setFaucetSymbol('❌');
-      setFaucetIndex((faucetIndex + 1) % TOTAL_FAUCETS);
+      // setFaucetIndex((faucetIndex + 1) % TOTAL_FAUCETS);
     } finally {
       if (response.status == 200) {
         setFaucetState('claimed');
