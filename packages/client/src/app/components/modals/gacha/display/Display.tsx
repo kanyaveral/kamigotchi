@@ -3,29 +3,22 @@ import styled from 'styled-components';
 
 import { Auction } from 'network/shapes/Auction';
 import { Kami } from 'network/shapes/Kami';
-import { GachaKami } from 'network/shapes/Kami/types';
 import { AuctionMode, Filter, Sort, TabType } from '../types';
 import { AuctionDisplay } from './auction/Auction';
 import { Pool } from './mint/Pool';
 import { Reroll } from './reroll/Reroll';
 
 interface Props {
+  caches: {
+    kamiBlocks: Map<EntityIndex, JSX.Element>;
+  };
   controls: {
     filters: Filter[];
     sorts: Sort[];
   };
-  actions: {
-    reroll: (kamis: Kami[], price: bigint) => Promise<boolean>;
-  };
-  caches: {
-    kamis: Map<EntityIndex, GachaKami>;
-    kamiBlocks: Map<EntityIndex, JSX.Element>;
-  };
   data: {
     accountEntity: EntityIndex;
     poolKamis: EntityIndex[];
-    maxRerolls: number;
-    balance: bigint;
     auctions: {
       gacha: Auction;
       reroll: Auction;
@@ -34,19 +27,21 @@ interface Props {
   state: {
     mode: AuctionMode;
     setMode: (mode: AuctionMode) => void;
+    setQuantity: (quantity: number) => void;
+    selectedKamis: Kami[];
+    setSelectedKamis: (selectedKamis: Kami[]) => void;
     tab: TabType;
   };
   utils: {
-    getGachaKami: (entity: EntityIndex) => GachaKami;
-    getRerollCost: (kami: Kami) => bigint;
+    getKami: (entity: EntityIndex) => Kami;
     getAccountKamis: () => Kami[];
+    queryGachaKamis: () => EntityIndex[];
   };
 }
 
 export const Display = (props: Props) => {
-  const { state, controls, actions, data, caches, utils } = props;
-  const { tab, mode, setMode } = state;
-  const { reroll } = actions;
+  const { state, controls, data, caches, utils } = props;
+  const { tab, mode, setMode, setQuantity, selectedKamis, setSelectedKamis } = state;
   const { auctions, poolKamis } = data;
 
   const Content = () => {
@@ -62,7 +57,13 @@ export const Display = (props: Props) => {
           />
         );
       case 'REROLL':
-        return <Reroll tab={tab} actions={{ reroll }} data={data} utils={utils} />;
+        return (
+          <Reroll
+            data={data}
+            state={{ setQuantity, selectedKamis, setSelectedKamis, tab }}
+            utils={utils}
+          />
+        );
       case 'AUCTION':
         return (
           <AuctionDisplay
