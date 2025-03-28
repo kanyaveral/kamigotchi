@@ -6,14 +6,7 @@ import { useTokens } from 'app/stores';
 import { Item } from 'network/shapes/Item';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
-import { TabType } from '../types';
-
-// action labels for the purchase footer
-const ActionMap = new Map<TabType, string>([
-  ['MINT', 'Mint'],
-  ['REROLL', 'Reroll'],
-  ['AUCTION', 'Bid'],
-]);
+import { TabType, ViewMode } from '../types';
 
 interface Props {
   actions: {
@@ -24,6 +17,8 @@ interface Props {
   };
   controls: {
     tab: TabType;
+    mode: ViewMode;
+    setMode: (mode: ViewMode) => void;
   };
   data: {
     payItem: Item;
@@ -43,7 +38,7 @@ interface Props {
 export const Footer = (props: Props) => {
   const { actions, controls, data, state } = props;
   const { approve, bid, mint, reroll } = actions;
-  const { tab } = controls;
+  const { mode, setMode, tab } = controls;
   const { payItem, saleItem, balance } = data;
   const { quantity, setQuantity, price, selectedKamis, setSelectedKamis } = state;
 
@@ -79,22 +74,24 @@ export const Footer = (props: Props) => {
     return balance >= price;
   };
 
-  /////////////////
-  // COMPONENTS
-
-  const getButtonText = () => {
-    if (tab === 'AUCTION') return needsApproval ? 'Approve' : 'Bid';
-    else return ActionMap.get(tab) ?? 'Mint';
-  };
+  //////////////////
+  // HANDLERS
 
   const handleSubmit = async () => {
     playClick();
     let success = false;
-    if (tab === 'MINT') success = await mint(quantity);
-    else if (tab === 'REROLL') {
-      success = await reroll(selectedKamis);
-      if (success) setSelectedKamis([]);
-    } else if (tab === 'AUCTION') {
+    if (tab === 'GACHA') {
+      if (mode === 'DEFAULT') success = await mint(quantity);
+      else if (mode === 'ALT') bid(saleItem, quantity);
+    } else if (tab === 'REROLL') {
+      if (mode === 'DEFAULT') {
+        success = await reroll(selectedKamis);
+        if (success) setSelectedKamis([]);
+      } else if (mode === 'ALT') {
+        if (needsApproval) approve(payItem, price);
+        bid(saleItem, quantity);
+      }
+    } else if (tab === 'MINT') {
       if (needsApproval) approve(payItem, price);
       else bid(saleItem, quantity); // TODO: await on success
     }
@@ -108,28 +105,40 @@ export const Footer = (props: Props) => {
     setQuantity(quantity);
   };
 
+  /////////////////
+  // INTERPRETATION
+
+  const getButtonText = () => {
+    if (mode === 'ALT') return needsApproval ? 'Approve' : 'Bid';
+    else if (tab === 'GACHA') return 'Mint';
+    else if (tab === 'REROLL') return 'Reroll';
+    else return '';
+  };
+
   const getSubmitTooltip = () => {
     if (!enoughBalance) return ['too poore'];
     if (quantity <= 0) return ['no items to purchase'];
 
     let saleDesc = `Purchase ${quantity} ${saleItem.name}`;
-    if (tab === 'MINT') saleDesc = `Mint ${quantity} Kami`;
+    if (tab === 'GACHA') saleDesc = `Mint ${quantity} Kami`;
     if (tab === 'REROLL') saleDesc = `Reroll ${quantity} Kami`;
     return [saleDesc, `for ${price} ${payItem.name}`];
   };
 
+  /////////////////
+  // DISPLAY
+
   return (
     <Container>
       <Quantity type='string' value={quantity} onChange={(e) => handleChange(e)} />
-      {tab !== 'REROLL' && (
-        <Stepper
-          value={quantity}
-          set={setQuantity}
-          scale={6}
-          disableInc={!enoughBalance}
-          disableDec={quantity <= 0}
-        />
-      )}
+      <Stepper
+        value={quantity}
+        set={setQuantity}
+        scale={6}
+        disableInc={!enoughBalance}
+        disableDec={quantity <= 0}
+        isVisible={tab !== 'REROLL' || mode === 'ALT'}
+      />
       <Submit onClick={isDisabled ? undefined : handleSubmit} disabled={isDisabled}>
         <Tooltip text={getSubmitTooltip()} alignText='center' grow>
           {getButtonText()}

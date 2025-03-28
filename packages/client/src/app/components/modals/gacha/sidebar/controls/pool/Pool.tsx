@@ -2,14 +2,19 @@ import styled from 'styled-components';
 
 import { Commit } from 'network/shapes/Commit';
 import { Item } from 'network/shapes/Item';
-import { Kami } from 'network/shapes/Kami';
-import { ViewMode } from '../../../types';
+import { Filter, Sort, TabType, ViewMode } from '../../../types';
 import { AuctionPanel } from '../auctions/AuctionPanel';
 import { KamiPanel } from './KamiPanel';
 
 interface Props {
   controls: {
+    tab: TabType;
     mode: ViewMode;
+    setMode: (mode: ViewMode) => void;
+    filters: Filter[];
+    setFilters: (filters: Filter[]) => void;
+    sorts: Sort[];
+    setSorts: (sort: Sort[]) => void;
   };
   data: {
     balance: number;
@@ -20,23 +25,18 @@ interface Props {
   state: {
     price: number;
     quantity: number;
-    selectedKamis: Kami[];
   };
   isVisible: boolean;
 }
-export const Reroll = (props: Props) => {
+export const Pool = (props: Props) => {
   const { controls, data, state, isVisible } = props;
   const { mode } = controls;
-  const { price, quantity, selectedKamis } = state;
+  const { price, quantity } = state;
 
   return (
     <Container isVisible={isVisible}>
-      <KamiPanel selectedKamis={selectedKamis} isVisible={isVisible && mode === 'DEFAULT'} />
-      <AuctionPanel
-        data={data}
-        state={{ price, quantity }}
-        isVisible={isVisible && mode === 'ALT'}
-      />
+      <KamiPanel controls={controls} isVisible={mode === 'DEFAULT'} />
+      <AuctionPanel data={data} state={{ price, quantity }} isVisible={mode === 'ALT'} />
     </Container>
   );
 };

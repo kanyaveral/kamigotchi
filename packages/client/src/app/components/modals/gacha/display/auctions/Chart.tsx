@@ -37,19 +37,22 @@ export const Chart = (props: Props) => {
   const startTs = auction.time.start != 0 ? auction.time.start : endTs;
 
   // retrieve this auction's buy history
+  // TODO: allow for partial pulls
   useEffect(() => {
-    const retrieveBuys = async () => {
-      const auctionItem = auction.auctionItem;
-      if (auctionItem) {
-        const response = await kamidenClient.getAuctionBuys({
-          ItemIndex: auction.auctionItem?.index,
-        });
-        const buys = response.AuctionBuys;
-        setBuys(buys.sort((a, b) => a.Timestamp - b.Timestamp));
-      }
-    };
+    console.log('auction updated, retrieving data');
     retrieveBuys();
   }, [auction, auction.supply.sold]);
+
+  const retrieveBuys = async () => {
+    const auctionItem = auction.auctionItem;
+    if (auctionItem) {
+      const response = await kamidenClient.getAuctionBuys({
+        ItemIndex: auction.auctionItem?.index,
+      });
+      const buys = response.AuctionBuys;
+      setBuys(buys.sort((a, b) => a.Timestamp - b.Timestamp));
+    }
+  };
 
   // generate the price history data based on buy history and auction settings
   useEffect(() => {
@@ -64,6 +67,7 @@ export const Chart = (props: Props) => {
 
   // format and generate the chart from the data
   useEffect(() => {
+    if (!auction.auctionItem || !auction.auctionItem.index) return;
     if (chartRef.current) chartRef.current.destroy(); // destroy existing chart if it exists
     const canvas = document.getElementById(`chart-${name}`) as HTMLCanvasElement;
     if (!canvas) return;
@@ -173,7 +177,7 @@ export const Chart = (props: Props) => {
       <Tooltip text={getTitleTooltip()}>
         <Title onClick={onClick}>{name}</Title>
       </Tooltip>
-      <Overlay right={3} top={2.1}>
+      <Overlay left={1.2} top={4.2}>
         <ActionListButton
           id='dt'
           text={dt}
@@ -195,7 +199,7 @@ export const Chart = (props: Props) => {
 const Container = styled.div`
   position: relative;
   width: 100%;
-  height: 33vh;
+  height: 60vh;
 
   display: flex;
   flex-flow: column wrap;
@@ -207,7 +211,7 @@ const Container = styled.div`
 
 const Title = styled.div`
   color: black;
-  font-size: 1.5vw;
+  font-size: 2.1vw;
   margin: 0.6vw;
 
   &:hover {
