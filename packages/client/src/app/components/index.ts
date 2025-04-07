@@ -22,7 +22,7 @@ import { registerPresaleModal } from './modals/presale';
 import { registerQuestsModal } from './modals/quests';
 import { registerRevealModal } from './modals/reveal/Reveal';
 import { registerSettingsModal } from './modals/settings';
-
+import { registerTradingModal } from './modals/trading';
 // unused
 import { registerERC721BridgeModal } from './modals/BridgeERC721';
 import { registerFundOperatorModal } from './modals/FundOperator';
@@ -57,6 +57,7 @@ export function registerModals() {
   registerPartyModal();
   registerQuestsModal();
   registerSettingsModal();
+  registerTradingModal();
   registerPresaleModal();
 
   // scene modals

@@ -5,7 +5,8 @@ import styled from 'styled-components';
 import { useSelected, useVisibility } from 'app/stores';
 import { radiateFx } from 'app/styles/effects';
 import { triggerDialogueModal } from 'app/triggers/triggerDialogueModal';
-import { RoomAsset, rooms } from 'constants/rooms';
+import { rooms } from 'constants/rooms';
+import { RoomAsset } from 'constants/rooms/types';
 import { getCurrPhase } from 'utils/time';
 
 interface Props {
@@ -17,7 +18,7 @@ const RoomsBgm: Map<string, Howl> = new Map<string, Howl>();
 // painting of the room alongside any clickable objects
 export const Room = (props: Props) => {
   const { index } = props;
-  const { setModals } = useVisibility();
+  const { modals, setModals } = useVisibility();
   const { setNode } = useSelected();
   const [room, setRoom] = useState(rooms[0]);
   const [bgm, setBgm] = useState<Howl>();
@@ -83,7 +84,21 @@ export const Room = (props: Props) => {
     let onClick = (() => {}) as React.MouseEventHandler<HTMLDivElement>;
     if (object.dialogue) onClick = () => triggerDialogueModal(object.dialogue!);
     else if (object.onClick) onClick = object.onClick;
-    return <Clickbox key={object.name} x1={x1} y1={y1} x2={x2} y2={y2} onClick={onClick} />;
+
+    return object.name !== 'trading' ? (
+      <Clickbox key={object.name} x1={x1} y1={y1} x2={x2} y2={y2} onClick={onClick} />
+    ) : (
+      <Clickbox
+        key={object.name}
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        onClick={() => {
+          setModals({ trading: !modals.trading });
+        }}
+      />
+    );
   };
 
   ///////////////////
