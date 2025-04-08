@@ -1,8 +1,13 @@
 export {
   create as createStateCache,
   getEntries as getStateCacheEntries,
-  storeEvent,
-  storeEvents,
+  removeValues as removeStateValues,
+  storeBlock as storeStateBlock,
+  storeComponents as storeStateComponents,
+  storeEntities as storeStateEntities,
+  storeEvent as storeStateEvent,
+  storeEvents as storeStateEvents,
+  storeValues as storeStateValues,
 } from './cache';
 export { fromStore as loadStateCacheFromStore, toStore as saveStateCacheToStore } from './loaders';
 export { get as getStateStore, getBlockNumber as getStateStoreBlockNumber } from './store';
