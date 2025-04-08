@@ -42,6 +42,7 @@ import {
   createKamigazeStreamService,
   createTransformWorldEventsFromStream,
 } from './kamigazeStreamClient';
+import { createSnapshotClient, fetchSnapshot } from './snapshot';
 import {
   createStateCache,
   getStateCacheEntries,
@@ -49,15 +50,13 @@ import {
   getStateStore,
   loadStateCacheFromStore,
   saveStateCacheToStore,
-  storeEvents,
+  storeStateEvents,
 } from './state';
 import {
   createFetchSystemCallsFromEvents,
   createFetchWorldEventsInBlockRange,
   createLatestEventStreamRPC,
-  createSnapshotClient,
   fetchEventsInBlockRangeChunked,
-  fetchStateFromKamigaze,
 } from './utils';
 
 const debug = parentDebug.extend('SyncWorker');
@@ -279,7 +278,7 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
       // I removed it here just to make sure Kamigaze is working as expected
       // TODO: chunk this in a smart way based on block gap
       try {
-        initialState = await fetchStateFromKamigaze(
+        initialState = await fetchSnapshot(
           initialState,
           kamigazeClient,
           decode,
@@ -294,7 +293,7 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
         });
         return;
       }
-      this.setLoadingState({ percentage: 100 }); // move % updates into fetchStateFromKamigaze
+      this.setLoadingState({ percentage: 100 }); // move % updates into fetchSnapshot
       console.log('INTIAL STATE (POST-SYNC)', getStateReport(initialState));
     }
 
@@ -322,7 +321,7 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
     );
 
     // Merge initial state, gap state and live events since initial sync started
-    storeEvents(initialState, [...gapStateEvents, ...initialLiveEvents]);
+    storeStateEvents(initialState, [...gapStateEvents, ...initialLiveEvents]);
     stateCache.current = initialState;
 
     /*
