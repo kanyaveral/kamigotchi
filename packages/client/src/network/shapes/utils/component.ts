@@ -1,10 +1,11 @@
 import { EntityID, EntityIndex, getComponentValue } from '@mud-classic/recs';
 import { BigNumber } from 'ethers';
+import { Address } from 'viem';
 
 import { Affinity } from 'constants/affinities';
 import { formatEntityID } from 'engine/utils';
 import { Components } from 'network/';
-import { Address, getAddress } from 'viem';
+import { parseAddress } from 'utils/address';
 
 export const getAffinity = (components: Components, entity: EntityIndex): Affinity => {
   const { Affinity } = components;
@@ -212,25 +213,51 @@ export const getWeights = (components: Components, entity: EntityIndex): number[
 ////////////////
 // ADDRESSES
 
-export const getOwnerAddress = (components: Components, entity: EntityIndex): string => {
+// TODO: we should typecast the values of the XXAddress components
+// with some string validation 0x{40 chars} during decoding/unpacking
+
+// get an owner address
+export const getOwnerAddress = (
+  components: Components,
+  entity: EntityIndex
+): Address | undefined => {
   const { OwnerAddress } = components;
   const result = getComponentValue(OwnerAddress, entity)?.value;
-  if (result === undefined) console.warn('getOwnerAddress(): undefined for entity', entity);
-  return result ?? '';
+  if (result === undefined) {
+    console.warn(`getOwnerAddress(): undefined for entity ${entity}`);
+    return;
+  }
+
+  return parseAddress(result);
 };
 
-export const getOperatorAddress = (components: Components, entity: EntityIndex): string => {
+// get an operator address
+export const getOperatorAddress = (
+  components: Components,
+  entity: EntityIndex
+): Address | undefined => {
   const { OperatorAddress } = components;
   const result = getComponentValue(OperatorAddress, entity)?.value;
-  if (result === undefined) console.warn('getOperatorAddress(): undefined for entity', entity);
-  return result ?? '';
+  if (result === undefined) {
+    console.warn(`getOperatorAddress(): undefined for entity ${entity}`);
+    return;
+  }
+
+  return parseAddress(result);
 };
 
-export const getTokenAddress = (components: Components, entity: EntityIndex): Address => {
+export const getTokenAddress = (
+  components: Components,
+  entity: EntityIndex
+): Address | undefined => {
   const { TokenAddress } = components;
   const result = getComponentValue(TokenAddress, entity)?.value;
-  if (result === undefined) console.warn('getTokenAddress(): undefined for entity', entity);
-  return getAddress(result ?? '');
+  if (result === undefined) {
+    console.warn(`getTokenAddress(): undefined for entity ${entity}`);
+    return;
+  }
+
+  return parseAddress(result);
 };
 
 ////////////////
