@@ -30,12 +30,14 @@ abstract contract SetupTemplate is TestSetupImports {
 
   uint256 _currTime;
   uint256 _idleRequirement;
+  uint256 _numRegistered; // number of accounts registered
   mapping(uint256 => PlayerAccount) internal _accounts;
   address[] internal _owners;
   mapping(address => address) internal _operators; // owner => operator
   uint256 internal _currBlock;
 
   // Global accounts
+  // TODO: underscore these names for consistency
   PlayerAccount alice;
   PlayerAccount bob;
   PlayerAccount charlie;
@@ -88,7 +90,7 @@ abstract contract SetupTemplate is TestSetupImports {
 
   // sets up some default accounts. override to change/remove behaviour if needed
   function setUpAccounts() public virtual {
-    _createOwnerOperatorPairs(25); // create 10 pairs of Owners/Operators
+    _createOwnerOperatorPairs(25); // create pairs of Owners/Operators
     _registerAccounts(10);
     alice = _accounts[0];
     bob = _accounts[1];
@@ -269,12 +271,14 @@ abstract contract SetupTemplate is TestSetupImports {
     vm.stopPrank();
 
     _accounts[playerIndex] = PlayerAccount(accID, uint32(playerIndex), operator, owner);
+    _numRegistered++;
     return accID;
   }
 
   // registers n accounts, starting from 0
   function _registerAccounts(uint n) internal {
-    for (uint i = 0; i < n; i++) _registerAccount(i);
+    uint numRegistered = _numRegistered;
+    for (uint i = numRegistered; i < numRegistered + n; i++) _registerAccount(i);
   }
 
   /////////////////
