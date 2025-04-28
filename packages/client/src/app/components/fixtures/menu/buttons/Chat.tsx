@@ -1,8 +1,15 @@
-import { Modals } from 'app/stores';
+import { useEffect, useState } from 'react';
+import styled from 'styled-components';
+
+import { getChatLastTimestamp, numMessagesChatSince } from 'app/cache/chat';
+import { Modals, useSelected, useVisibility } from 'app/stores';
 import { ChatIcon } from 'assets/images/icons/menu';
 import { MenuButton } from './MenuButton';
 
+const LastClearTs = new Map<number, number>(); // roomIndex => ts last opened
+
 export const ChatMenuButton = () => {
+  const { modals } = useVisibility();
   const modalsToHide: Partial<Modals> = {
     bridgeERC20: false,
     bridgeERC721: false,
@@ -18,13 +25,78 @@ export const ChatMenuButton = () => {
     trading: false,
   };
 
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [notification, setNotification] = useState(false);
+
+  const { roomIndex } = useSelected();
+
+  const handleNumMessages = () => {
+    const numberNewMessages = numMessagesChatSince(roomIndex, LastClearTs.get(roomIndex) ?? 0);
+    return numberNewMessages > 10 ? '+10' : numberNewMessages;
+  };
+
+  // ticking
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      setLastRefresh(Date.now());
+    }, 250);
+    return () => clearInterval(timerId);
+  }, []);
+
+  useEffect(() => {
+    if (modals.chat) {
+      setNotification(false);
+    } else {
+      const lastChatTs = getChatLastTimestamp(roomIndex);
+      const lastClearTs = LastClearTs.get(roomIndex) ?? 0;
+      setNotification(lastChatTs > lastClearTs);
+    }
+  }, [lastRefresh, modals.chat, roomIndex]);
+
+  useEffect(() => {
+    LastClearTs.set(roomIndex, Date.now());
+  }, [modals.chat]);
+
+  // added (!LastClearTs.has(roomIndex)) to not overwrite the last clear timestamp each time an already visited room is visited again
+  useEffect(() => {
+    if (!LastClearTs.has(roomIndex)) LastClearTs.set(roomIndex, Date.now());
+  }, [roomIndex]);
+
   return (
-    <MenuButton
-      id='chat-button'
-      image={ChatIcon}
-      tooltip='Chat'
-      targetModal='chat'
-      hideModals={modalsToHide}
-    />
+    <Container>
+      <MenuButton
+        id='chat-button'
+        image={ChatIcon}
+        tooltip='Chat'
+        targetModal='chat'
+        hideModals={modalsToHide}
+      />
+      <Status notification={notification}>
+        <Number>{handleNumMessages()}</Number>
+      </Status>
+    </Container>
   );
 };
+
+const Container = styled.div`
+  position: relative;
+`;
+
+const Status = styled.div<{ notification: boolean }>`
+  display: ${({ notification }) => (notification ? 'block' : 'none')};
+  border: solid 0.1vw white;
+  position: absolute;
+  bottom: 0.9%;
+  right: 0%;
+
+  height: fit-content;
+  padding: 0.2vw;
+  border-radius: 33vw;
+  z-index: 1;
+  background-color: green;
+`;
+
+const Number = styled.text`
+  color: white;
+  font-size: 0.8vh;
+`;
