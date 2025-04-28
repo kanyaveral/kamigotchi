@@ -4,14 +4,16 @@ import { interval, map } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { AccountCache, getAccount } from 'app/cache/account';
-import { ActionButton, ValidatorWrapper } from 'app/components/library';
+import { ValidatorWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
 import { emptyAccountDetails, useAccount, useNetwork, useVisibility } from 'app/stores';
+import { ETH_INDEX } from 'constants/items';
 import { GodID, SyncState } from 'engine/constants';
 import { getBaseAccount, queryAccountFromEmbedded, queryAllAccounts } from 'network/shapes/Account';
+import { getItemByIndex } from 'network/shapes/Item';
 import { waitForActionCompletion } from 'network/utils';
+import { IntroStep1, IntroStep2 } from './IntroSteps';
 import { Registration } from './Registration';
-import { BackButton, Description, Row } from './shared';
 
 export function registerAccountRegistrar() {
   registerUIComponent(
@@ -50,6 +52,7 @@ export function registerAccountRegistrar() {
           return {
             data: {
               accountEntity,
+              ethAddress: getItemByIndex(world, components, ETH_INDEX).address!,
             },
             network,
             utils: {
@@ -80,6 +83,7 @@ export function registerAccountRegistrar() {
       const { validators, setValidators } = useVisibility();
       const { validations, setValidations } = useAccount();
       const { setAccount } = useAccount();
+
       const [step, setStep] = useState(0);
 
       // update the Kami Account and validation based on changes to the
@@ -142,45 +146,16 @@ export function registerAccountRegistrar() {
       /////////////////
       // RENDERING
 
-      const NextButton = () => <ActionButton text='Next' onClick={() => setStep(step + 1)} />;
-
-      const IntroStep1 = () => {
-        return (
-          <>
-            <br />
-            <Description>Welcome to Kamigotchi World.</Description>
-            <Description>This world exists entirely on-chain.</Description>
-            <br />
-            <Row>
-              <NextButton />
-            </Row>
-          </>
-        );
-      };
-      const IntroStep2 = () => {
-        return (
-          <>
-            <br />
-            <Description>Kamigotchi are key to this world.</Description>
-            <Description>You will need them to progress.</Description>
-            <br />
-            <Row>
-              <BackButton step={step} setStep={setStep} />
-              <NextButton />
-            </Row>
-          </>
-        );
-      };
-
       const GetSteps = () => {
         return [
-          IntroStep1(),
-          IntroStep2(),
+          <IntroStep1 step={step} setStep={setStep} />,
+          <IntroStep2 step={step} setStep={setStep} />,
           <Registration
             address={{
               selected: selectedAddress,
               burner: burnerAddress,
             }}
+            tokens={{ ethAddress: data.ethAddress }}
             actions={{ createAccount }}
             utils={{
               setStep,
