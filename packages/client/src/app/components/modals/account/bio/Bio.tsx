@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 import { Popover, Tooltip } from 'app/components/library';
 import { ActionIcons } from 'assets/images/icons/actions';
+import { KAMI_BASE_URI } from 'constants/media';
 import { Account } from 'network/shapes/Account';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
@@ -88,7 +89,11 @@ export const Bio = (props: Props) => {
   const Pfp = () => {
     return (
       <PfpContainer>
-        <PfpImage isLoading={isLoading} draggable='false' src={account.pfpURI} />
+        <PfpImage
+          isLoading={isLoading}
+          draggable='false'
+          src={`${KAMI_BASE_URI + account.pfpURI}.gif`}
+        />
         <Tooltip text={[getLastSeenString()]}>
           <PfpStatus isLoading={isLoading} timeDelta={tick / 1000 - account.time.last} />
         </Tooltip>
