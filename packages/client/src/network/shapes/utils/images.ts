@@ -10,7 +10,9 @@ export const getAffinityImage = (name: string) => {
   return AffinityIcons[key];
 };
 
+// TODO: need faction 'key' field on onchain shapes to parse Faction shapes correctly
 export const getFactionImage = (name: string) => {
+  if (name === 'Kamigotchi Tourism Agency') return FactionIcons.agency;
   const key = cleanName(name) as keyof typeof FactionIcons;
   if (!key) throw new Error(`No faction image found for ${name}`);
   return FactionIcons[key];
