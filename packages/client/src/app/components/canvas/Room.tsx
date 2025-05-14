@@ -6,6 +6,7 @@ import { useLocalStorage } from 'usehooks-ts';
 import { useSelected, useVisibility } from 'app/stores';
 import { radiateFx } from 'app/styles/effects';
 import { triggerDialogueModal } from 'app/triggers/triggerDialogueModal';
+import { cave } from 'assets/sound/ost';
 import { rooms } from 'constants/rooms';
 import { RoomAsset } from 'constants/rooms/types';
 import { getCurrPhase } from 'utils/time';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const RoomsBgm: Map<string, Howl> = new Map<string, Howl>();
+const defaultBgm = { key: 'cave', path: cave };
 
 // painting of the room alongside any clickable objects
 export const Room = (props: Props) => {
@@ -33,12 +35,12 @@ export const Room = (props: Props) => {
   useEffect(() => {
     if (index == room.index) return;
     const newRoom = rooms[index];
-    const music = newRoom.music;
+    let music = newRoom.music;
     if (!music) {
-      bgm?.stop();
-      return;
+      music = defaultBgm;
     }
-    if (music.path !== room.music?.path) {
+    // if prev music is the same, or starting new room with default music
+    if (music.path !== room.music?.path || !newRoom.music) {
       if (!RoomsBgm.has(music.path)) {
         RoomsBgm.set(music.path, new Howl({ src: [music.path], loop: true, volume: bgmVolume }));
       }
