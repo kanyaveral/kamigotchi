@@ -1,38 +1,57 @@
 import { Dispatch, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { calcHealthPercent } from 'app/cache/kami';
+import { calcHealthPercent, canHarvest } from 'app/cache/kami';
 import { compareTraits } from 'app/cache/trait';
-import { IconButton, IconListButton, Text } from 'app/components/library';
+import { IconButton, IconListButton } from 'app/components/library';
+import { DropDownToggle } from 'app/components/library/buttons/DropDownToggle';
 import { useVisibility } from 'app/stores';
+import { HarvestIcon } from 'assets/images/icons/actions';
 import { TriggerIcons } from 'assets/images/icons/triggers';
 import { Account } from 'network/shapes/Account';
 import { Kami } from 'network/shapes/Kami';
 import { Node } from 'network/shapes/Node';
 import { SortIcons } from './constants';
-import { WHALE_LIMIT } from './KamiList';
+
 import { Sort } from './types';
 
 interface Props {
+  actions: {
+    addKamis: (kamis: Kami[]) => void;
+  };
   data: {
     account: Account;
     kamis: Kami[];
     node: Node;
   };
+  utils: { passesNodeReqs: (kami: Kami) => boolean };
   state: {
-    sort: Sort;
-    setSort: Dispatch<Sort>;
     collapsed: boolean;
     setCollapsed: Dispatch<boolean>;
     setDisplayedKamis: Dispatch<Kami[]>;
+    setSort: Dispatch<Sort>;
+    sort: Sort;
   };
 }
 
 export const Toolbar = (props: Props) => {
-  const { data, state } = props;
-  const { kamis } = data;
+  const { data, state, actions, utils } = props;
+  const { passesNodeReqs } = utils;
+  const { addKamis } = actions;
+  const { kamis, node, account } = data;
   const { sort, setSort, collapsed, setCollapsed, setDisplayedKamis } = state;
   const { modals } = useVisibility();
+
+  const canAdd = (kami: Kami) => {
+    return canHarvest(kami) && passesNodeReqs(kami);
+  };
+  //TODO:  be more explicit about when/how the deployOptions gets updated
+  const deployOptions = kamis
+    .filter((kami) => canAdd(kami))
+    .map((kami) => ({
+      text: kami.name,
+      object: kami,
+    }));
 
   // memoized sort options
   const sortOptions = useMemo(
@@ -48,7 +67,6 @@ export const Toolbar = (props: Props) => {
   // sort kamis when sort is changed
   // sorts in place so the seDisplayedKamis is just to triggere an update
   useEffect(() => {
-    if (kamis.length <= WHALE_LIMIT) return; // only shown for whales
     let sorted = kamis;
     if (sort === 'index') {
       sorted = kamis.sort((a, b) => a.index - b.index);
@@ -79,29 +97,33 @@ export const Toolbar = (props: Props) => {
 
   return (
     <Container>
-      <Text size={1.2}>Whale Tools</Text>
       <ButtonSection>
         <IconButton
           img={collapsed ? TriggerIcons.eyeHalf : TriggerIcons.eyeOpen}
           onClick={() => setCollapsed(!collapsed)}
         />
-        <IconListButton img={SortIcons[sort]} text={sort} options={sortOptions} radius={0.6} />
-      </ButtonSection>
+        <IconListButton img={SortIcons[sort]} text={sort} options={sortOptions} radius={0.6} />{' '}
+      </ButtonSection>{' '}
+      <DropDownToggle
+        img={HarvestIcon}
+        disabled={deployOptions.length == 0 || account.roomIndex !== node.index}
+        onClick={(selectedKamis: Kami[]) => addKamis(selectedKamis)}
+        deployOptions={deployOptions}
+      />
     </Container>
   );
 };
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: row;
   position: sticky;
   z-index: 1;
   top: 0;
-
   background-color: #eee;
   opacity: 0.9;
   width: 100%;
-
   padding: 0.6vw;
-
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
@@ -110,8 +132,7 @@ const Container = styled.div`
 `;
 
 const ButtonSection = styled.div`
-  gap: 0.45vw;
-
+  gap: 0.3vw;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-end;
