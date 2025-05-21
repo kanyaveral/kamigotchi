@@ -7,12 +7,9 @@ interface Props {
   cursor?: string;
   mouseButton?: 0 | 2;
   closeOnClick?: boolean;
-  // execute a function when the popover closes
-  onClose?: () => void;
-  // forceclose the popover
-  forceClose?: boolean;
-  // disable the popover
-  disabled?: boolean;
+  onClose?: () => void; // execute a function when the popover closes
+  forceClose?: boolean; // forceclose the popover
+  disabled?: boolean; // disable the popover
 }
 
 export const Popover = (props: Props) => {
@@ -87,22 +84,27 @@ export const Popover = (props: Props) => {
   };
 
   const handlePosition = () => {
-    const width = popoverRef.current?.offsetWidth || 0;
-    const height = popoverRef.current?.offsetHeight || 0;
-    const childrenPosition = triggerRef.current?.getBoundingClientRect();
-    if (childrenPosition) {
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      let x = childrenPosition.left;
-      let y = childrenPosition.bottom - 10;
-      if (x + width + 10 > viewportWidth) {
-        x = childrenPosition.right - width;
-      }
-      if (y + height + 10 > viewportHeight) {
-        y = childrenPosition.bottom - height - 10;
-      }
-      setPopoverPosition({ x, y });
+    const popoverEl = popoverRef.current;
+    const triggerEl = triggerRef.current;
+    if (!popoverEl || !triggerEl) return;
+    const triggerRect = triggerEl.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    let x = triggerRect.left;
+    let y = triggerRect.bottom;
+    // avoids going off the bottom of the screen
+    if (y + popoverEl.offsetHeight > viewportHeight) {
+      y = triggerRect.top - popoverEl.offsetHeight;
     }
+    // avoids going off the top of the screen
+    if (y < 0) y = 10;
+    // avoids going off the right side of the screen
+    if (x + popoverEl.offsetWidth > viewportWidth) {
+      x = triggerRect.right - popoverEl.offsetWidth;
+    }
+    // avoids going off the left side of the screen
+    if (x < 0) x = 10;
+    setPopoverPosition({ x, y });
   };
 
   const handleScroll = (event: any) => {
@@ -170,10 +172,9 @@ const PopoverContent = styled.div<{
   overflow-x: hidden;
   visibility: ${({ isVisible }) => (isVisible ? `visible` : `hidden`)};
   position: fixed;
-  margin-top: 1%;
+
   background-color: white;
   border: 0.15vw solid black;
-  box-shadow: 0 0.3vw 0.8vw rgba(0, 0, 0, 0.7);
   border-radius: 0.45vw;
   z-index: 10;
   white-space: nowrap;
