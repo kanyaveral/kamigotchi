@@ -22,6 +22,24 @@ export function createSyncWorker<C extends Components>(ack$?: Observable<Ack>) {
   });
   const ecsEvents$ = new Subject<NetworkEvent<C>[]>();
 
+  // Handle reloads from worker
+  worker.addEventListener('message', (event) => {
+    if (event.data.type === 'RELOAD_REQUIRED') {
+      const lastReload = localStorage.getItem('lastBlockGapReload');
+      const now = Date.now();
+
+      if (!lastReload || now - parseInt(lastReload) > event.data.minTimeBetweenReloads) {
+        console.log('Large block gap detected, reloadingpage...');
+        localStorage.setItem('lastBlockGapReload', now.toString());
+        window.location.reload();
+      } else {
+        console.log(
+          `Skipping reload.. ${now - parseInt(lastReload)} > ${event.data.minTimeBetweenReloads}`
+        );
+      }
+    }
+  });
+
   // Send ack every 16ms if no external ack$ is provided
   ack$ = ack$ || timer(0, 16).pipe(map(() => ack));
   const ackSub = ack$.subscribe(input$);
