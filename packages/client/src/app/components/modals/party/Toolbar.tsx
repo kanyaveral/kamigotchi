@@ -2,7 +2,7 @@ import { Dispatch, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { calcHealthPercent, canHarvest } from 'app/cache/kami';
-import { compareTraits } from 'app/cache/trait';
+import { compareTraitAffinity, compareTraitName, compareTraitRarity } from 'app/cache/trait';
 import { IconButton, IconListButton } from 'app/components/library';
 import { DropDownToggle } from 'app/components/library/buttons/DropDownToggle';
 import { useVisibility } from 'app/stores';
@@ -38,7 +38,7 @@ export const Toolbar = (props: Props) => {
   const { addKamis } = actions;
   const { sort, setSort, view, setView } = controls;
   const { kamis } = data;
-  const { tick, displayedKamis, setDisplayedKamis } = state;
+  const { displayedKamis, setDisplayedKamis } = state;
   const { passesNodeReqs } = utils;
   const { modals } = useVisibility();
 
@@ -65,15 +65,14 @@ export const Toolbar = (props: Props) => {
     []
   );
 
-  // sort kamis when sort is changed
-  // sorts in place so the seDisplayedKamis is just to triggere an update
+  // sort kamis when changes are detected
+  // TODO: trigger updates after successful state updates
+  // NOTE: sorts in place (setDisplayedKamis is just used to trigger a rendering update)
   useEffect(() => {
     if (!modals.party) return;
 
     let sorted = kamis;
-    if (sort === 'index') {
-      sorted = kamis.sort((a, b) => a.index - b.index);
-    } else if (sort === 'name') {
+    if (sort === 'name') {
       sorted = kamis.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sort === 'state') {
       sorted = kamis.sort((a, b) => {
@@ -83,14 +82,19 @@ export const Toolbar = (props: Props) => {
       });
     } else if (sort === 'traits') {
       sorted = kamis.sort((a, b) => {
-        const bodyDiff = compareTraits(a.traits?.body!, b.traits?.body!);
-        if (bodyDiff === 0) return compareTraits(a.traits?.hand!, b.traits?.hand!);
-        return bodyDiff;
+        let diff = 0;
+        if (diff === 0) diff = compareTraitAffinity(a.traits?.body!, b.traits?.body!);
+        if (diff === 0) diff = compareTraitAffinity(a.traits?.hand!, b.traits?.hand!);
+        if (diff === 0) diff = compareTraitRarity(a.traits?.body!, b.traits?.body!);
+        if (diff === 0) diff = compareTraitName(a.traits?.body!, b.traits?.body!);
+        if (diff === 0) diff = compareTraitRarity(a.traits?.hand!, b.traits?.hand!);
+        if (diff === 0) diff = compareTraitName(a.traits?.hand!, b.traits?.hand!);
+        return diff;
       });
     }
 
     setDisplayedKamis(kamis);
-  }, [modals.party, sort]);
+  }, [modals.party, kamis.length, sort, view]);
 
   return (
     <Container>
