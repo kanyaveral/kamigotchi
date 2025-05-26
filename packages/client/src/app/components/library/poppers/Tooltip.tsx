@@ -3,26 +3,18 @@ import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 
 interface Props {
-  text: string[];
-  title?: string;
-
-  // parent container
   children: React.ReactNode;
-  grow?: boolean; // parent prop
+  grow?: boolean;
   direction?: 'row' | 'column';
-
-  // tooltip
   delay?: number;
   maxWidth?: number;
-  size?: number;
-  alignText?: 'left' | 'right' | 'center';
   color?: string;
+  content: React.ReactNode;
+  isDisabled: boolean;
 }
 
 export const Tooltip = (props: Props) => {
-  const { children, grow, direction } = props;
-  const { text, title, alignText, maxWidth, color, delay } = props;
-  const textSize = props.size ?? 0.75;
+  const { children, grow, direction, delay, maxWidth, color, content, isDisabled } = props;
 
   const [isVisible, setIsVisible] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -35,31 +27,25 @@ export const Tooltip = (props: Props) => {
 
   const handleMouseMove = (event: React.MouseEvent) => {
     const { clientX: cursorX, clientY: cursorY } = event;
-
     const width = tooltipRef.current?.offsetWidth || 0;
     const height = tooltipRef.current?.offsetHeight || 0;
-
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-
     let x = cursorX + 12;
     let y = cursorY + 12;
-
     if (x + width + 10 > viewportWidth) {
       x = cursorX - width - 10;
     }
-
     if (y + height + 10 > viewportHeight) {
       y = cursorY - height - 10;
     }
-
     setTooltipPosition({ x, y });
   };
 
   const handleMouseEnter = (event: React.MouseEvent) => {
     handleMouseMove(event);
 
-    if (text[0] !== '') {
+    if (!isDisabled) {
       setIsActive(true);
     }
   };
@@ -69,14 +55,13 @@ export const Tooltip = (props: Props) => {
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof window.setTimeout>;
-
     if (isActive) {
       timeoutId = setTimeout(() => {
-        if (text.length > 0) setIsVisible(true);
+        if (!isDisabled) setIsVisible(true);
       }, delay ?? 350);
     }
     return () => clearTimeout(timeoutId);
-  }, [isActive, delay]);
+  }, [isActive, delay, isDisabled]);
 
   /////////////////
   // DISPLAY
@@ -85,9 +70,9 @@ export const Tooltip = (props: Props) => {
     <Container
       flexGrow={grow ? '1' : '0'}
       direction={direction}
-      disabled={text.length === 0}
+      disabled={isDisabled}
       onMouseEnter={(e) => handleMouseEnter(e)}
-      onMouseLeave={(e) => {
+      onMouseLeave={() => {
         setIsActive(false), setIsVisible(false);
       }}
       onMouseMove={(e) => {
@@ -103,12 +88,7 @@ export const Tooltip = (props: Props) => {
             tooltipPosition={tooltipPosition}
             ref={tooltipRef}
           >
-            {title && <Text size={textSize * 1.35}>{title}</Text>}
-            {text.map((line, idx) => (
-              <Text key={idx} size={textSize} align={alignText}>
-                {line}
-              </Text>
-            ))}
+            {content}
           </PopoverContainer>,
           document.body
         )}
@@ -125,7 +105,6 @@ const Container = styled.div<{
 }>`
   display: flex;
   flex-direction: ${({ direction }) => direction ?? 'column'};
-
   flex-grow: ${({ flexGrow }) => flexGrow};
   cursor: ${({ disabled }) => (disabled ? 'cursor' : 'help')};
 `;
@@ -148,28 +127,16 @@ const PopoverContainer = styled.div.attrs<PopOverProps>((props) => ({
 }))<PopOverProps>`
   position: fixed;
   flex-direction: column;
-
   border: solid black 0.15vw;
   border-radius: 0.6vw;
-
   padding: 0.9vw;
   display: flex;
   overflow-wrap: anywhere;
-
   color: black;
   font-size: 0.7vw;
   line-height: 1.25vw;
-
   white-space: normal;
   z-index: 10;
-
   pointer-events: none;
   user-select: none;
-`;
-
-const Text = styled.div<{ size: number; align?: string }>`
-  font-size: ${(props) => props.size}vw;
-  line-height: ${(props) => props.size * 1.8}vw;
-  text-align: ${(props) => props.align ?? 'center'};
-  white-space: pre-line;
 `;
