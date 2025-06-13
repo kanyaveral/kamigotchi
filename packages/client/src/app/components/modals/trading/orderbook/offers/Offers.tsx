@@ -1,13 +1,12 @@
+import { Dispatch, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { isItemCurrency } from 'app/cache/item';
+import { getTradeType, Trade } from 'app/cache/trade';
+import { getPerUnitPrice } from 'app/cache/trade/functions';
 import { EmptyText } from 'app/components/library';
-import { Item } from 'network/shapes';
-import { Trade } from 'network/shapes/Trade/types';
-import { useEffect, useState } from 'react';
-import { OrderType } from '../types';
-import { BuyOrder } from './BuyOrder';
-import { SellOrder } from './SellOrder';
+import { Account, Item } from 'network/shapes';
+import { ConfirmationData } from '../../Confirmation';
+import { PendingOffer } from './PendingOffer';
 
 interface Props {
   actions: {
@@ -18,21 +17,27 @@ interface Props {
     ascending: boolean;
     itemFilter: Item;
     typeFilter: string;
+    isConfirming: boolean;
+    setIsConfirming: Dispatch<boolean>;
+    setConfirmData: Dispatch<ConfirmationData>;
   };
-  data: { trades: Trade[] };
+  data: { account: Account; trades: Trade[] };
+  utils: {
+    getItemByIndex: (index: number) => Item;
+  };
 }
 
 export const Offers = (props: Props) => {
-  const { actions, controls, data } = props;
+  const { actions, controls, data, utils } = props;
   const { typeFilter, sort, ascending, itemFilter } = controls;
-  const { trades } = data;
+  const { account, trades } = data;
 
   const [displayed, setDisplayed] = useState<Trade[]>([]);
 
   useEffect(() => {
     // filter by type
     let cleaned = trades.filter((trade) => {
-      const type = getTradeType(trade);
+      const type = getTradeType(trade, false);
       return type === typeFilter;
     });
 
@@ -56,8 +61,10 @@ export const Offers = (props: Props) => {
       }
 
       if (sort === 'Price') {
-        const aPrice = getTradePrice(a);
-        const bPrice = getTradePrice(b);
+        const aType = getTradeType(a, false);
+        const bType = getTradeType(b, false);
+        const aPrice = getPerUnitPrice(a, aType);
+        const bPrice = getPerUnitPrice(b, bType);
         if (ascending) return aPrice - bPrice;
         return bPrice - aPrice;
       }
@@ -67,33 +74,6 @@ export const Offers = (props: Props) => {
     setDisplayed(sorted);
   }, [trades, typeFilter, sort, ascending, itemFilter]);
 
-  // determine what kind of trade this is to the Taker
-  // TODO: check is simple atm. refine it over time
-  const getTradeType = (trade: Trade): OrderType => {
-    const buyOrder = trade.buyOrder;
-    const sellOrder = trade.sellOrder;
-    if (!buyOrder || !sellOrder) return '???';
-
-    const buyHasMusu = buyOrder.items.some((item) => isItemCurrency(item));
-    const sellHasMusu = sellOrder.items.some((item) => isItemCurrency(item));
-
-    if (buyHasMusu && !sellHasMusu) return 'Buy';
-    if (!buyHasMusu && sellHasMusu) return 'Sell';
-    if (buyHasMusu && sellHasMusu) return 'Forex';
-    if (!buyHasMusu && !sellHasMusu) return 'Barter';
-    return '???';
-  };
-
-  // determine the per unit item price of a trade
-  const getTradePrice = (trade: Trade) => {
-    const type = getTradeType(trade);
-    const buyAmt = trade.buyOrder?.amounts[0] ?? 1;
-    const sellAmt = trade.sellOrder?.amounts[0] ?? 1;
-    if (type === 'Buy') return buyAmt / sellAmt;
-    else if (type === 'Sell') return sellAmt / buyAmt;
-    return 0;
-  };
-
   /////////////////
   // DISPLAY
 
@@ -101,10 +81,22 @@ export const Offers = (props: Props) => {
     <Container>
       <Title>Open Offers</Title>
       <Body>
-        {displayed.map((trade, i) => {
-          const type = getTradeType(trade);
+        {/* {displayed.map((trade, i) => {
+          const type = getTradeType(trade, false);
           if (type === 'Sell') return <SellOrder key={i} actions={actions} data={{ trade }} />;
           return <BuyOrder key={i} actions={actions} data={{ trade }} />;
+        })} */}
+        {displayed.map((trade, i) => {
+          const type = getTradeType(trade, false);
+          return (
+            <PendingOffer
+              key={i}
+              actions={actions}
+              controls={controls}
+              data={{ account, trade, type }}
+              utils={utils}
+            />
+          );
         })}
       </Body>
       {displayed.length === 0 && <EmptyText text={['No active trades to show']} />}

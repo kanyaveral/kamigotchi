@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.28;
 
-import { LibString } from "solady/utils/LibString.sol";
 import { System } from "solecs/System.sol";
 import { IWorld } from "solecs/interfaces/IWorld.sol";
-import { getAddrByID } from "solecs/utils.sol";
 
 import { LibAccount } from "libraries/LibAccount.sol";
+import { LibConfig } from "libraries/LibConfig.sol";
+import { LibInventory, MUSU_INDEX } from "libraries/LibInventory.sol";
 import { LibTrade } from "libraries/LibTrade.sol";
 
 uint256 constant ID = uint256(keccak256("system.trade.create"));
@@ -28,6 +28,10 @@ contract TradeCreateSystem is System {
     LibTrade.verifyTradable(components, buyIndices, sellIndices);
     LibTrade.verifyMaxOrders(components, accID);
 
+    // take the trade creation fee. implicitly checks if enough MUSU
+    uint256 createFee = LibConfig.get(components, "TRADE_CREATION_FEE");
+    LibInventory.decFor(components, accID, MUSU_INDEX, createFee);
+
     // create trade order
     uint256 id = LibTrade.create(
       world,
@@ -38,13 +42,26 @@ contract TradeCreateSystem is System {
       LibTrade.Order(sellIndices, sellAmts)
     );
 
-    // standard logging and tracking
+    // data logging and event emission
+    LibTrade.emitTradeCreate(
+      world,
+      id,
+      accID,
+      targetID,
+      LibTrade.Order(buyIndices, buyAmts),
+      LibTrade.Order(sellIndices, sellAmts)
+    );
     LibTrade.logCreate(components, accID);
     LibAccount.updateLastTs(components, accID);
 
     return abi.encode(id);
   }
 
+  /// @param buyIndices Item indices to buy
+  /// @param buyAmts Amounts to buy
+  /// @param sellIndices Item indices to sell
+  /// @param sellAmts Amounts to sell
+  /// @param targetID Target Taker Account id
   function executeTyped(
     uint32[] memory buyIndices,
     uint256[] memory buyAmts,

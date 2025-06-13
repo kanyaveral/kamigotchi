@@ -4,18 +4,18 @@ import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 import styled from 'styled-components';
 
-import { getAccountInventories } from 'app/cache/account';
-import { cleanInventories, getInventoryBalance } from 'app/cache/inventory';
+import { getAccount } from 'app/cache/account';
+import { getItemByIndex } from 'app/cache/item';
 import { getTrade } from 'app/cache/trade';
-import { ModalHeader, ModalWrapper } from 'app/components/library';
+import { ModalHeader, ModalWrapper, Overlay } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
 import { useNetwork, useVisibility } from 'app/stores';
 import { ETH_INDEX, MUSU_INDEX, ONYX_INDEX } from 'constants/items';
-import { Inventory } from 'network/shapes';
 import { queryAccountFromEmbedded } from 'network/shapes/Account';
 import { getAllItems, getMusuBalance, Item } from 'network/shapes/Item';
 import { queryTrades } from 'network/shapes/Trade';
 import { Trade } from 'network/shapes/Trade/types';
+import { Confirmation, ConfirmationData } from './Confirmation';
 import { Management } from './management';
 import { Orderbook } from './orderbook';
 import { Tabs } from './Tabs';
@@ -39,22 +39,27 @@ export function registerTradingModal() {
       interval(1000).pipe(
         map(() => {
           const { network } = layers;
-          const { world, components, actions } = network;
+          const { world, components: comps, actions } = network;
           const accountEntity = queryAccountFromEmbedded(network);
+          const accountOptions = { live: 1, config: 3600 };
+          const tradeOptions = { state: 2, taker: 2 };
+
           return {
             network,
-            data: { accountEntity },
+            data: {
+              account: getAccount(world, comps, accountEntity, accountOptions),
+            },
             types: {
               ActionComp: actions.Action,
             },
             utils: {
               entityToIndex: (id: EntityID) => world.entityToIndex.get(id)!,
-              getAllItems: () => getAllItems(world, components),
-              getInventories: () => getAccountInventories(world, components, accountEntity),
-              getTrade: (entity: EntityIndex) => getTrade(world, components, entity),
-              queryTrades: () => queryTrades(components),
-
-              getMusuBalance: () => getMusuBalance(world, components, accountEntity),
+              getAllItems: () => getAllItems(world, comps),
+              getAccount: () => getAccount(world, comps, accountEntity, accountOptions),
+              getTrade: (entity: EntityIndex) => getTrade(world, comps, entity, tradeOptions),
+              queryTrades: () => queryTrades(comps),
+              getItemByIndex: (index: number) => getItemByIndex(world, comps, index),
+              getMusuBalance: () => getMusuBalance(world, comps, accountEntity),
             },
           };
         })
@@ -62,25 +67,28 @@ export function registerTradingModal() {
 
     // Render
     ({ network, data, types, utils }) => {
-      const { actions, api } = network;
-      const { accountEntity } = data;
-      const { getAllItems, getInventories, getTrade, queryTrades } = utils;
+      const { actions } = network;
+      const { account } = data;
+      const { getAllItems, getTrade, queryTrades } = utils;
       const { modals } = useVisibility();
       const { selectedAddress, apis } = useNetwork();
 
+      const [items, setItems] = useState<Item[]>([]);
+      const [currencies, setCurrencies] = useState<Item[]>([]);
       const [trades, setTrades] = useState<Trade[]>([]);
       const [myTrades, setMyTrades] = useState<Trade[]>([]);
-      const [currencies, setCurrencies] = useState<Item[]>([]);
-      const [inventories, setInventories] = useState<Inventory[]>([]);
-      const [items, setItems] = useState<Item[]>([]);
-      const [musuBalance, setMusuBalance] = useState<number>(0);
 
       const [tab, setTab] = useState<TabType>('Orderbook');
       const [tick, setTick] = useState(Date.now());
+      const [isConfirming, setIsConfirming] = useState(false);
+      const [confirmData, setConfirmData] = useState<ConfirmationData>({
+        content: <></>,
+        onConfirm: () => null,
+      });
 
       // time trigger to use for periodic refreshes
       useEffect(() => {
-        refreshItems();
+        refreshItemRegistry();
 
         const updateSync = () => setTick(Date.now());
         const timerId = setInterval(updateSync, SYNC_TIME);
@@ -91,14 +99,13 @@ export function registerTradingModal() {
       useEffect(() => {
         if (!modals.trading) return;
         refreshTrades();
-        refreshInventories();
       }, [modals.trading, tick]);
 
       /////////////////
       // GETTERS
 
       // pull all items from the registry and save the tradable ones
-      const refreshItems = () => {
+      const refreshItemRegistry = () => {
         const all = getAllItems();
         const nonCurrencies = all.filter((item) => !CurrencyIndices.includes(item.index));
         const tradable = nonCurrencies.filter((item) => !!item.is.tradeable);
@@ -108,22 +115,21 @@ export function registerTradingModal() {
         setCurrencies([all.find((item) => item.index === 1)!]);
       };
 
-      // pull all inventories from the player. filter out MUSU and untradable items
-      const refreshInventories = () => {
-        const all = getInventories();
-        setMusuBalance(getInventoryBalance(all, MUSU_INDEX));
-        const filtered = cleanInventories(all);
-        const tradable = filtered.filter((inv) => inv.item.is.tradeable);
-        const sorted = tradable.sort((a, b) => (a.item.name > b.item.name ? 1 : -1));
-        setInventories(sorted);
-      };
-
       // pull all open trades and partition them based on whether created by the player
       // NOTE: filtering by Taker not yet implemented
       const refreshTrades = () => {
         const allTrades = queryTrades().map((entity: EntityIndex) => getTrade(entity));
-        const myTrades = allTrades.filter((trade) => trade.maker?.entity === accountEntity);
-        const trades = allTrades.filter((trade) => trade.maker?.entity !== accountEntity);
+        const myTrades = allTrades.filter((trade) => {
+          const isMaker = trade.maker?.entity === account.entity;
+          const isTaker = trade.taker?.entity === account.entity;
+          return isMaker || isTaker;
+        });
+        const trades = allTrades.filter((trade) => {
+          const isNotMaker = trade.maker?.entity !== account.entity;
+          const isNotTaker = trade.taker?.entity !== account.entity;
+          const isOpen = trade.state === 'PENDING';
+          return isNotMaker && isNotTaker && isOpen;
+        });
         setMyTrades(myTrades);
         setTrades(trades);
       };
@@ -154,7 +160,7 @@ export function registerTradingModal() {
         return actionID;
       };
 
-      // fulfuill and existing trade offer
+      // execute an open trade offer
       const executeTrade = (trade: Trade) => {
         const api = apis.get(selectedAddress);
         if (!api) return console.error(`API not established for ${selectedAddress}`);
@@ -166,6 +172,23 @@ export function registerTradingModal() {
           description: `Executing Order`,
           execute: async () => {
             return api.account.trade.execute(trade.id);
+          },
+        });
+        return actionID;
+      };
+
+      // complete an executed trade offer
+      const completeTrade = (trade: Trade) => {
+        const api = apis.get(selectedAddress);
+        if (!api) return console.error(`API not established for ${selectedAddress}`);
+
+        const actionID = uuid() as EntityID;
+        actions.add({
+          action: 'Complete Order',
+          params: [trade.id],
+          description: `Completing Order`,
+          execute: async () => {
+            return api.account.trade.complete(trade.id);
           },
         });
         return actionID;
@@ -190,20 +213,37 @@ export function registerTradingModal() {
 
       return (
         <ModalWrapper id='trading' header={<ModalHeader title='Trade' />} canExit noPadding>
+          <Overlay fullHeight fullWidth passthrough>
+            <Confirmation
+              title={confirmData.title}
+              subTitle={confirmData.subTitle}
+              controls={{ isOpen: isConfirming, close: () => setIsConfirming(false) }}
+              onConfirm={confirmData.onConfirm}
+            >
+              {confirmData.content}
+            </Confirmation>
+          </Overlay>
           <Tabs tab={tab} setTab={setTab} />
           <Content>
             <Orderbook
+              actions={{ cancelTrade, executeTrade }}
+              controls={{ tab, setConfirmData, isConfirming, setIsConfirming }}
+              data={{ account, items, trades }}
               isVisible={tab === `Orderbook`}
-              actions={{ executeTrade }}
-              controls={{ tab }}
-              data={{ accountEntity, items, trades }}
+              utils={utils}
             />
             <Management
-              isVisible={tab === `Management`}
-              actions={{ cancelTrade, createTrade }}
-              data={{ currencies, inventories, items, musuBalance, trades: myTrades }}
+              actions={{ cancelTrade, completeTrade, createTrade, executeTrade }}
+              controls={{ tab, setConfirmData, isConfirming, setIsConfirming }}
+              data={{
+                account,
+                currencies,
+                items,
+                trades: myTrades,
+              }}
               types={types}
               utils={utils}
+              isVisible={tab === `Management`}
             />
           </Content>
         </ModalWrapper>
@@ -213,9 +253,10 @@ export function registerTradingModal() {
 }
 
 const Content = styled.div`
-  height: 100%;
+  position: relative;
   gap: 0.6vw;
 
+  flex-grow: 1;
   display: flex;
   flex-flow: column nowrap;
   justify-content: flex-start;

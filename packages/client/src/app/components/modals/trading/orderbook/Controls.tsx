@@ -1,6 +1,7 @@
 import { Dispatch } from 'react';
 import styled from 'styled-components';
 
+import { Trade, TradeType } from 'app/cache/trade';
 import {
   IconButton,
   IconListButton,
@@ -8,15 +9,14 @@ import {
   Text,
   TextTooltip,
 } from 'app/components/library';
-import { KamiIcon } from 'assets/images/icons/menu';
+import { MenuIcons } from 'assets/images/icons/menu';
+import { MUSU_INDEX } from 'constants/items';
 import { Item, NullItem } from 'network/shapes';
-import { Trade } from 'network/shapes/Trade';
-import { OrderType } from '../types';
 
 interface Props {
   controls: {
-    typeFilter: OrderType;
-    setTypeFilter: Dispatch<OrderType>;
+    typeFilter: TradeType;
+    setTypeFilter: Dispatch<TradeType>;
     sort: string;
     setSort: Dispatch<string>;
     ascending: boolean;
@@ -28,10 +28,13 @@ interface Props {
     items: Item[];
     trades: Trade[];
   };
+  utils: {
+    getItemByIndex: (index: number) => Item;
+  };
 }
 
 export const Controls = (props: Props) => {
-  const { controls, data } = props;
+  const { controls, data, utils } = props;
   const {
     typeFilter,
     setTypeFilter,
@@ -43,6 +46,10 @@ export const Controls = (props: Props) => {
     setItemFilter,
   } = controls;
   const { items } = data;
+  const { getItemByIndex } = utils;
+
+  /////////////////
+  // INTERPRETATION
 
   const getItemOptions = (): IconListButtonOption[] => {
     // if buying, show all tradable items
@@ -61,29 +68,36 @@ export const Controls = (props: Props) => {
     return itemOptions;
   };
 
+  const getSortIcon = (sort: string) => {
+    if (sort === 'Price') return getItemByIndex(MUSU_INDEX).image;
+    return MenuIcons.operator;
+  };
+
+  /////////////////
+  // INTERACTION
+
+  const toggleTypeFilter = () => {
+    if (typeFilter === 'Buy') setTypeFilter('Sell');
+    if (typeFilter === 'Sell') setTypeFilter('Barter');
+    if (typeFilter === 'Barter') setTypeFilter('Buy');
+  };
+
   return (
     <Container>
-      <Title>Search</Title>
+      <Title>Search Offers</Title>
       <Body>
         <Row>
           <Text size={1.2}>Type:</Text>
-          <IconListButton
-            img={KamiIcon}
-            text={typeFilter}
-            options={[
-              { text: 'Buy', onClick: () => setTypeFilter('Buy') },
-              { text: 'Sell', onClick: () => setTypeFilter('Sell') },
-            ]}
-          />
+          <IconButton text={`< ${typeFilter} >`} onClick={toggleTypeFilter} />
         </Row>
         <Row>
           <Text size={1.2}>Sort:</Text>
           <IconListButton
-            img={KamiIcon}
+            img={getSortIcon(sort)}
             text={sort}
             options={[
-              { text: 'Price', onClick: () => setSort('Price') },
-              { text: 'Owner', onClick: () => setSort('Owner') },
+              { text: 'Price', image: getSortIcon('Price'), onClick: () => setSort('Price') },
+              { text: 'Owner', image: getSortIcon('Owner'), onClick: () => setSort('Owner') },
             ]}
           />
           <TextTooltip text={[ascending ? 'sorting by ascending' : 'sorting by descending']}>

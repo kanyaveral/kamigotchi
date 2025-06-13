@@ -1,5 +1,5 @@
 import { EntityID, EntityIndex } from '@mud-classic/recs';
-import { useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { getInventoryBalance } from 'app/cache/inventory';
@@ -9,16 +9,19 @@ import {
   IconListButton,
   IconListButtonOption,
   Overlay,
+  Pairing,
   Text,
   TextTooltip,
 } from 'app/components/library';
 import { useVisibility } from 'app/stores';
-import { STONE_INDEX } from 'constants/items';
-import { Inventory } from 'network/shapes';
+import { MUSU_INDEX, STONE_INDEX } from 'constants/items';
+import { Account, Inventory } from 'network/shapes';
 import { Item, NullItem } from 'network/shapes/Item';
 import { ActionComponent } from 'network/systems';
 import { waitForActionCompletion } from 'network/utils';
+import { playClick } from 'utils/sounds';
 import { abbreviateString } from 'utils/strings';
+import { ConfirmationData } from '../Confirmation';
 import { CreateMode } from '../types';
 
 interface Props {
@@ -30,11 +33,15 @@ interface Props {
       sellAmt: number
     ) => EntityID | void;
   };
+  controls: {
+    isConfirming: boolean;
+    setIsConfirming: Dispatch<boolean>;
+    setConfirmData: Dispatch<ConfirmationData>;
+  };
   data: {
+    account: Account;
     currencies: Item[];
-    inventories: Inventory[];
     items: Item[];
-    musuBalance: number;
   };
   types: {
     ActionComp: ActionComponent;
@@ -45,9 +52,11 @@ interface Props {
 }
 
 export const Create = (props: Props) => {
-  const { actions, data, types, utils } = props;
+  const { actions, controls, data, types, utils } = props;
   const { createTrade } = actions;
-  const { musuBalance, currencies, items, inventories } = data;
+  const { isConfirming, setIsConfirming } = controls;
+  const { setConfirmData } = controls;
+  const { account, currencies, items } = data;
   const { ActionComp } = types;
   const { entityToIndex } = utils;
   const { modals } = useVisibility();
@@ -73,7 +82,8 @@ export const Create = (props: Props) => {
       setItem(stone ?? NullItem);
       setItemAmt(1);
     } else if (mode === CreateMode.SELL) {
-      setItem(inventories[0].item ?? NullItem);
+      if (!account.inventories) return;
+      setItem(account.inventories[0].item ?? NullItem);
       setItemAmt(1);
     }
 
@@ -86,9 +96,11 @@ export const Create = (props: Props) => {
   // adjust and clean the currency amount in the trade offer in respoonse to a form change
   // TODO: update this to support other currencies
   const handleCurrencyAmtChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const min = 1;
+    const min = 0;
     let max = Infinity;
-    if (mode === CreateMode.BUY) max = musuBalance;
+    if (mode === CreateMode.BUY) {
+      max = getInventoryBalance(account.inventories ?? [], MUSU_INDEX);
+    }
 
     const quantityStr = event.target.value.replaceAll('[^\\d.]', '');
     const rawQuantity = parseInt(quantityStr.replaceAll(',', '') || '0');
@@ -98,9 +110,11 @@ export const Create = (props: Props) => {
 
   // adjust and clean the item amount in the trade offer in respoonse to a form change
   const handleItemAmtChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const min = 1;
+    const min = 0;
     let max = Infinity;
-    if (mode === CreateMode.SELL) max = getInventoryBalance(inventories, item.index);
+    if (mode === CreateMode.SELL) {
+      max = getInventoryBalance(account.inventories ?? [], item.index);
+    }
 
     const quantityStr = event.target.value.replaceAll('[^\\d.]', '');
     const rawQuantity = parseInt(quantityStr.replaceAll(',', '') || '0');
@@ -123,6 +137,18 @@ export const Create = (props: Props) => {
     } catch (e) {
       console.log('handleTrade() failed', e);
     }
+  };
+
+  // handle prompting for confirmation with trade creation
+  const handleCreatePrompt = () => {
+    const confirmAction = () => handleTrade(item, itemAmt, currency, currencyAmt);
+    setConfirmData({
+      title: 'Confirm Creation',
+      content: getConfirmContent(),
+      onConfirm: confirmAction,
+    });
+    setIsConfirming(true); // TODO: this is a hack to get the confirmation to show
+    playClick();
   };
 
   /////////////////
@@ -157,7 +183,8 @@ export const Create = (props: Props) => {
     }
 
     // if selling, show only tradable items in inventory
-    return inventories.map((inv: Inventory) => {
+    if (!account.inventories) return [];
+    return account.inventories?.map((inv: Inventory) => {
       return {
         text: inv.item.name,
         image: inv.item.image,
@@ -171,6 +198,65 @@ export const Create = (props: Props) => {
 
   /////////////////
   // DISPLAY
+
+  // create the trade confirmation window content
+  // TODO: adjust Buy amounts for tax and display breakdown in tooltip
+  const getConfirmContent = () => {
+    const buyItem = mode === CreateMode.BUY ? item : currency;
+    const buyAmt = mode === CreateMode.BUY ? itemAmt : currencyAmt;
+    const sellItem = mode === CreateMode.BUY ? currency : item;
+    const sellAmt = mode === CreateMode.BUY ? currencyAmt : itemAmt;
+    const tradeConfig = account.config?.trade;
+    const tradeFee = tradeConfig?.fee ?? 0;
+
+    let tax = 0;
+    let taxTooltip: string[] = [];
+    const taxConfig = account.config?.trade.tax;
+    if (taxConfig && mode === CreateMode.SELL) {
+      tax = Math.floor(buyAmt * taxConfig.value);
+      const taxPercent = Math.floor(taxConfig.value * 100).toFixed(2);
+      taxTooltip = [`${buyAmt.toLocaleString()} MUSU`, `less ${taxPercent}% tax (${tax} MUSU)`];
+    }
+
+    return (
+      <Paragraph>
+        <Row>
+          <Text size={1.2}>{'('}</Text>
+          <Pairing
+            text={sellAmt.toLocaleString()}
+            icon={sellItem.image}
+            tooltip={[`${sellAmt.toLocaleString()} ${sellItem.name}`]}
+          />
+          <Text size={1.2}>{`) will be transferred to the Trade.`}</Text>
+        </Row>
+        <Row>
+          <Text size={1.2}>{'You will receive ('}</Text>
+          <Pairing
+            text={(buyAmt - tax).toLocaleString()}
+            icon={buyItem.image}
+            tooltip={taxTooltip}
+          />
+          <Text size={1.2}>{`) upon Completion.`}</Text>
+        </Row>
+        <Row>
+          <Text size={0.9}>{`Listing Fee: (`}</Text>
+          <Pairing
+            text={tradeFee.toLocaleString()}
+            icon={currency.image}
+            scale={0.9}
+            tooltip={[
+              `Non-refundable (trade responsibly)`,
+              `Deducted from your inventory upon creation.`,
+            ]}
+          />
+          <Text size={0.9}>{`)`}</Text>
+        </Row>
+      </Paragraph>
+    );
+  };
+
+  /////////////////
+  // RENDER
 
   return (
     <Container>
@@ -218,10 +304,14 @@ export const Create = (props: Props) => {
       <Overlay bottom={0.75} right={0.75}>
         <IconButton
           text='Create'
-          onClick={() => {
-            handleTrade(item, itemAmt, currency, currencyAmt);
-          }}
-          disabled={item.index === 0 || itemAmt === 0 || currency.index === 0 || currencyAmt === 0}
+          onClick={handleCreatePrompt}
+          disabled={
+            isConfirming ||
+            item.index === 0 ||
+            itemAmt === 0 ||
+            currency.index === 0 ||
+            currencyAmt === 0
+          }
         />
       </Overlay>
     </Container>
@@ -272,6 +362,16 @@ const Row = styled.div`
   align-items: center;
   justify-content: center;
   gap: 0.6vw;
+`;
+
+const Paragraph = styled.div`
+  color: #333;
+  flex-grow: 1;
+  padding: 1.8vw;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-evenly;
+  align-items: center;
 `;
 
 const Quantity = styled.input<{ width?: number }>`

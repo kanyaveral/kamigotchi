@@ -4,16 +4,20 @@ import { Components } from 'network/components';
 import { Account, getAccountByID } from '../Account';
 import { getItemByIndex, Item } from '../Item';
 import { getEntityByHash } from '../utils';
-import { getOwnsTradeID, getTargetID } from '../utils/component';
+import { getEntityType, getOwnsTradeID, getState, getTargetID } from '../utils/component';
 
 export interface Trade {
   id: EntityID;
   entity: EntityIndex;
-  buyOrder?: TradeOrder; // from the perspective of the maker
-  sellOrder?: TradeOrder; // from the perspective of the maker
+  ObjectType: string;
+  state: TradeState;
   maker?: Account; // trade creator
   taker?: Account; // optional (only if designated taker defined)
+  buyOrder?: TradeOrder; // from the perspective of the maker
+  sellOrder?: TradeOrder; // from the perspective of the maker
 }
+
+export type TradeState = 'PENDING' | 'EXECUTED';
 
 export interface TradeOrder {
   items: Item[];
@@ -26,58 +30,55 @@ interface Options {
   taker: boolean;
 }
 
+// get a Trade Object
 export const getTrade = (
   world: World,
-  components: Components,
+  comps: Components,
   entity: EntityIndex,
   options?: Options
 ): Trade => {
   const id = world.entities[entity];
-  const trade: Trade = { id, entity };
+  const trade: Trade = {
+    id,
+    entity,
+    ObjectType: getEntityType(comps, entity),
+    state: getState(comps, entity) as TradeState,
+  };
 
   if (options?.maker) {
-    const makerID = getOwnsTradeID(components, entity);
-    trade.maker = getAccountByID(world, components, makerID);
+    const makerID = getOwnsTradeID(comps, entity);
+    trade.maker = getAccountByID(world, comps, makerID);
   }
   if (options?.taker) {
-    const takerID = getTargetID(components, entity);
-    trade.taker = getAccountByID(world, components, takerID);
+    const takerID = getTargetID(comps, entity);
+    trade.taker = getAccountByID(world, comps, takerID);
   }
-  if (options?.buyOrder) trade.buyOrder = getBuyOrder(world, components, id);
-  if (options?.sellOrder) trade.sellOrder = getSellOrder(world, components, id);
+  if (options?.buyOrder) trade.buyOrder = getBuyOrder(world, comps, id);
+  if (options?.sellOrder) trade.sellOrder = getSellOrder(world, comps, id);
 
   return trade;
 };
 
-export const getBuyOrder = (
-  world: World,
-  components: Components,
-  tradeID: EntityID
-): TradeOrder => {
-  return getOrder(world, components, getBuyAnchor(world, tradeID));
+// get a Buy Order Object, identified through the Trade ID
+export const getBuyOrder = (world: World, comps: Components, tradeID: EntityID): TradeOrder => {
+  return getOrder(world, comps, getBuyAnchor(world, tradeID));
 };
 
-export const getSellOrder = (
-  world: World,
-  components: Components,
-  tradeID: EntityID
-): TradeOrder => {
-  return getOrder(world, components, getSellAnchor(world, tradeID));
+// get a Sell Order Object, identified through the Trade ID
+export const getSellOrder = (world: World, comps: Components, tradeID: EntityID): TradeOrder => {
+  return getOrder(world, comps, getSellAnchor(world, tradeID));
 };
 
-const getOrder = (
-  world: World,
-  components: Components,
-  entity: EntityIndex | undefined
-): TradeOrder => {
+// get an Order Object
+const getOrder = (world: World, comps: Components, entity: EntityIndex | undefined): TradeOrder => {
   if (!entity) return { items: [], amounts: [] };
 
-  const { Keys, Values } = components;
+  const { Keys, Values } = comps;
   const keys = getComponentValue(Keys, entity)?.value as number[];
   const values = getComponentValue(Values, entity)?.value as number[];
 
   return {
-    items: keys.map((key) => getItemByIndex(world, components, key)),
+    items: keys.map((key) => getItemByIndex(world, comps, key)),
     amounts: values,
   };
 };

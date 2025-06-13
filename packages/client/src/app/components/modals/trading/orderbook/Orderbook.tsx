@@ -1,40 +1,46 @@
-import { EntityIndex } from '@mud-classic/recs';
-import { useState } from 'react';
+import { Dispatch, useState } from 'react';
 import styled from 'styled-components';
 
-import { Item, NullItem } from 'network/shapes';
-import { Trade } from 'network/shapes/Trade/types';
-import { OrderType } from '../types';
+import { Trade, TradeType } from 'app/cache/trade';
+import { Account, Item, NullItem } from 'network/shapes';
+import { ConfirmationData } from '../Confirmation';
+import { TabType } from '../types';
 import { Controls } from './Controls';
-import { Offers } from './Offers';
+import { Offers } from './offers/Offers';
 
 interface Props {
   actions: {
+    cancelTrade: (trade: Trade) => void;
     executeTrade: (trade: Trade) => void;
   };
   controls: {
-    tab: string;
+    tab: TabType;
+    isConfirming: boolean;
+    setIsConfirming: Dispatch<boolean>;
+    setConfirmData: Dispatch<ConfirmationData>;
   };
   data: {
-    accountEntity: EntityIndex;
+    account: Account;
     items: Item[];
     trades: Trade[];
+  };
+  utils: {
+    getItemByIndex: (index: number) => Item;
   };
   isVisible: boolean;
 }
 
 export const Orderbook = (props: Props) => {
-  const { actions, controls, data } = props;
-  const { executeTrade } = actions;
+  const { actions, controls, data, utils, isVisible } = props;
   const { tab } = controls;
 
   const [sort, setSort] = useState<string>('Price'); // Price, Owner
   const [ascending, setAscending] = useState<boolean>(true);
   const [itemFilter, setItemFilter] = useState<Item>(NullItem); // item index
-  const [typeFilter, setTypeFilter] = useState<OrderType>('Buy');
+  const [typeFilter, setTypeFilter] = useState<TradeType>('Buy');
 
   return (
-    <Container isVisible={tab === `Orderbook`}>
+    <Container isVisible={isVisible}>
       <Controls
         controls={{
           typeFilter,
@@ -47,11 +53,13 @@ export const Orderbook = (props: Props) => {
           setItemFilter,
         }}
         data={data}
+        utils={utils}
       />
       <Offers
-        actions={{ executeTrade }}
-        controls={{ typeFilter, sort, ascending, itemFilter }}
+        actions={actions}
+        controls={{ ...controls, typeFilter, sort, ascending, itemFilter }}
         data={data}
+        utils={utils}
       />
     </Container>
   );
@@ -62,4 +70,6 @@ const Container = styled.div<{ isVisible: boolean }>`
 
   display: ${({ isVisible }) => (isVisible ? 'flex' : 'none')};
   flex-flow: row nowrap;
+
+  user-select: none;
 `;
