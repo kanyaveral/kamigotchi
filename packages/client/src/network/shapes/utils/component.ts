@@ -280,10 +280,21 @@ export const getSourceID = (components: Components, entity: EntityIndex): Entity
   return formatEntityID(result ?? '');
 };
 
-export const getTargetID = (components: Components, entity: EntityIndex): EntityID => {
+export const getTargetID = (
+  components: Components,
+  entity: EntityIndex,
+  debug = true
+): EntityID => {
   const { TargetID } = components;
   const result = getComponentValue(TargetID, entity)?.value;
-  if (result === undefined) console.warn('getTargetID(): undefined for entity', entity);
+  if (debug && result === undefined) console.warn('getTargetID(): undefined for entity', entity);
+  return formatEntityID(result ?? '');
+};
+
+export const getOwnsTradeID = (components: Components, entity: EntityIndex): EntityID => {
+  const { OwnsTradeID } = components;
+  const result = getComponentValue(OwnsTradeID, entity)?.value;
+  if (result === undefined) console.warn('getOwnsTradeID(): undefined for entity', entity);
   return formatEntityID(result ?? '');
 };
 

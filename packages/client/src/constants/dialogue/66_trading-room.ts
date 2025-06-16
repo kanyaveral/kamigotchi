@@ -1,8 +1,12 @@
 import { DialogueNode } from '.';
 
-const tradingRoom: DialogueNode = {
+const tradingPanel: DialogueNode = {
   index: 661,
-  text: [`This machine is still not online. Perhaps it'll be active soon?`],
+  text: [`The screen is now dancing with life. \nThe marketplace is open.`],
+  action: {
+    type: 'trading',
+    label: 'Trade',
+  },
 };
 
-export default [tradingRoom];
+export default [tradingPanel];

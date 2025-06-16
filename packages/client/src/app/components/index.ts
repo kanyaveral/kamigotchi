@@ -20,13 +20,13 @@ import { registerEMABoardModal } from './modals/naming';
 import { registerNodeModal } from './modals/node';
 import { registerPartyModal } from './modals/party';
 import { registerPresaleModal } from './modals/presale';
-import { registerQuestsModal } from './modals/quests';
 import { registerRevealModal } from './modals/reveal/Reveal';
 import { registerSettingsModal } from './modals/settings';
 import { registerTradingModal } from './modals/trading';
 // unused
 import { registerFundOperatorModal } from './modals/FundOperator';
 
+import { registerQuestsModal } from './modals/quests';
 import {
   registerAccountRegistrar,
   registerGasHarasser,

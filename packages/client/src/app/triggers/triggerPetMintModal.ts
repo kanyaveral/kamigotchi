@@ -16,7 +16,6 @@ export const triggerPetMintModal = () => {
         kami: false,
         emaBoard: false,
         map: false,
-        nameKami: false,
         node: false,
       },
     });

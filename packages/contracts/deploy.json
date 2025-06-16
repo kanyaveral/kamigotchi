@@ -676,11 +676,26 @@
         "IDOwnsTrade",
         "IndexItem",
         "Keys",
+        "State",
         "TimeLast",
         "Value",
         "Values"
-      ],
-      "skipEnv": ["production"]
+      ]
+    },
+    {
+      "name": "TradeCompleteSystem",
+      "writeAccess": [
+        "EntityType",
+        "IdTarget",
+        "IDOwnsInventory",
+        "IDOwnsTrade",
+        "IndexItem",
+        "Keys",
+        "State",
+        "TimeLast",
+        "Value",
+        "Values"
+      ]
     },
     {
       "name": "TradeCreateSystem",
@@ -691,11 +706,11 @@
         "IDOwnsTrade",
         "IndexItem",
         "Keys",
+        "State",
         "TimeLast",
         "Value",
         "Values"
-      ],
-      "skipEnv": ["production"]
+      ]
     },
     {
       "name": "TradeExecuteSystem",
@@ -706,26 +721,11 @@
         "IDOwnsTrade",
         "IndexItem",
         "Keys",
+        "State",
         "TimeLast",
         "Value",
         "Values"
-      ],
-      "skipEnv": ["production"]
-    },
-    {
-      "name": "TradeModifySystem",
-      "writeAccess": [
-        "EntityType",
-        "IdTarget",
-        "IDOwnsInventory",
-        "IDOwnsTrade",
-        "IndexItem",
-        "Keys",
-        "TimeLast",
-        "Value",
-        "Values"
-      ],
-      "skipEnv": ["production"]
+      ]
     },
     {
       "name": "_721BatchMinterSystem",

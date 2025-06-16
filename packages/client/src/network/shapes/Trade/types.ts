@@ -4,82 +4,81 @@ import { Components } from 'network/components';
 import { Account, getAccountByID } from '../Account';
 import { getItemByIndex, Item } from '../Item';
 import { getEntityByHash } from '../utils';
+import { getEntityType, getOwnsTradeID, getState, getTargetID } from '../utils/component';
 
 export interface Trade {
   id: EntityID;
   entity: EntityIndex;
-  buyOrder?: TradeOrder;
-  sellOrder?: TradeOrder;
-  seller?: Account; // account
-  buyer?: Account; // account, optional (only if specific buyer)
+  ObjectType: string;
+  state: TradeState;
+  maker?: Account; // trade creator
+  taker?: Account; // optional (only if designated taker defined)
+  buyOrder?: TradeOrder; // from the perspective of the maker
+  sellOrder?: TradeOrder; // from the perspective of the maker
 }
+
+export type TradeState = 'PENDING' | 'EXECUTED';
 
 export interface TradeOrder {
   items: Item[];
   amounts: number[];
 }
 interface Options {
-  buyOrder: boolean;
+  buyOrder: boolean; // from the perspective of the maker
   sellOrder: boolean;
-  seller: boolean;
-  buyer: boolean;
+  maker: boolean;
+  taker: boolean;
 }
 
+// get a Trade Object
 export const getTrade = (
   world: World,
-  components: Components,
+  comps: Components,
   entity: EntityIndex,
   options?: Options
 ): Trade => {
-  const { OwnsTradeID, TargetID } = components;
-
   const id = world.entities[entity];
-  const sellerID = options?.seller
-    ? ((getComponentValue(OwnsTradeID, entity)?.value || '') as EntityID)
-    : undefined;
-  const buyerID = options?.buyer
-    ? (getComponentValue(TargetID, entity)?.value as EntityID)
-    : undefined;
-
-  return {
+  const trade: Trade = {
     id,
     entity,
-    buyOrder: options?.buyOrder ? getBuyOrder(world, components, id) : undefined,
-    sellOrder: options?.sellOrder ? getSellOrder(world, components, id) : undefined,
-    seller: options?.seller && sellerID ? getAccountByID(world, components, sellerID) : undefined,
-    buyer: options?.buyer && buyerID ? getAccountByID(world, components, buyerID) : undefined,
+    ObjectType: getEntityType(comps, entity),
+    state: getState(comps, entity) as TradeState,
   };
+
+  if (options?.maker) {
+    const makerID = getOwnsTradeID(comps, entity);
+    trade.maker = getAccountByID(world, comps, makerID);
+  }
+  if (options?.taker) {
+    const takerID = getTargetID(comps, entity);
+    trade.taker = getAccountByID(world, comps, takerID);
+  }
+  if (options?.buyOrder) trade.buyOrder = getBuyOrder(world, comps, id);
+  if (options?.sellOrder) trade.sellOrder = getSellOrder(world, comps, id);
+
+  return trade;
 };
 
-export const getBuyOrder = (
-  world: World,
-  components: Components,
-  tradeID: EntityID
-): TradeOrder => {
-  return getOrder(world, components, getBuyAnchor(world, tradeID));
+// get a Buy Order Object, identified through the Trade ID
+export const getBuyOrder = (world: World, comps: Components, tradeID: EntityID): TradeOrder => {
+  return getOrder(world, comps, getBuyAnchor(world, tradeID));
 };
 
-export const getSellOrder = (
-  world: World,
-  components: Components,
-  tradeID: EntityID
-): TradeOrder => {
-  return getOrder(world, components, getSellAnchor(world, tradeID));
+// get a Sell Order Object, identified through the Trade ID
+export const getSellOrder = (world: World, comps: Components, tradeID: EntityID): TradeOrder => {
+  return getOrder(world, comps, getSellAnchor(world, tradeID));
 };
 
-const getOrder = (
-  world: World,
-  components: Components,
-  entity: EntityIndex | undefined
-): TradeOrder => {
+// get an Order Object
+const getOrder = (world: World, comps: Components, entity: EntityIndex | undefined): TradeOrder => {
   if (!entity) return { items: [], amounts: [] };
 
-  const { Keys, Values } = components;
+  const { Keys, Values } = comps;
   const keys = getComponentValue(Keys, entity)?.value as number[];
   const values = getComponentValue(Values, entity)?.value as number[];
 
   return {
-    items: keys.map((key) => getItemByIndex(world, components, key)),
+    items: keys.map((key) => getItemByIndex(world, comps, key)),
     amounts: values,
   };
 };
