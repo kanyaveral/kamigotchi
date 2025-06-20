@@ -2,14 +2,19 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { playClick } from 'utils/sounds';
+import { Tooltip } from '../poppers';
 import { Popover } from '../poppers/Popover';
 import { IconButton } from './IconButton';
+import { VerticalToggle } from './VerticalToggle';
 
 interface Props {
-  onClick: (selected: any[]) => void;
-  img: string;
-  options: Option[];
-  disabled?: boolean;
+  onClick: ((selected: any[]) => void)[];
+  button: {
+    images: string[];
+    tooltips?: string[];
+  };
+  options: Option[][];
+  disabled?: boolean[];
   balance?: number;
   radius?: number;
   limit?: number;
@@ -22,22 +27,32 @@ interface Option {
   disabled?: boolean;
 }
 
-export function DropDownToggle(props: Props) {
-  const { options, img, onClick, limit } = props;
+export function DropdownToggle(props: Props) {
+  const { options, button, onClick, limit } = props;
+  const { images, tooltips } = button;
   const { balance, disabled, radius } = props;
   const [checked, setChecked] = useState<boolean[]>([]);
+  const [modeSelected, setModeSelected] = useState<number>(0);
   const [forceClose, setForceClose] = useState(false);
+
+  // to avoid overcomplicating the code we should pass disabled,onClick,img and options as arrays
+  const currentMode = options.length === 1 ? 0 : modeSelected;
+  const modeOptions = options[currentMode] ?? [];
+  const modeDisabled = disabled?.[currentMode] ?? false;
 
   // necessary to properly create the checked array, this way it waits for the options to be populated
   useEffect(() => {
-    if (checked.length !== options.length) setChecked(Array(options.length).fill(false));
-  }, [options]);
+    if (checked.length !== modeOptions.length) setChecked(Array(modeOptions.length).fill(false));
+  }, [modeOptions]);
+
+  useEffect(() => {
+    setChecked([]);
+  }, [currentMode]);
 
   // force close the popover if there are no options left and the checklist is in the process of being emptied
   useEffect(() => {
-    if (options.length === 0) setForceClose(true);
-    else setForceClose(false);
-  }, [options]);
+    setForceClose(modeOptions.length === 0);
+  }, [modeOptions]);
 
   const toggleOption = (e: React.MouseEvent, index: number) => {
     e.stopPropagation(); // prevent popover from closing
@@ -54,7 +69,7 @@ export function DropDownToggle(props: Props) {
     // currently selected
     const selected = checked.filter(Boolean).length;
     // limit
-    const selectLimit = Math.min(limit ?? options.length, options.length);
+    const selectLimit = Math.min(limit ?? modeOptions.length, modeOptions.length);
     // check if all are selected
     const allSelected = selected >= selectLimit;
     // If all selected deselect all, else select up to the limit
@@ -62,10 +77,10 @@ export function DropDownToggle(props: Props) {
   };
 
   const handleTriggerClick = () => {
-    const selected = options.filter((_, index) => checked[index]);
+    const selected = modeOptions.filter((_, index) => checked[index]);
     const selectedObjects = selected.map((option) => option.object);
     playClick();
-    onClick(selectedObjects);
+    onClick[currentMode]?.(selectedObjects);
   };
 
   const MenuCheckListOption = (
@@ -77,7 +92,7 @@ export function DropDownToggle(props: Props) {
     const imageSrc = img ?? object?.image;
     const selected = checked.filter(Boolean).length;
 
-    const maxSelectable = Math.min(limit ?? options.length, options.length);
+    const maxSelectable = Math.min(limit ?? modeOptions.length, modeOptions.length);
     const allSelected = selected >= maxSelectable;
     const isChecked = isSelectAll ? allSelected : !!checked[i!];
 
@@ -86,7 +101,7 @@ export function DropDownToggle(props: Props) {
         key={isSelectAll ? 'SelectAll' : `toggle-${i}`}
         onClick={onClick}
         isSelectAll={isSelectAll}
-        disabled={disabled}
+        disabled={modeDisabled}
       >
         <Row>
           <input type='checkbox' checked={isChecked} readOnly />
@@ -105,37 +120,42 @@ export function DropDownToggle(props: Props) {
       <Popover
         content={[
           MenuCheckListOption({ text: 'Select All' }, null, (e) => toggleAll(e), true),
-          ...options.map((option, i) =>
+          ...modeOptions.map((option, i) =>
             MenuCheckListOption(option, i, (e) => toggleOption(e, i), false)
           ),
         ]}
-        disabled={disabled}
+        disabled={modeDisabled}
         forceClose={forceClose}
       >
         <IconButton
           text={`${checked.filter(Boolean).length} Selected`}
           width={10}
           onClick={() => {}}
-          disabled={disabled}
+          disabled={modeDisabled}
           balance={balance}
           corner={!balance}
           flatten={'right'}
           radius={radius ?? 0.45}
         />
       </Popover>
-      <IconButton
-        img={img}
-        disabled={disabled || !checked.includes(true)}
-        onClick={handleTriggerClick}
-        flatten={'left'}
-        radius={radius ?? 0.45}
-      />
+      {options.length > 1 && <VerticalToggle setModeSelected={setModeSelected} />}
+      <Tooltip content={tooltips?.[currentMode]} isDisabled={!tooltips?.[currentMode]}>
+        <IconButton
+          img={images[currentMode]}
+          disabled={modeDisabled || !checked.includes(true)}
+          onClick={handleTriggerClick}
+          flatten={'left'}
+          radius={radius ?? 0.45}
+        />
+      </Tooltip>
     </Container>
   );
 }
 
 const Container = styled.div`
   display: flex;
+  width: 14vw;
+  height: 2.5vw;
 `;
 
 const MenuOption = styled.div<{
