@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 
 import { Account, getAccount, getAccountKamis, getAllAccounts } from 'app/cache/account';
+import { getFriends } from 'app/cache/account/getters';
 import { Kami } from 'app/cache/kami';
 import { ModalHeader, ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
@@ -14,8 +15,8 @@ import { BaseAccount, NullAccount, queryAccountByIndex } from 'network/shapes/Ac
 import { Friendship } from 'network/shapes/Friendship';
 import { getTotalScoreByFilter, getVIPEpoch } from 'network/shapes/Score';
 import { waitForActionCompletion } from 'network/utils';
-import { Bio } from './bio/Bio';
 import { Bottom } from './bottom/Bottom';
+import { Header } from './header/Header';
 import { Tabs } from './tabs/Tabs';
 
 export function registerAccountModal() {
@@ -37,6 +38,7 @@ export function registerAccountModal() {
         friends: 5,
         pfp: 5,
         stats: 5,
+        bio: 5,
       };
 
       const vipEpoch = getVIPEpoch(world, components);
@@ -58,6 +60,7 @@ export function registerAccountModal() {
                 getAccount(world, components, entity, accountOptions),
               getAccountKamis: (accEntity: EntityIndex) =>
                 getAccountKamis(world, components, accEntity),
+              getFriends: (accEntity: EntityIndex) => getFriends(world, components, accEntity),
             },
           };
         })
@@ -182,6 +185,17 @@ export function registerAccountModal() {
           console.log('Bio.tsx: handlePfpChange()  failed', e);
         }
       };
+
+      const setBio = async (bio: string) => {
+        actions.add({
+          action: 'AccountSetBio',
+          params: [bio],
+          description: `Setting account bio`,
+          execute: async () => {
+            return api.player.account.set.bio(bio);
+          },
+        });
+      };
       /////////////////
       // RENDERING
 
@@ -195,11 +209,11 @@ export function registerAccountModal() {
           canExit
           truncate
         >
-          <Bio
-            isLoading={isLoading}
-            handlePfpChange={handlePfpChange}
-            key='bio'
+          <Header
+            key='header'
             account={account} // account selected for viewing
+            actions={{ handlePfpChange, setBio }}
+            isLoading={isLoading}
             isSelf={isSelf}
             utils={utils}
           />
@@ -207,7 +221,7 @@ export function registerAccountModal() {
           <Bottom
             key='bottom'
             actions={{ acceptFren, blockFren, cancelFren, requestFren }}
-            data={{ accounts, account, vip }}
+            data={{ accounts, account, vip, player, isSelf }}
             utils={utils}
             view={{ isSelf, setSubTab, subTab, tab }}
           />
