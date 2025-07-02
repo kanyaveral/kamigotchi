@@ -12,6 +12,7 @@ interface Props {
   text?: string;
   balance?: number;
   disabled?: boolean;
+  width?: number;
   fullWidth?: boolean;
   radius?: number;
   scale?: number;
@@ -35,7 +36,7 @@ interface Search {
 export function IconListButton(props: Props) {
   const { img, options, text, balance } = props;
   const { radius, scale, scaleOrientation, search } = props;
-  const { disabled, fullWidth } = props;
+  const { disabled, width, fullWidth } = props;
 
   const toggleRef = useRef<HTMLButtonElement>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -62,7 +63,7 @@ export function IconListButton(props: Props) {
   const id = open ? 'simple-popover' : undefined;
   const OptionsMap = () => {
     return (
-      <MenuWrapper search={!!props.search}>
+      <MenuWrapper>
         {props.search && (
           <MenuInput
             {...props.search}
@@ -93,6 +94,7 @@ export function IconListButton(props: Props) {
         radius={radius ?? 0.45}
         scale={scale ?? 2.5}
         scaleOrientation={scaleOrientation ?? 'vw'}
+        width={width}
         fullWidth={fullWidth}
         balance={balance}
         corner={!balance}
@@ -129,16 +131,22 @@ const MenuIcon = styled.img`
 `;
 
 const MenuInput = styled.input`
-  height: 2.5vw;
-  width: 100%;
-  box-sizing: border-box;
+  position: sticky;
   border: 0.15vw solid black;
   border-radius: 0.45vw;
+
+  width: 90%;
+  height: 2.5vw;
+  box-sizing: border-box;
+  top: 0.6vw;
+
+  padding: 0vw 0.6vw;
+  margin: 0.6vw;
+  flex-grow: 1;
+
   font-size: 0.75vw;
-  padding: 0vw 0.5vw;
-  margin-bottom: 0.6vw;
 `;
 
-const MenuWrapper = styled.div<{ search?: boolean }>`
-  padding: ${({ search }) => (search ? '1vw' : '0vw')};
+const MenuWrapper = styled.div`
+  position: relative;
 `;
