@@ -17,17 +17,31 @@ contract _RecipeRegistrySystem is System, AuthRoles {
   function create(bytes memory arguments) public onlyAdmin(components) returns (uint256) {
     (
       uint32 index,
+      string memory type_,
       uint32[] memory iIndices,
       uint256[] memory iAmts,
       uint32[] memory oIndices,
       uint256[] memory oAmts,
       uint256 xp,
-      int32 stCost
-    ) = abi.decode(arguments, (uint32, uint32[], uint256[], uint32[], uint256[], uint256, int32));
+      int32 staminaCost
+    ) = abi.decode(
+        arguments,
+        (uint32, string, uint32[], uint256[], uint32[], uint256[], uint256, int32)
+      );
 
-    require(LibRecipe.get(components, index) == 0, "Recipe: index already exists");
+    if (LibRecipe.get(components, index) != 0) revert("Recipe: index already exists");
 
-    uint256 id = LibRecipe.create(components, index, iIndices, iAmts, oIndices, oAmts, xp, stCost);
+    uint256 id = LibRecipe.create(
+      components,
+      index,
+      type_,
+      iIndices,
+      iAmts,
+      oIndices,
+      oAmts,
+      xp,
+      staminaCost
+    );
     return id;
   }
 
@@ -35,8 +49,8 @@ contract _RecipeRegistrySystem is System, AuthRoles {
     uint32 recipeIndex,
     string memory logicType,
     string memory type_,
-    uint32 index, // can be empty
-    uint32 value, // can be empty
+    uint32 index, // optional field
+    uint32 value, // optional field
     string memory condFor
   ) public onlyAdmin(components) returns (uint256) {
     return
@@ -51,7 +65,7 @@ contract _RecipeRegistrySystem is System, AuthRoles {
   function remove(uint32 index) public onlyAdmin(components) {
     uint256 regID = LibRecipe.get(components, index);
     require(regID != 0, "Recipe: does not exist");
-    LibRecipe.remove(components, index, regID);
+    LibRecipe.remove(components, index);
   }
 
   function execute(bytes memory arguments) public onlyAdmin(components) returns (bytes memory) {
