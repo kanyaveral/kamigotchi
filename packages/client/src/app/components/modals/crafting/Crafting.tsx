@@ -12,6 +12,7 @@ import { parseConditionalText, passesConditions } from 'network/shapes/Condition
 import { getItemBalance } from 'network/shapes/Item';
 import { hasIngredients, Ingredient, Recipe } from 'network/shapes/Recipe';
 import { Recipes } from './Recipes/Recipes';
+import { Tabs } from './tabs/Tabs';
 
 export function registerCraftingModal() {
   registerUIComponent(
@@ -59,13 +60,15 @@ export function registerCraftingModal() {
       const { hasIngredients } = utils;
       const [recipes, setRecipes] = useState<Recipe[]>([]);
       const [showAll, setShowAll] = useState<boolean>(true);
+      const [tab, setTab] = useState('consumable'); //  consumable | material | reagent | special
 
       // update the list of recipes depending on the filter
       useEffect(() => {
         const recipes = getAllRecipes(world, components);
-        if (showAll) setRecipes(recipes);
-        else setRecipes(recipes.filter((recipe) => hasIngredients(recipe)));
-      }, [showAll]);
+        const currentTabRecipes = recipes.filter((recipe) => recipe.type === tab.toUpperCase());
+        if (showAll) setRecipes(currentTabRecipes);
+        else setRecipes(currentTabRecipes.filter((recipe) => hasIngredients(recipe)));
+      }, [showAll, tab]);
 
       /////////////////
       // INTERPRETATION
@@ -103,11 +106,12 @@ export function registerCraftingModal() {
           header={<ModalHeader title='Crafting' icon={CraftIcon} />}
           canExit
         >
+          <Tabs tab={tab} setTab={setTab} />
           <ActionButton onClick={() => setShowAll(!showAll)} text='Filter by Available' />
           {recipes.length == 0 ? (
             <EmptyText text={['There are no recipes here.', 'Look somewhere else!']} size={1} />
           ) : (
-            <Recipes data={{ account, recipes }} actions={{ craft }} utils={utils} />
+            <Recipes data={{ account, recipes, tab }} actions={{ craft }} utils={utils} />
           )}
         </ModalWrapper>
       );
