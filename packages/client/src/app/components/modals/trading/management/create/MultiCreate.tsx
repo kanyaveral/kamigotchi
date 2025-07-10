@@ -38,6 +38,12 @@ export const MultiCreate = (props: Props) => {
   const [wantAmt, setWantAmt] = useState<number[]>([]);
   const [have, setHave] = useState<Item[]>([]);
   const [haveAmt, setHaveAmt] = useState<number[]>([]);
+  const [thousandsSeparator, setThousandsSeparator] = useState<string>(',');
+
+  // tests number formatting
+  useEffect(() => {
+    setThousandsSeparator((4.56).toLocaleString().includes(',') ? '.' : ',');
+  }, []);
 
   useEffect(() => {
     if (modals.trading) reset();
@@ -82,7 +88,7 @@ export const MultiCreate = (props: Props) => {
   const updateWantAmt = (index: number, event: ChangeEvent<HTMLInputElement>) => {
     const min = 0;
     const quantityStr = event.target.value.replace(/[^\d.]/g, '');
-    const rawQuantity = parseInt(quantityStr.replaceAll(',', '') || '0');
+    const rawQuantity = parseInt(quantityStr.replaceAll(thousandsSeparator, '') || '0');
     const max = Number.MAX_SAFE_INTEGER;
     const amt = Math.max(min, Math.min(max, rawQuantity));
 
@@ -122,7 +128,7 @@ export const MultiCreate = (props: Props) => {
     const item = have[index];
     const min = 0;
     const quantityStr = event.target.value.replace(/[^\d.]/g, '');
-    const rawQuantity = parseInt(quantityStr.replaceAll(',', '') || '0');
+    const rawQuantity = parseInt(quantityStr.replaceAll(thousandsSeparator, '') || '0');
     const max = getInventoryBalance(inventory, item.index);
     const amt = Math.max(min, Math.min(max, rawQuantity));
 
