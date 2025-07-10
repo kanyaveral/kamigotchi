@@ -10,7 +10,7 @@ import { initItems, initLocalItems } from './items';
 import { initListings } from './listings';
 import { initNpcs } from './npcs';
 import { initQuests } from './quests/quests';
-import { initRecipes } from './recipes';
+import { initRecipes } from './recipes/recipes';
 import { initRelationships } from './relationships';
 import { initNodes, initRooms } from './rooms';
 import { initSkills } from './skills';
@@ -60,7 +60,8 @@ export async function initAll(api: AdminAPI) {
     await initAllLocal(api);
   } else if (process.env.NODE_ENV === 'testing') {
     await initAllTesting(api);
-    await initGachaPool(api, 100);
+    // ignore batchMinter - deployment unreliable. gacha autocreates upon mint
+    // await initGachaPool(api, 100);
   } else if (process.env.NODE_ENV === 'production') {
     await initAllProd(api);
     await initSnapshot(api);
@@ -105,7 +106,7 @@ export { deleteItems, initItems, reviseItems } from './items';
 export { deleteListings, initListings, reviseListings } from './listings';
 export { initNpcs } from './npcs';
 export { deleteQuests, initQuests, reviseQuests } from './quests';
-export { deleteRecipes, initRecipes, reviseRecipes } from './recipes';
+export { deleteRecipes, initRecipes, reviseRecipes } from './recipes/recipes';
 export { deleteRelationships, initRelationships } from './relationships';
 export {
   addNodeScavenges,

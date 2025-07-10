@@ -25,7 +25,7 @@ import { Gaussian } from "utils/Gaussian.sol";
 
 uint256 constant ANIMOSITY_PREC = 6;
 
-struct KillBalance {
+struct KillLog {
   uint256 bounty;
   uint256 salvage;
   uint256 spoils;
@@ -78,7 +78,7 @@ library LibKill {
   /////////////////
   // CALCULATIONS
 
-  // Calculate the base liquidation threshold % for target pet when attacked by source pet.
+  /// @notice Calculate the base liquidation threshold % for target pet when attacked by source pet.
   // H = Φ(ln(v_s / h_t)) * ratio  as proportion of total health (1e6 precision).
   function calcAnimosity(
     IUintComp comps,
@@ -98,7 +98,7 @@ library LibKill {
     return (base * ratio) / precision;
   }
 
-  // Calculate the affinity multiplier for attacks between two kamis.
+  /// @notice Calculate the affinity multiplier for attacks between two kamis.
   function calcEfficacy(
     IUintComp comps,
     uint256 sourceID,
@@ -127,7 +127,7 @@ library LibKill {
     return (efficacy > 0) ? uint(efficacy) : 0;
   }
 
-  // Calculate the liquidation HP threshold for target pet, attacked by the source pet.
+  /// @notice Calculate the liquidation HP threshold for target pet, attacked by the source pet.
   // This is measured as an absolute health value (1e0 precision).
   function calcThreshold(
     IUintComp comps,
@@ -142,9 +142,9 @@ library LibKill {
     uint256 shiftPrec = 10 ** (ANIMOSITY_PREC + config[3] - config[5]);
     int256 shiftAttBonus = LibBonus.getFor(comps, "ATK_THRESHOLD_SHIFT", sourceID);
     int256 shiftDefBonus = LibBonus.getFor(comps, "DEF_THRESHOLD_SHIFT", targetID);
-    int256 shift = (shiftAttBonus + shiftDefBonus) * int(shiftPrec);
+    int256 shift = (shiftAttBonus + shiftDefBonus) * int256(shiftPrec);
 
-    int256 postShiftVal = int(base * ratio) + shift;
+    int256 postShiftVal = int256(base * ratio) + shift;
     if (postShiftVal < 0) return 0;
 
     uint256 totalHealth = LibStat.getTotal(comps, "HEALTH", targetID).toUint256();
@@ -152,7 +152,7 @@ library LibKill {
     return (uint(postShiftVal) * totalHealth) / precision;
   }
 
-  // Calculate the resulting negative karma (HP loss) from two kamis duking it out. Rounds down.
+  /// @notice Calculate the resulting negative karma (HP loss) from two kamis duking it out. Rounds down.
   function calcKarma(
     IUintComp comps,
     uint256 sourceID,
@@ -161,14 +161,32 @@ library LibKill {
     uint32[8] memory config = LibConfig.getArray(comps, "KAMI_LIQ_KARMA");
     int32 v2 = LibStat.getTotal(comps, "VIOLENCE", targetID);
     int32 h1 = LibStat.getTotal(comps, "HARMONY", sourceID);
-    if (v2 - h1 < 0) return 0;
+    int32 nudge = config[0].toInt32(); // assumed 0 precision
+    if (nudge + v2 - h1 < 0) return 0;
 
-    uint256 ratio = uint(config[2]);
-    uint256 precision = 10 ** uint(config[3]);
-    return (uint32(v2 - h1) * ratio) / precision;
+    uint256 boost = uint256(config[6]);
+    uint256 precision = 10 ** uint256(config[7]);
+    return (uint32(nudge + v2 - h1) * boost) / precision;
   }
 
-  // Calculate the amount of MUSU salvaged by a target from a given balance. Round down.
+  /// @notice Calculate the total resulting HP damage from a liquidation
+  function calcRecoil(
+    IUintComp comps,
+    uint256 sourceID,
+    uint256 strain,
+    uint256 karma
+  ) internal view returns (int32) {
+    uint32[8] memory config = LibConfig.getArray(comps, "KAMI_LIQ_RECOIL");
+    int256 boostBonus = LibBonus.getFor(comps, "ATK_RECOIL_BOOST", sourceID);
+    uint256 ratio = config[2];
+    uint256 core = strain * ratio + karma * 10 ** uint256(config[3]); // scale karma (shift) by the precision of the ratio
+    uint256 boost = (config[6].toInt256() + boostBonus).toUint256(); // need to be wary here of negative values
+
+    uint256 precision = 10 ** uint256(config[3] + config[7]);
+    return ((core * boost) / precision).toInt32();
+  }
+
+  /// @notice Calculate the amount of MUSU salvaged by a target from a given balance. Round down.
   // ASSUME: config[3] >= config[1]
   function calcSalvage(
     IUintComp comps,
@@ -180,11 +198,13 @@ library LibKill {
     uint256 power = LibStat.getTotal(comps, "POWER", id).toUint256();
     uint256 powerTuning = (config[0] + power) * 10 ** (config[3] - config[1]); // scale to Ratio precision
     uint256 ratio = config[2] + powerTuning + ratioBonus.toUint256();
+
     uint256 precision = 10 ** uint256(config[3]);
+    if (ratio / precision > 1) return amt;
     return (amt * ratio) / precision;
   }
 
-  // Calculate the reward for liquidating a specified Coin balance. Round down.
+  /// @notice Calculate the reward for liquidating a specified Coin balance. Round down.
   // ASSUME: config[3] >= config[1]
   function calcSpoils(
     IUintComp comps,
@@ -196,6 +216,7 @@ library LibKill {
     uint256 power = LibStat.getTotal(comps, "POWER", id).toUint256();
     uint256 powerTuning = (config[0] + power) * 10 ** (config[3] - config[1]); // scale to Ratio precision
     uint256 ratio = config[2] + powerTuning + ratioBonus.toUint256();
+
     uint256 precision = 10 ** uint256(config[3]);
     if (ratio / precision > 1) return amt;
     return (amt * ratio) / precision;
@@ -211,7 +232,7 @@ library LibKill {
     uint256 killerID,
     uint256 victimID,
     uint256 nodeID,
-    KillBalance memory bals
+    KillLog memory bals
   ) public {
     uint32 nodeIndex = LibNode.getIndex(comps, nodeID);
     _logTotals(comps, accID, nodeIndex);
@@ -224,7 +245,7 @@ library LibKill {
   function _logBounty(
     IWorld world,
     IUintComp comps,
-    KillBalance memory bals
+    KillLog memory bals
   ) internal returns (uint256 id) {
     id = world.getUniqueEntityId();
     uint32[8] memory bounties;
@@ -263,7 +284,7 @@ library LibKill {
     uint256 accID,
     uint256 killerID,
     uint256 victimID,
-    KillBalance memory bals,
+    KillLog memory bals,
     uint32 nodeIndex
   ) internal {
     KillEventData memory eventData;

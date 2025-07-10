@@ -9,6 +9,7 @@ interface Props {
   data: {
     account: Account;
     recipes: Recipe[];
+    tab: string;
   };
   actions: {
     craft: (recipe: Recipe, amount: number) => void;

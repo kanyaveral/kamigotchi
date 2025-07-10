@@ -28,7 +28,13 @@ export function createAdminAPI(compiledCalls: string[]) {
   //  CONFIG
 
   async function setConfig(field: string, value: BigNumberish) {
-    const callData = generateCallData('system.config.registry', [field, value]);
+    const callData = generateCallData(
+      'system.config.registry',
+      [field, value],
+      undefined,
+      undefined,
+      '800000'
+    );
     compiledCalls.push(callData);
   }
 
@@ -128,6 +134,7 @@ export function createAdminAPI(compiledCalls: string[]) {
 
   async function createRecipe(
     index: number,
+    type: string,
     inputs: number[],
     inputAmounts: number[],
     outputs: number[],
@@ -137,9 +144,9 @@ export function createAdminAPI(compiledCalls: string[]) {
   ) {
     const callData = generateCallData(
       'system.recipe.registry',
-      [index, inputs, inputAmounts, outputs, outputAmounts, xp, stamina],
+      [index, type, inputs, inputAmounts, outputs, outputAmounts, xp, stamina],
       'create',
-      ['uint32', 'uint32[]', 'uint256[]', 'uint32[]', 'uint256[]', 'uint256', 'uint256']
+      ['uint32', 'string', 'uint32[]', 'uint256[]', 'uint32[]', 'uint256[]', 'uint256', 'uint256']
     );
     compiledCalls.push(callData);
   }

@@ -1,23 +1,23 @@
 import { EntityID, EntityIndex } from '@mud-classic/recs';
+import { Dispatch } from 'react';
 import styled from 'styled-components';
 
-import { Account } from 'network/shapes';
+import { Account, Inventory } from 'network/shapes';
 import { Item } from 'network/shapes/Item';
 import { Trade } from 'network/shapes/Trade/types';
 import { ActionComponent } from 'network/systems';
-import { Dispatch } from 'react';
 import { ConfirmationData } from '../Confirmation';
 import { TabType } from '../types';
-import { Create } from './Create';
+import { Create } from './create/Create';
 import { Offers } from './offers/Offers';
 
 interface Props {
   actions: {
     createTrade: (
-      buyItem: Item,
-      buyAmt: number,
-      sellItem: Item,
-      sellAmt: number
+      wantItems: Item[],
+      wantAmts: number[],
+      haveItems: Item[],
+      haveAmts: number[]
     ) => EntityID | void;
     executeTrade: (trade: Trade) => void;
     completeTrade: (trade: Trade) => void;
@@ -32,6 +32,7 @@ interface Props {
   data: {
     account: Account;
     currencies: Item[];
+    inventory: Inventory[];
     items: Item[]; // all tradable items
     trades: Trade[];
   };

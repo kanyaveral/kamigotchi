@@ -18,6 +18,7 @@ interface Props {
     itemFilter: Item;
     typeFilter: string;
     isConfirming: boolean;
+    itemSearch: string;
     setIsConfirming: Dispatch<boolean>;
     setConfirmData: Dispatch<ConfirmationData>;
   };
@@ -29,7 +30,7 @@ interface Props {
 
 export const Offers = (props: Props) => {
   const { actions, controls, data, utils } = props;
-  const { typeFilter, sort, ascending, itemFilter } = controls;
+  const { typeFilter, sort, ascending, itemFilter, itemSearch } = controls;
   const { account, trades } = data;
 
   const [displayed, setDisplayed] = useState<Trade[]>([]);
@@ -72,7 +73,7 @@ export const Offers = (props: Props) => {
       return 0;
     });
     setDisplayed(sorted);
-  }, [trades, typeFilter, sort, ascending, itemFilter]);
+  }, [trades, typeFilter, sort, ascending, itemFilter, itemSearch]);
 
   /////////////////
   // DISPLAY
@@ -81,11 +82,6 @@ export const Offers = (props: Props) => {
     <Container>
       <Title>Open Offers</Title>
       <Body>
-        {/* {displayed.map((trade, i) => {
-          const type = getTradeType(trade, false);
-          if (type === 'Sell') return <SellOrder key={i} actions={actions} data={{ trade }} />;
-          return <BuyOrder key={i} actions={actions} data={{ trade }} />;
-        })} */}
         {displayed.map((trade, i) => {
           const type = getTradeType(trade, false);
           return (
@@ -128,7 +124,7 @@ const Title = styled.div`
   color: black;
   font-size: 1.2vw;
   text-align: left;
-  z-index: 2;
+  z-index: 1;
 `;
 
 const Body = styled.div`

@@ -112,7 +112,7 @@ export async function initHarvest(api: AdminAPI) {
   await api.config.set.array('KAMI_HARV_FERTILITY', [0, 0, 1500, 3, 0, 0, 1000, 3]);
   await api.config.set.array('KAMI_HARV_INTENSITY', [5, 0, 480, 0, 0, 0, 10, 0]); // nudge is multiplier on base, ratio is inversed
   await api.config.set.array('KAMI_HARV_BOUNTY', [0, 9, 0, 0, 0, 0, 1000, 3]);
-  await api.config.set.array('KAMI_HARV_STRAIN', [20, 0, 7500, 3, 0, 0, 1000, 3]); // hijacking nudge here for denominator base value
+  await api.config.set.array('KAMI_HARV_STRAIN', [20, 0, 6500, 3, 0, 0, 1000, 3]); // hijacking nudge here for denominator base value
 }
 
 export async function initLiquidation(api: AdminAPI) {
@@ -123,7 +123,8 @@ export async function initLiquidation(api: AdminAPI) {
   await api.config.set.array('KAMI_LIQ_THRESHOLD', [0, 3, 1000, 3, 0, 3, 0, 0]);
   await api.config.set.array('KAMI_LIQ_SALVAGE', [0, 2, 0, 3, 0, 0, 0, 0]); // hijacked nudge for power tuning (REQUIRED: config[3] >= config[1])
   await api.config.set.array('KAMI_LIQ_SPOILS', [45, 2, 0, 3, 0, 0, 0, 0]); // hijacked nudge for power tuning (REQUIRED: config[3] >= config[1])
-  await api.config.set.array('KAMI_LIQ_KARMA', [0, 0, 3000, 3, 0, 0, 0, 0]);
+  await api.config.set.array('KAMI_LIQ_KARMA', [10, 0, 0, 0, 0, 0, 2000, 3]);
+  await api.config.set.array('KAMI_LIQ_RECOIL', [0, 0, 600, 3, 0, 0, 1000, 3]);
 }
 
 async function initTokens(api: AdminAPI) {
