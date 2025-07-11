@@ -27,12 +27,13 @@ interface Props {
     getBonuses: (entity: EntityIndex) => BonusInstance[];
     getKami: (entity: EntityIndex, refresh?: boolean) => Kami;
     getOwner: (kamiEntity: EntityIndex) => BaseAccount;
+    calcExpRequirement: (lvl: number) => number;
   };
 }
 
 export const Kards = (props: Props) => {
   const { actions, kamiEntities, account, display, utils } = props;
-  const { getKami, getBonuses } = utils;
+  const { getKami, getBonuses, calcExpRequirement } = utils;
   const { modals } = useVisibility();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -124,6 +125,7 @@ export const Kards = (props: Props) => {
         bonuses={allyBonuses}
         actions={actions}
         display={display}
+        utils={{ calcExpRequirement }}
       />
       <EnemyCards
         account={account}

@@ -18,13 +18,15 @@ interface Props {
   display: {
     UseItemButton: (kami: Kami, account: Account) => React.ReactNode;
   };
+  utils: { calcExpRequirement: (lvl: number) => number };
 }
 
 // rendering of an ally kami on this node
 export const AllyKards = (props: Props) => {
-  const { actions, display, account, kamis, bonuses } = props;
+  const { actions, display, account, kamis, bonuses, utils } = props;
   const { collect, stop } = actions;
   const { UseItemButton } = display;
+  const { calcExpRequirement } = utils;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -61,7 +63,8 @@ export const AllyKards = (props: Props) => {
             key={kami.index}
             kami={kami}
             description={getDescription(kami)}
-            titleTooltip={bonuses[i]}
+            // titleTooltip={bonuses[i]}
+
             subtext={`yours (\$${calcOutput(kami)})`}
             actions={[
               UseItemButton(kami, account),
@@ -70,6 +73,7 @@ export const AllyKards = (props: Props) => {
             ]}
             showBattery
             showCooldown
+            utils={{ calcExpRequirement }}
           />
         ))}
     </Container>
