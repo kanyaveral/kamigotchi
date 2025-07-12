@@ -8,7 +8,8 @@ interface Props {
   intensity: number;
 }
 
-export const Glow = ({ children, color, intensity }: Props) => {
+export const Glow = (props: Props) => {
+  const { children, color, intensity } = props;
   const scope = useRef<Scope | null>(null);
   const childRef = useRef<HTMLDivElement | null>(null);
 
@@ -17,16 +18,16 @@ export const Glow = ({ children, color, intensity }: Props) => {
 
     scope.current = createScope().add(() => {
       animate(childRef.current!, {
-        boxShadow: [`0 0 0px ${color}`, `0 0 ${30}px ${color}`, `0 0 0px ${color}`],
+        boxShadow: [`0 0 0px ${color}`, `0 0 ${8 * intensity}px ${color}`, `0 0 0px ${color}`],
         duration: 1000,
-        easing: 'easeInOutSine',
         direction: 'alternate',
+        easing: 'easeInOutSine',
         loop: true,
       });
     });
 
     return () => scope.current?.revert();
-  }, []);
+  }, [color, intensity]);
 
   return (
     <GlowWrapper ref={childRef} color={color}>
@@ -41,5 +42,4 @@ const GlowWrapper = styled.div<{ color: string }>`
   border: 0.15vw solid ${({ color }) => color};
   box-shadow: 0 0 0px ${({ color }) => color};
   display: flex;
-  position: relative;
 `;
