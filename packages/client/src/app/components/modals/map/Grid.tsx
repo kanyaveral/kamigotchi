@@ -199,37 +199,21 @@ export const Grid = (props: Props) => {
                 >
                   {typeSelected.includes(
                     (getNode(room.index)?.affinity ?? '').toUpperCase().trim()
-                  ) && room.index !== 0 ? (
-                    <>
-                      <Glow key={room.index} color='#00ffff' intensity={0.8}>
-                        <Tile
-                          key={j}
-                          backgroundColor={backgroundColor}
-                          onClick={() =>
-                            room.index !== 0 && !isRoomBlocked(room) && handleRoomMove(room.index)
-                          }
-                          hasRoom={room.index !== 0}
-                          isHighlighted={!!backgroundColor}
-                          onMouseEnter={() => updateRoomStats(room.index)}
-                        >
-                          {kamiIconsMap.has(room.index) && <FloatingMapKami />}
-                        </Tile>{' '}
-                      </Glow>{' '}
-                    </>
-                  ) : (
-                    <Tile
-                      key={j}
-                      backgroundColor={backgroundColor}
-                      onClick={() =>
-                        room.index !== 0 && !isRoomBlocked(room) && handleRoomMove(room.index)
-                      }
-                      hasRoom={room.index !== 0}
-                      isHighlighted={!!backgroundColor}
-                      onMouseEnter={() => updateRoomStats(room.index)}
-                    >
-                      {kamiIconsMap.has(room.index) && <FloatingMapKami />}
-                    </Tile>
-                  )}
+                  ) &&
+                    room.index !== 0 && <Glow key={room.index} color='#00ffff' intensity={0.8} />}
+
+                  <Tile
+                    key={j}
+                    backgroundColor={backgroundColor}
+                    onClick={() =>
+                      room.index !== 0 && !isRoomBlocked(room) && handleRoomMove(room.index)
+                    }
+                    hasRoom={room.index !== 0}
+                    isHighlighted={!!backgroundColor}
+                    onMouseEnter={() => updateRoomStats(room.index)}
+                  >
+                    {kamiIconsMap.has(room.index) && <FloatingMapKami />}
+                  </Tile>
                 </TextTooltip>
               );
             })}

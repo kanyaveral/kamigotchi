@@ -1,45 +1,62 @@
-import { animate, createScope, Scope } from 'animejs';
+import { animate, createScope, Scope, svg } from 'animejs';
 import { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 interface Props {
-  children: React.ReactNode;
   color: string;
   intensity: number;
 }
 
+const SQUARE_PATH = 'M 5 5 L 35 5 L 35 35 L 5 35 Z';
+
 export const Glow = (props: Props) => {
-  const { children, color, intensity } = props;
+  const { color, intensity } = props;
   const scope = useRef<Scope | null>(null);
-  const childRef = useRef<HTMLDivElement | null>(null);
+  const pathRef = useRef<SVGPathElement | null>(null);
+  const tracerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!childRef.current) return;
+    if (!pathRef.current || !tracerRef.current) return;
 
     scope.current = createScope().add(() => {
-      animate(childRef.current!, {
-        boxShadow: [`0 0 0px ${color}`, `0 0 ${8 * intensity}px ${color}`, `0 0 0px ${color}`],
-        duration: 1000,
-        direction: 'alternate',
+      animate(svg.createDrawable(pathRef.current!), {
+        draw: '0 1',
         easing: 'easeInOutSine',
+        duration: 2000,
         loop: true,
+        direction: 'alternate',
       });
     });
 
     return () => scope.current?.revert();
-  }, [color, intensity]);
+  }, []);
 
+  // will need to use viewBox as props to scale the svg
   return (
-    <GlowWrapper ref={childRef} color={color}>
-      {children}
-    </GlowWrapper>
+    <Wrapper>
+      <SVG viewBox='4 4 32 32' preserveAspectRatio='none'>
+        <path ref={pathRef} d={SQUARE_PATH} stroke={color} strokeWidth={2} fill='none' />
+      </SVG>
+
+      <Tracer ref={tracerRef} color={color} intensity={intensity} className='car' />
+    </Wrapper>
   );
 };
 
-const GlowWrapper = styled.div<{ color: string }>`
+const Wrapper = styled.div`
+  position: relative;
   width: 100%;
   height: 100%;
-  border: 0.15vw solid ${({ color }) => color};
-  box-shadow: 0 0 0px ${({ color }) => color};
-  display: flex;
+`;
+
+const SVG = styled.svg`
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+const Tracer = styled.div<{ color: string; intensity: number }>`
+  background-color: ${({ color }) => color};
+
+  position: absolute;
+  box-shadow: 0 0 ${({ intensity }) => 8 * intensity}px ${({ color }) => color};
 `;
