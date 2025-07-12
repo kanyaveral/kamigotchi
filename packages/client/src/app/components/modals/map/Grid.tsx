@@ -201,7 +201,7 @@ export const Grid = (props: Props) => {
                     (getNode(room.index)?.affinity ?? '').toUpperCase().trim()
                   ) &&
                     room.index !== 0 && (
-                      <Glow key={`glow-${i}-${j}`} color='#00ffff' intensity={0.8} />
+                      <Glow key={`glow-${i}-${j}`} color='hsl(60, 100%, 80%)' intensity={0.8} />
                     )}
                   <Tile
                     key={j}
