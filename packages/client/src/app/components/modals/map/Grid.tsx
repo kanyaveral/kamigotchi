@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import { Account } from 'app/cache/account';
 import { TextTooltip } from 'app/components/library';
+import { Glow } from 'app/components/library/animations/Glow';
 import { DropdownToggle } from 'app/components/library/buttons/DropdownToggle';
 import { ActionIcons } from 'assets/images/icons/actions';
 import { mapBackgrounds } from 'assets/images/map';
@@ -196,23 +197,39 @@ export const Grid = (props: Props) => {
                   maxWidth={25}
                   grow
                 >
-                  <Tile
-                    key={j}
-                    backgroundColor={backgroundColor}
-                    onClick={() =>
-                      room.index !== 0 && !isRoomBlocked(room) && handleRoomMove(room.index)
-                    }
-                    hasRoom={room.index !== 0}
-                    isHighlighted={!!backgroundColor}
-                    onMouseEnter={() => updateRoomStats(room.index)}
-                    typeSelected={
-                      typeSelected.includes(
-                        (getNode(room.index)?.affinity ?? '').toUpperCase().trim()
-                      ) && room.index !== 0
-                    }
-                  >
-                    {kamiIconsMap.has(room.index) && <FloatingMapKami />}
-                  </Tile>
+                  {typeSelected.includes(
+                    (getNode(room.index)?.affinity ?? '').toUpperCase().trim()
+                  ) && room.index !== 0 ? (
+                    <>
+                      <Glow key={room.index} color='#00ffff' intensity={0.8}>
+                        <Tile
+                          key={j}
+                          backgroundColor={backgroundColor}
+                          onClick={() =>
+                            room.index !== 0 && !isRoomBlocked(room) && handleRoomMove(room.index)
+                          }
+                          hasRoom={room.index !== 0}
+                          isHighlighted={!!backgroundColor}
+                          onMouseEnter={() => updateRoomStats(room.index)}
+                        >
+                          {kamiIconsMap.has(room.index) && <FloatingMapKami />}
+                        </Tile>{' '}
+                      </Glow>{' '}
+                    </>
+                  ) : (
+                    <Tile
+                      key={j}
+                      backgroundColor={backgroundColor}
+                      onClick={() =>
+                        room.index !== 0 && !isRoomBlocked(room) && handleRoomMove(room.index)
+                      }
+                      hasRoom={room.index !== 0}
+                      isHighlighted={!!backgroundColor}
+                      onMouseEnter={() => updateRoomStats(room.index)}
+                    >
+                      {kamiIconsMap.has(room.index) && <FloatingMapKami />}
+                    </Tile>
+                  )}
                 </TextTooltip>
               );
             })}
@@ -254,7 +271,6 @@ const Tile = styled.div<{
   hasRoom: boolean;
   isHighlighted: boolean;
   backgroundColor: any;
-  typeSelected: boolean;
 }>`
   border-left: 0.01vw solid rgba(0, 0, 0, 0.2);
   border-bottom: 0.01vw solid rgba(0, 0, 0, 0.2);
@@ -263,7 +279,7 @@ const Tile = styled.div<{
   flex-grow: 1;
   align-items: stretch;
   justify-content: stretch;
-  ${({ typeSelected }) => typeSelected && `border: 0.01vw solid rgba(248, 91, 91, 1);`}
+
   ${({ hasRoom }) =>
     hasRoom &&
     ` &:hover {
@@ -274,7 +290,7 @@ const Tile = styled.div<{
       background-color: rgba(255, 255, 255, 0.3);
     }
   `}
-    ${({ isHighlighted }) =>
+  ${({ isHighlighted }) =>
     isHighlighted &&
     `opacity: 0.9;
     border-left-color: rgba(0, 0, 0, 1);

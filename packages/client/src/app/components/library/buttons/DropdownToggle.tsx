@@ -184,7 +184,6 @@ const MenuOption = styled.div<{
   pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
   background-color: ${({ disabled }) => (disabled ? '#bbb' : '#fff')};
   padding: ${({ isSelectAll }) => (isSelectAll ? '1vw 0.6vw 0.4vw 0.9vw ' : '0 0.2vw 0.1vw 2.2vw')};
-
   &:hover {
     background-color: #ddd;
   }
