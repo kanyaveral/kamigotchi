@@ -14,10 +14,10 @@ export const Glow = (props: Props) => {
   const { color, intensity, particleCount = 8 } = props;
   const scope = useRef<Scope | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
-  const particlesRef = useRef<HTMLDivElement[]>([]);
+  const particlesRef = useRef<Array<HTMLDivElement | null>>(new Array(particleCount).fill(null));
 
   useEffect(() => {
-    if (!pathRef.current || particlesRef.current.length === 0) return;
+    if (!pathRef.current || particlesRef?.current?.length === 0) return;
 
     scope.current = createScope().add(() => {
       animate(svg.createDrawable(pathRef.current!), {
@@ -29,8 +29,9 @@ export const Glow = (props: Props) => {
       });
 
       // Animate each particle with slight delay offset
-      particlesRef.current.forEach((particle, index) => {
+      particlesRef?.current?.forEach((particle, index) => {
         const delay = (index * 1500) / particleCount; // Stagger particles
+        if (!particle) return;
         animate(particle, {
           loop: true,
           easing: 'linear',
@@ -57,22 +58,15 @@ export const Glow = (props: Props) => {
     return () => scope.current?.revert();
   }, [particleCount]);
 
-  // Create particle refs
-  const setParticleRef = (el: HTMLDivElement | null, index: number) => {
-    if (el) {
-      particlesRef.current[index] = el;
-    }
-  };
-
   return (
     <Wrapper>
       <SVG viewBox='4 4 31.5 31.5' preserveAspectRatio='none'>
         <path ref={pathRef} d={SQUARE_PATH} stroke={color} strokeWidth={1} fill='none' />
       </SVG>
-      {Array.from({ length: particleCount }, (_, index) => (
+      {Array.from({ length: particleCount }, (_, i) => (
         <Tracer
-          key={index}
-          ref={(el) => setParticleRef(el, index)}
+          key={i}
+          ref={(el) => (particlesRef.current[i] = el)}
           color={color}
           intensity={intensity}
         />
