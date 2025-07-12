@@ -21,9 +21,9 @@ export const Glow = (props: Props) => {
     scope.current = createScope().add(() => {
       animate(svg.createDrawable(pathRef.current!), {
         draw: '0 1',
-        easing: 'easeInOutSine',
-        duration: 2000,
-        loop: true,
+        easing: 'linear',
+        duration: 1000,
+        loop: false,
         direction: 'alternate',
       });
     });
@@ -34,10 +34,9 @@ export const Glow = (props: Props) => {
   // will need to use viewBox as props to scale the svg
   return (
     <Wrapper>
-      <SVG viewBox='4 4 32 32' preserveAspectRatio='none'>
-        <path ref={pathRef} d={SQUARE_PATH} stroke={color} strokeWidth={2} fill='none' />
+      <SVG viewBox='4 4 31.5 31.5' preserveAspectRatio='none'>
+        <path ref={pathRef} d={SQUARE_PATH} stroke={color} strokeWidth={1} fill='none' />
       </SVG>
-
       <Tracer ref={tracerRef} color={color} intensity={intensity} className='car' />
     </Wrapper>
   );
@@ -51,8 +50,6 @@ const Wrapper = styled.div`
 
 const SVG = styled.svg`
   position: absolute;
-  top: 0;
-  left: 0;
 `;
 const Tracer = styled.div<{ color: string; intensity: number }>`
   background-color: ${({ color }) => color};
