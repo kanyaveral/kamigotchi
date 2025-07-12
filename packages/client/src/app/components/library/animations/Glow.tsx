@@ -9,12 +9,14 @@ interface Props {
 }
 
 const SQUARE_PATH = 'M 5 5 L 35 5 L 35 35 L 5 35 Z';
+const SMALLER_SQUARE_PATH = 'M 7 7 L 33 7 L 33 33 L 7 33 Z';
 
 export const Glow = (props: Props) => {
   const { color, intensity, particleCount = 8 } = props;
   const scope = useRef<Scope | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
   const particlesRef = useRef<Array<HTMLDivElement | null>>(new Array(particleCount).fill(null));
+  const innerPathRef = useRef<SVGPathElement | null>(null);
 
   useEffect(() => {
     if (!pathRef.current || particlesRef?.current?.length === 0) return;
@@ -27,27 +29,34 @@ export const Glow = (props: Props) => {
         loop: false,
         direction: 'alternate',
       });
-      const { translateX, translateY, rotate } = svg.createMotionPath(pathRef.current!);
+      const { translateX, translateY, rotate } = svg.createMotionPath(innerPathRef.current!);
 
       particlesRef?.current?.forEach((particle, index) => {
-        const delay = (index * 3500) / particleCount;
+        const delay = (index * 4000) / particleCount;
         if (!particle) return;
         animate(particle, {
-          loop: false,
+          loop: true,
           easing: 'linear',
           delay: delay,
-
+          opacity: [
+            { value: 0, duration: 200 },
+            { value: 1, duration: 2000 },
+          ],
+          fill: 'forwards',
+          direction: 'alternate',
           translateX: translateX,
           translateY: translateY,
           rotate: rotate,
           scale: [
-            { to: 1, ease: 'linear', duration: 200 },
-            { to: 1.5, ease: 'linear', duration: 400 },
-            { to: 2.5, ease: 'linear', duration: 400 },
-            { to: 1.5, ease: 'linear', duration: 400 },
-            { to: 1, ease: 'linear', duration: 200 },
+            { to: 0.5 * Math.random(), duration: 400, easing: 'linear' },
+
+            { to: 1 * Math.random(), duration: 200, easing: 'linear' },
           ],
-          duration: 3000,
+          duration: 2000,
+        }).then(() => {
+          if (particle) {
+            particle.style.opacity = '0';
+          }
         });
       });
     });
@@ -62,9 +71,16 @@ export const Glow = (props: Props) => {
           style={{ width: `100%`, height: `100%` }}
           ref={pathRef}
           d={SQUARE_PATH}
-          stroke={color}
+          // stroke={color}
           strokeWidth={1}
           fill='none'
+        />{' '}
+        <path
+          ref={innerPathRef}
+          //d={SMALLER_SQUARE_PATH}
+          d={SQUARE_PATH}
+          fill='none'
+          style={{ display: 'none' }}
         />
       </SVG>
       {Array.from({ length: particleCount }, (_, i) => (
