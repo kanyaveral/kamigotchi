@@ -173,6 +173,7 @@ export const Grid = (props: Props) => {
           <Row key={i}>
             {row.map((room, j) => {
               const backgroundColor = getTileColor(room);
+
               return (
                 <TextTooltip
                   key={j}
@@ -199,8 +200,9 @@ export const Grid = (props: Props) => {
                   {typeSelected.includes(
                     (getNode(room.index)?.affinity ?? '').toUpperCase().trim()
                   ) &&
-                    room.index !== 0 && <Glow key={room.index} color='#00ffff' intensity={0.8} />}
-
+                    room.index !== 0 && (
+                      <Glow key={`glow-${i}-${j}`} color='#00ffff' intensity={0.8} />
+                    )}
                   <Tile
                     key={j}
                     backgroundColor={backgroundColor}
