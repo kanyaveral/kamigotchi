@@ -68,6 +68,12 @@ export const Grid = (props: Props) => {
     { text: 'Insect', object: 'INSECT' },
     { text: 'Scrap', object: 'SCRAP' },
   ];
+  const colorMap = {
+    NORMAL: 'hsl(60, 100%, 80%)',
+    EERIE: 'hsl(0, 100%, 80%)',
+    INSECT: 'hsl(300, 100%, 80%)',
+    SCRAP: 'hsl(180, 100%, 80%)',
+  };
 
   const rolls = useMemo(() => {
     const map = new Map<number, number>();
@@ -173,6 +179,11 @@ export const Grid = (props: Props) => {
           <Row key={i}>
             {row.map((room, j) => {
               const backgroundColor = getTileColor(room);
+              const affinity = getNode(room.index)?.affinity?.toUpperCase();
+              const color =
+                affinity && affinity in colorMap
+                  ? colorMap[affinity as keyof typeof colorMap]
+                  : 'hsl(60, 100%, 80%)';
 
               return (
                 <TextTooltip
@@ -197,12 +208,9 @@ export const Grid = (props: Props) => {
                   maxWidth={25}
                   grow
                 >
-                  {typeSelected.includes(
-                    (getNode(room.index)?.affinity ?? '').toUpperCase().trim()
-                  ) &&
-                    room.index !== 0 && (
-                      <Glow key={`glow-${i}-${j}`} color='hsl(60, 100%, 80%)' intensity={0.8} />
-                    )}
+                  {typeSelected.includes(affinity) && room.index !== 0 && (
+                    <Glow key={`glow-${i}-${j}`} color={color} intensity={0.8} />
+                  )}
                   <Tile
                     key={j}
                     backgroundColor={backgroundColor}
