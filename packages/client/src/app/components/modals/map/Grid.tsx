@@ -63,10 +63,10 @@ export const Grid = (props: Props) => {
   const [playerEntities, setPlayerEntities] = useState<EntityIndex[]>([]);
   const [typeSelected, setTypeSelected] = useState<String[]>([]);
   const types = [
-    { text: 'NORMAL', object: 'NORMAL' },
-    { text: 'EERIE', object: 'EERIE' },
-    { text: 'INSECT', object: 'INSECT' },
-    { text: 'SCRAP', object: 'SCRAP' },
+    { text: 'Normal', object: 'NORMAL' },
+    { text: 'Eerie', object: 'EERIE' },
+    { text: 'Insect', object: 'INSECT' },
+    { text: 'Scrap', object: 'SCRAP' },
   ];
 
   const rolls = useMemo(() => {
@@ -156,7 +156,7 @@ export const Grid = (props: Props) => {
     <Container>
       <Background src={mapBackgrounds[zone]} />
       <Overlay>
-        <div style={{ position: 'absolute', top: '0', left: '0' }}>
+        <div style={{ position: 'absolute', top: '0', left: '0', zIndex: 1 }}>
           <DropdownToggle
             allowNone
             limit={33}
@@ -173,7 +173,6 @@ export const Grid = (props: Props) => {
           <Row key={i}>
             {row.map((room, j) => {
               const backgroundColor = getTileColor(room);
-
               return (
                 <TextTooltip
                   key={j}
