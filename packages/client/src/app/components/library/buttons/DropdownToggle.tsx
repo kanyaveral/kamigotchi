@@ -8,6 +8,7 @@ import { IconButton } from './IconButton';
 import { VerticalToggle } from './VerticalToggle';
 
 interface Props {
+  allowNone?: boolean;
   onClick: ((selected: any[]) => void)[];
   button: {
     images: string[];
@@ -83,11 +84,19 @@ export function DropdownToggle(props: Props) {
     onClick[currentMode]?.(selectedObjects);
   };
 
+  const handleNone = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setChecked(Array(modeOptions.length).fill(false));
+    playClick();
+    onClick[currentMode]?.([]);
+  };
+
   const MenuCheckListOption = (
     { text, img, object }: Option,
     i: number | null,
     onClick: (e: React.MouseEvent) => void,
-    isSelectAll: boolean
+    isSelectAll: boolean,
+    isNone?: boolean
   ) => {
     const imageSrc = img ?? object?.image;
     const selected = checked.filter(Boolean).length;
@@ -104,7 +113,7 @@ export function DropdownToggle(props: Props) {
         disabled={modeDisabled}
       >
         <Row>
-          <input type='checkbox' checked={isChecked} readOnly />
+          {!isNone && <input type='checkbox' checked={isChecked} readOnly />}
           <span>
             {text}
             {isSelectAll && limit && selected >= limit ? ` (max ${limit})` : ''}
@@ -120,6 +129,9 @@ export function DropdownToggle(props: Props) {
       <Popover
         content={[
           MenuCheckListOption({ text: 'Select All' }, null, (e) => toggleAll(e), true),
+          ...(props.allowNone
+            ? [MenuCheckListOption({ text: 'None' }, null, handleNone, false, true)]
+            : []),
           ...modeOptions.map((option, i) =>
             MenuCheckListOption(option, i, (e) => toggleOption(e, i), false)
           ),

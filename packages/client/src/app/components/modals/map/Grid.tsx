@@ -4,6 +4,8 @@ import styled from 'styled-components';
 
 import { Account } from 'app/cache/account';
 import { TextTooltip } from 'app/components/library';
+import { DropdownToggle } from 'app/components/library/buttons/DropdownToggle';
+import { ActionIcons } from 'assets/images/icons/actions';
 import { mapBackgrounds } from 'assets/images/map';
 import { Zones } from 'constants/zones';
 import { Allo } from 'network/shapes/Allo';
@@ -58,6 +60,13 @@ export const Grid = (props: Props) => {
 
   const [kamiEntities, setKamiEntities] = useState<EntityIndex[]>([]);
   const [playerEntities, setPlayerEntities] = useState<EntityIndex[]>([]);
+  const [typeSelected, setTypeSelected] = useState<String[]>([]);
+  const types = [
+    { text: 'NORMAL', object: 'NORMAL' },
+    { text: 'EERIE', object: 'EERIE' },
+    { text: 'INSECT', object: 'INSECT' },
+    { text: 'SCRAP', object: 'SCRAP' },
+  ];
 
   const rolls = useMemo(() => {
     const map = new Map<number, number>();
@@ -135,6 +144,10 @@ export const Grid = (props: Props) => {
     setKamiEntities(queryNodeKamis(queryNodeByIndex(roomIndex)));
   };
 
+  const setType = (type: String[]) => {
+    setTypeSelected(type);
+  };
+
   /////////////////
   // RENDER
 
@@ -142,10 +155,24 @@ export const Grid = (props: Props) => {
     <Container>
       <Background src={mapBackgrounds[zone]} />
       <Overlay>
+        <div style={{ position: 'absolute', top: '0', left: '0' }}>
+          <DropdownToggle
+            allowNone
+            limit={33}
+            button={{
+              images: [ActionIcons.search],
+              tooltips: ['Filter tile by Type'],
+            }}
+            onClick={[setType]}
+            options={[types]}
+            radius={0.6}
+          />
+        </div>
         {grid.map((row, i) => (
           <Row key={i}>
             {row.map((room, j) => {
               const backgroundColor = getTileColor(room);
+
               return (
                 <TextTooltip
                   key={j}
@@ -178,6 +205,11 @@ export const Grid = (props: Props) => {
                     hasRoom={room.index !== 0}
                     isHighlighted={!!backgroundColor}
                     onMouseEnter={() => updateRoomStats(room.index)}
+                    typeSelected={
+                      typeSelected.includes(
+                        (getNode(room.index)?.affinity ?? '').toUpperCase().trim()
+                      ) && room.index !== 0
+                    }
                   >
                     {kamiIconsMap.has(room.index) && <FloatingMapKami />}
                   </Tile>
@@ -218,7 +250,12 @@ const Row = styled.div`
   flex-grow: 1;
 `;
 
-const Tile = styled.div<{ hasRoom: boolean; isHighlighted: boolean; backgroundColor: any }>`
+const Tile = styled.div<{
+  hasRoom: boolean;
+  isHighlighted: boolean;
+  backgroundColor: any;
+  typeSelected: boolean;
+}>`
   border-left: 0.01vw solid rgba(0, 0, 0, 0.2);
   border-bottom: 0.01vw solid rgba(0, 0, 0, 0.2);
   background-color: ${({ backgroundColor }) => backgroundColor};
@@ -226,6 +263,7 @@ const Tile = styled.div<{ hasRoom: boolean; isHighlighted: boolean; backgroundCo
   flex-grow: 1;
   align-items: stretch;
   justify-content: stretch;
+  ${({ typeSelected }) => typeSelected && `border: 0.01vw solid rgba(248, 91, 91, 1);`}
   ${({ hasRoom }) =>
     hasRoom &&
     ` &:hover {
@@ -236,10 +274,10 @@ const Tile = styled.div<{ hasRoom: boolean; isHighlighted: boolean; backgroundCo
       background-color: rgba(255, 255, 255, 0.3);
     }
   `}
-  ${({ isHighlighted }) =>
+    ${({ isHighlighted }) =>
     isHighlighted &&
     `opacity: 0.9;
     border-left-color: rgba(0, 0, 0, 1);
     border-bottom-color: rgba(0, 0, 0, 1);
-  `}
+  `};
 `;
