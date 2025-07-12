@@ -9,7 +9,7 @@ interface Props {
 }
 
 const SQUARE_PATH = 'M 5 5 L 35 5 L 35 35 L 5 35 Z';
-const SMALLER_SQUARE_PATH = 'M 5 5 L 32 5L 33 33  L 7 33  Z';
+const SMALLER_SQUARE_PATH = 'M 5 5 L 32 5 L 32 33 L 5 33 Z';
 
 export const Glow = (props: Props) => {
   const { color, intensity, particleCount = 8 } = props;
@@ -27,28 +27,29 @@ export const Glow = (props: Props) => {
         easing: 'linear',
         duration: 2000,
         loop: false,
-        direction: 'alternate',
+        ease: 'easeInOutCubic',
       });
       const { translateX, translateY, rotate } = svg.createMotionPath(innerPathRef.current!);
 
       particlesRef?.current?.forEach((particle, index) => {
-        const delay = index * 400;
+        const delay = index * 200;
         if (!particle) return;
         animate(particle, {
-          loop: true,
+          loop: false,
           easing: 'linear',
           delay: delay,
           opacity: [
             { value: 0, duration: 200 },
-            { value: 1, duration: 2000 },
+            { value: 1, duration: 1200 },
+            { value: 0, duration: 600 },
           ],
-          fill: 'forwards',
-          direction: 'alternate',
+
           translateX: translateX,
           translateY: translateY,
           rotate: rotate,
+          ease: 'easeInOutCubic',
 
-          duration: 2000,
+          duration: 800,
         }).then(() => {
           if (particle) {
             particle.style.opacity = '0';
