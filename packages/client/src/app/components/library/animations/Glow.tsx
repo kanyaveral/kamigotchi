@@ -9,7 +9,7 @@ interface Props {
 }
 
 const SQUARE_PATH = 'M 5 5 L 35 5 L 35 35 L 5 35 Z';
-const SMALLER_SQUARE_PATH = 'M 7 7 L 33 7 L 33 33 L 7 33 Z';
+const SMALLER_SQUARE_PATH = 'M 5 5 L 32 5L 33 33  L 7 33  Z';
 
 export const Glow = (props: Props) => {
   const { color, intensity, particleCount = 8 } = props;
@@ -32,7 +32,7 @@ export const Glow = (props: Props) => {
       const { translateX, translateY, rotate } = svg.createMotionPath(innerPathRef.current!);
 
       particlesRef?.current?.forEach((particle, index) => {
-        const delay = (index * 4000) / particleCount;
+        const delay = index * 400;
         if (!particle) return;
         animate(particle, {
           loop: true,
@@ -47,11 +47,7 @@ export const Glow = (props: Props) => {
           translateX: translateX,
           translateY: translateY,
           rotate: rotate,
-          scale: [
-            { to: 0.5 * Math.random(), duration: 400, easing: 'linear' },
 
-            { to: 1 * Math.random(), duration: 200, easing: 'linear' },
-          ],
           duration: 2000,
         }).then(() => {
           if (particle) {
@@ -71,17 +67,11 @@ export const Glow = (props: Props) => {
           style={{ width: `100%`, height: `100%` }}
           ref={pathRef}
           d={SQUARE_PATH}
-          // stroke={color}
+          stroke={color}
           strokeWidth={1}
           fill='none'
         />{' '}
-        <path
-          ref={innerPathRef}
-          //d={SMALLER_SQUARE_PATH}
-          d={SQUARE_PATH}
-          fill='none'
-          style={{ display: 'none' }}
-        />
+        <path ref={innerPathRef} d={SMALLER_SQUARE_PATH} fill='none' style={{ display: 'none' }} />
       </SVG>
       {Array.from({ length: particleCount }, (_, i) => (
         <Tracer
@@ -104,7 +94,6 @@ const Wrapper = styled.div`
 
 const SVG = styled.svg`
   position: absolute;
-  border-radius: 20%;
 `;
 
 const Tracer = styled.div<{ color: string; intensity: number }>`
