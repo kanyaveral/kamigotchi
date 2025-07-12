@@ -208,9 +208,6 @@ export const Grid = (props: Props) => {
                   maxWidth={25}
                   grow
                 >
-                  {typeSelected.includes(affinity) && room.index !== 0 && (
-                    <Glow key={`glow-${i}-${j}`} color={color} intensity={0.8} />
-                  )}
                   <Tile
                     key={j}
                     backgroundColor={backgroundColor}
@@ -221,8 +218,11 @@ export const Grid = (props: Props) => {
                     isHighlighted={!!backgroundColor}
                     onMouseEnter={() => updateRoomStats(room.index)}
                   >
-                    {kamiIconsMap.has(room.index) && <FloatingMapKami />}
-                  </Tile>
+                    {kamiIconsMap.has(room.index) && <FloatingMapKami />}{' '}
+                    {typeSelected.includes(affinity) && room.index !== 0 && (
+                      <Glow key={`glow-${i}-${j}`} color={color} intensity={0.8} />
+                    )}
+                  </Tile>{' '}
                 </TextTooltip>
               );
             })}
