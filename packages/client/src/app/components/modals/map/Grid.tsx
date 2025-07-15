@@ -63,7 +63,7 @@ export const Grid = (props: Props) => {
 
   const [kamiEntities, setKamiEntities] = useState<EntityIndex[]>([]);
   const [playerEntities, setPlayerEntities] = useState<EntityIndex[]>([]);
-  const [typeSelected, setTypeSelected] = useState<String[]>(['MyKamis']);
+  const [typeSelected, setTypeSelected] = useState<string[]>(['MyKamis']);
   const types = [
     { text: 'My Kamis', img: KamiIcon, object: 'MyKamis' },
     { text: 'Room Type', img: insectIcon, object: 'RoomType' },
@@ -71,7 +71,7 @@ export const Grid = (props: Props) => {
     { text: 'Operator Count', img: OperatorIcon, object: 'OperatorCount' },
   ];
 
-  const setType = (type: String[]) => {
+  const setType = (type: string[]) => {
     setTypeSelected(type);
   };
 
@@ -214,15 +214,16 @@ export const Grid = (props: Props) => {
                     {kamiIconsMap.has(room.index) && typeSelected[0] === 'MyKamis' && (
                       <FloatingOnMap icon={KamiIcon} />
                     )}
-                    {typeSelected[0] === 'RoomType' && room.index !== 0 && (
-                      <FloatingOnMap icon={getAffinityImage(getNode(room.index).affinity)} />
-                    )}
-                    {typeSelected[0] === 'KamiCount' && room.index !== 0 && (
-                      <FloatingOnMap icon={HelpMenuIcons.kamis} />
-                    )}
-                    {typeSelected[0] === 'OperatorCount' && room.index !== 0 && (
-                      <FloatingOnMap icon={OperatorIcon} />
-                    )}
+                    {room.index !== 0 &&
+                      ((typeSelected[0] === 'RoomType' && (
+                        <FloatingOnMap icon={getAffinityImage(getNode(room.index).affinity)} />
+                      )) ||
+                        (typeSelected[0] === 'KamiCount' && (
+                          <FloatingOnMap icon={HelpMenuIcons.kamis} />
+                        )) ||
+                        (typeSelected[0] === 'OperatorCount' && (
+                          <FloatingOnMap icon={OperatorIcon} />
+                        )))}
                   </Tile>
                 </TextTooltip>
               );
