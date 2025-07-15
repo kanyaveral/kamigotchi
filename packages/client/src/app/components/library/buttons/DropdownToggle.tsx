@@ -114,7 +114,12 @@ export function DropdownToggle(props: Props) {
         disabled={modeDisabled}
       >
         <Row simplified={simplified}>
-          <input type='checkbox' checked={isChecked} readOnly />
+          <input
+            type={simplified ? 'radio' : 'checkbox'}
+            checked={isChecked}
+            readOnly
+            name={simplified ? `dropdown-${currentMode}` : undefined}
+          />
           <span>
             {text}
             {isSelectAll && limit && selected >= limit ? ` (max ${limit})` : ''}
@@ -192,15 +197,16 @@ const MenuOption = styled.div<{
     background-color: #ddd;
   }
 `;
-// modifies checkbox color and size
+// modifies checkbox/radio color and size
 const Row = styled.span<{ simplified?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.6vw;
 
-  input[type='checkbox'] {
-    width: 1.2vw;
-    height: 1.2vw;
+  input[type='checkbox'],
+  input[type='radio'] {
+    width: 1vw;
+    height: 1vw;
     cursor: pointer;
     accent-color: ${({ simplified }) => simplified && 'rgb(203, 186, 61)'};
   }
