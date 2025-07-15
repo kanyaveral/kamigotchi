@@ -45,6 +45,8 @@ interface Props {
   };
 }
 
+type FilterType = 'RoomType' | 'KamiCount' | 'OperatorCount' | 'MyKamis';
+
 export const Grid = (props: Props) => {
   const { data, actions, utils } = props;
   const { account, roomIndex, zone, rooms, accountKamis } = data;
@@ -63,7 +65,7 @@ export const Grid = (props: Props) => {
 
   const [kamiEntities, setKamiEntities] = useState<EntityIndex[]>([]);
   const [playerEntities, setPlayerEntities] = useState<EntityIndex[]>([]);
-  const [typeSelected, setTypeSelected] = useState<string[]>(['MyKamis']);
+  const [typeSelected, setTypeSelected] = useState<FilterType[]>(['MyKamis']);
   const types = [
     { text: 'My Kamis', img: KamiIcon, object: 'MyKamis' },
     { text: 'Room Type', img: insectIcon, object: 'RoomType' },
@@ -71,7 +73,7 @@ export const Grid = (props: Props) => {
     { text: 'Operator Count', img: OperatorIcon, object: 'OperatorCount' },
   ];
 
-  const setType = (type: string[]) => {
+  const setType = (type: FilterType[]) => {
     setTypeSelected(type);
   };
 
@@ -157,6 +159,15 @@ export const Grid = (props: Props) => {
     return isRoomBlocked(room) ? 'rgba(0,0,0,0.3)' : 'rgba(255,136,85,0.6)';
   };
 
+  const getIconForType = (type: FilterType, roomIndex: number) => {
+    const iconMap: Record<FilterType, string | null> = {
+      MyKamis: yourKamiCountMap.has(roomIndex) && KamiIcon,
+      RoomType: getAffinityImage(getNode(roomIndex).affinity),
+      KamiCount: (kamiCountMap?.get(roomIndex) ?? 0) > 0 && HelpMenuIcons.kamis,
+      OperatorCount: (operatorCountMap.get(roomIndex) ?? 0) > 0 && OperatorIcon,
+    };
+    return roomIndex !== 0 && iconMap[type];
+  };
   /////////////////
   // INTERACTION
 
@@ -199,6 +210,7 @@ export const Grid = (props: Props) => {
           <Row key={i}>
             {row.map((room, j) => {
               const backgroundColor = getTileColor(room);
+              const icon = getIconForType(typeSelected[0], room.index);
               return (
                 <TextTooltip
                   key={j}
@@ -232,21 +244,7 @@ export const Grid = (props: Props) => {
                     isHighlighted={!!backgroundColor}
                     onMouseEnter={() => updateRoomStats(room.index)}
                   >
-                    {yourKamiCountMap.has(room.index) && typeSelected[0] === 'MyKamis' && (
-                      <FloatingOnMap icon={KamiIcon} />
-                    )}
-                    {room.index !== 0 &&
-                      ((typeSelected[0] === 'RoomType' && (
-                        <FloatingOnMap icon={getAffinityImage(getNode(room.index).affinity)} />
-                      )) ||
-                        (typeSelected[0] === 'KamiCount' &&
-                          (kamiCountMap?.get(room.index) ?? 0) > 0 && (
-                            <FloatingOnMap icon={HelpMenuIcons.kamis} />
-                          )) ||
-                        (typeSelected[0] === 'OperatorCount' &&
-                          (operatorCountMap.get(room.index) ?? 0) > 0 && (
-                            <FloatingOnMap icon={OperatorIcon} />
-                          )))}
+                    {icon && <FloatingOnMap icon={icon} />}
                   </Tile>
                 </TextTooltip>
               );
