@@ -108,7 +108,7 @@ export const Grid = (props: Props) => {
     return grid;
   }, [zone, rooms]);
 
-  const kamiIconsMap = useMemo(() => {
+  const yourKamiCountMap = useMemo(() => {
     const map = new Map<number, string[]>();
     accountKamis.forEach((kami) => {
       const location = getKamiLocation(kami);
@@ -118,6 +118,27 @@ export const Grid = (props: Props) => {
     });
     return map;
   }, [accountKamis]);
+
+  const kamiCountMap = useMemo(() => {
+    const map = new Map<number, number>();
+    rooms.forEach((room) => {
+      if (!room.index) return;
+      const nodeEntity = queryNodeByIndex(room.index);
+      const kamisInNode = queryNodeKamis(nodeEntity);
+      map.set(room.index, kamisInNode.length);
+    });
+    return map;
+  }, [rooms]);
+
+  const operatorCountMap = useMemo(() => {
+    const map = new Map<number, number>();
+    rooms.forEach((room) => {
+      if (!room.index) return;
+      const playersInRoom = queryRoomAccounts(room.index);
+      map.set(room.index, playersInRoom.length);
+    });
+    return map;
+  }, [rooms]);
 
   /////////////////
   // INTERPRETATION
@@ -187,7 +208,7 @@ export const Grid = (props: Props) => {
                           <GridTooltip
                             room={room}
                             rolls={rolls}
-                            kamiIconsMap={kamiIconsMap}
+                            yourKamiCountMap={yourKamiCountMap}
                             getNode={getNode}
                             parseAllos={parseAllos}
                             playerEntitiesLength={playerEntities.length}
@@ -211,19 +232,21 @@ export const Grid = (props: Props) => {
                     isHighlighted={!!backgroundColor}
                     onMouseEnter={() => updateRoomStats(room.index)}
                   >
-                    {kamiIconsMap.has(room.index) && typeSelected[0] === 'MyKamis' && (
+                    {yourKamiCountMap.has(room.index) && typeSelected[0] === 'MyKamis' && (
                       <FloatingOnMap icon={KamiIcon} />
                     )}
                     {room.index !== 0 &&
                       ((typeSelected[0] === 'RoomType' && (
                         <FloatingOnMap icon={getAffinityImage(getNode(room.index).affinity)} />
                       )) ||
-                        (typeSelected[0] === 'KamiCount' && (
-                          <FloatingOnMap icon={HelpMenuIcons.kamis} />
-                        )) ||
-                        (typeSelected[0] === 'OperatorCount' && (
-                          <FloatingOnMap icon={OperatorIcon} />
-                        )))}
+                        (typeSelected[0] === 'KamiCount' &&
+                          (kamiCountMap?.get(room.index) ?? 0) > 0 && (
+                            <FloatingOnMap icon={HelpMenuIcons.kamis} />
+                          )) ||
+                        (typeSelected[0] === 'OperatorCount' &&
+                          (operatorCountMap.get(room.index) ?? 0) > 0 && (
+                            <FloatingOnMap icon={OperatorIcon} />
+                          )))}
                   </Tile>
                 </TextTooltip>
               );
