@@ -57,7 +57,7 @@ export function DropdownToggle(props: Props) {
   }, [modeOptions]);
 
   const toggleOption = (e: React.MouseEvent, index: number) => {
-    e.stopPropagation(); // prevent popover from closing
+    // prevent popover from closing
     if (simplified) {
       const newChecked = Array(modeOptions.length).fill(false);
       newChecked[index] = true;
@@ -65,6 +65,7 @@ export function DropdownToggle(props: Props) {
       playClick();
       onClick[currentMode]?.([modeOptions[index].object]);
     } else {
+      e.stopPropagation();
       setChecked((prev) => {
         const selected = prev.filter(Boolean).length;
         // !prev[index] is neccesary so the player can decrease the number of selected options when the limit is reached
