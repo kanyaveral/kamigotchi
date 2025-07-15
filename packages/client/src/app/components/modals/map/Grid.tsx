@@ -4,6 +4,8 @@ import styled from 'styled-components';
 
 import { Account } from 'app/cache/account';
 import { TextTooltip } from 'app/components/library';
+import { DropdownToggle } from 'app/components/library/buttons/DropdownToggle';
+import { ActionIcons } from 'assets/images/icons/actions';
 import { mapBackgrounds } from 'assets/images/map';
 import { Zones } from 'constants/zones';
 import { Allo } from 'network/shapes/Allo';
@@ -58,6 +60,17 @@ export const Grid = (props: Props) => {
 
   const [kamiEntities, setKamiEntities] = useState<EntityIndex[]>([]);
   const [playerEntities, setPlayerEntities] = useState<EntityIndex[]>([]);
+  const [typeSelected, setTypeSelected] = useState<String[]>(['MyKamis']);
+  const types = [
+    { text: 'My Kamis', object: 'MyKamis' },
+    { text: 'Room Type', object: 'RoomType' },
+    { text: 'Kami Count', object: 'KamiCount' },
+    { text: 'Operator Count', object: 'OperatorCount' },
+  ];
+
+  const setType = (type: String[]) => {
+    setTypeSelected(type);
+  };
 
   const rolls = useMemo(() => {
     const map = new Map<number, number>();
@@ -142,6 +155,20 @@ export const Grid = (props: Props) => {
     <Container>
       <Background src={mapBackgrounds[zone]} />
       <Overlay>
+        <div style={{ position: 'absolute', top: '0', left: '0', zIndex: 1 }}>
+          <DropdownToggle
+            limit={33}
+            button={{
+              images: [ActionIcons.search],
+              tooltips: ['Filter tile by Type'],
+            }}
+            onClick={[setType]}
+            options={[types]}
+            simplified
+            radius={0.6}
+          />
+        </div>
+
         {grid.map((row, i) => (
           <Row key={i}>
             {row.map((room, j) => {
@@ -179,7 +206,9 @@ export const Grid = (props: Props) => {
                     isHighlighted={!!backgroundColor}
                     onMouseEnter={() => updateRoomStats(room.index)}
                   >
-                    {kamiIconsMap.has(room.index) && <FloatingMapKami />}
+                    {kamiIconsMap.has(room.index) && typeSelected[0] === 'MyKamis' && (
+                      <FloatingMapKami />
+                    )}
                   </Tile>
                 </TextTooltip>
               );

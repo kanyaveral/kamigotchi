@@ -17,6 +17,7 @@ interface Props {
   disabled?: boolean[];
   balance?: number;
   radius?: number;
+  simplified?: boolean;
   limit?: number;
 }
 
@@ -30,7 +31,7 @@ interface Option {
 export function DropdownToggle(props: Props) {
   const { options, button, onClick, limit } = props;
   const { images, tooltips } = button;
-  const { balance, disabled, radius } = props;
+  const { balance, disabled, radius, simplified } = props;
   const [checked, setChecked] = useState<boolean[]>([]);
   const [modeSelected, setModeSelected] = useState<number>(0);
   const [forceClose, setForceClose] = useState(false);
@@ -56,12 +57,20 @@ export function DropdownToggle(props: Props) {
 
   const toggleOption = (e: React.MouseEvent, index: number) => {
     e.stopPropagation(); // prevent popover from closing
-    setChecked((prev) => {
-      const selected = prev.filter(Boolean).length;
-      // !prev[index] is neccesary so the player can decrease the number of selected options when the limit is reached
-      if (!prev[index] && limit && selected >= limit) return prev;
-      return prev.map((val, i) => (i === index ? !val : val));
-    });
+    if (simplified) {
+      const newChecked = Array(modeOptions.length).fill(false);
+      newChecked[index] = true;
+      setChecked(newChecked);
+      playClick();
+      onClick[currentMode]?.([modeOptions[index].object]);
+    } else {
+      setChecked((prev) => {
+        const selected = prev.filter(Boolean).length;
+        // !prev[index] is neccesary so the player can decrease the number of selected options when the limit is reached
+        if (!prev[index] && limit && selected >= limit) return prev;
+        return prev.map((val, i) => (i === index ? !val : val));
+      });
+    }
   };
 
   const toggleAll = (e: React.MouseEvent) => {
@@ -119,7 +128,9 @@ export function DropdownToggle(props: Props) {
     <Container>
       <Popover
         content={[
-          MenuCheckListOption({ text: 'Select All' }, null, (e) => toggleAll(e), true),
+          ...(simplified
+            ? []
+            : [MenuCheckListOption({ text: 'Select All' }, null, (e) => toggleAll(e), true)]),
           ...modeOptions.map((option, i) =>
             MenuCheckListOption(option, i, (e) => toggleOption(e, i), false)
           ),
@@ -139,15 +150,17 @@ export function DropdownToggle(props: Props) {
         />
       </Popover>
       {options.length > 1 && <VerticalToggle setModeSelected={setModeSelected} />}
-      <Tooltip content={tooltips?.[currentMode]} isDisabled={!tooltips?.[currentMode]}>
-        <IconButton
-          img={images[currentMode]}
-          disabled={modeDisabled || !checked.includes(true)}
-          onClick={handleTriggerClick}
-          flatten={'left'}
-          radius={radius ?? 0.45}
-        />
-      </Tooltip>
+      {!simplified && (
+        <Tooltip content={tooltips?.[currentMode]} isDisabled={!tooltips?.[currentMode]}>
+          <IconButton
+            img={images[currentMode]}
+            disabled={modeDisabled || !checked.includes(true)}
+            onClick={handleTriggerClick}
+            flatten={'left'}
+            radius={radius ?? 0.45}
+          />
+        </Tooltip>
+      )}
     </Container>
   );
 }
