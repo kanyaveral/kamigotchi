@@ -16,9 +16,9 @@ import { Condition } from 'network/shapes/Conditional';
 import { BaseKami } from 'network/shapes/Kami/types';
 import { Node } from 'network/shapes/Node';
 import { NullRoom, Room } from 'network/shapes/Room';
-import { DetailedEntity } from 'network/shapes/utils';
+import { DetailedEntity, getAffinityImage } from 'network/shapes/utils';
 import { playClick } from 'utils/sounds';
-import { FloatingMapKami } from './FloatingMapKami';
+import { FloatingOnMap } from './FloatingOnMap';
 import { GridTooltip } from './GridTooltip';
 interface Props {
   data: {
@@ -158,7 +158,9 @@ export const Grid = (props: Props) => {
     <Container>
       <Background src={mapBackgrounds[zone]} />
       <Overlay>
-        <div style={{ position: 'absolute', top: '0', left: '0', zIndex: 1 }}>
+        <div
+          style={{ position: 'absolute', top: '0', left: '0', zIndex: 3, pointerEvents: 'none' }}
+        >
           <DropdownToggle
             limit={33}
             button={{
@@ -210,7 +212,16 @@ export const Grid = (props: Props) => {
                     onMouseEnter={() => updateRoomStats(room.index)}
                   >
                     {kamiIconsMap.has(room.index) && typeSelected[0] === 'MyKamis' && (
-                      <FloatingMapKami />
+                      <FloatingOnMap icon={KamiIcon} />
+                    )}
+                    {typeSelected[0] === 'RoomType' && room.index !== 0 && (
+                      <FloatingOnMap icon={getAffinityImage(getNode(room.index).affinity)} />
+                    )}
+                    {typeSelected[0] === 'KamiCount' && room.index !== 0 && (
+                      <FloatingOnMap icon={HelpMenuIcons.kamis} />
+                    )}
+                    {typeSelected[0] === 'OperatorCount' && room.index !== 0 && (
+                      <FloatingOnMap icon={OperatorIcon} />
                     )}
                   </Tile>
                 </TextTooltip>

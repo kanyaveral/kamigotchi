@@ -1,11 +1,12 @@
 import styled from 'styled-components';
 
-import { KamiIcon } from 'assets/images/icons/menu';
-
-export const FloatingMapKami = () => {
+interface Props {
+  icon: string;
+}
+export const FloatingOnMap = (props: Props) => {
   return (
     <KamiAndShadow>
-      <KamiImage />
+      <KamiImage icon={props.icon} />
       <KamiShadow />
     </KamiAndShadow>
   );
@@ -19,9 +20,10 @@ const KamiAndShadow = styled.div`
   justify-content: center;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 `;
 
-const KamiImage = styled.div`
+const KamiImage = styled.div<{ icon: string }>`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -30,7 +32,7 @@ const KamiImage = styled.div`
   height: 100%;
   width: 100%;
   position: relative;
-  background-image: url(${KamiIcon});
+  ${({ icon }) => `background-image: url(${icon});`}
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
