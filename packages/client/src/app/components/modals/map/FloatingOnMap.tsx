@@ -2,15 +2,17 @@ import styled from 'styled-components';
 
 interface Props {
   icon: string;
+  color?: number;
 }
 export const FloatingOnMap = (props: Props) => {
   return (
     <KamiAndShadow>
-      <KamiImage icon={props.icon} />
+      <KamiImage icon={props.icon} $color={props.color} />
       <KamiShadow />
     </KamiAndShadow>
   );
 };
+
 const KamiAndShadow = styled.div`
   position: relative;
   display: flex;
@@ -23,8 +25,9 @@ const KamiAndShadow = styled.div`
   height: 100%;
   pointer-events: none;
 `;
-
-const KamiImage = styled.div<{ icon: string }>`
+// https://cdn-images-1.medium.com/v2/resize:fit:800/1*0iw7ymhZXKuggiTelXgzGQ.jpeg
+//  after applying sepia(1) and saturate(500%), hue-rotate will have a starting point of 40 deg aprox
+const KamiImage = styled.div<{ icon: string; $color?: number }>`
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
@@ -39,18 +42,18 @@ const KamiImage = styled.div<{ icon: string }>`
   background-size: contain;
   animation: 2s infinite alternate floating;
   animation-timing-function: linear;
-
+  ${({ $color }) => `filter: sepia(1) saturate(500%) hue-rotate(${$color}deg);`}
   z-index: 2;
+
   @keyframes floating {
     0% {
-      transform: translatey(-25%);
+      transform: translateY(-25%);
     }
-
     50% {
-      transform: translatey(-5%);
+      transform: translateY(-5%);
     }
     100% {
-      transform: translatey(-25%);
+      transform: translateY(-25%);
     }
   }
 `;
