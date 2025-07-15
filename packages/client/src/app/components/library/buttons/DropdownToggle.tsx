@@ -1,3 +1,4 @@
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -139,13 +140,14 @@ export function DropdownToggle(props: Props) {
         forceClose={forceClose}
       >
         <IconButton
-          text={`${checked.filter(Boolean).length} Selected`}
-          width={10}
+          img={simplified ? FilterListIcon : undefined}
+          text={simplified ? undefined : `${checked.filter(Boolean).length} Selected`}
+          width={simplified ? 2 : 10}
           onClick={() => {}}
           disabled={modeDisabled}
           balance={balance}
           corner={!balance}
-          flatten={'right'}
+          flatten={simplified ? undefined : 'right'}
           radius={radius ?? 0.45}
         />
       </Popover>

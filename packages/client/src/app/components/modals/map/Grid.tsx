@@ -5,7 +5,10 @@ import styled from 'styled-components';
 import { Account } from 'app/cache/account';
 import { TextTooltip } from 'app/components/library';
 import { DropdownToggle } from 'app/components/library/buttons/DropdownToggle';
+import { HelpMenuIcons } from 'assets/images/help';
 import { ActionIcons } from 'assets/images/icons/actions';
+import { insectIcon } from 'assets/images/icons/affinities';
+import { KamiIcon, OperatorIcon } from 'assets/images/icons/menu';
 import { mapBackgrounds } from 'assets/images/map';
 import { Zones } from 'constants/zones';
 import { Allo } from 'network/shapes/Allo';
@@ -62,10 +65,10 @@ export const Grid = (props: Props) => {
   const [playerEntities, setPlayerEntities] = useState<EntityIndex[]>([]);
   const [typeSelected, setTypeSelected] = useState<String[]>(['MyKamis']);
   const types = [
-    { text: 'My Kamis', object: 'MyKamis' },
-    { text: 'Room Type', object: 'RoomType' },
-    { text: 'Kami Count', object: 'KamiCount' },
-    { text: 'Operator Count', object: 'OperatorCount' },
+    { text: 'My Kamis', img: KamiIcon, object: 'MyKamis' },
+    { text: 'Room Type', img: insectIcon, object: 'RoomType' },
+    { text: 'Kami Count', img: HelpMenuIcons.kamis, object: 'KamiCount' },
+    { text: 'Operator Count', img: OperatorIcon, object: 'OperatorCount' },
   ];
 
   const setType = (type: String[]) => {
