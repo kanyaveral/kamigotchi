@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 import { EmptyText } from 'app/components/library';
 import { Account } from 'network/shapes/Account';
+import { Bonus } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { Node } from 'network/shapes/Node';
 import { KamiBars } from './KamiBars';
@@ -34,10 +35,13 @@ interface Props {
     displayedKamis: Kami[];
     tick: number;
   };
+  utils: {
+    getBonusesByItems: (kami: Kami) => Bonus[];
+  };
 }
 
 export const KamiList = (props: Props) => {
-  const { actions, controls, data, display, state } = props;
+  const { actions, controls, data, display, state, utils } = props;
   const { kamis } = data;
   const { view } = controls;
   const { displayedKamis, tick } = state;
@@ -70,6 +74,7 @@ export const KamiList = (props: Props) => {
         data={data}
         display={display}
         state={{ displayedKamis }}
+        utils={utils}
         isVisible={view === 'expanded'}
       />
       <KamiBars

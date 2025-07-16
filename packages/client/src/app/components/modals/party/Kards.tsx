@@ -8,13 +8,13 @@ import {
   isHarvesting,
   isOffWorld,
   isResting,
-  isUnrevealed,
 } from 'app/cache/kami';
 import { KamiCard } from 'app/components/library';
 import { OnyxButton } from 'app/components/library/buttons/actions/OnyxButton';
 import { useSelected, useVisibility } from 'app/stores';
 import { FeedIcon, ReviveIcon } from 'assets/images/icons/actions';
 import { Account } from 'network/shapes/Account';
+import { Bonus, parseBonusText } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { Node, NullNode } from 'network/shapes/Node';
 import { getRateDisplay } from 'utils/numbers';
@@ -42,11 +42,14 @@ interface Props {
   state: {
     displayedKamis: Kami[];
   };
+  utils: {
+    getBonusesByItems: (kami: Kami) => Bonus[];
+  };
   isVisible: boolean;
 }
 
 export const Kards = (props: Props) => {
-  const { actions, data, display, state, isVisible } = props;
+  const { actions, data, display, state, utils, isVisible } = props;
   const { onyxApprove, onyxRevive } = actions;
   const { account, node, onyx } = data;
   const { displayedKamis } = state;
@@ -64,7 +67,6 @@ export const Kards = (props: Props) => {
 
     let description: string[] = [];
     if (isOffWorld(kami)) description = ['kidnapped by slave traders'];
-    else if (isUnrevealed(kami)) description = ['Unrevealed!'];
     else if (isResting(kami)) description = ['Resting', `${healthRate} HP/hr`];
     else if (isDead(kami)) description = [`Murdered`];
     else if (isHarvesting(kami) && kami.harvest) {
@@ -84,7 +86,18 @@ export const Kards = (props: Props) => {
         ];
       }
     }
+
+    // add bonuses from items to description
+    if (getItemBonusesDescription(kami).length > 0) {
+      description = description.concat(getItemBonusesDescription(kami));
+    }
+
     return description;
+  };
+
+  const getItemBonusesDescription = (kami: Kami) => {
+    const bonuses = utils.getBonusesByItems(kami);
+    return bonuses.map((bonus) => parseBonusText(bonus));
   };
 
   // get the balance subtext for a kami
