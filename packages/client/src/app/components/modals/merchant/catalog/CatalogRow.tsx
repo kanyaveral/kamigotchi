@@ -66,7 +66,11 @@ export const CatalogRow = (props: Props) => {
   };
 
   const getInventoryQuantity = () => {
-    const inv = account.inventories?.find((inv) => inv.item.index === item.index);
+    if (!account.inventories) return 0;
+    const inv = account.inventories?.find((inv) => {
+      if (!inv || !inv.item) return false;
+      return inv.item.index === item.index;
+    });
     return inv?.balance ?? 0;
   };
 
