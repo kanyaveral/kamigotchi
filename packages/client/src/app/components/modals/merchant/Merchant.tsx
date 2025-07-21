@@ -93,7 +93,7 @@ export function registerMerchantModal() {
 
       // updates from selected Merchant updates
       useEffect(() => {
-        if (!modals.merchant) return;
+        if (!modals.merchant || npcIndex == merchant.index) return;
         const newMerchant = getNPC(npcIndex) ?? NullNPC;
         setMerchant(newMerchant);
         setListings(cleanListings(newMerchant.listings, account));
