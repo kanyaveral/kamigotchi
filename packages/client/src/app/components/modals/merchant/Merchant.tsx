@@ -79,7 +79,8 @@ export function registerMerchantModal() {
 
       // update the listings on each tick
       useEffect(() => {
-        if (!modals.merchant || npcIndex != merchant.index) return;
+        if (!modals.merchant) return;
+        if (!merchant || npcIndex != merchant.index) return;
         setMusuBalance(getMusuBalance(account.inventories ?? []));
         refreshListings(merchant);
       }, [lastTick]);
@@ -92,7 +93,7 @@ export function registerMerchantModal() {
 
       // updates from selected Merchant updates
       useEffect(() => {
-        if (!modals.merchant || npcIndex == merchant.index) return;
+        if (!modals.merchant) return;
         const newMerchant = getNPC(npcIndex) ?? NullNPC;
         setMerchant(newMerchant);
         setListings(cleanListings(newMerchant.listings, account));
@@ -116,7 +117,6 @@ export function registerMerchantModal() {
       /////////////////
       // DISPLAY
 
-      if (!merchant) return <></>;
       return (
         <ModalWrapper id='merchant' canExit overlay>
           <Header merchant={merchant} player={account} balance={musuBalance} />
