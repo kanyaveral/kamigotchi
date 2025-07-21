@@ -30,7 +30,10 @@ export const filterListings = (
   listings: Listing[],
   account: Account
 ): Listing[] => {
-  return listings.filter((l) => passesConditions(world, comps, l.requirements, account));
+  return listings.filter((l) => {
+    if (!l || !l.item) return false;
+    return passesConditions(world, comps, l.requirements, account);
+  });
 };
 
 // sorts listing by item index

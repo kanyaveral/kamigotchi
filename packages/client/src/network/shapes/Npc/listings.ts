@@ -1,4 +1,5 @@
 import { World } from '@mud-classic/recs';
+
 import { Components } from 'network/components';
 import { Listing, getListing, queryNPCListings } from '../Listing';
 
