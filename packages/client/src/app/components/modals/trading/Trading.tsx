@@ -108,7 +108,7 @@ export function registerTradingModal() {
       const refreshItemRegistry = () => {
         const all = getAllItems();
         // const nonCurrencies = all.filter((item) => !CurrencyIndices.includes(item.index));
-        const tradable = all.filter((item) => !!item.is.tradeable);
+        const tradable = all.filter((item) => item.is.tradeable);
         tradable.sort((a, b) => (a.name > b.name ? 1 : -1));
         if (tradable.length !== items.length) setItems(tradable);
 
