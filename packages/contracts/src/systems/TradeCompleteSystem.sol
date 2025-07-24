@@ -16,12 +16,12 @@ contract TradeCompleteSystem is System {
     uint256 id = abi.decode(arguments, (uint256));
 
     uint256 accID = LibAccount.getByOwner(components, msg.sender);
-    LibTrade.verifyRoom(components, accID);
     LibTrade.verifyIsTrade(components, id);
     LibTrade.verifyState(components, id, "EXECUTED");
     LibTrade.verifyMaker(components, id, accID);
 
     // complete the Trade
+    LibTrade.processDeliveryFee(components, accID);
     LibTrade.complete(world, components, id, accID);
 
     // data logging and event emission

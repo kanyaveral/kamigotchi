@@ -4,17 +4,20 @@ import { Dispatch, useState } from 'react';
 import { calcTradeTax } from 'app/cache/trade';
 import { IconButton, Overlay, Pairing, Text } from 'app/components/library';
 import { ItemImages } from 'assets/images/items';
+import { ETH_INDEX, ONYX_INDEX } from 'constants/items';
 import { Account, Inventory } from 'network/shapes';
 import { Item } from 'network/shapes/Item';
 import { ActionComponent } from 'network/systems';
 import { waitForActionCompletion } from 'network/utils';
 import styled from 'styled-components';
 import { playClick } from 'utils/sounds';
-import { ConfirmationData } from '../../Confirmation';
+import { TRADE_ROOM_INDEX } from '../../constants';
+import { ConfirmationData } from '../../library';
 import { MultiCreate } from './MultiCreate';
 import { SingleCreate } from './SingleCreate';
 
 type Mode = 'Single' | 'Multi';
+const DisabledItems = [ONYX_INDEX, ETH_INDEX];
 
 interface Props {
   actions: {
@@ -34,7 +37,6 @@ interface Props {
     account: Account;
     currencies: Item[];
     inventory: Inventory[];
-
     items: Item[];
   };
   types: {
@@ -49,10 +51,11 @@ export const Create = (props: Props) => {
   const { actions, controls, data, types, utils } = props;
   const { createTrade } = actions;
   const { setIsConfirming, setConfirmData } = controls;
+  const { account } = data;
   const { ActionComp } = types;
   const { entityToIndex } = utils;
 
-  const [mode, setMode] = useState<Mode>('Multi');
+  const [mode, setMode] = useState<Mode>('Single');
 
   // toggle between multi and single Create modes
   const toggleMode = () => {
@@ -96,7 +99,8 @@ export const Create = (props: Props) => {
     haveAmt: number[]
   ) => {
     const tradeConfig = data.account.config?.trade;
-    const tradeFee = tradeConfig?.fee ?? 0;
+    const createFee = tradeConfig?.fees.creation ?? 0;
+    const deliveryFee = tradeConfig?.fees.delivery ?? 0;
     const taxConfig = tradeConfig?.tax;
     const taxRate = taxConfig?.value ?? 0;
 
@@ -148,7 +152,7 @@ export const Create = (props: Props) => {
         <Row>
           <Text size={0.9}>{`Listing Fee: (`}</Text>
           <Pairing
-            text={tradeFee.toLocaleString()}
+            text={createFee.toLocaleString()}
             icon={ItemImages.musu}
             scale={0.9}
             tooltip={[
@@ -158,6 +162,18 @@ export const Create = (props: Props) => {
           />
           <Text size={0.9}>{`)`}</Text>
         </Row>
+        {account.roomIndex !== TRADE_ROOM_INDEX && (
+          <Row>
+            <Text size={0.9}>{`Delivery Fee: (`}</Text>
+            <Pairing
+              text={deliveryFee.toLocaleString()}
+              icon={ItemImages.musu}
+              scale={0.9}
+              tooltip={[`Trading outside of designated rooms`, `incurs a flat delivery fee.`]}
+            />
+            <Text size={0.9}>{`)`}</Text>
+          </Row>
+        )}
       </Paragraph>
     );
   };
@@ -173,17 +189,17 @@ export const Create = (props: Props) => {
       <MultiCreate
         actions={{ ...actions, handleCreatePrompt }}
         controls={{ ...controls }}
-        data={data}
+        data={{ ...data, items: data.items.filter((item) => !DisabledItems.includes(item.index)) }}
         isVisible={mode === 'Multi'}
       />
       <SingleCreate
         actions={{ ...actions, handleCreatePrompt }}
         controls={{ ...controls }}
-        data={data}
+        data={{ ...data, items: data.items.filter((item) => !DisabledItems.includes(item.index)) }}
         isVisible={mode === 'Single'}
       />
       <Overlay bottom={0.75} left={0.75}>
-        <IconButton text={mode} onClick={toggleMode} />
+        <IconButton text={`<${mode}>`} onClick={toggleMode} />
       </Overlay>
     </Container>
   );

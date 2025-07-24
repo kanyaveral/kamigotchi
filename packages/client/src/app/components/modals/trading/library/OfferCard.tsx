@@ -6,7 +6,7 @@ import { Overlay, Text, TextTooltip } from 'app/components/library';
 import { Account, Item, NullAccount } from 'network/shapes';
 import { Trade, TradeOrder } from 'network/shapes/Trade';
 import { playClick } from 'utils/sounds';
-import { getTypeColor } from '../../helpers';
+import { getTypeColor } from '../helpers';
 
 interface Props {
   button: {
@@ -103,7 +103,11 @@ export const OfferCard = (props: Props) => {
   return (
     <Container>
       <Side span={getSpan()} borderRight>
-        <TextTooltip text={getOrderTooltip(trade.sellOrder)} alignText='left' direction='row'>
+        <TextTooltip
+          text={getOrderTooltip(reverse ? trade.sellOrder : trade.buyOrder)}
+          alignText='left'
+          direction='row'
+        >
           {want.map((_, i) => (
             <ImagesWrapper key={i}>
               <Image src={want[i].image} />
@@ -133,7 +137,11 @@ export const OfferCard = (props: Props) => {
       </Controls>
 
       <Side span={getSpan()} borderLeft>
-        <TextTooltip text={getOrderTooltip(trade.buyOrder)} alignText='left' direction='row'>
+        <TextTooltip
+          text={getOrderTooltip(reverse ? trade.buyOrder : trade.sellOrder)}
+          alignText='left'
+          direction='row'
+        >
           {have.map((_, i) => (
             <ImagesWrapper key={i}>
               <Image src={have[i].image} />
@@ -153,10 +161,11 @@ const Container = styled.div`
 
   height: 6vw;
 
-  user-select: none;
-
   display: flex;
   flex-flow: row nowrap;
+
+  overflow: hidden;
+  user-select: none;
 `;
 
 const Side = styled.div<{ span: number; borderRight?: boolean; borderLeft?: boolean }>`
@@ -241,7 +250,7 @@ const TagContainer = styled.div`
 `;
 
 const TypeTag = styled.div<{ color: string; reverse?: boolean }>`
-  width: 5vw;
+  width: 6vw;
   padding: 0.2vw;
 
   color: rgb(25, 39, 2);
@@ -256,4 +265,5 @@ const TypeTag = styled.div<{ color: string; reverse?: boolean }>`
   justify-content: center;
 
   font-size: 0.9vw;
+  line-height: 1.2vw;
 `;
