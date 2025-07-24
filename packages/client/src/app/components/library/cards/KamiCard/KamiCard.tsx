@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { calcHealth } from 'app/cache/kami';
 import { TextTooltip } from 'app/components/library';
 import { useSelected, useVisibility } from 'app/stores';
+import { IndicatorIcons } from 'assets/images/icons/indicators';
+import { Bonus, parseBonusText } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
 import { Card } from '../';
@@ -21,12 +23,16 @@ interface Props {
   actions?: React.ReactNode;
   showBattery?: boolean;
   showCooldown?: boolean;
+  utils?: {
+    getBonusesByItems: (kami: Kami) => Bonus[];
+  };
 }
 
 // KamiCard is a card that displays information about a Kami. It is designed to display
 // information ranging from current harvest or death as well as support common actions.
 export const KamiCard = (props: Props) => {
-  const { kami, actions, showBattery, showCooldown, isFriend } = props;
+  const { kami, actions, showBattery, showCooldown, isFriend, utils } = props;
+  const getBonusesByItems = utils?.getBonusesByItems;
   const { description, descriptionOnClick } = props;
   const { contentTooltip } = props;
   const { subtext, subtextOnClick } = props;
@@ -64,6 +70,11 @@ export const KamiCard = (props: Props) => {
     return <>{[header, ...details]}</>;
   };
 
+  const getItemBonusesDescription = (kami: Kami) => {
+    if (!getBonusesByItems) return [];
+    return getBonusesByItems(kami).map((bonus) => parseBonusText(bonus));
+  };
+
   return (
     <Card image={{ icon: kami.image, onClick: handleKamiClick }}>
       <TitleBar>
@@ -71,6 +82,9 @@ export const KamiCard = (props: Props) => {
           {kami.name}
         </TitleText>
         <TitleCorner key='corner'>
+          <TextTooltip text={[getItemBonusesDescription(kami)]}>
+            {getItemBonusesDescription(kami).length > 0 && <Buff src={IndicatorIcons.buff} />}
+          </TextTooltip>
           {showCooldown && <Cooldown kami={kami} />}
           {showBattery && (
             <Health current={calcHealth(kami)} total={kami.stats?.health.total ?? 0} />
@@ -86,7 +100,6 @@ export const KamiCard = (props: Props) => {
         </ContentColumn>
         <ContentColumn key='column-2'>
           <ContentSubtext onClick={subtextOnClick}>{subtext}</ContentSubtext>
-
           <ContentActions>{actions}</ContentActions>
         </ContentColumn>
       </Content>
@@ -128,6 +141,12 @@ const TitleCorner = styled.div`
 
   font-size: 1vw;
   text-align: right;
+  height: 1.2vw;
+`;
+
+const Buff = styled.img`
+  height: 1.6vw;
+  margin-bottom: 0.2vw;
 `;
 
 const Content = styled.div`

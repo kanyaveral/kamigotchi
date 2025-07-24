@@ -4,6 +4,7 @@ import { interval, map } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { getAccount, getAccountKamis } from 'app/cache/account';
+import { getBonusesByItems } from 'app/cache/bonus';
 import { getNodeByIndex } from 'app/cache/node';
 import { HarvestButton, ModalHeader, ModalWrapper, UseItemButton } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
@@ -72,6 +73,8 @@ export function registerPartyModal() {
             },
             utils: {
               getAccount: () => getAccount(world, components, accountEntity, accRefreshOptions),
+              getBonusesByItems: (kami: Kami) =>
+                getBonusesByItems(world, components, kami.entity, kamiRefreshOptions.bonuses),
               getKamis: () =>
                 getAccountKamis(world, components, accountEntity, kamiRefreshOptions, debug.cache),
               getItem: (index: number) => getItemByIndex(world, components, index),
@@ -257,6 +260,7 @@ export function registerPartyModal() {
             }}
             display={display}
             state={{ displayedKamis, tick }}
+            utils={utils}
           />
         </ModalWrapper>
       );
