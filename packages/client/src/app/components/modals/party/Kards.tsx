@@ -8,13 +8,13 @@ import {
   isHarvesting,
   isOffWorld,
   isResting,
-  isUnrevealed,
 } from 'app/cache/kami';
 import { KamiCard } from 'app/components/library';
 import { OnyxButton } from 'app/components/library/buttons/actions/OnyxButton';
 import { useSelected, useVisibility } from 'app/stores';
 import { FeedIcon, ReviveIcon } from 'assets/images/icons/actions';
 import { Account } from 'network/shapes/Account';
+import { Bonus } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { Node, NullNode } from 'network/shapes/Node';
 import { getRateDisplay } from 'utils/numbers';
@@ -42,14 +42,20 @@ interface Props {
   state: {
     displayedKamis: Kami[];
   };
+  utils: {
+    calcExpRequirement: (lvl: number) => number;
+    getBonusesByItems: (kami: Kami) => Bonus[];
+  };
+
   isVisible: boolean;
 }
 
 export const Kards = (props: Props) => {
-  const { actions, data, display, state, isVisible } = props;
+  const { actions, data, display, state, utils, isVisible } = props;
   const { onyxApprove, onyxRevive } = actions;
   const { account, node, onyx } = data;
   const { displayedKamis } = state;
+  const { calcExpRequirement } = utils;
   const { HarvestButton, UseItemButton } = display;
   const { modals, setModals } = useVisibility();
   const { nodeIndex, setNode: setSelectedNode } = useSelected(); // node selected by user
@@ -64,7 +70,6 @@ export const Kards = (props: Props) => {
 
     let description: string[] = [];
     if (isOffWorld(kami)) description = ['kidnapped by slave traders'];
-    else if (isUnrevealed(kami)) description = ['Unrevealed!'];
     else if (isResting(kami)) description = ['Resting', `${healthRate} HP/hr`];
     else if (isDead(kami)) description = [`Murdered`];
     else if (isHarvesting(kami) && kami.harvest) {
@@ -84,6 +89,9 @@ export const Kards = (props: Props) => {
         ];
       }
     }
+
+    // add bonuses from items to description
+
     return description;
   };
 
@@ -181,6 +189,7 @@ export const Kards = (props: Props) => {
           actions={DisplayedActions(account, kami, node)}
           showBattery
           showCooldown
+          utils={utils}
         />
       ))}
     </Container>

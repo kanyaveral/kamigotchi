@@ -2,9 +2,11 @@ import styled from 'styled-components';
 
 import { isResting } from 'app/cache/kami';
 import { TextTooltip } from 'app/components/library';
+import { LevelUpArrows } from 'app/components/library/animations/LevelUp';
 import { Overlay } from 'app/components/library/styles';
 import { useSelected, useVisibility } from 'app/stores';
 import { clickFx, hoverFx, Shimmer } from 'app/styles/effects';
+import { IndicatorIcons } from 'assets/images/icons/indicators';
 import { Account, BaseAccount } from 'network/shapes/Account';
 import { Kami } from 'network/shapes/Kami';
 import { useEffect, useState } from 'react';
@@ -82,13 +84,16 @@ export const KamiImage = (props: Props) => {
     }
   };
 
+  const canLevel = getLevelTooltip() === LEVEL_UP_STRING;
+
   /////////////////
   // RENDERING
 
-  const canLevel = getLevelTooltip() === LEVEL_UP_STRING;
+  // used expCurr >= expLimit and not canLevel to show the level up animation even when not resting
   return (
     <Container>
       <Image src={kami.image} />
+      {expCurr >= expLimit && <LevelUpArrows />}
       <Overlay top={0.75} left={0.7}>
         <Grouping>
           <Text size={0.6}>Lvl</Text>
@@ -118,7 +123,8 @@ export const KamiImage = (props: Props) => {
         <Overlay bottom={0} right={0}>
           <TextTooltip text={[getLevelTooltip()]}>
             <Button disabled={!canLevel} onClick={() => handleLevelUp()}>
-              ↑{canLevel && <Shimmer />}
+              <Arrow src={IndicatorIcons.level_up} />
+              {canLevel && <Shimmer />}
             </Button>
           </TextTooltip>
         </Overlay>
@@ -131,6 +137,7 @@ const Container = styled.div`
   position: relative;
   height: 18vw;
   margin: 0.6vw 0 0.6vw 0.6vw;
+  overflow: hidden;
 `;
 
 const Image = styled.img`
@@ -234,4 +241,9 @@ const Button = styled.div<ButtonProps>`
   font-size: 0.8vw;
   text-align: center;
   user-select: none;
+`;
+
+const Arrow = styled.img`
+  width: 1.2vw;
+  height: 1.2vw;
 `;

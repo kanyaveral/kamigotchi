@@ -8,6 +8,20 @@ const AnchorToInstances = new Map<EntityID, EntityIndex[]>();
 
 const QueryUpdateTs = new Map<EntityID, number>();
 
+export const getByItems = (
+  world: World,
+  components: Components,
+  holder: EntityIndex,
+  update: number
+) => {
+  // todo: add SOURCE to bonus shape. queries based on end type for now
+  return [
+    ...getForEndType(world, components, 'UPON_HARVEST_ACTION', holder, update),
+    ...getForEndType(world, components, 'UPON_LIQUIDATION', holder, update),
+    ...getForEndType(world, components, 'UPON_DEATH', holder, update),
+  ];
+};
+
 export const getForEndType = (
   world: World,
   components: Components,

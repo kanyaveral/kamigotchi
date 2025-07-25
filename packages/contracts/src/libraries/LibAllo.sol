@@ -8,6 +8,7 @@ import { getAddrByID, getCompByID } from "solecs/utils.sol";
 import { LibQuery, QueryFragment, QueryType } from "solecs/LibQuery.sol";
 
 import { IDAnchorComponent, ID as IDAnchorCompID } from "components/IDAnchorComponent.sol";
+import { IdSourceComponent, ID as IDSourceCompID } from "components/IdSourceComponent.sol";
 import { IndexComponent, ID as IndexCompID } from "components/IndexComponent.sol";
 import { TypeComponent, ID as TypeCompID } from "components/TypeComponent.sol";
 import { ValueComponent, ID as ValueCompID } from "components/ValueComponent.sol";
@@ -23,6 +24,8 @@ import { Stat, LibStat } from "libraries/LibStat.sol";
 /**
  * @notice
  * Allos are shapes that indicate some sort of a one time distribution of other shapes
+ * note: Allos are strictly no takebacksies - ensure reverse mapping is not required post distribution
+ *    (entities created must be able to be deleted by other systems (e.g. temp bonuses) or is a balance (e.g. inventory))
  * - similar to Conditionals in that it matches a DescribedEntity (type + index)
  * - Can give
  *   - bonuses (unimplemented)
@@ -52,6 +55,7 @@ library LibAllo {
   /// @dev some allo types can be overridden
   function createBase(
     IUintComp components,
+    uint256 sourceID,
     uint256 anchorID,
     string memory type_,
     uint32 index,
@@ -62,6 +66,7 @@ library LibAllo {
       require(!LibEntityType.has(components, id), "Allocation already exists");
     }
     LibEntityType.set(components, id, "ALLOCATION");
+    IdSourceComponent(getAddrByID(components, IDSourceCompID)).set(id, sourceID);
     IDAnchorComponent(getAddrByID(components, IDAnchorCompID)).set(id, anchorID);
     TypeComponent(getAddrByID(components, TypeCompID)).set(id, type_);
     IndexComponent(getAddrByID(components, IndexCompID)).set(id, index);
@@ -69,12 +74,13 @@ library LibAllo {
 
   function createBasic(
     IUintComp components,
+    uint256 sourceID,
     uint256 anchorID,
     string memory type_,
     uint32 index,
     uint256 value
   ) internal returns (uint256 id) {
-    id = createBase(components, anchorID, type_, index, false);
+    id = createBase(components, sourceID, anchorID, type_, index, false);
 
     ValueComponent(getAddrByID(components, ValueCompID)).set(id, value);
   }
@@ -86,6 +92,7 @@ library LibAllo {
    */
   function createBonus(
     IUintComp components,
+    uint256 sourceID,
     uint256 anchorID,
     string memory bonusType,
     string memory endType,
@@ -93,7 +100,7 @@ library LibAllo {
     int256 value
   ) internal returns (uint256 id) {
     // create base each time, multiple bonuses to same allo
-    id = createBase(components, anchorID, "BONUS", 1, true);
+    id = createBase(components, sourceID, anchorID, "BONUS", 1, true);
 
     require(!endType.eq(""), "Allo: bonus must be temporary");
     uint256 bonusID = LibBonus.regCreate(components, id, bonusType, endType, duration, value);
@@ -102,15 +109,17 @@ library LibAllo {
   /// @notice this reward type does nothing. its for display.
   function createEmpty(
     IUintComp components,
+    uint256 sourceID,
     uint256 anchorID,
     string memory type_
   ) internal returns (uint256 id) {
     uint32 index = getIndexOverride(components, anchorID, type_);
-    id = createBase(components, anchorID, type_, index, false);
+    id = createBase(components, sourceID, anchorID, type_, index, false);
   }
 
   function createDT(
     IUintComp components,
+    uint256 sourceID,
     uint256 anchorID,
     uint32[] memory keys,
     uint256[] memory weights,
@@ -118,7 +127,7 @@ library LibAllo {
   ) internal returns (uint256 id) {
     // droptable indexes = num of DT in rwd, for each to be unique
     uint32 index = getIndexOverride(components, anchorID, "ITEM_DROPTABLE");
-    id = createBase(components, anchorID, "ITEM_DROPTABLE", index, false);
+    id = createBase(components, sourceID, anchorID, "ITEM_DROPTABLE", index, false);
 
     LibDroptable.set(components, id, keys, weights);
     ValueComponent(getAddrByID(components, ValueCompID)).set(id, value);
@@ -126,6 +135,7 @@ library LibAllo {
 
   function createStat(
     IUintComp components,
+    uint256 sourceID,
     uint256 anchorID,
     string memory statType,
     int32 base,
@@ -134,7 +144,7 @@ library LibAllo {
     int32 sync
   ) internal returns (uint256 id) {
     uint32 index = LibStat.typeToIndex(statType);
-    id = createBase(components, anchorID, "STAT", index, false);
+    id = createBase(components, sourceID, anchorID, "STAT", index, false);
 
     uint256 value = Stat(base, shift, boost, sync).toUint(); // store in raw form
     ValueComponent(getAddrByID(components, ValueCompID)).set(id, value);
@@ -142,6 +152,7 @@ library LibAllo {
 
   function remove(IUintComp components, uint256[] memory ids) internal {
     LibEntityType.remove(components, ids);
+    IdSourceComponent(getAddrByID(components, IDSourceCompID)).remove(ids);
     IDAnchorComponent(getAddrByID(components, IDAnchorCompID)).remove(ids);
     TypeComponent(getAddrByID(components, TypeCompID)).remove(ids);
     IndexComponent(getAddrByID(components, IndexCompID)).remove(ids);
@@ -152,6 +163,7 @@ library LibAllo {
 
   function remove(IUintComp components, uint256 id) internal {
     LibEntityType.remove(components, id);
+    IdSourceComponent(getAddrByID(components, IDSourceCompID)).remove(id);
     IDAnchorComponent(getAddrByID(components, IDAnchorCompID)).remove(id);
     TypeComponent(getAddrByID(components, TypeCompID)).remove(id);
     IndexComponent(getAddrByID(components, IndexCompID)).remove(id);
@@ -218,7 +230,7 @@ library LibAllo {
     uint256 mult,
     uint256 targetID
   ) internal {
-    LibBonus.incByTemporary(components, alloID, targetID, mult);
+    LibBonus.assignTemporary(components, alloID, targetID);
   }
 
   /// @notice distributes droptable rewards by creating a commit

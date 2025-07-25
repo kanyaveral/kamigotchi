@@ -1,5 +1,5 @@
 import { AdminAPI } from '../../api';
-import { getItemImage, getSheet, readFile } from '../utils';
+import { getItemImage, getSheet, readFile, toRevise } from '../utils';
 import { addAllo } from './allos';
 import { addRequirement, addTypeRequirement } from './requirements';
 
@@ -16,10 +16,11 @@ export async function initItems(api: AdminAPI, indices?: number[], all?: boolean
   if (!allosCSV) return console.log('No items/allos.csv found');
   const requirementsCSV = await getSheet('items', 'requirements');
   if (!requirementsCSV) return console.log('No items/requirements.csv found');
+  if (indices && indices.length == 0) return console.log('No items given to initialize');
   console.log('\n==INITIALIZING ITEMS==');
 
   const validStatuses = ['To Deploy'];
-  if (all || indices !== undefined) validStatuses.push('Ready', 'In Game');
+  if (all || indices !== undefined) validStatuses.push('Ready', 'In Game', 'To Update');
 
   // construct the map of allos for easier lookup
   const alloMap = new Map<string, any>();
@@ -93,7 +94,20 @@ export async function deleteItems(api: AdminAPI, indices: number[]) {
   }
 }
 
-export async function reviseItems(api: AdminAPI, indices: number[]) {
+export async function reviseItems(api: AdminAPI, overrideIndices?: number[]) {
+  const itemsCSV = await getSheet('items', 'items');
+  if (!itemsCSV) return console.log('No items/items.csv found');
+
+  let indices: number[] = [];
+  if (overrideIndices) indices = overrideIndices;
+  else {
+    for (let i = 0; i < itemsCSV.length; i++) {
+      const row = itemsCSV[i];
+      const index = Number(row['Index']);
+      if (toRevise(row)) indices.push(index);
+    }
+  }
+
   await deleteItems(api, indices);
   await initItems(api, indices);
 }
