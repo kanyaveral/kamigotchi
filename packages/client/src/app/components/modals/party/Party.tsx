@@ -14,7 +14,7 @@ import { KamiIcon } from 'assets/images/icons/menu';
 import { ONYX_INDEX } from 'constants/items';
 import { Account, NullAccount, queryAccountFromEmbedded } from 'network/shapes/Account';
 import { getItemByIndex, Item, NullItem } from 'network/shapes/Item';
-import { Kami } from 'network/shapes/Kami';
+import { calcKamiExpRequirement, Kami } from 'network/shapes/Kami';
 import { Node, NullNode, passesNodeReqs } from 'network/shapes/Node';
 import { getCompAddr } from 'network/shapes/utils';
 import { KamiList } from './KamiList';
@@ -53,6 +53,7 @@ export function registerPartyModal() {
             harvest: 5, // set this to 60 once we get explicit triggers for updates
             skills: 5, // set this to 3600 once we get explicit triggers for updates
             flags: 10, // set this to 3600 once we get explicit triggers for updates
+            progress: 3600,
             config: 3600,
             stats: 3600,
             traits: 3600,
@@ -72,6 +73,7 @@ export function registerPartyModal() {
                 UseItemButton(network, kami, account, icon),
             },
             utils: {
+              calcExpRequirement: (lvl: number) => calcKamiExpRequirement(world, components, lvl),
               getAccount: () => getAccount(world, components, accountEntity, accRefreshOptions),
               getBonusesByItems: (kami: Kami) =>
                 getBonusesByItems(world, components, kami.entity, kamiRefreshOptions.bonuses),
@@ -89,7 +91,7 @@ export function registerPartyModal() {
     ({ network, display, data, utils }) => {
       const { actions, api } = network;
       const { accountEntity, spender } = data;
-      const { getAccount, getItem, getKamis, getNode, passesNodeReqs } = utils;
+      const { getAccount, getItem, getKamis, getNode, passesNodeReqs, calcExpRequirement } = utils;
 
       const { modals } = useVisibility();
       const { selectedAddress, apis: ownerAPIs } = useNetwork();

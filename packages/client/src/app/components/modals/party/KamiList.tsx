@@ -31,12 +31,13 @@ interface Props {
     HarvestButton: (account: Account, kami: Kami, node: Node) => JSX.Element;
     UseItemButton: (kami: Kami, account: Account, icon: string) => JSX.Element;
   };
+  utils: {
+    calcExpRequirement: (lvl: number) => number;
+    getBonusesByItems: (kami: Kami) => Bonus[];
+  };
   state: {
     displayedKamis: Kami[];
     tick: number;
-  };
-  utils: {
-    getBonusesByItems: (kami: Kami) => Bonus[];
   };
 }
 
@@ -45,6 +46,7 @@ export const KamiList = (props: Props) => {
   const { kamis } = data;
   const { view } = controls;
   const { displayedKamis, tick } = state;
+  const { calcExpRequirement } = utils;
 
   /////////////////
   // DISPLAY

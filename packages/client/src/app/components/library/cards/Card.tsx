@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
+
 import { playClick } from 'utils/sounds';
+import { LevelUpArrows } from '../animations/LevelUp';
 import { TextTooltip } from '../poppers/TextTooltip';
 import { Overlay } from '../styles';
 
@@ -10,6 +12,7 @@ interface Props {
     icon?: string;
     onClick?: () => void;
     overlay?: string;
+    canLevel?: boolean;
     padding?: number;
     scale?: number;
     tooltip?: string[];
@@ -37,6 +40,7 @@ export const Card = (props: Props) => {
           <Overlay bottom={scale * 0.075} right={scale * 0.06}>
             <Text size={scale * 0.075}>{image?.overlay}</Text>
           </Overlay>
+          {!!image?.canLevel && <LevelUpArrows />}
           <Image src={image?.icon} onClick={handleImageClick} />
         </ImageContainer>
       </TextTooltip>
