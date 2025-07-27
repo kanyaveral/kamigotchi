@@ -7,15 +7,15 @@ import { Node } from 'network/shapes';
 import { getAffinityImage } from 'network/shapes/utils';
 import { abbreviateString } from 'utils/strings';
 
-interface Props {
+export const LocationColumn = ({
+  kills,
+  utils,
+}: {
   kills: Kill[];
   utils: {
     getNodeByIndex: (index: number) => Node;
   };
-}
-
-export const LocationColumn = (props: Props) => {
-  const { kills, utils } = props;
+}) => {
   const { getNodeByIndex } = utils;
 
   return (
