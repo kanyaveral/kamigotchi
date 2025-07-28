@@ -1,4 +1,4 @@
-import { World } from '@mud-classic/recs';
+import { EntityIndex, World } from '@mud-classic/recs';
 import moment from 'moment';
 
 import { HelpIcon, QuestsIcon } from 'assets/images/icons/menu';
@@ -14,6 +14,7 @@ import { capitalize } from './strings';
 
 // base shape of an entity with basic details
 export interface DetailedEntity {
+  entity: EntityIndex;
   ObjectType: string;
   image: string;
   name: string;
@@ -129,10 +130,12 @@ function getFaction(args: getArgs): DetailedEntity {
 }
 
 function getQuest(args: getArgs): DetailedEntity {
+  const quest = getQuestByIndex(args.world, args.components, args.index);
   return {
     ObjectType: 'QUEST',
+    entity: quest?.entity ?? (0 as EntityIndex),
     image: QuestsIcon,
-    name: getQuestByIndex(args.world, args.components, args.index)?.name ?? `Quest ${args.index}`,
+    name: quest?.name ?? `Quest ${args.index}`,
   };
 }
 
@@ -148,6 +151,7 @@ function getState(args: getArgs): DetailedEntity {
   const state = parseKamiStateFromIndex(args.index);
   return {
     ObjectType: 'STATE',
+    entity: 0 as EntityIndex,
     image: placeholderIcon,
     name: capitalize(state),
   };

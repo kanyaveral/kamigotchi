@@ -25,7 +25,6 @@ import { Traits, getTraits } from './traits';
 export interface BaseKami extends DetailedEntity {
   id: EntityID;
   index: number;
-  entity: EntityIndex;
 }
 
 // minimal gacha kami. reduced querying for performance
