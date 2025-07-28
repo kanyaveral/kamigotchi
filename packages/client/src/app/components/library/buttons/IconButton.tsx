@@ -24,6 +24,8 @@ interface Props {
   flatten?: `left` | `right`; // flattens a side, for use with dropdowns
 }
 
+const pixelSize = 24;
+
 // ActionButton is a text button that triggers an Action when clicked
 export const IconButton = forwardRef(function IconButton(
   props: Props,
@@ -37,7 +39,7 @@ export const IconButton = forwardRef(function IconButton(
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   const radius = props.radius ?? 0.45;
-  const scale = props.scale ? 1 : 1;
+  const scale = 1;
   const scaleOrientation = props.scaleOrientation ?? 'vw';
 
   useEffect(() => {
@@ -118,8 +120,7 @@ const Container = styled.button<ContainerProps>`
   width: ${({ fullWidth, width }) =>
     fullWidth ? '100%' : width ? `${Math.round(width * 0.9)}vw` : 'auto'};
   min-width: fit-content;
-  padding: ${({ scale, orientation }) => `${scale * 0.1}${orientation}`};
-  padding: ${({ scale, orientation }) => `${Math.round(scale * 0.1 * 100) / 100}${orientation}`};
+  padding: ${({ scale, orientation }) => `${scale * 0.55}${orientation}`};
 
   display: flex;
   flex-flow: row nowrap;
@@ -151,22 +152,23 @@ const Container = styled.button<ContainerProps>`
   ${({ pulse }) => pulse && `animation: ${pulseFx} 2.5s ease-in-out infinite;`}
 `;
 
+//backface-visibility: hidden;
 const Image = styled.img<{
   scale: number;
 }>`
-  width: ${({ scale }) => `${24 * scale * 0.5}px`};
-  height: ${({ scale }) => `${24 * scale * 0.5}px`};
+  width: ${({ scale }) => `${pixelSize * scale * 0.5}px`};
+  height: ${({ scale }) => `${pixelSize * scale * 0.5}px`};
 
   user-drag: none;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   image-rendering: -moz-crisp-edges;
-  backface-visibility: hidden;
+
   display: block;
 `;
 
 const Text = styled.div<{ scale: number; orientation: string }>`
-  font-size: ${({ scale }) => scale * 0.3}${({ orientation }) => orientation};
+  font-size: ${({ scale }) => scale * 0.8}${({ orientation }) => orientation};
 `;
 
 // TODO: get this scaling correctly with parent hover
