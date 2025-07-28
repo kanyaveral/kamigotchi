@@ -35,6 +35,7 @@ import { LibEntityType } from "libraries/utils/LibEntityType.sol";
  * - IsRegistry
  * - EntityType: BONUS
  * - IDAnchor: Parent registry's ID (e.g. SkillRegistryID)
+ * - IdSource: for client. ensure value is literal source's ID, not hashed anchorID
  * - Time [temporary only] - Duration of bonus, for timed bonuses only
  * - Type
  * - Subtype [temporary only] - EndAnchor (e.g. UPON_HARVEST_ACTION, TIMED)
@@ -65,6 +66,7 @@ library LibBonus {
   /// @notice creates a registry entry
   function regCreate(
     IUintComp components,
+    uint256 sourceID, // for client, ensure not hashed anchorID
     uint256 anchorID,
     string memory type_,
     string memory endAnchor, // leave blank if permanent
@@ -76,6 +78,7 @@ library LibBonus {
     LibEntityType.set(components, id, "BONUS");
     IsRegistryComponent(getAddrByID(components, IsRegCompID)).set(id);
 
+    IdSourceComponent(getAddrByID(components, IdSourceCompID)).set(id, sourceID);
     IDAnchorComponent(getAddrByID(components, IDAnchorCompID)).set(id, anchorID);
     TypeComponent(getAddrByID(components, TypeCompID)).set(id, type_);
     ValueComponent(getAddrByID(components, ValueCompID)).set(id, uint256(value));
@@ -136,6 +139,7 @@ library LibBonus {
   function regRemove(IUintComp components, uint256[] memory ids) internal {
     LibEntityType.remove(components, ids);
     IsRegistryComponent(getAddrByID(components, IsRegCompID)).remove(ids);
+    IdSourceComponent(getAddrByID(components, IdSourceCompID)).remove(ids);
     IDAnchorComponent(getAddrByID(components, IDAnchorCompID)).remove(ids);
     TimeComponent(getAddrByID(components, TimeCompID)).remove(ids);
     TypeComponent(getAddrByID(components, TypeCompID)).remove(ids);
