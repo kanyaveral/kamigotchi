@@ -18,7 +18,7 @@ interface Props {
     canContribute: () => [boolean, string];
     canClaim: () => [boolean, string];
     getBalance: (holder: EntityIndex, index: number | undefined, type: string) => number;
-    getDescribedEntity: (type: string, index: number) => DetailedEntity;
+    getFromDescription: (type: string, index: number) => DetailedEntity;
   };
 }
 
@@ -75,7 +75,7 @@ export const ActionBar = (props: Props) => {
         <SubText>
           Contribute{' '}
           {
-            utils.getDescribedEntity(goal.objective.target.type, goal.objective.target.index ?? 0)
+            utils.getFromDescription(goal.objective.target.type, goal.objective.target.index ?? 0)
               .name
           }
           ?

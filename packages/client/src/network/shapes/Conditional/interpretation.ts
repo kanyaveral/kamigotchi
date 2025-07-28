@@ -7,7 +7,7 @@ import { getPhaseName } from 'utils/time';
 import { Condition } from '../Conditional';
 import { getQuestByIndex } from '../Quest';
 import { getRoom } from '../Room';
-import { getDescribedEntity } from '../utils';
+import { getFromDescription } from '../utils';
 
 export const parseConditionalUnits = (con: Condition): [string, string] => {
   let tar = ((con.target.value ?? 0) * 1).toString();
@@ -48,7 +48,7 @@ export const parseConditionalText = (
 
   // account and general text
   if (con.target.type == 'ITEM')
-    text = `${targetVal} ${getDescribedEntity(world, components, con.target.type, con.target.index!).name}`;
+    text = `${targetVal} ${getFromDescription(world, components, con.target.type, con.target.index!).name}`;
   else if (con.target.type == 'HARVEST_TIME') text = `Harvest for ${deltaText} ${targetVal}`;
   else if (con.target.type == 'LIQUIDATE_TOTAL') text = `Liquidate ${deltaText} ${targetVal} Kami`;
   else if (con.target.type == 'LIQUIDATED_VICTIM')

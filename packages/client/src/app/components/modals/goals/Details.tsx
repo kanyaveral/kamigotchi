@@ -7,11 +7,11 @@ import { ItemIconHorizontal } from './ItemIconHorizontal';
 
 interface Props {
   goal: Goal;
-  getDescribedEntity: (type: string, index: number) => DetailedEntity;
+  getFromDescription: (type: string, index: number) => DetailedEntity;
 }
 
 export const Details = (props: Props) => {
-  const { goal, getDescribedEntity } = props;
+  const { goal, getFromDescription } = props;
 
   ////////////////
   // SMALL DISPLAYS
@@ -32,7 +32,7 @@ export const Details = (props: Props) => {
           {tier.rewards.map((reward, i) => (
             <ItemIconHorizontal
               key={`reward-${tier.name}-${i}`}
-              item={getDescribedEntity(reward.type, reward.index ?? 0)}
+              item={getFromDescription(reward.type, reward.index ?? 0)}
               size='small'
               balance={reward.value ?? 0}
               styleOverride={{ box: { borderColor: '#444', marginBottom: '0' } }}
