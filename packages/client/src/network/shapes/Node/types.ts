@@ -11,7 +11,6 @@ import { getRequirements } from './getters';
 export interface BaseNode extends DetailedEntity {
   ObjectType: 'NODE';
   id: EntityID;
-  entity: EntityIndex;
   affinity: string;
   index: number;
 }
