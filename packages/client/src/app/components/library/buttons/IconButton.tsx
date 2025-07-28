@@ -1,5 +1,5 @@
 import { SvgIconComponent } from '@mui/icons-material';
-import { ForwardedRef, forwardRef } from 'react';
+import { ForwardedRef, forwardRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { clickFx, hoverFx, pulseFx } from 'app/styles/effects';
@@ -33,11 +33,24 @@ export const IconButton = forwardRef(function IconButton(
   const { color, fullWidth, pulse, shadow, width, flatten } = props; // general styling
   const { balance, corner } = props; // IconListButton options
   const { cornerAlt } = props; // open page in new tab indicator
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   const radius = props.radius ?? 0.45;
-  const scale = props.scale ?? 2.5;
+  const scale = props.scale ? 1 : 1;
   const scaleOrientation = props.scaleOrientation ?? 'vw';
 
+  useEffect(() => {
+    const updateViewportSize = () => {
+      setViewportWidth(window.innerWidth);
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', updateViewportSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', updateViewportSize);
+  }, []);
   // layer on a sound effect
   const handleClick = async () => {
     playClick();
@@ -47,7 +60,7 @@ export const IconButton = forwardRef(function IconButton(
   const MyImage = () => {
     if (img) {
       if (typeof img === 'string') {
-        return <Image src={img} scale={scale} orientation={scaleOrientation} />;
+        return <Image src={img} scale={Math.floor(scale)} />;
       }
 
       const Icon = img;
@@ -101,11 +114,12 @@ const Container = styled.button<ContainerProps>`
   border: solid black 0.15vw;
   border-radius: ${({ radius, orientation }) => `${radius}${orientation}`};
 
-  height: ${({ scale, orientation }) => `${scale}${orientation}`};
-  width: ${({ fullWidth, width }) => (fullWidth ? '100%' : width ? `${width}vw` : 'auto')};
+  height: 100%;
+  width: ${({ fullWidth, width }) =>
+    fullWidth ? '100%' : width ? `${Math.round(width * 0.9)}vw` : 'auto'};
   min-width: fit-content;
   padding: ${({ scale, orientation }) => `${scale * 0.1}${orientation}`};
-  gap: ${({ scale, orientation }) => `${scale * 0.1}${orientation}`};
+  padding: ${({ scale, orientation }) => `${Math.round(scale * 0.1 * 100) / 100}${orientation}`};
 
   display: flex;
   flex-flow: row nowrap;
@@ -137,11 +151,18 @@ const Container = styled.button<ContainerProps>`
   ${({ pulse }) => pulse && `animation: ${pulseFx} 2.5s ease-in-out infinite;`}
 `;
 
-const Image = styled.img<{ scale: number; orientation: string }>`
-  width: ${({ scale }) => scale * 0.75}${({ orientation }) => orientation};
-  height: ${({ scale }) => scale * 0.75}${({ orientation }) => orientation};
-  ${({ scale }) => (scale > 4.5 ? 'image-rendering: pixelated;' : '')}
+const Image = styled.img<{
+  scale: number;
+}>`
+  width: ${({ scale }) => `${24 * scale * 0.5}px`};
+  height: ${({ scale }) => `${24 * scale * 0.5}px`};
+
   user-drag: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  backface-visibility: hidden;
+  display: block;
 `;
 
 const Text = styled.div<{ scale: number; orientation: string }>`

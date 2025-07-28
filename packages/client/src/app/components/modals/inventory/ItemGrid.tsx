@@ -121,7 +121,7 @@ export const ItemGrid = (props: Props) => {
         <IconListButton
           key={item.index}
           img={item.image}
-          scale={4.8}
+          scale={8}
           balance={inv.balance}
           options={options}
           disabled={options.length == 0}
