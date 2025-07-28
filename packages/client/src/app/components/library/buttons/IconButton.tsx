@@ -39,7 +39,7 @@ export const IconButton = forwardRef(function IconButton(
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   const radius = props.radius ?? 0.45;
-  const scale = 1;
+  const scale = 0.5;
   const scaleOrientation = props.scaleOrientation ?? 'vw';
 
   useEffect(() => {
@@ -62,9 +62,8 @@ export const IconButton = forwardRef(function IconButton(
   const MyImage = () => {
     if (img) {
       if (typeof img === 'string') {
-        return <Image src={img} scale={Math.floor(scale)} />;
+        return <Image src={img} scale={scale} />;
       }
-
       const Icon = img;
       return <Icon />;
     }
@@ -120,7 +119,7 @@ const Container = styled.button<ContainerProps>`
   width: ${({ fullWidth, width }) =>
     fullWidth ? '100%' : width ? `${Math.round(width * 0.9)}vw` : 'auto'};
   min-width: fit-content;
-  padding: ${({ scale, orientation }) => `${scale * 0.55}${orientation}`};
+  padding: ${({ scale, orientation }) => `${scale}${orientation}`};
 
   display: flex;
   flex-flow: row nowrap;
@@ -156,8 +155,8 @@ const Container = styled.button<ContainerProps>`
 const Image = styled.img<{
   scale: number;
 }>`
-  width: ${({ scale }) => `${pixelSize * scale * 0.5}px`};
-  height: ${({ scale }) => `${pixelSize * scale * 0.5}px`};
+  width: ${({ scale }) => `${pixelSize * scale}px`};
+  height: ${({ scale }) => `${pixelSize * scale}px`};
 
   user-drag: none;
   image-rendering: pixelated;
@@ -168,7 +167,7 @@ const Image = styled.img<{
 `;
 
 const Text = styled.div<{ scale: number; orientation: string }>`
-  font-size: ${({ scale }) => scale * 0.8}${({ orientation }) => orientation};
+  font-size: ${({ scale }) => scale * 2.8}${({ orientation }) => orientation};
 `;
 
 // TODO: get this scaling correctly with parent hover
