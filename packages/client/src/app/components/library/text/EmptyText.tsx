@@ -1,45 +1,61 @@
 import styled from 'styled-components';
 
-interface LinkPart {
-  text: string;
+// before and after are used to write plain text in the same line as the link
+interface Link {
+  before?: string;
+  linkText: string;
   href: string;
+  after?: string;
 }
-type TextPart = string | LinkPart;
+
+type TextPart = string | Link;
+
 interface Props {
   text: TextPart[];
-  size?: number; // font size
-  gapScale?: number; // lineheight proportion to font size
+  size?: number;
+  gapScale?: number;
   isHidden?: boolean;
   linkColor?: string;
 }
 
-export const EmptyText = (props: Props) => {
-  const { text, size, gapScale, isHidden, linkColor } = props;
-
+export const EmptyText = ({ text, size = 1.2, gapScale = 3, isHidden, linkColor }: Props) => {
   return (
     <Container isHidden={!!isHidden}>
-      {text.map((part, index) =>
-        typeof part === 'string' ? (
-          <Text key={part} size={size ?? 1.2} gapScale={gapScale ?? 3}>
-            {part}
-          </Text>
-        ) : (
-          <Link
-            key={`link-${index}`}
-            href={part.href}
-            target='_blank'
-            rel='noopener noreferrer'
-            size={size ?? 1.2}
-            linkColor={linkColor}
-            gapScale={gapScale ?? 3}
-          >
-            {part.text}
-          </Link>
-        )
-      )}
+      {
+        // plain text
+        text.map((part, index) => {
+          if (typeof part === 'string') {
+            return (
+              <Text key={index} size={size} gapScale={gapScale}>
+                {part}
+              </Text>
+            );
+          }
+          // link
+          if (typeof part === 'object' && 'linkText' in part) {
+            return (
+              <Text key={index} size={size} gapScale={gapScale}>
+                {part.before}
+                <Link
+                  href={part.href}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  size={size}
+                  linkColor={linkColor}
+                  gapScale={gapScale}
+                >
+                  {part.linkText}
+                </Link>
+                {part.after}
+              </Text>
+            );
+          }
+        })
+      }
     </Container>
   );
 };
+
 const Container = styled.div<{ isHidden: boolean }>`
   overflow-y: auto;
   height: 100%;
