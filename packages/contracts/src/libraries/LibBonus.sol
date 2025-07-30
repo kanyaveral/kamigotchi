@@ -125,11 +125,13 @@ library LibBonus {
     }
   }
 
+  // registry anchor
   function regRemoveByAnchor(IUintComp components, uint256[] memory anchorIDs) internal {
     uint256[] memory ids = queryByParent(components, anchorIDs);
     return regRemove(components, ids);
   }
 
+  // registry anchor
   function regRemoveByAnchor(IUintComp components, uint256 anchorID) internal {
     uint256[] memory ids = queryByParent(components, anchorID);
     regRemove(components, ids);
@@ -171,12 +173,14 @@ library LibBonus {
   /// @notice increases bonus based on registry entry (eg skill)
   function incBy(
     IUintComp components,
-    uint256 regAnchorID,
-    uint256 anchorID,
+    uint256 regAnchorID, // registry anchor, holds all bonuses from same registry entry
+    uint256 anchorID, // instance anchor, holds bonuses of (holder + source/type)
     uint256 holderID,
     uint256 amt
   ) internal returns (uint256[] memory instanceIDs) {
     uint256[] memory regIDs = queryByParent(components, regAnchorID);
+    if (regIDs.length == 0) return new uint256[](0);
+
     instanceIDs = new uint256[](regIDs.length);
     for (uint256 i; i < regIDs.length; i++) {
       instanceIDs[i] = assign(components, regIDs[i], anchorID, holderID);
@@ -187,10 +191,12 @@ library LibBonus {
   /// @dev temporary bonuses cannot be stacked (if same source, same end type). will never level up
   function assignTemporary(
     IUintComp components,
-    uint256 regAnchorID,
+    uint256 regAnchorID, // registry anchor, holds all bonuses from same registry entry
     uint256 holderID
   ) internal returns (uint256[] memory instanceIDs) {
     uint256[] memory regIDs = queryByParent(components, regAnchorID);
+    if (regIDs.length == 0) return new uint256[](0);
+
     instanceIDs = new uint256[](regIDs.length);
     uint256[] memory levels = new uint256[](regIDs.length); // all 1
     for (uint256 i; i < regIDs.length; i++) {
@@ -299,6 +305,11 @@ library LibBonus {
   /// @notice resets upon harvest action (collect, feed, stop)
   function resetUponHarvestAction(IUintComp components, uint256 holderID) public {
     unassignBy(components, "UPON_HARVEST_ACTION", holderID);
+  }
+
+  /// @notice resets upon harvest stop (stop, liquidated)
+  function resetUponHarvestStop(IUintComp components, uint256 holderID) public {
+    unassignBy(components, "UPON_HARVEST_STOP", holderID);
   }
 
   /// @notice resets upon kami death
