@@ -297,6 +297,10 @@
       "writeAccess": ["EntityType", "IDOwnsInventory", "IndexItem", "TimeLast", "Value"]
     },
     {
+      "name": "ItemTransferSystem",
+      "writeAccess": ["EntityType", "IDOwnsInventory", "IndexItem", "TimeLast", "Value"]
+    },
+    {
       "name": "FriendAcceptSystem",
       "writeAccess": ["EntityType", "IdSource", "IDAnchor", "IdTarget", "State", "TimeLast"]
     },

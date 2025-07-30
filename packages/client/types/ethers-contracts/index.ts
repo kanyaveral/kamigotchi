@@ -92,6 +92,7 @@ export type { IsCompleteComponent } from "./IsCompleteComponent";
 export type { IsDisabledComponent } from "./IsDisabledComponent";
 export type { IsRegistryComponent } from "./IsRegistryComponent";
 export type { ItemBurnSystem } from "./ItemBurnSystem";
+export type { ItemTransferSystem } from "./ItemTransferSystem";
 export type { Kami721IsInWorldSystem } from "./Kami721IsInWorldSystem";
 export type { Kami721MetadataSystem } from "./Kami721MetadataSystem";
 export type { Kami721StakeSystem } from "./Kami721StakeSystem";
@@ -303,6 +304,7 @@ export { IsCompleteComponent__factory } from "./factories/IsCompleteComponent__f
 export { IsDisabledComponent__factory } from "./factories/IsDisabledComponent__factory";
 export { IsRegistryComponent__factory } from "./factories/IsRegistryComponent__factory";
 export { ItemBurnSystem__factory } from "./factories/ItemBurnSystem__factory";
+export { ItemTransferSystem__factory } from "./factories/ItemTransferSystem__factory";
 export { Kami721IsInWorldSystem__factory } from "./factories/Kami721IsInWorldSystem__factory";
 export { Kami721MetadataSystem__factory } from "./factories/Kami721MetadataSystem__factory";
 export { Kami721StakeSystem__factory } from "./factories/Kami721StakeSystem__factory";
