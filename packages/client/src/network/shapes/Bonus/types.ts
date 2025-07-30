@@ -2,8 +2,9 @@ import { EntityID, EntityIndex, World, getComponentValue } from '@mud-classic/re
 
 import { formatEntityID } from 'engine/utils';
 import { Components } from 'network/';
-import { hashArgs } from '../utils';
-import { getLevel, getType, getValue as getValueComp } from '../utils/component';
+import { DetailedEntity, hashArgs } from '../utils';
+import { getLevel, getSourceID, getType, getValue as getValueComp } from '../utils/component';
+import { getDetailedEntityByID } from '../utils/parse';
 
 export interface Bonus {
   id: EntityID;
@@ -12,6 +13,7 @@ export interface Bonus {
   value: number;
   endType?: string;
   duration?: number;
+  source?: DetailedEntity; // source registry entity, for display purposes
 }
 
 export interface BonusInstance extends Bonus {
@@ -26,13 +28,13 @@ export const getRegistry = (
   precision: number = 0
 ): Bonus => {
   const { Subtype } = comps;
-
   return {
     id: world.entities[entity],
     entity: entity,
     type: getType(comps, entity),
     value: getValueComp(comps, entity),
     endType: getComponentValue(Subtype, entity)?.value as string,
+    source: getDetailedEntityByID(world, comps, getSourceID(comps, entity)),
   };
 };
 
