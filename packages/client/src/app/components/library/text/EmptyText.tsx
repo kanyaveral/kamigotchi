@@ -72,6 +72,7 @@ const Text = styled.div<{ size: number; gapScale: number }>`
   font-size: ${({ size }) => size}vw;
   line-height: ${({ size, gapScale }) => gapScale * size}vw;
   text-align: center;
+  pointer-events: auto;
 `;
 
 const Link = styled.a<{ size: number; linkColor?: string; gapScale: number }>`
