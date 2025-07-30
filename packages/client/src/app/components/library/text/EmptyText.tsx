@@ -32,7 +32,7 @@ export const EmptyText = ({ text, size = 1.2, gapScale = 3, isHidden, linkColor 
             );
           }
           // link
-          if (typeof part === 'object' && 'linkText' in part) {
+          if (typeof part === 'object') {
             return (
               <Text key={index} size={size} gapScale={gapScale}>
                 {part.before}
