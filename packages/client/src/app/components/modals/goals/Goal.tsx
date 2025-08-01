@@ -20,7 +20,7 @@ import {
   getGoalByIndex,
 } from 'network/shapes/Goals';
 import { Score } from 'network/shapes/Score';
-import { getBalance, getDescribedEntity } from 'network/shapes/utils';
+import { getBalance, getFromDescription } from 'network/shapes/utils';
 import { waitForActionCompletion } from 'network/utils';
 import { Details } from './Details';
 import { Leaderboard } from './Leaderboard';
@@ -58,8 +58,8 @@ export function registerGoalModal() {
               getContribution: (goal: Goal) =>
                 getContributionByHash(world, components, goal, account),
               getContributions: (goal: Goal) => getContributions(components, goal.id),
-              getDescribedEntity: (type: string, index: number) =>
-                getDescribedEntity(world, components, type, index),
+              getFromDescription: (type: string, index: number) =>
+                getFromDescription(world, components, type, index),
             },
           };
         })
@@ -144,8 +144,8 @@ export function registerGoalModal() {
           <>
             <Details
               goal={goal}
-              getDescribedEntity={(type, index) =>
-                getDescribedEntity(world, components, type, index)
+              getFromDescription={(type, index) =>
+                getFromDescription(world, components, type, index)
               }
             />
             <Progress

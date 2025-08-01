@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { calcHealth } from 'app/cache/kami';
 import { TextTooltip } from 'app/components/library';
 import { useSelected, useVisibility } from 'app/stores';
-import { IndicatorIcons } from 'assets/images/icons/indicators';
+import { StatusIcons } from 'assets/images/icons/statuses';
 import { Bonus, parseBonusText } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
@@ -25,7 +25,7 @@ interface Props {
   showCooldown?: boolean;
   utils?: {
     calcExpRequirement: (lvl: number) => number;
-    getBonusesByItems: (kami: Kami) => Bonus[];
+    getTempBonuses: (kami: Kami) => Bonus[];
   };
 }
 
@@ -33,7 +33,7 @@ interface Props {
 // information ranging from current harvest or death as well as support common actions.
 export const KamiCard = (props: Props) => {
   const { kami, actions, showBattery, showCooldown, isFriend, utils } = props;
-  const getBonusesByItems = utils?.getBonusesByItems;
+  const getTempBonuses = utils?.getTempBonuses;
   const { calcExpRequirement } = utils ?? {};
   const { description, descriptionOnClick } = props;
   const { contentTooltip } = props;
@@ -83,8 +83,8 @@ export const KamiCard = (props: Props) => {
   };
 
   const getItemBonusesDescription = (kami: Kami) => {
-    if (!getBonusesByItems) return [];
-    return getBonusesByItems(kami).map((bonus) => parseBonusText(bonus));
+    if (!getTempBonuses) return [];
+    return getTempBonuses(kami).map((bonus) => parseBonusText(bonus));
   };
 
   return (
@@ -95,7 +95,7 @@ export const KamiCard = (props: Props) => {
         </TitleText>
         <TitleCorner key='corner'>
           <TextTooltip text={[getItemBonusesDescription(kami)]}>
-            {getItemBonusesDescription(kami).length > 0 && <Buff src={IndicatorIcons.buff} />}
+            {getItemBonusesDescription(kami).length > 0 && <Buff src={StatusIcons.buff} />}
           </TextTooltip>
           {showCooldown && <Cooldown kami={kami} />}
           {showBattery && (
