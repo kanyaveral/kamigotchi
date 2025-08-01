@@ -163,6 +163,11 @@ export const KamiBar = (props: Props) => {
     return bonuses.map((bonus) => parseBonusText(bonus));
   };
 
+  const getKamiState = (kami: Kami) => {
+    if (kami.state === '721_EXTERNAL') return 'WANDERING';
+    else return kami.state;
+  };
+
   // get the color of the kami's status bar
   const getStatusColor = (level: number) => {
     if (isResting(kami)) return '#9CBCD2';
@@ -194,7 +199,7 @@ export const KamiBar = (props: Props) => {
           <Text size={0.45}>{calcOutput(kami)}</Text>
         </Overlay>
         <TextTooltip text={getTooltip(kami)} direction='row'>
-          <Text size={0.9}>{kami.state}</Text>
+          <Text size={0.9}>{getKamiState(kami)}</Text>
           <Text size={0.75}>({calcHealthPercent().toFixed(0)}%)</Text>
         </TextTooltip>
       </Middle>
