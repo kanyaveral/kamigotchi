@@ -44,18 +44,17 @@ interface Props {
   };
   utils: {
     calcExpRequirement: (lvl: number) => number;
-    getBonusesByItems: (kami: Kami) => Bonus[];
+    getTempBonuses: (kami: Kami) => Bonus[];
   };
 
   isVisible: boolean;
 }
 
-export const Kards = (props: Props) => {
+export const KamisExpanded = (props: Props) => {
   const { actions, data, display, state, utils, isVisible } = props;
   const { onyxApprove, onyxRevive } = actions;
   const { account, node, onyx } = data;
   const { displayedKamis } = state;
-  const { calcExpRequirement } = utils;
   const { HarvestButton, UseItemButton } = display;
   const { modals, setModals } = useVisibility();
   const { nodeIndex, setNode: setSelectedNode } = useSelected(); // node selected by user
@@ -157,9 +156,10 @@ export const Kards = (props: Props) => {
 
   // Choose and return the action button to display
   const DisplayedActions = (account: Account, kami: Kami, node: Node) => {
+    if (!isVisible) return <></>;
     let buttons = [];
-    let useIcon = isDead(kami) ? ReviveIcon : FeedIcon;
 
+    let useIcon = isDead(kami) ? ReviveIcon : FeedIcon;
     buttons.push(UseItemButton(kami, account, useIcon));
     if (!isDead(kami)) buttons.push(HarvestButton(account, kami, node));
     else {

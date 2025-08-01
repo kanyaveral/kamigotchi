@@ -11,30 +11,37 @@ import {
   isHarvesting,
   isResting,
 } from 'app/cache/kami';
-import { calcHealTime, calcIdleTime } from 'app/cache/kami/calcs/base';
+import { calcHealTime, calcIdleTime, isOffWorld } from 'app/cache/kami/calcs/base';
 import { Overlay, Text, TextTooltip } from 'app/components/library';
 import { Cooldown } from 'app/components/library/cards/KamiCard/Cooldown';
 import { useSelected, useVisibility } from 'app/stores';
 import { AffinityIcons } from 'constants/affinities';
+import { HarvestingMoods, RestingMoods } from 'constants/kamis';
 import { Bonus, parseBonusText } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { NullNode } from 'network/shapes/Node';
 import { getRateDisplay } from 'utils/numbers';
 import { playClick } from 'utils/sounds';
 import { formatCountdown } from 'utils/time';
-import { HarvestingMoods, RestingMoods } from './constants';
 
 interface Props {
   kami: Kami;
   actions?: React.ReactNode;
-  utils: {
-    getBonusesByItems: (kami: Kami) => Bonus[];
+  options?: {
+    showCooldown?: boolean;
+    showTooltip?: boolean;
   };
   tick: number;
+
+  // NOTE: this is really messy, we should embed temp bonuses onto the kami object
+  utils: {
+    getTempBonuses: (kami: Kami) => Bonus[];
+  };
 }
 
 export const KamiBar = (props: Props) => {
-  const { kami, actions, utils, tick } = props;
+  const { kami, actions, options, utils, tick } = props;
+  const { showCooldown, showTooltip } = options ?? {};
   const { kamiIndex, setKami } = useSelected();
   const { modals, setModals } = useVisibility();
   const [currentHealth, setCurrentHealth] = useState(0);
@@ -57,7 +64,7 @@ export const KamiBar = (props: Props) => {
   };
 
   /////////////////
-  // GETTERS
+  // INTERPRETATION
 
   const getBodyIcon = () => {
     const affinity = getKamiBodyAffinity(kami);
@@ -71,6 +78,7 @@ export const KamiBar = (props: Props) => {
     return AffinityIcons[affinityKey];
   };
 
+  // get the interpreted mood of the kami based on status
   const getMood = (kami: Kami, percent: number) => {
     let limit = 0;
     const limits = Object.keys(RestingMoods);
@@ -83,18 +91,25 @@ export const KamiBar = (props: Props) => {
     }
   };
 
+  // get the percent health the kami has remaining
   const calcHealthPercent = () => {
+    if (!showTooltip) return 100;
     const total = kami.stats?.health.total ?? 0;
     return (100 * currentHealth) / total;
   };
 
+  // get the tooltip for the kami
   const getTooltip = (kami: Kami) => {
+    // check for external and dead cases first to short circuit the tooltip
+    if (isOffWorld(kami)) {
+      return [`${kami.name} is not of this world`, `you may import them at the Scrap Confluence`];
+    }
     if (isDead(kami)) {
       return [`There's blood on your hands.`, `${kami.name} has fallen..`];
     }
 
     // get general data for the tooltip
-    // NOTE(jb): the underlying health calcs here are p inefficient ngl
+    // NOTE(ach): the underlying health calcs here are p inefficient ngl
     const totalHealth = kami.stats?.health.total ?? 0;
     const healthPercent = calcHealthPercent();
     const mood = getMood(kami, healthPercent);
@@ -107,6 +122,7 @@ export const KamiBar = (props: Props) => {
       `HP: ${currentHealth}/${totalHealth} (${healthRateStr}/hr)`,
     ];
 
+    // resting case
     if (isResting(kami)) {
       const healTime = calcHealTime(kami);
       if (healTime > 0) {
@@ -115,6 +131,7 @@ export const KamiBar = (props: Props) => {
       }
     }
 
+    // harvesting case
     if (isHarvesting(kami) && kami.harvest) {
       const harvest = kami.harvest;
       const spotRate = getRateDisplay(harvest.rates.total.spot, 2);
@@ -140,11 +157,13 @@ export const KamiBar = (props: Props) => {
     return tooltip;
   };
 
+  // get the description of temp bonuses currently applied to the kami
   const getBonusesDescription = (kami: Kami) => {
-    const bonuses = utils.getBonusesByItems(kami);
+    const bonuses = utils.getTempBonuses(kami);
     return bonuses.map((bonus) => parseBonusText(bonus));
   };
 
+  // get the color of the kami's status bar
   const getStatusColor = (level: number) => {
     if (isResting(kami)) return '#9CBCD2';
     if (level <= 25) return '#BD4F6C';
@@ -152,6 +171,9 @@ export const KamiBar = (props: Props) => {
     if (level <= 75) return '#F9DB6D';
     return '#16DB93';
   };
+
+  /////////////////
+  // RENDER
 
   return (
     <Container>
@@ -176,10 +198,10 @@ export const KamiBar = (props: Props) => {
           <Text size={0.75}>({calcHealthPercent().toFixed(0)}%)</Text>
         </TextTooltip>
       </Middle>
-      <Actions>
-        <Cooldown kami={kami} />
+      <Right>
+        {showCooldown && <Cooldown kami={kami} />}
         {actions}
-      </Actions>
+      </Right>
     </Container>
   );
 };
@@ -207,7 +229,7 @@ const Left = styled.div`
   justify-content: space-between;
 `;
 
-const Actions = styled.div`
+const Right = styled.div`
   display: flex;
   flex-flow: row nowrap;
   align-items: center;

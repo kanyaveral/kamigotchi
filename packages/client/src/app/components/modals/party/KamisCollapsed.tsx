@@ -1,13 +1,13 @@
 import styled from 'styled-components';
 
 import { isDead } from 'app/cache/kami';
-import { OnyxButton } from 'app/components/library/buttons/actions/OnyxButton';
+import { KamiBar } from 'app/components/library/bars';
+import { OnyxButton } from 'app/components/library/buttons';
 import { FeedIcon, ReviveIcon } from 'assets/images/icons/actions';
 import { Account } from 'network/shapes/Account';
 import { Bonus } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { Node } from 'network/shapes/Node';
-import { KamiBar } from './KamiBar';
 
 const ONYX_REVIVE_PRICE = 3;
 
@@ -35,11 +35,11 @@ interface Props {
   };
   isVisible: boolean;
   utils: {
-    getBonusesByItems: (kami: Kami) => Bonus[];
+    getTempBonuses: (kami: Kami) => Bonus[];
   };
 }
 
-export const KamiBars = (props: Props) => {
+export const KamisCollapsed = (props: Props) => {
   const { actions, data, display, state, isVisible, utils } = props;
   const { onyxApprove, onyxRevive } = actions;
   const { account, node, onyx } = data;
@@ -69,10 +69,12 @@ export const KamiBars = (props: Props) => {
   // DISPLAY
 
   // Choose and return the action button to display
+  // Q: what's the right way to prevent recomputes here?
   const DisplayedActions = (account: Account, kami: Kami, node: Node) => {
+    if (!isVisible) return <></>;
     let buttons = [];
-    let useIcon = isDead(kami) ? ReviveIcon : FeedIcon;
 
+    let useIcon = isDead(kami) ? ReviveIcon : FeedIcon;
     buttons.push(UseItemButton(kami, account, useIcon));
     if (!isDead(kami)) buttons.push(HarvestButton(account, kami, node));
     else {
@@ -96,6 +98,7 @@ export const KamiBars = (props: Props) => {
           key={kami.entity}
           kami={kami}
           actions={DisplayedActions(account, kami, node)}
+          options={{ showCooldown: true, showTooltip: true }}
           utils={utils}
           tick={tick}
         />
