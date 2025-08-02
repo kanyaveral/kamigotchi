@@ -10,15 +10,15 @@ export interface Trade {
   id: EntityID;
   entity: EntityIndex;
   ObjectType: string;
-  state: TradeState;
+  state: State;
   maker?: Account; // trade creator
   taker?: Account; // optional (only if designated taker defined)
   buyOrder?: TradeOrder; // from the perspective of the maker
   sellOrder?: TradeOrder; // from the perspective of the maker
 }
 
-export type TradeState = 'PENDING' | 'EXECUTED';
-
+export type State = 'PENDING' | 'EXECUTED' | 'CANCELLED' | 'COMPLETED';
+export type Timestamp = Record<State, string>;
 export interface TradeOrder {
   items: Item[];
   amounts: number[];
@@ -42,7 +42,7 @@ export const getTrade = (
     id,
     entity,
     ObjectType: getEntityType(comps, entity),
-    state: getState(comps, entity) as TradeState,
+    state: getState(comps, entity) as State,
   };
 
   if (options?.maker) {

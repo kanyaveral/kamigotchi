@@ -4,22 +4,24 @@ import styled from 'styled-components';
 import { calcTradeTax, TradeType } from 'app/cache/trade';
 import { Pairing, Text } from 'app/components/library';
 import { ItemImages } from 'assets/images/items';
+import moment from 'moment';
 import { Account, Item } from 'network/shapes';
 import { Trade } from 'network/shapes/Trade';
 import { TRADE_ROOM_INDEX } from '../../constants';
 import { ConfirmationData, OfferCard } from '../../library';
 
 interface Props {
-  actions: {
+  actions?: {
     completeTrade: (trade: Trade) => void;
   };
-  controls: {
+  controls?: {
     isConfirming: boolean;
     setIsConfirming: Dispatch<boolean>;
     setConfirmData: Dispatch<ConfirmationData>;
   };
   data: {
     account: Account;
+    isHistory?: boolean;
     trade: Trade;
     type: TradeType;
   };
@@ -33,14 +35,15 @@ interface Props {
 // TODO: add support for Trades you're the Taker for (disable action)
 export const ExecutedOffer = (props: Props) => {
   const { actions, controls, data } = props;
-  const { completeTrade } = actions;
-  const { isConfirming, setIsConfirming, setConfirmData } = controls;
-  const { account, trade, type } = data;
+  const { completeTrade } = actions ?? {};
+  const { isConfirming, setIsConfirming, setConfirmData } = controls ?? {};
+  const { account, isHistory, trade, type } = data;
 
   /////////////////
   // HANDLERS
 
   const handleComplete = () => {
+    if (!completeTrade || !setConfirmData || !setIsConfirming) return;
     const confirmAction = () => completeTrade(trade);
     setConfirmData({
       title: 'Confirm Completion',
@@ -55,12 +58,20 @@ export const ExecutedOffer = (props: Props) => {
   // INTERPRETATION
 
   const getActionTooltip = () => {
-    if (isMaker()) return ['Complete this trade'];
-    return [
+    if (isMaker() && actions) return ['Complete this trade'];
+    return [];
+    /* return [
       'You Executed this Trade as the Taker',
       'No further action is required on your part',
       `It'll disappear when ${trade.maker?.name ?? '???'} completes it`,
-    ];
+    ];*/
+  };
+
+  const getStateTooltip = () => {
+    const timestamp =
+      trade.timestamps &&
+      `: ${moment(Number(trade.timestamps[trade.state]) * 1000).format('MM/DD HH:mm')}`;
+    return [`${trade.state.toLowerCase()}${timestamp ?? ''}`];
   };
 
   // simple check for whether the player is the maker of the Trade Offer
@@ -144,10 +155,11 @@ export const ExecutedOffer = (props: Props) => {
         onClick: handleComplete,
         text: isMaker() ? 'Complete' : '.',
         tooltip: getActionTooltip(),
-        disabled: isConfirming || !isMaker(),
+        disabled: isConfirming || !isMaker() || isHistory,
       }}
       data={{ account, trade, type }}
       reverse={trade.maker?.entity === account.entity}
+      utils={{ getStateTooltip }}
     />
   );
 };
@@ -170,4 +182,22 @@ const Row = styled.div`
   align-items: center;
   justify-content: center;
   gap: 0.6vw;
+`;
+
+const Cancelled = styled.div`
+  position: absolute;
+  top: 24%;
+  left: 25%;
+  width: 50%;
+  height: 52%;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2vw;
+  color: rgb(128, 4, 4);
+  border: 0.19vw solid rgb(128, 4, 4);
+  transform: rotate(-22deg);
+  z-index: 2;
+  clip-path: polygon(0.5% 1%, 80% 0%, 100% 25%, 100% 90%, 90% 100%, 0% 100%, 15% 100%, 0% 70%);
 `;
