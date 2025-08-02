@@ -10,12 +10,14 @@ import { getTrade, getTradeHistory } from 'app/cache/trade';
 import { ModalHeader, ModalWrapper, Overlay } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
 import { useNetwork, useVisibility } from 'app/stores';
+import { getKamidenClient } from 'clients/kamiden';
 import { Trade as TradeHistory, TradesRequest } from 'clients/kamiden/proto';
 import { ETH_INDEX, MUSU_INDEX, ONYX_INDEX } from 'constants/items';
 import { queryAccountFromEmbedded } from 'network/shapes/Account';
 import { getAllItems, getMusuBalance, Item } from 'network/shapes/Item';
 import { queryTrades } from 'network/shapes/Trade';
 import { Trade } from 'network/shapes/Trade/types';
+import { History } from './history/History';
 import { Confirmation, ConfirmationData } from './library/Confirmation';
 import { Tabs } from './library/Tabs';
 import { Management } from './management';
@@ -24,6 +26,7 @@ import { TabType } from './types';
 
 const SYNC_TIME = 1000;
 const CurrencyIndices = [MUSU_INDEX, ETH_INDEX, ONYX_INDEX];
+const KamidenClient = getKamidenClient();
 
 export function registerTradingModal() {
   registerUIComponent(
@@ -275,7 +278,7 @@ export function registerTradingModal() {
                 currencies,
                 tradeHistory,
               }}
-              utils={{ getItemByIndex, getAccountByID, getTradeHistory }}
+              utils={utils}
               isVisible={tab === `History`}
             />
           </Content>
