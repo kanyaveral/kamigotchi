@@ -78,7 +78,6 @@ export const KamiCard = (props: Props) => {
     const details = description
       .slice(1)
       .map((text, i) => <TextMedium key={`desc-${i}`}>{text}</TextMedium>);
-
     return <>{[header, ...details]}</>;
   };
 
@@ -140,10 +139,10 @@ export const KamiCard = (props: Props) => {
 };
 
 const TitleBar = styled.div`
+  display: flex;
+
   border-bottom: solid black 0.15vw;
   padding: 0.45vw;
-
-  display: flex;
   flex-flow: row nowrap;
   align-items: center;
   justify-content: space-between;
@@ -153,10 +152,8 @@ const TitleBar = styled.div`
 const TitleText = styled.div`
   display: flex;
   justify-content: flex-start;
-
   font-size: 1vw;
   text-align: left;
-
   cursor: pointer;
   &:hover {
     opacity: 0.6;
@@ -169,9 +166,7 @@ const TitleCorner = styled.div`
   flex-grow: 1;
   align-items: center;
   justify-content: flex-end;
-
   gap: 0.3vw;
-
   font-size: 1vw;
   text-align: right;
   height: 1.2vw;
@@ -210,8 +205,9 @@ const ContentRow = styled.div`
 `;
 
 const ContentBottom = styled.div`
-  position: relative;
   display: flex;
+  position: relative;
+
   justify-content: space-between;
   align-items: flex-end;
 `;
@@ -227,7 +223,6 @@ const ContentColumn = styled.div`
 
 const ContentSubtext = styled.div`
   flex-grow: 1;
-
   text-align: right;
   font-size: 0.7vw;
 
@@ -243,10 +238,11 @@ const ContentSubtext = styled.div`
 `;
 
 const ContentActions = styled.div`
+  display: flex;
   position: absolute;
   right: 0.2vw;
   bottom: 0.1vw;
-  display: flex;
+
   flex-flow: row nowrap;
   justify-content: flex-end;
   gap: 0.3vw;
@@ -279,6 +275,7 @@ const TextMedium = styled.p`
 `;
 
 const Friend = styled.div`
+  display: flex;
   width: 5vw;
   padding: 0.2vw;
   position: absolute;
@@ -286,7 +283,7 @@ const Friend = styled.div`
   background-color: rgb(192, 224, 139);
   color: rgb(25, 39, 2);
   clip-path: polygon(10% 0%, 90% 0%, 100% 50%, 90% 100%, 10% 100%, 0% 50%);
-  display: flex;
+
   align-items: center;
   justify-content: center;
   font-size: 0.6vw;
