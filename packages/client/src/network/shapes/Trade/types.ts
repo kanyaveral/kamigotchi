@@ -15,6 +15,7 @@ export interface Trade {
   taker?: Account; // optional (only if designated taker defined)
   buyOrder?: TradeOrder; // from the perspective of the maker
   sellOrder?: TradeOrder; // from the perspective of the maker
+  timestamps?: Timestamp;
 }
 
 export type State = 'PENDING' | 'EXECUTED' | 'CANCELLED' | 'COMPLETED';
