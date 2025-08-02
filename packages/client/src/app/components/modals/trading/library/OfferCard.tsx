@@ -20,7 +20,7 @@ interface Props {
     trade: Trade;
     type: TradeType;
   };
-  utils: {
+  utils?: {
     getStateTooltip: () => string[];
   };
   reverse?: boolean;
@@ -120,7 +120,7 @@ export const OfferCard = (props: Props) => {
         </TextTooltip>
       </Side>
 
-      <TextTooltip title='status' text={[utils?.getStateTooltip()]} alignText='left'>
+      <TextTooltip title='status' text={utils?.getStateTooltip() || []} alignText='left'>
         <Controls>
           {trade.state === 'CANCELLED' && <Cancelled>Cancelled</Cancelled>}
           <TagContainer>
