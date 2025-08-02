@@ -153,7 +153,7 @@ export const ExecutedOffer = (props: Props) => {
     <OfferCard
       button={{
         onClick: handleComplete,
-        text: isMaker() ? 'Complete' : '.',
+        text: isMaker() && !isHistory ? 'Complete' : '.',
         tooltip: getActionTooltip(),
         disabled: isConfirming || !isMaker() || isHistory,
       }}

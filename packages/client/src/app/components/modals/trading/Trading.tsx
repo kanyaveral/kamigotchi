@@ -271,7 +271,7 @@ export function registerTradingModal() {
               types={types}
               utils={utils}
               isVisible={tab === `Management`}
-            />{' '}
+            />
             <History
               data={{
                 account,

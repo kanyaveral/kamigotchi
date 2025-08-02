@@ -27,7 +27,7 @@ export const Tabs = (props: Props) => {
       </Button>
       <Button disabled={tab === `Management`} onClick={() => handleTabbing(`Management`)}>
         {`Manage Orders`}
-      </Button>{' '}
+      </Button>
       <Button
         disabled={tab === `History`}
         onClick={() => handleTabbing(`History`)}

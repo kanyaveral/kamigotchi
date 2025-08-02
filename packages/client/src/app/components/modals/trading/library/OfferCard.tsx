@@ -122,7 +122,7 @@ export const OfferCard = (props: Props) => {
 
       <TextTooltip title='status' text={utils?.getStateTooltip() || []} alignText='left'>
         <Controls>
-          {trade.state === 'CANCELLED' && <Cancelled>Cancelled</Cancelled>}
+          {trade.state === 'CANCELLED' && <CancelOverlay>Cancelled</CancelOverlay>}
           <TagContainer>
             <Overlay top={0.21} left={0.21}>
               <Text size={0.6}>{getNameDisplay(leftAcc)}</Text>
@@ -134,10 +134,10 @@ export const OfferCard = (props: Props) => {
           </TagContainer>
           <TextTooltip text={button.tooltip} fullWidth>
             <Button onClick={handleClick} disabled={button.disabled}>
-              {button.disabled ? '.' : button.text}
+              {button.text}
             </Button>
           </TextTooltip>
-        </Controls>{' '}
+        </Controls>
       </TextTooltip>
 
       <Side span={getSpan()} borderLeft>
@@ -272,7 +272,7 @@ const TypeTag = styled.div<{ color: string; reverse?: boolean }>`
   line-height: 1.2vw;
 `;
 
-const Cancelled = styled.div`
+const CancelOverlay = styled.div`
   position: absolute;
   top: 24%;
   left: 25%;
