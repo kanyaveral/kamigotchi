@@ -2,10 +2,12 @@ import { EntityID, EntityIndex, getComponentValue } from '@mud-classic/recs';
 import { BigNumber } from 'ethers';
 import { Address } from 'viem';
 
+import { Trade as TradeHistory } from 'clients/kamiden/proto';
 import { Affinity } from 'constants/affinities';
 import { formatEntityID } from 'engine/utils';
 import { Components } from 'network/';
 import { parseAddress } from 'utils/address';
+import { State, Timestamp } from '../Trade/types';
 
 export const getAffinity = (components: Components, entity: EntityIndex): Affinity => {
   const { Affinity } = components;
@@ -141,9 +143,33 @@ export const getSkillPoints = (components: Components, entity: EntityIndex): num
 
 export const getState = (components: Components, entity: EntityIndex): string => {
   const { State } = components;
-  const result = getComponentValue(State, entity)?.value;
-  if (result === undefined) console.warn('getState(): undefined for entity', entity);
-  return result ?? '';
+  const value = getComponentValue(State, entity)?.value ?? '';
+  return value;
+};
+//move this to shapes?
+export const getTradeHistoryState = (
+  components: Components,
+  tradeHistory: TradeHistory,
+  timestamp: boolean = false
+): State | Timestamp => {
+  if (timestamp) {
+    return {
+      PENDING: tradeHistory.CreateTimestamp,
+      CANCELLED: tradeHistory.CancelTimestamp,
+      COMPLETED: tradeHistory.CompleteTimestamp,
+      EXECUTED: tradeHistory.ExecuteTimestamp,
+    };
+  } else {
+    let result: State;
+    if (tradeHistory.CancelTimestamp !== '0') {
+      result = 'CANCELLED';
+    } else if (tradeHistory.CompleteTimestamp !== '0') {
+      result = 'COMPLETED';
+    } else {
+      result = 'EXECUTED';
+    }
+    return result;
+  }
 };
 
 export const getType = (components: Components, entity: EntityIndex): string => {

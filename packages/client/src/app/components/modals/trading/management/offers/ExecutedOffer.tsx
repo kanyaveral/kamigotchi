@@ -1,25 +1,27 @@
-import { Dispatch } from 'react';
+import moment from 'moment';
+import { Dispatch, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { calcTradeTax, TradeType } from 'app/cache/trade';
 import { Pairing, Text } from 'app/components/library';
 import { ItemImages } from 'assets/images/items';
-import { Account, Item } from 'network/shapes';
+import { Account, Item, NullItem } from 'network/shapes';
 import { Trade } from 'network/shapes/Trade';
 import { TRADE_ROOM_INDEX } from '../../constants';
 import { ConfirmationData, OfferCard } from '../../library';
 
 interface Props {
-  actions: {
+  actions?: {
     completeTrade: (trade: Trade) => void;
   };
-  controls: {
+  controls?: {
     isConfirming: boolean;
     setIsConfirming: Dispatch<boolean>;
     setConfirmData: Dispatch<ConfirmationData>;
   };
   data: {
     account: Account;
+    isHistory?: boolean;
     trade: Trade;
     type: TradeType;
   };
@@ -32,15 +34,35 @@ interface Props {
 // NOTE: only supports simple (single item) trades against musu atm
 // TODO: add support for Trades you're the Taker for (disable action)
 export const ExecutedOffer = (props: Props) => {
-  const { actions, controls, data } = props;
-  const { completeTrade } = actions;
-  const { isConfirming, setIsConfirming, setConfirmData } = controls;
-  const { account, trade, type } = data;
+  const { actions, controls, data, utils } = props;
+  const { completeTrade } = actions ?? {};
+  const { isConfirming, setIsConfirming, setConfirmData } = controls ?? {};
+  const { account, isHistory, trade, type } = data;
+  const { getItemByIndex } = utils;
+
+  const [buyItem, setBuyItem] = useState<Item>(NullItem);
+  const [buyAmt, setBuyAmt] = useState<number>(1);
+  const [sellItem, setSellItem] = useState<Item>(NullItem);
+  const [sellAmt, setSellAmt] = useState<number>(1);
+
+  // set either side of a standard order based on the type
+  useEffect(() => {
+    const buyOrder = trade.buyOrder;
+    const sellOrder = trade.sellOrder;
+    if (!buyOrder || !sellOrder) return;
+
+    setBuyItem(buyOrder.items[0]);
+    setBuyAmt(buyOrder.amounts[0]);
+    setSellItem(sellOrder.items[0]);
+    setSellAmt(sellOrder.amounts[0]);
+  }, [trade, type]);
 
   /////////////////
   // HANDLERS
 
   const handleComplete = () => {
+    if (!completeTrade || !setConfirmData || !setIsConfirming) return;
+
     const confirmAction = () => completeTrade(trade);
     setConfirmData({
       title: 'Confirm Completion',
@@ -50,20 +72,26 @@ export const ExecutedOffer = (props: Props) => {
     });
     setIsConfirming(true);
   };
-
   /////////////////
   // INTERPRETATION
 
   const getActionTooltip = () => {
-    if (isMaker()) return ['Complete this trade'];
-    return [
+    if (isMaker() && actions) return ['Complete this trade'];
+    return [];
+    /*return [
       'You Executed this Trade as the Taker',
       'No further action is required on your part',
       `It'll disappear when ${trade.maker?.name ?? '???'} completes it`,
-    ];
+    ];*/
   };
 
-  // simple check for whether the player is the maker of the Trade Offer
+  const getStateTooltip = () => {
+    const timestamp =
+      trade.timestamps &&
+      `: ${moment(Number(trade.timestamps[trade.state]) * 1000).format('MM/DD HH:mm')}`;
+    return [`${trade.state.toLowerCase()}${timestamp ?? ''}`];
+  };
+
   const isMaker = () => {
     return trade.maker?.entity === account.entity;
   };
@@ -144,9 +172,10 @@ export const ExecutedOffer = (props: Props) => {
         onClick: handleComplete,
         text: isMaker() ? 'Complete' : '.',
         tooltip: getActionTooltip(),
-        disabled: isConfirming || !isMaker(),
+        disabled: isConfirming || isHistory || !isMaker(),
       }}
       data={{ account, trade, type }}
+      utils={{ getStateTooltip }}
       reverse={trade.maker?.entity === account.entity}
     />
   );
@@ -170,4 +199,23 @@ const Row = styled.div`
   align-items: center;
   justify-content: center;
   gap: 0.6vw;
+`;
+
+const Cancelled = styled.div`
+  position: absolute;
+  top: 24%;
+  left: 25%;
+  width: 50%;
+  height: 52%;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2vw;
+  color: rgb(128, 4, 4);
+  border: 0.19vw solid rgb(128, 4, 4);
+  transform: rotate(-22deg);
+  z-index: 2;
+
+  clip-path: polygon(0.5% 1%, 80% 0%, 100% 25%, 100% 90%, 90% 100%, 0% 100%, 15% 100%, 0% 70%);
 `;

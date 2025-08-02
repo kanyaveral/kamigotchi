@@ -317,7 +317,8 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
 
     const gapStateEvents = await fetchEventsInBlockRangeChunked(
       fetchWorldEvents,
-      initialState.blockNumber,
+      //initialState.blockNumber,
+      streamStartBlockNumber,
       streamStartBlockNumber,
       50,
       (percentage: number) => this.setLoadingState({ percentage })

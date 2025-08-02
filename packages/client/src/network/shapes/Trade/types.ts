@@ -1,24 +1,34 @@
 import { EntityID, EntityIndex, getComponentValue, World } from '@mud-classic/recs';
 
+import { Trade as TradeHistory } from 'clients/kamiden/proto';
+import { formatEntityID } from 'engine/utils';
+import { BigNumber } from 'ethers';
 import { Components } from 'network/components';
 import { Account, getAccountByID } from '../Account';
 import { getItemByIndex, Item } from '../Item';
 import { getEntityByHash } from '../utils';
-import { getEntityType, getOwnsTradeID, getState, getTargetID } from '../utils/component';
+import {
+  getEntityType,
+  getOwnsTradeID,
+  getState,
+  getTargetID,
+  getTradeHistoryState,
+} from '../utils/component';
 
 export interface Trade {
   id: EntityID;
   entity: EntityIndex;
   ObjectType: string;
-  state: TradeState;
+  state: State;
+  timestamps?: Timestamp;
   maker?: Account; // trade creator
   taker?: Account; // optional (only if designated taker defined)
   buyOrder?: TradeOrder; // from the perspective of the maker
   sellOrder?: TradeOrder; // from the perspective of the maker
 }
 
-export type TradeState = 'PENDING' | 'EXECUTED';
-
+export type State = 'PENDING' | 'EXECUTED' | 'CANCELLED' | 'COMPLETED';
+export type Timestamp = Record<State, string>;
 export interface TradeOrder {
   items: Item[];
   amounts: number[];
@@ -42,7 +52,7 @@ export const getTrade = (
     id,
     entity,
     ObjectType: getEntityType(comps, entity),
-    state: getState(comps, entity) as TradeState,
+    state: getState(comps, entity) as State,
   };
 
   if (options?.maker) {
@@ -55,6 +65,48 @@ export const getTrade = (
   }
   if (options?.buyOrder) trade.buyOrder = getBuyOrder(world, comps, id);
   if (options?.sellOrder) trade.sellOrder = getSellOrder(world, comps, id);
+
+  return trade;
+};
+
+export const getTradeHistory = (
+  world: World,
+  comps: Components,
+  tradeHistory: TradeHistory,
+  options?: Options
+): Trade => {
+  const id = formatEntityID(BigNumber.from(tradeHistory.TradeId));
+
+  const tradeEntity = world.entityToIndex.get(id)!;
+  const trade: Trade = {
+    id,
+    entity: tradeEntity,
+    ObjectType: getEntityType(comps, tradeEntity),
+    state: getTradeHistoryState(comps, tradeHistory) as State,
+    timestamps: getTradeHistoryState(comps, tradeHistory, true) as Timestamp,
+  };
+
+  if (options?.maker) {
+    const makerID = formatEntityID(BigNumber.from(tradeHistory.MakerId));
+    trade.maker = getAccountByID(world, comps, makerID);
+  }
+
+  if (options?.taker) {
+    const takerID = formatEntityID(BigNumber.from(tradeHistory.TakerId));
+    trade.taker = getAccountByID(world, comps, takerID);
+  }
+
+  if (options?.buyOrder)
+    trade.buyOrder = {
+      items: tradeHistory.BuyOrderIndices.map((key) => getItemByIndex(world, comps, key)),
+      amounts: tradeHistory.BuyOrderAmounts.map(Number),
+    };
+
+  if (options?.sellOrder)
+    trade.sellOrder = {
+      items: tradeHistory.SellOrderIndices.map((key) => getItemByIndex(world, comps, key)),
+      amounts: tradeHistory.SellOrderAmounts.map(Number),
+    };
 
   return trade;
 };

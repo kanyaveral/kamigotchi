@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { Dispatch } from 'react';
 import styled from 'styled-components';
 
@@ -7,7 +8,7 @@ import { Pairing, Text } from 'app/components/library';
 import { ItemImages } from 'assets/images/items';
 import { MUSU_INDEX } from 'constants/items';
 import { Account, Item } from 'network/shapes';
-import { Trade } from 'network/shapes/Trade';
+import { Trade, TradeOrder } from 'network/shapes/Trade';
 import { TRADE_ROOM_INDEX } from '../../constants';
 import { ConfirmationData, OfferCard } from '../../library';
 
@@ -98,6 +99,26 @@ export const PendingOffer = (props: Props) => {
   // simple check for whether the player is the maker of the Trade Offer
   const isMaker = () => {
     return trade.maker?.entity === account.entity;
+  };
+
+  // tooltip for list of order items/amts
+  const getOrderTooltip = (order?: TradeOrder): string[] => {
+    const tooltip = [];
+    if (!order) return [];
+
+    for (let i = 0; i < order.items.length; i++) {
+      const item = order.items[i];
+      const amt = order.amounts[i];
+      tooltip.push(`• ${amt.toLocaleString()} x ${item.name}`);
+    }
+    return tooltip;
+  };
+
+  const getStateTooltip = () => {
+    const timestamp =
+      trade.timestamps &&
+      `: ${moment(Number(trade.timestamps[trade.state]) * 1000).format('MM/DD HH:mm')}`;
+    return [`${trade.state.toLowerCase()}${timestamp ?? ''}`];
   };
 
   /////////////////
@@ -222,6 +243,7 @@ export const PendingOffer = (props: Props) => {
         disabled: isConfirming || !canFillOrder(),
       }}
       data={{ account, trade, type }}
+      utils={{ getStateTooltip }}
       reverse={trade.maker?.entity === account.entity}
     />
   );
