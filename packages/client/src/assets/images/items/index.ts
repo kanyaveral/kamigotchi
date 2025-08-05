@@ -77,6 +77,10 @@ import spice_grinder from './spice_grinder.png';
 import stone from './stone.png';
 import vipp from './vipp.png';
 import wooden_stick from './wooden_stick.png';
+import xp_candy_huge from './xp_candy_huge.png';
+import xp_candy_large from './xp_candy_large.png';
+import xp_candy_medium from './xp_candy_medium.png';
+import xp_candy_small from './xp_candy_small.png';
 import xp_potion from './xp_potion.png';
 
 export const ItemImages = {
@@ -159,5 +163,9 @@ export const ItemImages = {
   stone: stone,
   vipp: vipp,
   wooden_stick: wooden_stick,
+  xp_candy_huge: xp_candy_huge,
+  xp_candy_large: xp_candy_large,
+  xp_candy_medium: xp_candy_medium,
+  xp_candy_small: xp_candy_small,
   xp_potion: xp_potion,
 };
