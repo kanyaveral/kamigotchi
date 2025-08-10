@@ -7,9 +7,8 @@ import { WagmiProvider } from 'wagmi';
 import { BootScreen } from 'app/components/boot';
 import { privyConfig, tanstackClient, wagmiConfig } from 'clients/';
 import { Layers } from 'network/';
-import { MainWindow } from './components';
-import { NetworkContext, RootContext } from './context';
-import { RootStore } from './store';
+import { MainWindow } from './components/MainWindow';
+import { NetworkContext } from './context';
 
 export const Root = observer(({
   setLayers, mountReact,
@@ -38,9 +37,7 @@ export const Root = observer(({
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={tanstackClient}>
           <NetworkContext.Provider value={layers}>
-            <RootContext.Provider value={RootStore}>
-              <MainWindow />
-            </RootContext.Provider>
+            <MainWindow />
           </NetworkContext.Provider>
         </QueryClientProvider>
       </WagmiProvider>
