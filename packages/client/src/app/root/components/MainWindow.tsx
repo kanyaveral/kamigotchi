@@ -40,10 +40,7 @@ const UIComponentRenderer = ({
   return (
     <div
       style={{
-        gridRowStart: uiComponent.gridConfig.rowStart,
-        gridRowEnd: uiComponent.gridConfig.rowEnd,
-        gridColumnStart: uiComponent.gridConfig.colStart,
-        gridColumnEnd: uiComponent.gridConfig.colEnd,
+        gridArea: `${uiComponent.gridConfig.rowStart} / ${uiComponent.gridConfig.colStart} / ${uiComponent.gridConfig.rowEnd} / ${uiComponent.gridConfig.colEnd}`,
       }}
     >
       {<uiComponent.Render {...state} />}
