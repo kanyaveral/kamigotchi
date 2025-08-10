@@ -10,8 +10,9 @@ export type GridConfiguration = {
   rowEnd: number;
 };
 
-export interface UIComponent<T = unknown> {
+export type UIComponent = {
+  id: string;
   gridConfig: GridConfiguration;
-  requirement(layers: Layers): Observable<T>;
-  Render: React.FC<NonNullable<T>>;
+  requirement: (layers: Layers) => Observable<any>;
+  Render: React.FC<any>;
 }

@@ -8,7 +8,7 @@ import { getAccount } from 'app/cache/account';
 import { getItemByIndex } from 'app/cache/item';
 import { getTrade } from 'app/cache/trade';
 import { ModalHeader, ModalWrapper, Overlay } from 'app/components/library';
-import { registerUIComponent } from 'app/root';
+import { UIComponent } from 'app/root/types';
 import { useNetwork, useVisibility } from 'app/stores';
 import { ETH_INDEX, MUSU_INDEX, ONYX_INDEX } from 'constants/items';
 import { queryAccountFromEmbedded } from 'network/shapes/Account';
@@ -24,49 +24,44 @@ import { TabType } from './types';
 const SYNC_TIME = 1000;
 const CurrencyIndices = [MUSU_INDEX, ETH_INDEX, ONYX_INDEX];
 
-export function registerTradingModal() {
-  registerUIComponent(
-    'TradingModal',
-    // Grid Config
-    {
-      colStart: 2,
-      colEnd: 67,
-      rowStart: 8,
-      rowEnd: 99,
-    },
-    // Requirement
-    (layers) =>
-      interval(1000).pipe(
-        map(() => {
-          const { network } = layers;
-          const { world, components: comps, actions } = network;
-          const accountEntity = queryAccountFromEmbedded(network);
-          const accountOptions = { live: 1, config: 3600 };
-          const tradeOptions = { state: 2, taker: 2 };
+export const TradingModal: UIComponent = {
+  id: 'TradingModal',
+  gridConfig: {
+    colStart: 2,
+    colEnd: 67,
+    rowStart: 8,
+    rowEnd: 99,
+  },
+  requirement: (layers) =>
+    interval(1000).pipe(
+      map(() => {
+        const { network } = layers;
+        const { world, components: comps, actions } = network;
+        const accountEntity = queryAccountFromEmbedded(network);
+        const accountOptions = { live: 1, config: 3600 };
+        const tradeOptions = { state: 2, taker: 2 };
 
-          return {
-            network,
-            data: {
-              account: getAccount(world, comps, accountEntity, accountOptions),
-            },
-            types: {
-              ActionComp: actions.Action,
-            },
-            utils: {
-              entityToIndex: (id: EntityID) => world.entityToIndex.get(id)!,
-              getAllItems: () => getAllItems(world, comps),
-              getAccount: () => getAccount(world, comps, accountEntity, accountOptions),
-              getTrade: (entity: EntityIndex) => getTrade(world, comps, entity, tradeOptions),
-              queryTrades: () => queryTrades(comps),
-              getItemByIndex: (index: number) => getItemByIndex(world, comps, index),
-              getMusuBalance: () => getMusuBalance(world, comps, accountEntity),
-            },
-          };
-        })
-      ),
-
-    // Render
-    ({ network, data, types, utils }) => {
+        return {
+          network,
+          data: {
+            account: getAccount(world, comps, accountEntity, accountOptions),
+          },
+          types: {
+            ActionComp: actions.Action,
+          },
+          utils: {
+            entityToIndex: (id: EntityID) => world.entityToIndex.get(id)!,
+            getAllItems: () => getAllItems(world, comps),
+            getAccount: () => getAccount(world, comps, accountEntity, accountOptions),
+            getTrade: (entity: EntityIndex) => getTrade(world, comps, entity, tradeOptions),
+            queryTrades: () => queryTrades(comps),
+            getItemByIndex: (index: number) => getItemByIndex(world, comps, index),
+            getMusuBalance: () => getMusuBalance(world, comps, accountEntity),
+          },
+        };
+      })
+    ),
+  Render: ({ network, data, types, utils }) => {
       const { actions } = network;
       const { account } = data;
       const { getAllItems, getTrade, queryTrades } = utils;
@@ -251,9 +246,8 @@ export function registerTradingModal() {
           </Content>
         </ModalWrapper>
       );
-    }
-  );
-}
+  },
+};
 
 const Content = styled.div`
   position: relative;

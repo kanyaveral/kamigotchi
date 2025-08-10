@@ -16,9 +16,18 @@ export const registerUIComponent = action(
     Render: React.FC<NonNullable<T>>
   ) => {
     RootStore.UIComponents.set(id, {
+      id,
       requirement,
       Render: Render as React.FC,
       gridConfig,
     });
+  }
+);
+
+export const registerUIComponents = action(
+  (components: Array<{ id: string; gridConfig: GridConfiguration; requirement: (layers: Layers) => Observable<any>; Render: React.FC<any> }>) => {
+    for (const c of components) {
+      RootStore.UIComponents.set(c.id, c);
+    }
   }
 );

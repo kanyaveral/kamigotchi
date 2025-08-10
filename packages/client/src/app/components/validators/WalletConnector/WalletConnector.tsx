@@ -13,7 +13,8 @@ import styled from 'styled-components';
 import { useAccount, useConnect } from 'wagmi';
 
 import { ActionButton, ValidatorWrapper } from 'app/components/library';
-import { registerUIComponent } from 'app/root';
+import { UIComponent } from 'app/root/types';
+import type { Layers } from 'network/';
 import { useNetwork, useVisibility } from 'app/stores';
 import { wagmiConfig } from 'clients/wagmi';
 import { DefaultChain } from 'constants/chains';
@@ -28,19 +29,18 @@ import { Progress } from './Progress';
 // TERMINOLOGY:
 //    injectedAddress (privy) = ownerAddress (kamiworld)
 //    embeddedAddress (privy) = operatorAddress (kamiworld)
-export function registerWalletConnecter() {
-  registerUIComponent(
-    'WalletConnecter',
-    {
-      // positioning controlled by validator wrapper
-      colStart: 0,
-      colEnd: 0,
-      rowStart: 0,
-      rowEnd: 0,
-    },
-    (layers) => of(layers),
-    (layers) => {
-      const { network } = layers;
+export const WalletConnecter: UIComponent = {
+  id: 'WalletConnecter',
+  // positioning controlled by validator wrapper
+  gridConfig: {
+    colStart: 0,
+    colEnd: 0,
+    rowStart: 0,
+    rowEnd: 0,
+  },
+  requirement: (layers) => of(layers),
+  Render: (layers) => {
+      const { network } = layers as Layers;
       const { address: wagmiAddress, chain, isConnected } = useAccount();
       const { connectors, connect } = useConnect();
       const { ready, authenticated, login, logout } = usePrivy();
@@ -230,9 +230,8 @@ export function registerWalletConnecter() {
           </Container>
         </ValidatorWrapper>
       );
-    }
-  );
-}
+  },
+};
 
 const Container = styled.div`
   height: 15vw;

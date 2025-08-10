@@ -1,82 +1,83 @@
-import { registerClock } from './fixtures/clock';
-import { registerMenuLeft, registerMenuRight } from './fixtures/menu';
-import { registerNotificationFixture } from './fixtures/notifications';
-import { registerActionQueue } from './fixtures/queue';
+import { ClockFixture } from './fixtures/clock';
+import { LeftMenuFixture, RightMenuFixture } from './fixtures/menu';
+import { NotificationFixture } from './fixtures/notifications';
+import { ActionQueue } from './fixtures/queue';
 
-import { registerAccountModal } from './modals/account';
-import { registerChatModal } from './modals/chat';
-import { registerCraftingModal } from './modals/crafting';
-import { registerDialogueModal } from './modals/dialogue';
-import { registerGachaModal } from './modals/gacha';
-import { registerGoalModal } from './modals/goals';
-import { registerHelpModal } from './modals/help';
-import { registerInventoryModal } from './modals/inventory';
-import { registerKamiModal } from './modals/kami';
-import { registerKamiBridge } from './modals/kamiBridge';
-import { registerLeaderboardModal } from './modals/leaderboard';
-import { registerMapModal } from './modals/map';
-import { registerMerchantModal } from './modals/merchant';
-import { registerEMABoardModal } from './modals/naming';
-import { registerNodeModal } from './modals/node';
-import { registerPartyModal } from './modals/party';
-import { registerPresaleModal } from './modals/presale';
-import { registerRevealModal } from './modals/reveal/Reveal';
-import { registerSettingsModal } from './modals/settings';
-import { registerTradingModal } from './modals/trading';
+import { AccountModal } from './modals/account';
+import { ChatModal } from './modals/chat';
+import { CraftingModal } from './modals/crafting';
+import { DialogueModal } from './modals/dialogue';
+import { GachaModal } from './modals/gacha';
+import { GoalModal } from './modals/goals';
+import { HelpModal } from './modals/help';
+import { InventoryModal } from './modals/inventory';
+import { KamiDetails } from './modals/kami';
+import { KamiBridge } from './modals/kamiBridge';
+import { LeaderboardModal } from './modals/leaderboard';
+import { MapModal } from './modals/map';
+import { MerchantWindow } from './modals/merchant';
+import { EmaBoard } from './modals/naming';
+import { NodeModal } from './modals/node';
+import { PartyModal } from './modals/party';
+import { Presale } from './modals/presale';
+import { Reveal } from './modals/reveal/Reveal';
+import { Settings } from './modals/settings';
+import { TradingModal } from './modals/trading';
 // unused
-import { registerFundOperatorModal } from './modals/FundOperator';
+import { FundOperator } from './modals/FundOperator';
 
-import { registerQuestsModal } from './modals/quests';
-import {
-  registerAccountRegistrar,
-  registerGasHarasser,
-  registerOperatorUpdater,
-  registerWalletConnecter,
-} from './validators';
+import { Quests } from './modals/quests';
+import { AccountRegistrar, GasHarasser, OperatorUpdater, WalletConnecter } from './validators';
+import { TokenChecker } from './validators/TokenChecker';
+import type { UIComponent } from 'app/root/types';
 
-export { registerLoadingState } from './boot';
-export { registerScene } from './canvas';
-export { registerActionQueue };
+import { Scene } from './canvas';
+import { LoadingState } from './boot';
 
-export function registerFixtures() {
-  registerClock();
-  registerMenuLeft();
-  registerMenuRight();
-  registerNotificationFixture();
-}
+export const allComponents = [
+  // boot
+  LoadingState,
 
-export function registerModals() {
+  // validators
+  WalletConnecter,
+  AccountRegistrar,
+  OperatorUpdater,
+  GasHarasser,
+  TokenChecker,
+
+  // fixtures
+  ClockFixture,
+  LeftMenuFixture,
+  RightMenuFixture,
+  NotificationFixture,
+  ActionQueue,
+
+  // canvas
+  Scene,
+
   // menu modals
-  registerAccountModal();
-  registerChatModal();
-  registerCraftingModal();
-  registerHelpModal();
-  registerInventoryModal();
-  registerMapModal();
-  registerNodeModal();
-  registerPartyModal();
-  registerQuestsModal();
-  registerSettingsModal();
-  registerTradingModal();
-  registerPresaleModal();
+  AccountModal,
+  ChatModal,
+  CraftingModal,
+  HelpModal,
+  InventoryModal,
+  MapModal,
+  NodeModal,
+  PartyModal,
+  Quests,
+  Settings,
+  TradingModal,
+  Presale,
 
   // scene modals
-  registerDialogueModal();
-  registerKamiBridge();
-  registerEMABoardModal();
-  registerFundOperatorModal();
-  registerGachaModal();
-  registerKamiModal();
-  registerLeaderboardModal();
-  registerRevealModal();
-  registerMerchantModal();
-  registerGoalModal();
-}
-
-export function registerValidators() {
-  registerWalletConnecter();
-  registerAccountRegistrar();
-  registerOperatorUpdater();
-  registerGasHarasser();
-  // registerTokenChecker();
-}
+  DialogueModal,
+  KamiBridge,
+  EmaBoard,
+  FundOperator,
+  GachaModal,
+  KamiDetails,
+  LeaderboardModal,
+  Reveal,
+  MerchantWindow,
+  GoalModal,
+] as const satisfies UIComponent[];
