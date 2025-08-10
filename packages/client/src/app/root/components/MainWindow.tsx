@@ -39,7 +39,6 @@ const UIComponentRenderer = ({
 
   return (
     <div
-      key={`component-${uiComponent.id}`}
       style={{
         gridRowStart: uiComponent.gridConfig.rowStart,
         gridRowEnd: uiComponent.gridConfig.rowEnd,
