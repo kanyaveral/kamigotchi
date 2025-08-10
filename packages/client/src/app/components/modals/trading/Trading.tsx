@@ -106,13 +106,16 @@ export const TradingModal: UIComponent = {
 
       // pull all items from the registry and save the tradable ones
       const refreshItemRegistry = () => {
-        const all = getAllItems();
+        const all: Item[] = getAllItems();
         // const nonCurrencies = all.filter((item) => !CurrencyIndices.includes(item.index));
         const tradable = all.filter((item) => item.is.tradeable);
         tradable.sort((a, b) => (a.name > b.name ? 1 : -1));
         if (tradable.length !== items.length) setItems(tradable);
 
-        setCurrencies([all.find((item) => item.index === 1)!]);
+        const currencyIndices = new Set(CurrencyIndices);
+        setCurrencies(
+          all.filter((item) => currencyIndices.has(item.index))
+        );
       };
 
       // pull all open trades and partition them based on whether created by the player
