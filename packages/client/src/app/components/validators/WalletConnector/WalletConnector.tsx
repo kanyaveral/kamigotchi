@@ -32,12 +32,6 @@ import { Progress } from './Progress';
 export const WalletConnecter: UIComponent = {
   id: 'WalletConnecter',
   // positioning controlled by validator wrapper
-  gridConfig: {
-    colStart: 0,
-    colEnd: 0,
-    rowStart: 0,
-    rowEnd: 0,
-  },
   requirement: (layers) => of(layers),
   Render: (layers) => {
       const { network } = layers as Layers;

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { allComponents } from 'app/components';
 import { useLayers } from 'app/root/hooks';
 import { useStream } from 'network/utils';
-import type { UIComponent } from 'app/root/types';
+import type { UIComponentWithGrid } from 'app/root/types';
 import { Layers } from 'network/index';
 
 export const MainWindow = observer(() => {
@@ -13,11 +13,11 @@ export const MainWindow = observer(() => {
 
   return (
     <UIGrid>
-      {allComponents.map((uiComponent) => (
+      {allComponents.map((componentWithGrid) => (
         <UIComponentRenderer
-          key={uiComponent.id}
+          key={componentWithGrid.uiComponent.id}
           layers={layers}
-          uiComponent={uiComponent}
+          componentWithGrid={componentWithGrid}
         />
       ))}
     </UIGrid>
@@ -26,11 +26,12 @@ export const MainWindow = observer(() => {
 
 const UIComponentRenderer = ({
   layers,
-  uiComponent,
+  componentWithGrid,
 }: {
   layers: Layers;
-  uiComponent: UIComponent;
+  componentWithGrid: UIComponentWithGrid;
 }) => {
+  const { uiComponent, gridConfig } = componentWithGrid;
   const req$ = useMemo(() => uiComponent.requirement(layers), [uiComponent, layers]);
 
   const state = useStream(req$);
@@ -40,7 +41,7 @@ const UIComponentRenderer = ({
   return (
     <div
       style={{
-        gridArea: `${uiComponent.gridConfig.rowStart} / ${uiComponent.gridConfig.colStart} / ${uiComponent.gridConfig.rowEnd} / ${uiComponent.gridConfig.colEnd}`,
+        gridArea: `${gridConfig.rowStart} / ${gridConfig.colStart} / ${gridConfig.rowEnd} / ${gridConfig.colEnd}`,
       }}
     >
       {<uiComponent.Render {...state} />}

@@ -17,13 +17,6 @@ import { playFund, playSuccess } from 'utils/sounds';
 
 export const GasHarasser: UIComponent = {
   id: 'GasHarasser',
-  gridConfig: {
-    // positioning controlled by validator wrapper
-    colStart: 0,
-    colEnd: 0,
-    rowStart: 0,
-    rowEnd: 0,
-  },
   requirement: (layers) => of(layers),
   Render: (layers) => {
       const { network } = layers;

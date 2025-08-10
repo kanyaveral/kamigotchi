@@ -25,12 +25,6 @@ const REFRESH_INTERVAL = 1000;
 
 export const PartyModal: UIComponent = {
   id: 'PartyModal',
-  gridConfig: {
-    colStart: 2,
-    colEnd: 33,
-    rowStart: 8,
-    rowEnd: 99,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

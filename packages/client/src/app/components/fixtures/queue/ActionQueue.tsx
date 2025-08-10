@@ -10,12 +10,6 @@ import { Logs } from './Logs';
 
 export const ActionQueue: UIComponent = {
   id: 'ActionQueue',
-  gridConfig: {
-    rowStart: 90,
-    rowEnd: 100,
-    colStart: 66,
-    colEnd: 99,
-  },
   requirement: (layers) => {
     const { network } = layers;
     const { actions, components } = network;

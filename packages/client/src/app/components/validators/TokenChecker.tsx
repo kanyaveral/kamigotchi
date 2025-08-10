@@ -13,12 +13,6 @@ import { parseTokenBalance } from 'utils/numbers';
 
 export const TokenChecker: UIComponent = {
   id: 'TokenBalances',
-  gridConfig: {
-    colStart: 0,
-    colEnd: 0,
-    rowStart: 0,
-    rowEnd: 0,
-  },
   requirement: (layers) => {
       const { network } = layers;
       const { actions, components } = network;

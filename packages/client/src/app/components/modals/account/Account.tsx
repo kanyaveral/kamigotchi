@@ -21,12 +21,6 @@ import { Tabs } from './tabs/Tabs';
 
 export const AccountModal: UIComponent = {
   id: 'AccountModal',
-  gridConfig: {
-    colStart: 2,
-    colEnd: 33,
-    rowStart: 8,
-    rowEnd: 99,
-  },
   requirement: (layers) => {
     const { network } = layers;
     const { world, components } = network;

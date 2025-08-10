@@ -13,12 +13,6 @@ import {
 
 export const RightMenuFixture: UIComponent = {
   id: 'RightMenuFixture',
-  gridConfig: {
-    colStart: 67,
-    colEnd: 100,
-    rowStart: 3,
-    rowEnd: 6,
-  },
   requirement: (layers) => of(layers),
   Render: () => {
     const { fixtures } = useVisibility();

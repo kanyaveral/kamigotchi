@@ -33,12 +33,6 @@ const KamiBlockCache = new Map<EntityIndex, JSX.Element>();
 
 export const GachaModal: UIComponent = {
   id: 'Gacha',
-  gridConfig: {
-    colStart: 11,
-    colEnd: 89,
-    rowStart: 8,
-    rowEnd: 85,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

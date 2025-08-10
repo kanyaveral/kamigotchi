@@ -20,12 +20,6 @@ import { CartItem } from './types';
 // merchant window with listings. assumes at most 1 merchant per room
 export const MerchantWindow: UIComponent = {
   id: 'MerchantWindow',
-  gridConfig: {
-    colStart: 2,
-    colEnd: 67,
-    rowStart: 8,
-    rowEnd: 99,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

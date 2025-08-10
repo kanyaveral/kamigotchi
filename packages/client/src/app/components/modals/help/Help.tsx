@@ -12,12 +12,6 @@ import { HelpTabs } from './types';
 
 export const HelpModal: UIComponent = {
   id: 'HelpModal',
-  gridConfig: {
-    colStart: 67,
-    colEnd: 100,
-    rowStart: 8,
-    rowEnd: 75,
-  },
   requirement: (layers) => of(layers),
   Render: () => {
       const [tab, setTab] = useState<HelpTabs>(HelpTabs.HOME);

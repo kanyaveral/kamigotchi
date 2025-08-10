@@ -40,12 +40,6 @@ const LIVE_UPDATE_LIMIT = 2;
 
 export const NodeModal: UIComponent = {
   id: 'NodeModal',
-  gridConfig: {
-    colStart: 33,
-    colEnd: 67,
-    rowStart: 3,
-    rowEnd: 99,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

@@ -20,12 +20,6 @@ import { WorldKamis } from './WorldKamis';
 
 export const KamiBridge: UIComponent = {
   id: 'KamiBridge',
-  gridConfig: {
-    colStart: 33,
-    colEnd: 67,
-    rowStart: 15,
-    rowEnd: 99,
-  },
   requirement: (layers) => {
     const { network } = layers;
     const { world, components } = network;

@@ -16,12 +16,6 @@ import { playFund } from 'utils/sounds';
 
 export const FundOperator: UIComponent = {
   id: 'FundOperator',
-  gridConfig: {
-    colStart: 30,
-    colEnd: 70,
-    rowStart: 30,
-    rowEnd: 74,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

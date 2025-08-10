@@ -34,12 +34,6 @@ export type TabType = 'TRAITS' | 'SKILLS' | 'BATTLES';
 
 export const KamiDetails: UIComponent = {
   id: 'KamiDetails',
-  gridConfig: {
-    colStart: 11,
-    colEnd: 67,
-    rowStart: 8,
-    rowEnd: 99,
-  },
   requirement: (layers) => {
     const { network } = layers;
     const { world, components } = network;

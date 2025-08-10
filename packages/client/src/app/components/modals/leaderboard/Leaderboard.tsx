@@ -14,12 +14,6 @@ import { Table } from './Table';
 
 export const LeaderboardModal: UIComponent = {
   id: 'LeaderboardModal',
-  gridConfig: {
-    colStart: 32,
-    colEnd: 70,
-    rowStart: 20,
-    rowEnd: 78,
-  },
   requirement: (layers) => {
     return interval(3000).pipe(
       map(() => {

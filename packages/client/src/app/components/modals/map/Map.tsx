@@ -26,12 +26,6 @@ import { Grid } from './Grid';
 
 export const MapModal: UIComponent = {
   id: 'MapModal',
-  gridConfig: {
-    colStart: 2,
-    colEnd: 33,
-    rowStart: 8,
-    rowEnd: 79,
-  },
   requirement: (layers) =>
     interval(2000).pipe(
       map(() => {

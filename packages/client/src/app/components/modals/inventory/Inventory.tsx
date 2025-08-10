@@ -14,12 +14,6 @@ import { MusuRow } from './MusuRow';
 
 export const InventoryModal: UIComponent = {
   id: 'Inventory',
-  gridConfig: {
-    colStart: 67,
-    colEnd: 100,
-    rowStart: 8,
-    rowEnd: 75,
-  },
   requirement: (layers) => {
     return interval(1000).pipe(
       map(() => {

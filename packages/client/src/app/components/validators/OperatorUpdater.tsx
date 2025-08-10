@@ -14,13 +14,6 @@ import { playScribble, playSuccess } from 'utils/sounds';
 // TODO: check for whether an account with the burner address already exists
 export const OperatorUpdater: UIComponent = {
   id: 'OperatorUpdater',
-  gridConfig: {
-    // positioning controlled by validator wrapper
-    colStart: 0,
-    colEnd: 0,
-    rowStart: 0,
-    rowEnd: 0,
-  },
   requirement: (layers) => of(layers),
   Render: (layers) => {
       const { network } = layers;

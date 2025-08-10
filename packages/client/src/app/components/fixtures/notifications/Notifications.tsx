@@ -7,12 +7,6 @@ import { Modals, useVisibility } from 'app/stores';
 
 export const NotificationFixture: UIComponent = {
   id: 'NotificationFixture',
-  gridConfig: {
-    colStart: 72,
-    colEnd: 100,
-    rowStart: 8,
-    rowEnd: 30,
-  },
   requirement: (layers) => {
       const {
         network: { notifications },
@@ -56,7 +50,7 @@ export const NotificationFixture: UIComponent = {
         return (
           <Card key={entity.toString()}>
             <ExitButton onClick={() => dismiss(entity)}>X</ExitButton>
-            <div onClick={() => handleClick(notification.modal, entity)}>
+            <div onClick={() => handleClick(notification.modal as string | undefined, entity)}>
               <Title>{notification.title}</Title>
               <Description>{notification.description}</Description>
             </div>
@@ -73,7 +67,7 @@ export const NotificationFixture: UIComponent = {
 
       return (
         <Wrapper style={{ display: isVisible() ? 'block' : 'none' }}>
-          <Contents>{list.map((id) => SingleNotif(id))}</Contents>
+          <Contents>{list.map((id: EntityIndex) => SingleNotif(id))}</Contents>
         </Wrapper>
       );
   },

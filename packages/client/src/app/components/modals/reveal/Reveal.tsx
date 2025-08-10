@@ -14,12 +14,6 @@ import { Commits } from './Commits';
 
 export const Reveal: UIComponent = {
   id: 'Reveal',
-  gridConfig: {
-    colStart: 30,
-    colEnd: 70,
-    rowStart: 30,
-    rowEnd: 75,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

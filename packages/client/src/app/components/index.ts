@@ -29,55 +29,157 @@ import { FundOperator } from './modals/FundOperator';
 import { Quests } from './modals/quests';
 import { AccountRegistrar, GasHarasser, OperatorUpdater, WalletConnecter } from './validators';
 import { TokenChecker } from './validators/TokenChecker';
-import type { UIComponent } from 'app/root/types';
+import type { UIComponentWithGrid } from 'app/root/types';
 
 import { Scene } from './canvas';
 import { LoadingState } from './boot';
 
-export const allComponents = [
+export const allComponents: UIComponentWithGrid[] = [
   // boot
-  LoadingState,
+  {
+    uiComponent: LoadingState,
+    gridConfig: { colStart: 1, colEnd: 13, rowStart: 1, rowEnd: 13 }
+  },
 
   // validators
-  WalletConnecter,
-  AccountRegistrar,
-  OperatorUpdater,
-  GasHarasser,
-  TokenChecker,
+  {
+    uiComponent: WalletConnecter,
+    gridConfig: { colStart: 1, colEnd: 100, rowStart: 1, rowEnd: 100 }
+  },
+  {
+    uiComponent: AccountRegistrar,
+    gridConfig: { colStart: 1, colEnd: 100, rowStart: 1, rowEnd: 100 }
+  },
+  {
+    uiComponent: OperatorUpdater,
+    gridConfig: { colStart: 1, colEnd: 100, rowStart: 1, rowEnd: 100 }
+  },
+  {
+    uiComponent: GasHarasser,
+    gridConfig: { colStart: 1, colEnd: 100, rowStart: 1, rowEnd: 100 }
+  },
+  {
+    uiComponent: TokenChecker,
+    gridConfig: { colStart: 1, colEnd: 100, rowStart: 1, rowEnd: 100 }
+  },
 
   // fixtures
-  ClockFixture,
-  LeftMenuFixture,
-  RightMenuFixture,
-  NotificationFixture,
-  ActionQueue,
+  {
+    uiComponent: ClockFixture,
+    gridConfig: { colStart: 33, colEnd: 67, rowStart: 78, rowEnd: 99 }
+  },
+  {
+    uiComponent: LeftMenuFixture,
+    gridConfig: { colStart: 2, colEnd: 33, rowStart: 3, rowEnd: 6 }
+  },
+  {
+    uiComponent: RightMenuFixture,
+    gridConfig: { colStart: 67, colEnd: 100, rowStart: 3, rowEnd: 6 }
+  },
+  {
+    uiComponent: NotificationFixture,
+    gridConfig: { colStart: 72, colEnd: 100, rowStart: 8, rowEnd: 30 }
+  },
+  {
+    uiComponent: ActionQueue,
+    gridConfig: { colStart: 66, colEnd: 99, rowStart: 90, rowEnd: 100 }
+  },
 
   // canvas
-  Scene,
+  {
+    uiComponent: Scene,
+    gridConfig: { colStart: 1, colEnd: 100, rowStart: 1, rowEnd: 100 }
+  },
 
   // menu modals
-  AccountModal,
-  ChatModal,
-  CraftingModal,
-  HelpModal,
-  InventoryModal,
-  MapModal,
-  NodeModal,
-  PartyModal,
-  Quests,
-  Settings,
-  TradingModal,
-  Presale,
+  {
+    uiComponent: AccountModal,
+    gridConfig: { colStart: 2, colEnd: 33, rowStart: 8, rowEnd: 99 }
+  },
+  {
+    uiComponent: ChatModal,
+    gridConfig: { colStart: 67, colEnd: 100, rowStart: 8, rowEnd: 75 }
+  },
+  {
+    uiComponent: CraftingModal,
+    gridConfig: { colStart: 33, colEnd: 67, rowStart: 3, rowEnd: 99 }
+  },
+  {
+    uiComponent: HelpModal,
+    gridConfig: { colStart: 67, colEnd: 100, rowStart: 8, rowEnd: 75 }
+  },
+  {
+    uiComponent: InventoryModal,
+    gridConfig: { colStart: 67, colEnd: 100, rowStart: 8, rowEnd: 75 }
+  },
+  {
+    uiComponent: MapModal,
+    gridConfig: { colStart: 2, colEnd: 33, rowStart: 8, rowEnd: 79 }
+  },
+  {
+    uiComponent: NodeModal,
+    gridConfig: { colStart: 33, colEnd: 67, rowStart: 3, rowEnd: 99 }
+  },
+  {
+    uiComponent: PartyModal,
+    gridConfig: { colStart: 2, colEnd: 33, rowStart: 8, rowEnd: 99 }
+  },
+  {
+    uiComponent: Quests,
+    gridConfig: { colStart: 67, colEnd: 100, rowStart: 8, rowEnd: 75 }
+  },
+  {
+    uiComponent: Settings,
+    gridConfig: { colStart: 67, colEnd: 100, rowStart: 8, rowEnd: 75 }
+  },
+  {
+    uiComponent: TradingModal,
+    gridConfig: { colStart: 2, colEnd: 67, rowStart: 8, rowEnd: 99 }
+  },
+  {
+    uiComponent: Presale,
+    gridConfig: { colStart: 25, colEnd: 75, rowStart: 25, rowEnd: 75 }
+  },
 
   // scene modals
-  DialogueModal,
-  KamiBridge,
-  EmaBoard,
-  FundOperator,
-  GachaModal,
-  KamiDetails,
-  LeaderboardModal,
-  Reveal,
-  MerchantWindow,
-  GoalModal,
-] as const satisfies UIComponent[];
+  {
+    uiComponent: DialogueModal,
+    gridConfig: { colStart: 2, colEnd: 67, rowStart: 75, rowEnd: 99 }
+  },
+  {
+    uiComponent: KamiBridge,
+    gridConfig: { colStart: 33, colEnd: 67, rowStart: 15, rowEnd: 99 }
+  },
+  {
+    uiComponent: EmaBoard,
+    gridConfig: { colStart: 33, colEnd: 67, rowStart: 15, rowEnd: 99 }
+  },
+  {
+    uiComponent: FundOperator,
+    gridConfig: { colStart: 30, colEnd: 70, rowStart: 30, rowEnd: 74 }
+  },
+  {
+    uiComponent: GachaModal,
+    gridConfig: { colStart: 11, colEnd: 89, rowStart: 8, rowEnd: 85 }
+  },
+  {
+    uiComponent: KamiDetails,
+    gridConfig: { colStart: 11, colEnd: 67, rowStart: 8, rowEnd: 99 }
+  },
+  {
+    uiComponent: LeaderboardModal,
+    gridConfig: { colStart: 32, colEnd: 70, rowStart: 20, rowEnd: 78 }
+  },
+  {
+    uiComponent: Reveal,
+    gridConfig: { colStart: 30, colEnd: 70, rowStart: 30, rowEnd: 75 }
+  },
+  {
+    uiComponent: MerchantWindow,
+    gridConfig: { colStart: 2, colEnd: 67, rowStart: 8, rowEnd: 99 }
+  },
+  {
+    uiComponent: GoalModal,
+    gridConfig: { colStart: 20, colEnd: 80, rowStart: 24, rowEnd: 78 }
+  },
+];

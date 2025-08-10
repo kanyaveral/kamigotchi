@@ -14,12 +14,6 @@ import { getCurrPhase, getKamiTime, getPhaseName } from 'utils/time';
 
 export const ClockFixture: UIComponent = {
   id: 'ClockFixture',
-  gridConfig: {
-    colStart: 33,
-    colEnd: 67,
-    rowStart: 78,
-    rowEnd: 99,
-  },
   requirement: (layers) => {
       return interval(1000).pipe(
         map(() => {

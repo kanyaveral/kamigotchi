@@ -23,12 +23,6 @@ const EndTime = StartTime + 3600 * 24 * 2;
 
 export const Presale: UIComponent = {
   id: 'Presale',
-  gridConfig: {
-    colStart: 25,
-    colEnd: 75,
-    rowStart: 25,
-    rowEnd: 75,
-  },
   requirement: (layers) => {
     return interval(1000).pipe(
       map(() => {

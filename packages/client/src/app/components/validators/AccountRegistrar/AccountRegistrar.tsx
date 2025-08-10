@@ -17,13 +17,6 @@ import { Registration } from './Registration';
 
 export const AccountRegistrar: UIComponent = {
   id: 'AccountRegistrar',
-  gridConfig: {
-    // positioning controlled by validator wrapper
-    colStart: 0,
-    colEnd: 0,
-    rowStart: 0,
-    rowEnd: 0,
-  },
   requirement: (layers) => {
       const { network } = layers;
       const { world, components } = network;

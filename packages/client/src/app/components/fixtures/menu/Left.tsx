@@ -15,12 +15,6 @@ import {
 
 export const LeftMenuFixture: UIComponent = {
   id: 'LeftMenuFixture',
-  gridConfig: {
-    colStart: 2,
-    colEnd: 33,
-    rowStart: 3,
-    rowEnd: 6,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

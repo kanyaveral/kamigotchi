@@ -17,12 +17,6 @@ import { Room } from './Room';
 // the connected account.
 export const Scene: UIComponent = {
   id: 'Scene',
-  gridConfig: {
-    colStart: 1,
-    colEnd: 100,
-    rowStart: 1,
-    rowEnd: 100,
-  },
   requirement: (layers) => {
       const { network } = layers;
       const { world, components } = network;

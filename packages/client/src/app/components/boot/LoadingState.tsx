@@ -10,12 +10,6 @@ const FE_DISABLED = import.meta.env.VITE_STATE === 'DISABLED';
 
 export const LoadingState: UIComponent = {
   id: 'LoadingState',
-  gridConfig: {
-    rowStart: 1,
-    rowEnd: 13,
-    colStart: 1,
-    colEnd: 13,
-  },
   requirement: (layers) => {
     const {
       components: { LoadingState },

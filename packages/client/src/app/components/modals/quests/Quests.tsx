@@ -28,12 +28,6 @@ import { Tabs } from './Tabs';
 
 export const Quests: UIComponent = {
   id: 'Quests',
-  gridConfig: {
-    colStart: 67,
-    colEnd: 100,
-    rowStart: 8,
-    rowEnd: 75,
-  },
   requirement: (layers) =>
     interval(2000).pipe(
       map(() => {

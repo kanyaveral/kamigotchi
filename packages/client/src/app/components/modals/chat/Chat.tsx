@@ -18,12 +18,6 @@ import { Feed } from './feed/Feed';
 
 export const ChatModal: UIComponent = {
   id: 'ChatModal',
-  gridConfig: {
-    colStart: 67,
-    colEnd: 100,
-    rowStart: 8,
-    rowEnd: 75,
-  },
   requirement: (layers) => {
     const { network } = layers;
     return interval(3333).pipe(

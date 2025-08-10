@@ -29,12 +29,6 @@ import { Tabs } from './Tabs';
 
 export const GoalModal: UIComponent = {
   id: 'GoalModal',
-  gridConfig: {
-    colStart: 20,
-    colEnd: 80,
-    rowStart: 24,
-    rowEnd: 78,
-  },
   requirement: (layers) => {
     return interval(1000).pipe(
       map(() => {

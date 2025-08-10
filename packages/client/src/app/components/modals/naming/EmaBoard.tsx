@@ -23,12 +23,6 @@ const REFRESH_INTERVAL = 2000;
 
 export const EmaBoard: UIComponent = {
   id: 'EmaBoard',
-  gridConfig: {
-    colStart: 33,
-    colEnd: 67,
-    rowStart: 15,
-    rowEnd: 99,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

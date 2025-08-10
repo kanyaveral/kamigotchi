@@ -16,12 +16,6 @@ import { Tabs } from './tabs/Tabs';
 
 export const CraftingModal: UIComponent = {
   id: 'CraftingModal',
-  gridConfig: {
-    colStart: 33,
-    colEnd: 67,
-    rowStart: 3,
-    rowEnd: 99,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

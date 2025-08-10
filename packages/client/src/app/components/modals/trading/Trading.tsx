@@ -26,12 +26,6 @@ const CurrencyIndices = [MUSU_INDEX, ETH_INDEX, ONYX_INDEX];
 
 export const TradingModal: UIComponent = {
   id: 'TradingModal',
-  gridConfig: {
-    colStart: 2,
-    colEnd: 67,
-    rowStart: 8,
-    rowEnd: 99,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

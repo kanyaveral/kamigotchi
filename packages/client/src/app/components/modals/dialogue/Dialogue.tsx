@@ -14,12 +14,6 @@ import { getBalance } from 'network/shapes/utils';
 
 export const DialogueModal: UIComponent = {
   id: 'DialogueModal',
-  gridConfig: {
-    colStart: 2,
-    colEnd: 67,
-    rowStart: 75,
-    rowEnd: 99,
-  },
   requirement: (layers) =>
     interval(1000).pipe(
       map(() => {

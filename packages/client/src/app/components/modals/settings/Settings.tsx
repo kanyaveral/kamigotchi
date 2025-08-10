@@ -12,12 +12,6 @@ import { Volume } from './Volume';
 
 export const Settings: UIComponent = {
   id: 'Settings',
-  gridConfig: {
-    colStart: 67,
-    colEnd: 100,
-    rowStart: 8,
-    rowEnd: 75,
-  },
   requirement: (layers) =>
     interval(5000).pipe(
       map(() => {
