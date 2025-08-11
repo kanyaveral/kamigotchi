@@ -116,11 +116,23 @@ export function registerLootBoxModal() {
           overlay
         >
           <Content>
-            <Overlay top={4} left={5} orientation='column' align='flex-end'>
-              <ArrowButton>&#x25B2; +5</ArrowButton>
-              <ArrowButton>&#x25B4; +1</ArrowButton>
-              <ArrowButton>&#x25BE; -1</ArrowButton>
-              <ArrowButton>&#x25BC; -5 </ArrowButton>
+            <Overlay top={4} left={5} gap={0.3} orientation='column' align='flex-end'>
+              <Row>
+                <Arrow>{'\u25B2'}</Arrow>
+                <Number>+5</Number>
+              </Row>
+              <Row>
+                <Arrow smaller>{'\u25B4'}</Arrow>
+                <Number style={{ marginLeft: '0.6vw' }}>+1</Number>
+              </Row>
+              <Row>
+                <Arrow smaller>{'\u25BE'}</Arrow>
+                <Number style={{ marginLeft: '0.7vw' }}>-1</Number>
+              </Row>
+              <Row>
+                <Arrow>{'\u25BC'}</Arrow>
+                <Number>-5</Number>
+              </Row>
             </Overlay>
             <Text>Demon Egg</Text>
             <Img src={ItemImages.demon_egg} />
@@ -148,8 +160,7 @@ const Content = styled.div`
   display: flex;
   flex-flow: column nowrap;
   justify-content: space-around;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   background-color: black;
   color: white;
   border: 0.3vw solid white;
@@ -249,16 +260,6 @@ const Text = styled.text<{ size?: number; weight?: string }>`
   ${({ weight }) => (weight ? `font-weight: ${weight};` : 'normal;')}
 `;
 
-const ArrowButton = styled.div`
-  color: white;
-  font-size: 0.8vw;
-  &:hover {
-    animation: ${() => hoverFx()} 0.2s;
-    transform: scale(1.05);
-    cursor: pointer;
-  }
-`;
-
 const Balance = styled.div`
   border: solid white 0.3vw;
   border-radius: 0.6vw 0 0.6vw 0.6vw;
@@ -273,4 +274,26 @@ const Balance = styled.div`
   color: white;
   font-size: 0.9vw;
   line-height: 1.2vw;
+`;
+
+const Row = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  &:hover {
+    animation: ${() => hoverFx()} 0.2s;
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+`;
+
+const Arrow = styled.div<{ smaller?: boolean }>`
+  font-size: ${({ smaller }) => (smaller ? '0.7vw' : '0.8vw')};
+  color: white;
+`;
+
+const Number = styled.div`
+  color: white;
+  font-size: 0.8vw;
+  margin-left: 0.4vw;
 `;
