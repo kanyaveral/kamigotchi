@@ -5,16 +5,16 @@ import styled from 'styled-components';
 
 import { getAccount } from 'app/cache/account';
 import { getItemByIndex } from 'app/cache/item';
-import { ModalWrapper } from 'app/components/library';
+import { ModalWrapper, Overlay } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
 import { useNetwork, useVisibility } from 'app/stores';
-import { SkillImages } from 'assets/images/skills';
-import { ETH_INDEX, MUSU_INDEX, ONYX_INDEX } from 'constants/items';
+import { hoverFx } from 'app/styles/effects';
+import { ItemImages } from 'assets/images/items';
 import { queryAccountFromEmbedded } from 'network/shapes/Account';
 import { getAllItems } from 'network/shapes/Item';
 
 const SYNC_TIME = 1000;
-const CurrencyIndices = [MUSU_INDEX, ETH_INDEX, ONYX_INDEX];
+const eggPrice = 5;
 
 export function registerLootBoxModal() {
   registerUIComponent(
@@ -34,7 +34,6 @@ export function registerLootBoxModal() {
           const { world, components: comps, actions } = network;
           const accountEntity = queryAccountFromEmbedded(network);
           const accountOptions = { live: 1, config: 3600 };
-          const tradeOptions = { state: 2, taker: 2 };
 
           return {
             network,
@@ -56,11 +55,10 @@ export function registerLootBoxModal() {
 
     // Render
     ({ network, data, types, utils }) => {
-      const { actions } = network;
-      const { account } = data;
       const { getAllItems } = utils;
       const { modals } = useVisibility();
       const { selectedAddress, apis } = useNetwork();
+      const [eggsQuantityt, setEggsQuantity] = useState(1);
 
       const [tick, setTick] = useState(Date.now());
 
@@ -71,10 +69,10 @@ export function registerLootBoxModal() {
         return () => clearInterval(timerId);
       }, []);
 
-      // sets trades upon opening modal
+      // sets data upon opening modal
       useEffect(() => {
-        if (!modals.trading) return;
-      }, [modals.trading, tick]);
+        if (!modals.lootBox) return;
+      }, [modals.lootBox, tick]);
 
       const HeaderRenderer = useMemo(() => {
         return (
@@ -89,7 +87,12 @@ export function registerLootBoxModal() {
       }, []);
 
       const FooterRenderer = useMemo(() => {
-        return <Footer>'FOOTER' </Footer>;
+        return (
+          <Footer>
+            <img src={ItemImages.obol} style={{ width: `2vw` }} />
+            <Balance>7,4000</Balance>
+          </Footer>
+        );
       }, []);
 
       /////////////////
@@ -107,9 +110,20 @@ export function registerLootBoxModal() {
           overlay
         >
           <Content>
-            Demon Egg
-            <Img src={SkillImages.self_care} />
-            <Text> X Obols</Text>
+            <Overlay top={3} left={7} orientation='column' gap={0.5}>
+              <ArrowButton>&#x25B2; +5</ArrowButton>
+              <ArrowButton>&#x25B4; +1</ArrowButton>
+              <ArrowButton>&#x25BE; -1</ArrowButton>
+              <ArrowButton>&#x25BC; -5 </ArrowButton>
+            </Overlay>
+            <Text>Demon Egg</Text>
+            <Img src={ItemImages.demon_egg} />
+            <Overlay top={6} right={6} orientation='column'>
+              <Text size={1.7} weight={`bold`}>
+                X{eggsQuantityt}
+              </Text>
+            </Overlay>
+            <Text> {eggsQuantityt * eggPrice} Obols</Text>
             <ButtonsRow>
               <Button onClick={() => {}}>I accept.</Button>
               <Button onClick={() => {}}>I refuse.</Button>
@@ -135,6 +149,7 @@ const Content = styled.div`
   border: 0.3vw solid white;
   align-items: center;
   padding: 2vw;
+  font-size: 1vw;
 `;
 
 const Header = styled.div`
@@ -153,6 +168,7 @@ const Header = styled.div`
   border-bottom: none;
   border-radius: 1vw 1vw 0 0;
 `;
+
 const HeaderPart = styled.div<{ size: number; weight?: string; spacing?: number }>`
   position: relative;
   color: white;
@@ -163,13 +179,20 @@ const HeaderPart = styled.div<{ size: number; weight?: string; spacing?: number 
 `;
 
 const Footer = styled.div`
+  display: flex;
   position: relative;
+  flex-flow: row nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3vw;
   background-color: black;
   color: white;
   border: 0.3vw solid white;
   border-top: none;
   border-radius: 0 0 1vw 1vw;
   height: 4vw;
+  width: 100%;
+  padding-right: 0.5vw;
 `;
 
 const ButtonsRow = styled.div`
@@ -183,11 +206,19 @@ const ButtonsRow = styled.div`
   padding: 0.5vw;
 `;
 
+// modify icontbutton so it
+//  has color and bakcground color
 const Button = styled.button`
   border: 0.2vw solid white;
   background-color: black;
   color: white;
   padding: 0.5vw;
+  font-size: 1vw;
+  &:hover {
+    animation: ${() => hoverFx()} 0.2s;
+    transform: scale(1.05);
+    cursor: pointer;
+  }
 `;
 
 const Img = styled.img`
@@ -198,6 +229,34 @@ const Img = styled.img`
   padding: 0.5vw;
 `;
 
-const Text = styled.text`
+const Text = styled.text<{ size?: number; weight?: string }>`
   color: white;
+  ${({ size }) => (size ? `font-size: ${size}vw;` : '0.8vw;')}
+  ${({ weight }) => (weight ? `font-weight: ${weight};` : 'normal;')}
+`;
+
+const ArrowButton = styled.div`
+  color: white;
+  font-size: 1vw;
+  &:hover {
+    animation: ${() => hoverFx()} 0.2s;
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+`;
+
+const Balance = styled.div`
+  border: solid white 0.3vw;
+  border-radius: 0.6vw 0 0.6vw 0.6vw;
+  padding: 0.3vw;
+  width: 30%;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-end;
+  align-items: center;
+
+  color: white;
+  font-size: 0.9vw;
+  line-height: 1.2vw;
 `;
