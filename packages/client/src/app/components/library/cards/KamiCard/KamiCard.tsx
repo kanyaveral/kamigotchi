@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { calcHealth } from 'app/cache/kami';
 import { TextTooltip } from 'app/components/library';
 import { useSelected, useVisibility } from 'app/stores';
-import { IndicatorIcons } from 'assets/images/icons/indicators';
+import { StatusIcons } from 'assets/images/icons/statuses';
 import { Bonus, parseBonusText } from 'network/shapes/Bonus';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
@@ -19,13 +19,16 @@ export const KamiCard = ({
   description,
   descriptionOnClick,
   isFriend,
-  contentTooltip = [],
+  contentTooltip,
   subtext,
   subtextOnClick,
   actions,
   showBattery,
   showCooldown,
-  utils,
+  utils: {
+    calcExpRequirement,
+    getTempBonuses,
+  } = {},
 }: {
   kami: Kami; // assumed to have a harvest attached
   description: string[];
@@ -39,12 +42,9 @@ export const KamiCard = ({
   showCooldown?: boolean;
   utils?: {
     calcExpRequirement: (lvl: number) => number;
-    getBonusesByItems: (kami: Kami) => Bonus[];
+    getTempBonuses: (kami: Kami) => Bonus[];
   };
 }) => {
-  const getBonusesByItems = utils?.getBonusesByItems;
-  const { calcExpRequirement } = utils ?? {};
-
   const { modals, setModals } = useVisibility();
   const { kamiIndex, setKami } = useSelected();
   const [canLevel, setCanLevel] = useState(false);
@@ -89,19 +89,26 @@ export const KamiCard = ({
   };
 
   const getItemBonusesDescription = (kami: Kami) => {
-    if (!getBonusesByItems) return [];
-    return getBonusesByItems(kami).map((bonus) => parseBonusText(bonus));
+    if (!getTempBonuses) return [];
+    return getTempBonuses(kami).map((bonus) => parseBonusText(bonus));
   };
 
   return (
-    <Card image={{ icon: kami.image, canLevel, onClick: handleKamiClick }}>
+    <Card
+      image={{
+        icon: kami.image,
+        canLevel,
+        skillPoints: (kami.skills?.points ?? 0) > 0,
+        onClick: handleKamiClick,
+      }}
+    >
       <TitleBar>
         <TitleText key='title' onClick={() => handleKamiClick()}>
           {kami.name}
         </TitleText>
         <TitleCorner key='corner'>
           <TextTooltip text={[getItemBonusesDescription(kami)]}>
-            {getItemBonusesDescription(kami).length > 0 && <Buff src={IndicatorIcons.buff} />}
+            {getItemBonusesDescription(kami).length > 0 && <Buff src={StatusIcons.buff} />}
           </TextTooltip>
           {showCooldown && <Cooldown kami={kami} />}
           {showBattery && (
@@ -111,7 +118,7 @@ export const KamiCard = ({
       </TitleBar>
       <Content>
         <ContentColumn key='column-1'>
-          <TextTooltip text={contentTooltip}>
+          <TextTooltip text={contentTooltip ?? []}>
             <Description />
           </TextTooltip>
           {isFriend && <Friend>Friend</Friend>}

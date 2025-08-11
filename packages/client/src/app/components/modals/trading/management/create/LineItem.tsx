@@ -37,17 +37,7 @@ export const LineItem = ({
         />
       )}
       <TextTooltip title={selected.name} text={[selected.description]}>
-        <IconListButton
-          img={selected.image}
-          scale={2.7}
-          options={options}
-          search={{
-            value: search,
-            onChange: (e) => {
-              setSearch(e.target.value);
-            },
-          }}
-        />
+        <IconListButton img={selected.image} scale={2.7} options={options} searchable />
       </TextTooltip>
       {!reverse && (
         <Quantity

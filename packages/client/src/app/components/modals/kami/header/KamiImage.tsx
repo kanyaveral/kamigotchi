@@ -6,7 +6,7 @@ import { LevelUpArrows } from 'app/components/library/animations/LevelUp';
 import { Overlay } from 'app/components/library/styles';
 import { useSelected, useVisibility } from 'app/stores';
 import { clickFx, hoverFx, Shimmer } from 'app/styles/effects';
-import { IndicatorIcons } from 'assets/images/icons/indicators';
+import { ArrowIcons } from 'assets/images/icons/arrows';
 import { Account, BaseAccount } from 'network/shapes/Account';
 import { Kami } from 'network/shapes/Kami';
 import { useEffect, useState } from 'react';
@@ -101,7 +101,7 @@ export const KamiImage = ({
           <Text size={0.9}>{progress ? progress.level : '??'}</Text>
         </Grouping>
       </Overlay>
-      <Overlay top={0.75} right={0.7}>
+      <Overlay top={1.95} left={0.7}>
         {!isSearching && (
           <Text size={0.9} onClick={handleIndexClick}>
             {kami.index}
@@ -116,6 +116,9 @@ export const KamiImage = ({
           />
         )}
       </Overlay>
+      <Overlay top={1} right={1}>
+        {(kami.skills?.points ?? 0) > 0 && <Sp>SP</Sp>}
+      </Overlay>
       <Overlay bottom={0} fullWidth>
         <TextTooltip text={[`${expCurr}/${expLimit}`]} grow>
           <ExperienceBar percent={percentage}></ExperienceBar>
@@ -124,7 +127,7 @@ export const KamiImage = ({
         <Overlay bottom={0} right={0}>
           <TextTooltip text={[getLevelTooltip()]}>
             <Button disabled={!canLevel} onClick={() => handleLevelUp()}>
-              <Arrow src={IndicatorIcons.level_up} />
+              <Arrow src={ArrowIcons.up} />
               {canLevel && <Shimmer />}
             </Button>
           </TextTooltip>
@@ -245,4 +248,12 @@ const Button = styled.div<{
 const Arrow = styled.img`
   width: 1.2vw;
   height: 1.2vw;
+`;
+
+const Sp = styled.div`
+  font-size: 2vw;
+  font-weight: bold;
+  background: linear-gradient(to right, #0b0d0eff, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 `;

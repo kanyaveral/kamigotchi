@@ -77,7 +77,7 @@ contract HarvestLiquidateSystem is System {
     // kill the target and shut off the harvest
     LibKami.kill(components, victimID);
     LibBonus.resetUponHarvestAction(components, victimID);
-    LibHarvest.stop(components, victimHarvID);
+    LibHarvest.stop(components, victimHarvID, victimID);
     LibKami.setLastActionTs(components, killerID, block.timestamp);
 
     // resetting bonuses
