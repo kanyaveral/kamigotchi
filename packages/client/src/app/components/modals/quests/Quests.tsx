@@ -22,7 +22,7 @@ import {
   queryRegistryQuests,
 } from 'network/shapes/Quest';
 import { BaseQuest } from 'network/shapes/Quest/quest';
-import { getDescribedEntity } from 'network/shapes/utils/parse';
+import { getFromDescription } from 'network/shapes/utils/parse';
 import { List } from './list/List';
 import { Tabs } from './Tabs';
 
@@ -62,10 +62,11 @@ export const Quests: UIComponent = {
           },
           utils: {
             describeEntity: (type: string, index: number) =>
-              getDescribedEntity(world, components, type, index),
+              getFromDescription(world, components, type, index),
             getBase: (entity: EntityIndex) => getBaseQuest(world, components, entity),
             getItem: (index: number) => getItemByIndex(world, components, index),
-            getItemBalance: (index: number) => getItemBalance(world, components, account.id, index),
+            getItemBalance: (index: number) =>
+              getItemBalance(world, components, account.id, index),
             filterByAvailable: (
               registry: BaseQuest[],
               ongoing: BaseQuest[],
@@ -82,6 +83,7 @@ export const Quests: UIComponent = {
         };
       })
     ),
+
   Render: ({ network, data, utils }) => {
       const { actions, api, notifications } = network;
       const { ongoing, completed, registry } = data.quests;

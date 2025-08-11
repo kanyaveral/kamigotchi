@@ -35,7 +35,7 @@ export const SingleCreate = ({
 }) => {
   const { handleCreatePrompt } = actions;
   const { isConfirming } = controls;
-  const { account, currencies, inventory, items } = data;
+  const { currencies, inventory, items } = data;
   const { modals } = useVisibility();
 
   const [mode, setMode] = useState<Mode>('Buy');

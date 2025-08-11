@@ -6,7 +6,8 @@ import { UIComponent } from 'app/root/types';
 import { useAccount } from 'app/stores';
 import { InventoryIcon } from 'assets/images/icons/menu';
 import { Account, queryAccountFromEmbedded } from 'network/shapes/Account';
-import { passesConditions } from 'network/shapes/Conditional';
+import { Allo, parseAllos } from 'network/shapes/Allo';
+import { parseConditionalText, passesConditions } from 'network/shapes/Conditional';
 import { getMusuBalance, Item } from 'network/shapes/Item';
 import { Kami } from 'network/shapes/Kami';
 import { ItemGrid } from './ItemGrid';
@@ -45,6 +46,11 @@ export const InventoryModal: UIComponent = {
             meetsRequirements: (holder: Kami | Account, item: Item) =>
               passesConditions(world, components, item.requirements.use, holder),
             getMusuBalance: () => getMusuBalance(world, components, accountEntity),
+            displayRequirements: (recipe: Item) =>
+              recipe.requirements.use
+                .map((req) => parseConditionalText(world, components, req))
+                .join('\n '),
+            parseAllos: (allo: Allo[]) => parseAllos(world, components, allo),
           },
         };
       })

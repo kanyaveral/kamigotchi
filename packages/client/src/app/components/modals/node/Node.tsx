@@ -4,7 +4,7 @@ import { interval, map } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { getAccount, getAccountKamis } from 'app/cache/account';
-import { getBonusesByItems, getBonusesForEndType } from 'app/cache/bonus';
+import { getBonusesForEndType, getTempBonuses } from 'app/cache/bonus';
 import { getKami, getKamiAccount } from 'app/cache/kami';
 import { getNodeByIndex } from 'app/cache/node';
 import { getRoomByIndex } from 'app/cache/room';
@@ -106,15 +106,18 @@ export const NodeModal: UIComponent = {
             queryScavInstance: (index: number, holderID: EntityID) =>
               queryScavInstance(world, 'NODE', index, holderID),
 
+            // node header functions..
+            // TODO: clean up this mess
             passesNodeReqs: (kami: Kami) => passesNodeReqs(world, components, nodeIndex, kami),
             parseConditionalText: (condition: Condition, tracking?: boolean) =>
               parseConditionalText(world, components, condition, tracking),
-            getBonusesByItems: (kami: Kami) =>
-              getBonusesByItems(world, components, kami.entity, kamiRefreshOptions.bonuses),
+            getTempBonuses: (kami: Kami) =>
+              getTempBonuses(world, components, kami.entity, kamiRefreshOptions.bonuses),
           },
         };
       })
     ),
+
   Render: ({ data, display, network, utils }) => {
       const { kamiEntities } = data;
       const {

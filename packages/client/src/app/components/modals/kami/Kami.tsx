@@ -119,9 +119,6 @@ export const KamiDetails: UIComponent = {
       // update the Kami Object whenever the index changes or on each cycle
       useEffect(() => {
         if (!modals.kami) return;
-        if (modals.kami && !modals.account) {
-          setModals({ party: true });
-        }
         const kamiEntity = queryKamiByIndex(kamiIndex);
         const newKami = getKami(kamiEntity);
         setKami(newKami);
