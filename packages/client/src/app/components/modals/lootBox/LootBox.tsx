@@ -96,7 +96,7 @@ export function registerLootBoxModal() {
         return (
           <Footer>
             <img src={ItemImages.obol} style={{ width: `2vw` }} />
-            <Balance>7,4000</Balance>
+            <Balance>7,400</Balance>
           </Footer>
         );
       }, []);
@@ -114,6 +114,7 @@ export function registerLootBoxModal() {
           footer={FooterRenderer}
           noPadding
           overlay
+          truncate
         >
           <Content>
             <Overlay top={4} left={5} gap={0.3} orientation='column' align='flex-end'>
