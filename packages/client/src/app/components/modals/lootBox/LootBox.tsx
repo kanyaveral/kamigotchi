@@ -22,7 +22,7 @@ export function registerLootBoxModal() {
     // Grid Config
     {
       colStart: 36,
-      colEnd: 68,
+      colEnd: 65,
       rowStart: 3,
       rowEnd: 63,
     },
@@ -77,11 +77,17 @@ export function registerLootBoxModal() {
       const HeaderRenderer = useMemo(() => {
         return (
           <Header>
-            <HeaderPart size={1.2}>EVERYTHING MUST GO!!! "Normal!" - Leonard</HeaderPart>
-            <HeaderPart size={3.4} weight={'bolder'} spacing={-0.55}>
+            <HeaderRow>
+              <HeaderPart size={1}>EVERYTHING MUST GO!!!</HeaderPart>
+              <HeaderPart size={1.2}> "Normal!" - Leonard</HeaderPart>
+            </HeaderRow>
+            <HeaderPart size={2.8} weight={'bolder'} spacing={-0.4}>
               Pop-Up Shop
             </HeaderPart>
-            <HeaderPart size={1.2}>"Five stars!!" - Amy WE ACCEPT OBOLS</HeaderPart>
+            <HeaderRow>
+              <HeaderPart size={1.2}>"Five stars!!" - Amy</HeaderPart>
+              <HeaderPart size={1}>WE ACCEPT OBOLS</HeaderPart>
+            </HeaderRow>
           </Header>
         );
       }, []);
@@ -110,7 +116,7 @@ export function registerLootBoxModal() {
           overlay
         >
           <Content>
-            <Overlay top={3} left={7} orientation='column' gap={0.5}>
+            <Overlay top={4} left={7} orientation='column' gap={0.5}>
               <ArrowButton>&#x25B2; +5</ArrowButton>
               <ArrowButton>&#x25B4; +1</ArrowButton>
               <ArrowButton>&#x25BE; -1</ArrowButton>
@@ -150,6 +156,7 @@ const Content = styled.div`
   align-items: center;
   padding: 2vw;
   font-size: 1vw;
+  padding-bottom: 0.5vw;
 `;
 
 const Header = styled.div`
@@ -167,6 +174,13 @@ const Header = styled.div`
   border: 0.3vw solid white;
   border-bottom: none;
   border-radius: 1vw 1vw 0 0;
+`;
+
+const HeaderRow = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  width: 100%;
 `;
 
 const HeaderPart = styled.div<{ size: number; weight?: string; spacing?: number }>`
@@ -237,7 +251,7 @@ const Text = styled.text<{ size?: number; weight?: string }>`
 
 const ArrowButton = styled.div`
   color: white;
-  font-size: 1vw;
+  font-size: 0.8vw;
   &:hover {
     animation: ${() => hoverFx()} 0.2s;
     transform: scale(1.05);
