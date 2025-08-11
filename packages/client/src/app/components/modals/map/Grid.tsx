@@ -161,6 +161,44 @@ export const Grid = (props: Props) => {
     setMode(option);
   };
 
+  // used for the GrdiFilter, calculates averages to use
+  // for the floating icons coloring
+  // and maps to check if there are any kami
+  // or players on a tile
+  const { kamiCountMap, operatorCountMap, kamiAverage, operatorAverage } = useMemo(() => {
+    const kamiCountMap = new Map<number, number>();
+    const operatorCountMap = new Map<number, number>();
+
+    let totalKamis = 0;
+    let roomsWithKamis = 0;
+    let totalPlayers = 0;
+    let roomsWithPlayers = 0;
+
+    rooms.forEach((room) => {
+      if (!room.index) return;
+
+      const kamis = queryNodeKamis(queryNodeByIndex(room.index));
+      kamiCountMap.set(room.index, kamis.length);
+      if (kamis.length > 0) {
+        totalKamis += kamis.length;
+        roomsWithKamis++;
+      }
+
+      const players = queryRoomAccounts(room.index);
+      operatorCountMap.set(room.index, players.length);
+      if (players.length > 0) {
+        totalPlayers += players.length;
+        roomsWithPlayers++;
+      }
+    });
+    return {
+      kamiCountMap,
+      operatorCountMap,
+      kamiAverage: roomsWithKamis && totalKamis / roomsWithKamis,
+      operatorAverage: roomsWithPlayers && totalPlayers / roomsWithPlayers,
+    };
+  }, [rooms, tick, queryNodeByIndex, queryNodeKamis, queryRoomAccounts]);
+
   /////////////////
   // RENDER
 
@@ -181,7 +219,6 @@ export const Grid = (props: Props) => {
             radius={0.6}
           />
         </DropdownWrapper>
-
         {grid.map((row, i) => (
           <Row key={i}>
             {row.map((room, j) => {
@@ -224,15 +261,12 @@ export const Grid = (props: Props) => {
                         optionSelected: mode[0],
                         roomIndex: room.index,
                         yourKamiIconsMap,
-                        rooms,
+                        kamiCountMap,
+                        operatorCountMap,
+                        kamiAverage,
+                        operatorAverage,
                       }}
-                      state={{ tick }}
-                      utils={{
-                        getNode,
-                        queryNodeByIndex,
-                        queryNodeKamis,
-                        queryRoomAccounts,
-                      }}
+                      utils={{ getNode }}
                     />
                   </Tile>
                 </TextTooltip>
