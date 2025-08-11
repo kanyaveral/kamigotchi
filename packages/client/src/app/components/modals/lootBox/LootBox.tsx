@@ -24,7 +24,7 @@ export function registerLootBoxModal() {
       colStart: 36,
       colEnd: 65,
       rowStart: 3,
-      rowEnd: 63,
+      rowEnd: 60,
     },
     // Requirement
     (layers) =>
@@ -116,7 +116,7 @@ export function registerLootBoxModal() {
           overlay
         >
           <Content>
-            <Overlay top={4} left={7} orientation='column' gap={0.5}>
+            <Overlay top={4} left={5} orientation='column' align='flex-end'>
               <ArrowButton>&#x25B2; +5</ArrowButton>
               <ArrowButton>&#x25B4; +1</ArrowButton>
               <ArrowButton>&#x25BE; -1</ArrowButton>
@@ -147,7 +147,7 @@ const Content = styled.div`
   flex-grow: 1;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: flex-start;
+  justify-content: space-around;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: black;
@@ -236,7 +236,7 @@ const Button = styled.button`
 `;
 
 const Img = styled.img`
-  width: 6vw;
+  width: 5vw;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
