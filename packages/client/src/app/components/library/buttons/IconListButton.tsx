@@ -5,26 +5,7 @@ import { playClick } from 'utils/sounds';
 import { Popover } from '../poppers/Popover';
 import { IconButton } from './IconButton';
 
-export interface Option {
-  text: string;
-  onClick: Function;
-  image?: string;
-  disabled?: boolean;
-}
-
-export function IconListButton({
-  img,
-  options,
-  text,
-  balance,
-  disabled,
-  width,
-  fullWidth,
-  radius,
-  scale,
-  scaleOrientation,
-  searchable,
-}: {
+interface Props {
   img: string;
   options: Option[];
 
@@ -38,7 +19,20 @@ export function IconListButton({
   scaleOrientation?: 'vw' | 'vh';
 
   searchable?: boolean;
-}) {
+}
+
+export interface Option {
+  text: string;
+  onClick: Function;
+  image?: string;
+  disabled?: boolean;
+}
+
+export function IconListButton(props: Props) {
+  const { img, options, text, balance } = props;
+  const { radius, scale, scaleOrientation, searchable } = props;
+  const { disabled, width, fullWidth } = props;
+
   const toggleRef = useRef<HTMLButtonElement>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [search, setSearch] = useState<string>('');

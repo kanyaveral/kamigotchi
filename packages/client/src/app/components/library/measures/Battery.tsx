@@ -1,25 +1,25 @@
 import styled from 'styled-components';
 
+type Props = {
+  level: number;
+  scale?: number;
+};
+
 export const getColor = (level: number) => {
   if (level <= 20) return '#FF6600';
   if (level <= 50) return '#FFD000';
   return '#23AD41';
 };
 
-export const Battery = ({
-  level,
-  scale = 1,
-}: {
-  level: number
-  scale?: number
-}) => {
+export const Battery = (props: Props) => {
+  const { level, scale } = props;
 
   return (
     <Container>
-      <Shell scale={scale}>
-        <Juice level={level} scale={scale} />
+      <Shell scale={scale ?? 1}>
+        <Juice level={level} scale={scale ?? 1} />
       </Shell>
-      <Bump scale={scale} />
+      <Bump scale={scale ?? 1} />
     </Container>
   );
 };

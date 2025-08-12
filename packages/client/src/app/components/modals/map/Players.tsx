@@ -4,13 +4,13 @@ import { useSelected, useVisibility } from 'app/stores';
 import { Room } from 'network/shapes/Room';
 import { playClick } from 'utils/sounds';
 
-export const Players = ({
-  index,
-  rooms,
-}: {
+interface Props {
   index: number; // index of displayed room
   rooms: Map<number, Room>;
-}) => {
+}
+
+export const Players = (props: Props) => {
+  const { index, rooms } = props;
   const room = rooms.get(index)!;
 
   const { setAccount } = useSelected();

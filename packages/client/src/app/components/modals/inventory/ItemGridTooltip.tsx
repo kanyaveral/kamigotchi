@@ -4,19 +4,17 @@ import { Item } from 'app/cache/item';
 import { Allo } from 'network/shapes/Allo';
 import { DetailedEntity } from 'network/shapes/utils';
 
-export const ItemGridTooltip = ({
-  item,
-  utils: {
-    displayRequirements,
-    parseAllos,
-  },
-}: {
+interface Props {
   item: Item;
   utils: {
     displayRequirements: (recipe: Item) => string;
     parseAllos: (allo: Allo[]) => DetailedEntity[];
   };
-}) => {
+}
+
+export const ItemGridTooltip = (props: Props) => {
+  const { item, utils } = props;
+  const { displayRequirements, parseAllos } = utils;
 
   const image = item.image;
   const title = item.name;

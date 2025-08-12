@@ -17,16 +17,7 @@ import { OwnerColumn } from './OwnerColumn';
 
 const KamidenClient = getKamidenClient();
 
-interface BattleStats {
-  Kills: number;
-  Deaths: number;
-  PNL: number;
-}
-
-export const Battles = ({
-  kami,
-  utils,
-}: {
+interface Props {
   kami: Kami;
   setKami: Dispatch<SetStateAction<Kami | undefined>>;
   tab: TabType;
@@ -38,7 +29,17 @@ export const Battles = ({
     getOwner: (entity: EntityIndex) => Account;
     getNodeByIndex: (index: number) => Node;
   };
-}) => {
+}
+
+interface BattleStats {
+  Kills: number;
+  Deaths: number;
+  PNL: number;
+}
+
+export const Battles = (props: Props) => {
+  const { kami, utils } = props;
+
   const feedRef = useRef<HTMLDivElement>(null);
   const currentKamiIdRef = useRef(kami.id);
   const [kamidenKills, setKamidenKills] = useState<Kill[]>([]);

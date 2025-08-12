@@ -8,14 +8,7 @@ import { meetsObjectives, Objective, Quest } from 'network/shapes/Quest';
 import { DetailedEntity } from 'network/shapes/utils';
 import { getFactionImage } from 'network/shapes/utils/images';
 
-// Quest Card
-export const QuestCard = ({
-  quest,
-  status,
-  actions,
-  utils,
-  imageCache,
-}: {
+interface Props {
   quest: Quest;
   status: QuestStatus;
   actions: QuestModalActions;
@@ -24,7 +17,11 @@ export const QuestCard = ({
     getItemBalance: (index: number) => number;
   };
   imageCache: Map<string, JSX.Element>;
-}) => {
+}
+
+// Quest Card
+export const QuestCard = (props: Props) => {
+  const { quest, status, actions, utils, imageCache } = props;
   const { accept, complete, burnItems } = actions;
   const { describeEntity, getItemBalance } = utils;
 

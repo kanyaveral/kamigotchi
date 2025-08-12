@@ -5,13 +5,14 @@ import { Auction } from 'network/shapes/Auction';
 import { formatCountdown } from 'utils/time';
 import { Chart } from './Chart';
 
-export const AuctionView = ({
-  auction,
-  isVisible,
-}: {
+export interface Props {
   auction: Auction;
   isVisible: boolean;
-}) => {
+}
+
+export const AuctionView = (props: Props) => {
+  const { auction, isVisible } = props;
+
   const getAuctionTitle = () => {
     if (!auction.auctionItem) return '??? Auction';
     const itemName = auction.auctionItem.name;
@@ -49,6 +50,6 @@ const Container = styled.div<{ isVisible: boolean }>`
 
 const Text = styled.div<{ size: number }>`
   color: black;
-  font-size: ${({ size }) => size}vw;
-  line-height: ${({ size }) => size * 1.5}vw;
+  font-size: ${(props) => props.size}vw;
+  line-height: ${(props) => props.size * 1.5}vw;
 `;

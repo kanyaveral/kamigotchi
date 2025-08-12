@@ -7,17 +7,16 @@ import { Node } from 'network/shapes/Node';
 import { ScavBar } from 'network/shapes/Scavenge';
 import { DetailedEntity } from 'network/shapes/utils';
 
-export const ItemDrops = ({
-  node,
-  scavenge,
-  utils,
-}: {
+interface Props {
   node: Node;
   scavenge: ScavBar;
   utils: {
     parseAllos: (scavAllo: Allo[]) => DetailedEntity[];
   };
-}) => {
+}
+
+export const ItemDrops = (props: Props) => {
+  const { node, scavenge, utils } = props;
   const { parseAllos } = utils;
   const [drops, setDrops] = useState<DetailedEntity[]>([]);
   const nodeDrops = node.drops;

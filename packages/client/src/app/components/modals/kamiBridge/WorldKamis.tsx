@@ -8,11 +8,7 @@ import { playClick } from 'utils/sounds';
 import { KamiBlock } from '../../library/KamiBlock';
 import { Mode } from './types';
 
-export const WorldKamis = ({
-  kamis,
-  state,
-  mode,
-}: {
+interface Props {
   mode: Mode;
   kamis: {
     wild: Kami[];
@@ -22,7 +18,10 @@ export const WorldKamis = ({
     selected: Kami[];
     setSelected: (kamis: Kami[]) => void;
   };
-}) => {
+}
+
+export const WorldKamis = (props: Props) => {
+  const { kamis, state, mode } = props;
   const { world, wild } = kamis;
   const { selected, setSelected } = state;
   const [displayed, setDisplayed] = useState<Kami[]>([]);
@@ -109,6 +108,6 @@ const Scrollable = styled.div`
 `;
 
 const Text = styled.div<{ size: number }>`
-  font-size: ${({ size }) => size}vw;
-  line-height: ${({ size }) => size * 1.5}vw;
+  font-size: ${(props) => props.size}vw;
+  line-height: ${(props) => props.size * 1.5}vw;
 `;

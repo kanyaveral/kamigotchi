@@ -7,13 +7,7 @@ import { TabType, ViewMode } from '../../types';
 import { AuctionView } from '../auctions/AuctionView';
 import { KamiView } from './KamiView';
 
-export const Reroll = ({
-  controls,
-  data,
-  isVisible,
-  state,
-  utils,
-}: {
+interface Props {
   controls: {
     mode: ViewMode;
     setMode: (mode: ViewMode) => void;
@@ -33,7 +27,10 @@ export const Reroll = ({
     getAccountKamis: () => Kami[];
   };
   isVisible: boolean;
-}) => {
+}
+
+export const Reroll = (props: Props) => {
+  const { controls, data, isVisible, state, utils } = props;
   const { mode } = controls;
   const { auction } = data;
 

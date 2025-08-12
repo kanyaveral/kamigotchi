@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const Overlay = styled.div<{
+interface OverlayProps {
   bottom?: number;
   top?: number;
   right?: number;
@@ -21,7 +21,9 @@ export const Overlay = styled.div<{
   justify?: 'flex-start' | 'center' | 'flex-end' | 'space-between';
   gap?: number;
   isHidden?: boolean;
-}>`
+}
+
+export const Overlay = styled.div<OverlayProps>`
   position: absolute;
 
   ${({ width }) => width && `width: ${width}vw;`}

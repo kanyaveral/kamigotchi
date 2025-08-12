@@ -4,18 +4,7 @@ import { pulseFx } from 'app/styles/effects';
 import { playClick } from 'utils/sounds';
 import { TextTooltip } from '../poppers/TextTooltip';
 
-// ActionButton is a text button that triggers an Action when clicked
-export const ActionButton = ({
-  onClick,
-  text,
-  disabled = false,
-  fill = false,
-  inverted = false,
-  size = 'medium',
-  pulse = false,
-  tooltip,
-  noBorder = false,
-}: {
+export interface ActionButtonProps {
   onClick: Function;
   text: string;
   disabled?: boolean;
@@ -25,17 +14,21 @@ export const ActionButton = ({
   pulse?: boolean;
   tooltip?: string[];
   noBorder?: boolean;
-}) => {
+}
+
+// ActionButton is a text button that triggers an Action when clicked
+export const ActionButton = (props: ActionButtonProps) => {
   // layer on a sound effect
   const handleClick = async () => {
     playClick();
-    await onClick();
+    await props.onClick();
   };
 
   // override styles for sizes and disabling
   const setStyles = () => {
-    const styles: any = {};
+    let styles: any = {};
 
+    const size = props.size ?? 'medium';
     if (size === 'small') {
       styles.fontSize = '.6vw';
       styles.padding = '.3vw .6vw';
@@ -65,17 +58,17 @@ export const ActionButton = ({
       styles.height = '4.5vh';
     }
 
-    if (inverted) {
+    if (props.inverted) {
       styles.backgroundColor = '#111';
       styles.borderColor = 'white';
       styles.color = 'white';
-      if (disabled) styles.backgroundColor = '#4d4d4d';
+      if (props.disabled) styles.backgroundColor = '#4d4d4d';
     } else {
-      if (disabled) styles.backgroundColor = '#b2b2b2';
+      if (props.disabled) styles.backgroundColor = '#b2b2b2';
     }
 
-    if (fill) styles.flexGrow = '1';
-    if (noBorder) {
+    if (props.fill) styles.flexGrow = '1';
+    if (props.noBorder) {
       styles.border = 'none';
       styles.borderRadius = '0vw';
     }
@@ -84,20 +77,20 @@ export const ActionButton = ({
 
   let result: JSX.Element;
 
-  if (pulse)
+  if (props.pulse)
     result = (
-      <PulseButton onClick={!disabled ? handleClick : () => {}} style={setStyles()}>
-        {text}
+      <PulseButton onClick={!props.disabled ? handleClick : () => {}} style={setStyles()}>
+        {props.text}
       </PulseButton>
     );
   else
     result = (
-      <Button onClick={!disabled ? handleClick : () => {}} style={setStyles()}>
-        {text}
+      <Button onClick={!props.disabled ? handleClick : () => {}} style={setStyles()}>
+        {props.text}
       </Button>
     );
 
-  if (tooltip) result = <TextTooltip text={tooltip}>{result}</TextTooltip>;
+  if (props.tooltip) result = <TextTooltip text={props.tooltip}>{result}</TextTooltip>;
 
   return result;
 };

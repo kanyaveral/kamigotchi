@@ -3,14 +3,15 @@ import styled from 'styled-components';
 import { ActionButton } from 'app/components/library';
 import { useAccount, useVisibility } from 'app/stores';
 
-export const Debugging = ({
-  actions,
-}: {
+interface Props {
   actions: {
     echoRoom: () => void;
     echoKamis: () => void;
   };
-}) => {
+}
+
+export const Debugging = (props: Props) => {
+  const { actions } = props;
   const { debug, setDebug } = useAccount();
   const { modals, setModals } = useVisibility();
 

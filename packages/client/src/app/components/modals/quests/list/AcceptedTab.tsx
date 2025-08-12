@@ -8,13 +8,7 @@ import { EmptyText } from '../../../library/text/EmptyText';
 import { CompletedQuests } from './Completed';
 import { OngoingQuests } from './Ongoing';
 
-export const AcceptedTab = ({
-  quests,
-  actions,
-  utils,
-  imageCache,
-  isVisible,
-}: {
+interface Props {
   quests: {
     ongoing: BaseQuest[];
     completed: BaseQuest[];
@@ -30,7 +24,10 @@ export const AcceptedTab = ({
   };
   imageCache: Map<string, JSX.Element>;
   isVisible: boolean;
-}) => {
+}
+
+export const AcceptedTab = (props: Props) => {
+  const { quests, actions, utils, imageCache, isVisible } = props;
   const { ongoing, completed } = quests;
   const [showCompleted, setShowCompleted] = useState(false);
   const emptyText = ['No ongoing quests.', 'Get a job?'];

@@ -6,12 +6,7 @@ import { ItemImages } from 'assets/images/items';
 import { Account } from 'network/shapes/Account';
 import { Factions } from '../Factions';
 
-export const StatsBottom = ({
-  data: {
-    account,
-    vip
-  },
-}: {
+interface Props {
   data: {
     account: Account;
     vip: {
@@ -19,7 +14,12 @@ export const StatsBottom = ({
       total: number; // total VIP this epoch
     };
   };
-}) => {
+}
+
+export const StatsBottom = (props: Props) => {
+  const { data } = props;
+  const { account, vip } = data;
+
   /////////////////
   // INTERPRETATION
 

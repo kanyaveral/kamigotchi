@@ -3,17 +3,7 @@ import styled from 'styled-components';
 import { TextTooltip } from 'app/components/library';
 import { calcPercentCompletion } from 'utils/numbers';
 
-export const ProgressBar = ({
-  total,
-  current,
-  width,
-  height = 1.2,
-  colors: {
-    background = '#fff',
-    progress = '#000',
-  } = {},
-  icon,
-}: {
+interface Props {
   total: number;
   current: number;
   width?: number;
@@ -23,15 +13,27 @@ export const ProgressBar = ({
     progress?: string;
   };
   icon?: string;
-}) => {
+}
+
+export const ProgressBar = (props: Props) => {
+  const { total, current, height, colors, icon } = props;
+
+  const getBgColor = () => {
+    return colors?.background ?? '#fff';
+  };
+
+  const getFgColor = () => {
+    return colors?.progress ?? '#000';
+  };
+
   return (
-    <Container width={width}>
+    <Container width={props.width}>
       <TextTooltip text={[`${current}/${total}`]} grow>
         <Bar
           percent={calcPercentCompletion(current, total)}
-          height={height}
-          bgColor={background}
-          fgColor={progress}
+          height={height ?? 1.2}
+          bgColor={getBgColor()}
+          fgColor={getFgColor()}
         >
           {icon && <Icon src={icon} alt='icon' position={calcPercentCompletion(current, total)} />}
         </Bar>
@@ -57,12 +59,14 @@ const Icon = styled.img<{ position: number }>`
   border-radius: 50%;
 `;
 
-const Bar = styled.div<{
+interface BarProps {
   height: number;
   percent: number;
   bgColor: string;
   fgColor: string;
-}>`
+}
+
+const Bar = styled.div<BarProps>`
   position: relative;
   border: solid black 0.15vw;
   border-radius: ${({ height }) => height * 0.5}vw;

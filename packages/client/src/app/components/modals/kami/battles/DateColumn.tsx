@@ -4,11 +4,13 @@ import { Text, TextTooltip } from 'app/components/library';
 import { Kill } from 'clients/kamiden';
 import { getDateString, getKamiDate, getKamiTime, getPhaseIcon, getPhaseOf } from 'utils/time';
 
-export const DateColumn = ({
-  kills,
-}: {
+interface Props {
   kills: Kill[];
-}) => {
+}
+
+export const DateColumn = (props: Props) => {
+  const { kills } = props;
+
   const getTooltipText = (kill: Kill) => {
     const date = getDateString(kill.Timestamp, 0);
     const kamiTime = getKamiTime(kill.Timestamp, 0);

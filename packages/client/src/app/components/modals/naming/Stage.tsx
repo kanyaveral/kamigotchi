@@ -14,13 +14,7 @@ const MIN_LEN = 1;
 const MAX_LEN = 16;
 const ONYX_PRICE = 5; // rename price in onyx
 
-// TODO: check action status, prevent duplicate spend and update names properly on cache
-export const Stage = ({
-  actions,
-  data,
-  state,
-  utils,
-}: {
+interface Props {
   actions: {
     onyxApprove: (price: number) => EntityID | void;
     onyxRename: (kami: Kami, name: string) => EntityID | void;
@@ -42,7 +36,11 @@ export const Stage = ({
   utils: {
     getItemBalance: (inventory: Inventory[], index: number) => number;
   };
-}) => {
+}
+
+// TODO: check action status, prevent duplicate spend and update names properly on cache
+export const Stage = (props: Props) => {
+  const { actions, data, state, utils } = props;
   const { onyxApprove, onyxRename, rename } = actions;
   const { account, kami, onyxInfo, onyxItem, holyDustItem } = data;
   const { tick } = state;

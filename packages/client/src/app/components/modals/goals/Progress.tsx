@@ -9,13 +9,7 @@ import { parseQuantity } from 'network/shapes/utils/parse';
 import { ActionBar } from './ActionBar';
 import { ProgressBar } from './ProgressBar';
 
-export const Progress = ({
-  actions,
-  account,
-  goal,
-  accContribution,
-  utils,
-}: {
+interface Props {
   actions: {
     contributeTx: (goal: Goal, amount: number) => void;
     claimTx: (goal: Goal) => void;
@@ -29,7 +23,11 @@ export const Progress = ({
     getBalance: (holder: EntityIndex, index: number | undefined, type: string) => number;
     getFromDescription: (type: string, index: number) => DetailedEntity;
   };
-}) => {
+}
+
+export const Progress = (props: Props) => {
+  const { goal, accContribution, utils } = props;
+
   const [objType, setObjType] = useState<DetailedEntity>({ ObjectType: '', image: '', name: '' });
 
   useEffect(() => {
@@ -58,9 +56,9 @@ export const Progress = ({
           />
         </div>
         <ActionBar
-          actions={actions}
-          account={account}
-          goal={goal}
+          actions={props.actions}
+          account={props.account}
+          goal={props.goal}
           utils={utils}
         />
       </Row>

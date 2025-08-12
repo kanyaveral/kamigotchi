@@ -24,13 +24,7 @@ import { Controls } from './controls/Controls';
 import { Footer } from './Footer';
 import { Tabs } from './Tabs';
 
-export const Sidebar = ({
-  actions,
-  controls,
-  data,
-  state,
-  utils,
-}: {
+interface Props {
   actions: {
     approve: (payItem: Item, price: number) => void;
     bid: (item: Item, amt: number) => void;
@@ -78,7 +72,10 @@ export const Sidebar = ({
     getItemBalance: (index: number) => number;
     isWhitelisted: (entity: EntityIndex) => boolean;
   };
-}) => {
+}
+
+export const Sidebar = (props: Props) => {
+  const { actions, controls, data, state, utils } = props;
   const { mode, tab, setTab } = controls;
   const { auctions, commits, mint } = data;
   const { tick, quantity, setQuantity } = state;

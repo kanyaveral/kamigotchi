@@ -7,13 +7,7 @@ import { QuestCard } from './QuestCard';
 
 const emptyText = ['No quests available.', 'Do something else?'];
 
-export const AvailableTab = ({
-  quests,
-  actions,
-  utils,
-  imageCache,
-  isVisible,
-}: {
+interface Props {
   quests: Quest[];
   actions: QuestModalActions;
   utils: {
@@ -22,7 +16,10 @@ export const AvailableTab = ({
   };
   imageCache: Map<string, JSX.Element>;
   isVisible: boolean;
-}) => {
+}
+
+export const AvailableTab = (props: Props) => {
+  const { quests, actions, utils, imageCache, isVisible } = props;
   const display = isVisible ? 'block' : 'none';
 
   return (

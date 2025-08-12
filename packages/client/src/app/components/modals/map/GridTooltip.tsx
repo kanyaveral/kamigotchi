@@ -4,16 +4,7 @@ import { KamiIcon, OperatorIcon } from 'assets/images/icons/menu';
 import { Room } from 'network/shapes/Room';
 import { getAffinityImage } from 'network/shapes/utils';
 
-export const GridTooltip = ({
-  room,
-  rolls,
-  kamiIconsMap,
-  getNode,
-  parseAllos,
-  playerEntitiesLength,
-  kamiEntitiesLength,
-  friendsCount,
-}: {
+interface Props {
   room: Room;
   rolls: Map<number, number>;
   kamiIconsMap: Map<number, string[]>;
@@ -22,7 +13,20 @@ export const GridTooltip = ({
   playerEntitiesLength: number;
   kamiEntitiesLength: number;
   friendsCount: number;
-}) => {
+}
+
+export const GridTooltip = (props: Props) => {
+  const {
+    room,
+    rolls,
+    kamiIconsMap,
+    getNode,
+    parseAllos,
+    playerEntitiesLength,
+    kamiEntitiesLength,
+    friendsCount,
+  } = props;
+
   if (!room.index) return null;
 
   const node = getNode(room.index);

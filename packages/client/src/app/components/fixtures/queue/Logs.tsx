@@ -10,15 +10,16 @@ import { DefaultChain } from 'constants/chains';
 import { NetworkLayer } from 'network/';
 import { ActionState, ActionStateString } from 'network/systems/ActionSystem/constants';
 
-export const Logs = ({
-  network: {
-    actions,
-  },
-  actionIndices,
-}: {
+interface Props {
   network: NetworkLayer;
   actionIndices: EntityIndex[];
-}) => {
+}
+
+export const Logs = (props: Props) => {
+  const {
+    network: { actions },
+    actionIndices,
+  } = props;
   const ActionComponent = actions!.Action;
 
   // scroll to bottom when tx added

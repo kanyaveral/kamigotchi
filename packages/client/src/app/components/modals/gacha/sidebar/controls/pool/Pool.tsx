@@ -6,12 +6,7 @@ import { Filter, Sort, TabType, ViewMode } from '../../../types';
 import { PricePanel } from '../PricePanel';
 import { KamiPanel } from './KamiPanel';
 
-export const Pool = ({
-  controls,
-  data,
-  state,
-  isVisible,
-}: {
+interface Props {
   controls: {
     tab: TabType;
     mode: ViewMode;
@@ -33,7 +28,9 @@ export const Pool = ({
     tick: number;
   };
   isVisible: boolean;
-}) => {
+}
+export const Pool = (props: Props) => {
+  const { controls, data, state, isVisible } = props;
   const { mode } = controls;
 
   return (

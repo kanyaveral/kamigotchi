@@ -6,11 +6,7 @@ import { GachaMintData } from 'network/shapes/Gacha';
 import { Item } from 'network/shapes/Item';
 import { PricePanel } from '../PricePanel';
 
-export const Public = ({
-  data,
-  state,
-  isVisible,
-}: {
+interface Props {
   isVisible: boolean;
   data: {
     balance: number;
@@ -29,7 +25,10 @@ export const Public = ({
     price: number;
     tick: number;
   };
-}) => {
+}
+
+export const Public = (props: Props) => {
+  const { data, state, isVisible } = props;
   const { tick } = state;
   const { mint } = data;
 

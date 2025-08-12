@@ -1,28 +1,22 @@
 import styled from 'styled-components';
 import { playClick } from 'utils/sounds';
 
-// just a pair of simple control buttons to adjust a value
-export const Stepper = ({
-  value,
-  set,
-  scale = 1,
-  max,
-  min,
-
-  disableInc,
-  disableDec,
-  isHidden,
-}: {
+interface Props {
   value: number;
   set: (value: number) => void;
   scale?: number;
   max?: number;
   min?: number;
-
   disableInc?: boolean;
   disableDec?: boolean;
   isHidden?: boolean;
-}) => {
+}
+
+// just a pair of simple control buttons to adjust a value
+export const Stepper = (props: Props) => {
+  const { value, set, max, min, scale = 1 } = props;
+  const { disableInc, disableDec, isHidden } = props;
+
   const handleInc = () => {
     let newValue = value + 1;
     if (max) newValue = Math.min(max, newValue);
@@ -88,7 +82,7 @@ const Button = styled.div<{ scale: number; disabled?: boolean }>`
   ${({ disabled }) =>
     disabled &&
     `
-  background-color: #bbb;
-  cursor: default;
+  background-color: #bbb; 
+  cursor: default; 
   pointer-events: none;`}
 `;

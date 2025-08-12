@@ -6,11 +6,7 @@ import { GachaMintData } from 'network/shapes/Gacha';
 import { Item } from 'network/shapes/Item';
 import { PricePanel } from '../PricePanel';
 
-export const Whitelist = ({
-  data,
-  state,
-  isVisible,
-}: {
+interface Props {
   isVisible: boolean;
   data: {
     balance: number;
@@ -30,7 +26,10 @@ export const Whitelist = ({
     price: number;
     tick: number;
   };
-}) => {
+}
+
+export const Whitelist = (props: Props) => {
+  const { data, state, isVisible } = props;
   const { tick } = state;
   const { mint } = data;
 

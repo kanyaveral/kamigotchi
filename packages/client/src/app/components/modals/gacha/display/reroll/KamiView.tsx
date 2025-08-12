@@ -6,12 +6,7 @@ import { useVisibility } from 'app/stores';
 import { Account } from 'network/shapes/Account';
 import { Kami } from 'network/shapes/Kami';
 
-export const KamiView = ({
-  data,
-  state,
-  utils,
-  isVisible,
-}: {
+interface Props {
   data: {
     account: Account;
   };
@@ -25,7 +20,10 @@ export const KamiView = ({
     getAccountKamis: () => Kami[];
   };
   isVisible: boolean;
-}) => {
+}
+
+export const KamiView = (props: Props) => {
+  const { data, state, utils, isVisible } = props;
   const { account } = data;
   const { setQuantity, selectedKamis, setSelectedKamis, tick } = state;
   const { getAccountKamis } = utils;

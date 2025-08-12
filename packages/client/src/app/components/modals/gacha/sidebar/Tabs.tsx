@@ -3,13 +3,14 @@ import styled from 'styled-components';
 import { playClick } from 'utils/sounds';
 import { TABS, TabType } from '../types';
 
-export const Tabs = ({
-  tab,
-  setTab,
-}: {
+interface Props {
   tab: TabType;
   setTab: (tab: TabType) => void;
-}) => {
+}
+
+export const Tabs = (props: Props) => {
+  const { tab, setTab } = props;
+
   // layer on a sound effect
   const handleTab = async (tab: TabType) => {
     playClick();

@@ -3,17 +3,16 @@ import styled from 'styled-components';
 import { Room } from 'network/shapes/Room';
 import { playClick } from 'utils/sounds';
 
-export const Exits = ({
-  index,
-  rooms,
-  actions,
-}: {
+interface Props {
   index: number; // index of displayed room
   rooms: Map<number, Room>;
   actions: {
     move: (targetRoom: number) => void;
   };
-}) => {
+}
+
+export const Exits = (props: Props) => {
+  const { index, rooms, actions } = props;
   if (index == 0 || !rooms.has(index)) return <div />;
 
   const handleClick = (targetRoom: number) => {

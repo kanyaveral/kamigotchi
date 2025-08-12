@@ -8,12 +8,7 @@ import { DetailedEntity } from 'network/shapes/utils';
 import { getFactionImage } from 'network/shapes/utils/images';
 import { Battlepass } from './Battlepass';
 
-export const Footer = ({
-  account,
-  quests,
-  actions,
-  utils,
-}: {
+interface Props {
   account: Account;
   quests: {
     registry: BaseQuest[];
@@ -28,7 +23,11 @@ export const Footer = ({
     parseObjectives: (quest: Quest) => Quest;
     parseRequirements: (quest: Quest) => Quest;
   };
-}) => {
+}
+
+export const Footer = (props: Props) => {
+  const { account, quests, actions, utils } = props;
+
   return (
     <Container>
       <TextTooltip

@@ -14,11 +14,7 @@ import { ViewMode } from '../../types';
 const GACHA_TICKET_IMAGE = ItemImages.gacha_ticket;
 const TOTAL = 3000;
 
-export const Public = ({
-  controls,
-  data,
-  state,
-}: {
+interface Props {
   controls: {
     mode: ViewMode;
     setMode: (mode: ViewMode) => void;
@@ -35,7 +31,10 @@ export const Public = ({
   state: {
     tick: number;
   };
-}) => {
+}
+
+export const Public = (props: Props) => {
+  const { controls, data, state } = props;
   const { mode, setMode } = controls;
   const {
     config,
@@ -136,8 +135,8 @@ const Section = styled.div`
 `;
 
 const Text = styled.div<{ size: number }>`
-  font-size: ${({ size }) => size}vw;
-  line-height: ${({ size }) => size * 1.5}vw;
+  font-size: ${(props) => props.size}vw;
+  line-height: ${(props) => props.size * 1.5}vw;
 `;
 
 const Image = styled.img<{ selected: boolean }>`

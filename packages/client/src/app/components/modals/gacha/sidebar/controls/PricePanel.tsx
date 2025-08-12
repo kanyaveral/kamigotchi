@@ -3,11 +3,7 @@ import styled from 'styled-components';
 import { EmptyText } from 'app/components/library';
 import { Item } from 'network/shapes/Item';
 
-export const PricePanel = ({
-  data,
-  state,
-  isVisible,
-}: {
+interface Props {
   isVisible: boolean;
   data: {
     balance: number;
@@ -19,7 +15,10 @@ export const PricePanel = ({
     quantity: number;
     tick: number;
   };
-}) => {
+}
+
+export const PricePanel = (props: Props) => {
+  const { data, state, isVisible } = props;
   const { payItem, saleItem } = data;
   const { price, quantity, tick } = state;
 

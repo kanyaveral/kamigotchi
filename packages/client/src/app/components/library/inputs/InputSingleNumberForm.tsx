@@ -3,27 +3,7 @@ import styled from 'styled-components';
 
 import { playClick } from 'utils/sounds';
 
-const disabledStepperStyle = {
-  backgroundColor: '#c4c4c4',
-  pointerEvents: 'none' as const,
-};
-
-// InputSingleNumberForm is a styled number input field with buttons to increase or decrease
-export const InputSingleNumberForm = ({
-  id,
-  bounds,
-  hasButton,
-  buttonText = 'Submit',
-  fullWidth,
-  initialValue = 0,
-  label,
-  placeholder,
-  onSubmit,
-  watch,
-  stepper,
-  disabled,
-  tooltip
-}: {
+interface Props {
   id: string;
   bounds: {
     min?: number;
@@ -41,22 +21,30 @@ export const InputSingleNumberForm = ({
   stepper?: boolean;
   disabled?: boolean;
   tooltip?: string[];
-}) => {
-  const [value, setValue] = watch
-    ? [watch.value, watch.set]
-    : useState<number>(initialValue);
+}
+
+const disabledStepperStyle = {
+  backgroundColor: '#c4c4c4',
+  pointerEvents: 'none',
+};
+
+// InputSingleNumberForm is a styled number input field with buttons to increase or decrease
+export const InputSingleNumberForm = (props: Props) => {
+  const [value, setValue] = props.watch
+    ? [props.watch.value, props.watch.set]
+    : useState<number>(props.initialValue || 0);
   let styleOverride = {};
-  if (fullWidth) styleOverride = { width: '100%', maxWidth: '100%' };
-  const step = bounds.step = 1;
+  if (props.fullWidth) styleOverride = { width: '100%', maxWidth: '100%' };
+  const step = props.bounds.step || 1;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(parseInt(event.target.value) || initialValue);
+    setValue(parseInt(event.target.value) || props.initialValue || 0);
   };
 
   const handleSubmit = () => {
     playClick();
-    onSubmit && onSubmit(value);
-    setValue(initialValue);
+    props.onSubmit && props.onSubmit(value);
+    setValue(props.initialValue || 0);
   };
 
   const catchKeys = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -67,8 +55,8 @@ export const InputSingleNumberForm = ({
   };
 
   const Stepper = () => {
-    const atMax = bounds.max != undefined && value + step > bounds.max;
-    const atMin = value - step <= (bounds.min = 0);
+    const atMax = props.bounds.max != undefined && value + step > props.bounds.max;
+    const atMin = value - step <= (props.bounds.min || 0);
     return (
       <StepperGroup>
         <StepperButtonTop
@@ -91,23 +79,23 @@ export const InputSingleNumberForm = ({
   };
 
   return (
-    <Container id={id} style={styleOverride}>
+    <Container id={props.id} style={styleOverride}>
       <Box>
         <InputGroup style={styleOverride}>
-          {label && <Label>{label}</Label>}
+          {props.label && <Label>{props.label}</Label>}
           <Input
             type='number'
-            placeholder={placeholder?.toString()}
+            placeholder={props.placeholder?.toString()}
             value={value}
             onKeyDown={(e) => catchKeys(e)}
             onChange={(e) => handleChange(e)}
             step='1'
           />
-          {stepper && Stepper()}
+          {props.stepper && Stepper()}
         </InputGroup>
-        {hasButton ? (
-          <Button onClick={() => handleSubmit()} disabled={disabled}>
-            {buttonText}
+        {props.hasButton ? (
+          <Button onClick={() => handleSubmit()} disabled={props.disabled}>
+            {props.buttonText || 'Submit'}
           </Button>
         ) : (
           <div />

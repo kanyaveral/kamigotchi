@@ -10,12 +10,7 @@ import { Blocked } from '../../blocked/Blocked';
 import { Friends } from '../../friends/Friends';
 import { Requests } from '../../requests/Requests';
 
-export const SocialBottom = ({
-  subTab,
-  data,
-  actions,
-  utils,
-}: {
+interface Props {
   actions: {
     acceptFren: (friendship: Friendship) => void;
     blockFren: (account: BaseAccount) => void;
@@ -34,7 +29,10 @@ export const SocialBottom = ({
     getAccountKamis: (accEntity: EntityIndex) => Kami[];
     getFriends: (accEntity: EntityIndex) => FriendsType;
   };
-}) => {
+}
+
+export const SocialBottom = (props: Props) => {
+  const { subTab, data, actions, utils } = props;
   const { accounts, player, isSelf } = data;
   const { getFriends } = utils;
 

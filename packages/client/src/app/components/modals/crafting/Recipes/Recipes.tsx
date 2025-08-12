@@ -5,11 +5,7 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { RecipeCard } from './RecipeCard';
 
-export const Recipes = ({
-  data,
-  actions,
-  utils,
-}: {
+interface Props {
   data: {
     account: Account;
     recipes: Recipe[];
@@ -23,7 +19,10 @@ export const Recipes = ({
     getItemBalance: (index: number) => number;
     meetsRequirements: (recipe: Recipe) => boolean;
   };
-}) => {
+}
+
+export const Recipes = (props: Props) => {
+  const { actions, data, utils } = props;
   const { account, recipes } = data;
   const { craft } = actions;
 

@@ -7,12 +7,7 @@ import { ViewMode } from '../../../types';
 import { PricePanel } from '../PricePanel';
 import { KamiPanel } from './KamiPanel';
 
-export const Reroll = ({
-  controls,
-  data,
-  state,
-  isVisible,
-}: {
+interface Props {
   controls: {
     mode: ViewMode;
   };
@@ -29,7 +24,9 @@ export const Reroll = ({
     tick: number;
   };
   isVisible: boolean;
-}) => {
+}
+export const Reroll = (props: Props) => {
+  const { controls, data, state, isVisible } = props;
   const { mode } = controls;
   const { selectedKamis } = state;
 

@@ -3,13 +3,7 @@ import { Kami } from 'network/shapes/Kami';
 import { TextTooltip } from '../../poppers';
 import { IconButton } from '../IconButton';
 
-export const OnyxButton = ({
-  kami,
-  onyx,
-  actions,
-  tooltip,
-  disabled,
-}: {
+interface Props {
   kami: Kami;
   onyx: {
     price: number;
@@ -22,7 +16,10 @@ export const OnyxButton = ({
   };
   tooltip?: string[];
   disabled?: boolean;
-}) => {
+}
+
+export const OnyxButton = (props: Props) => {
+  const { actions, kami, onyx, tooltip, disabled } = props;
   const { onyxApprove, onyxUse } = actions;
   const { allowance, balance, price } = onyx;
 

@@ -10,29 +10,14 @@ import { Trade } from 'network/shapes/Trade';
 import { TRADE_ROOM_INDEX } from '../../constants';
 import { ConfirmationData, OfferCard } from '../../library';
 
-// represents the player's Buy/Sell Orders that are in EXECUTED state
-// NOTE: only supports simple (single item) trades against musu atm
-// TODO: add support for Trades you're the Taker for (disable action)
-export const ExecutedOffer = ({
-  actions,
-  controls: {
-    isConfirming,
-    setIsConfirming,
-    setConfirmData,
-  } = {},
-  data: {
-    account,
-    trade,
-    type,
-  },
-}: {
+interface Props {
   actions?: {
     completeTrade: (trade: Trade) => void;
   };
   controls?: {
-    isConfirming?: boolean;
-    setIsConfirming?: Dispatch<boolean>;
-    setConfirmData?: Dispatch<ConfirmationData>;
+    isConfirming: boolean;
+    setIsConfirming: Dispatch<boolean>;
+    setConfirmData: Dispatch<ConfirmationData>;
   };
   data: {
     account: Account;
@@ -42,8 +27,16 @@ export const ExecutedOffer = ({
   utils: {
     getItemByIndex: (index: number) => Item;
   };
-}) => {
+}
+
+// represents the player's Buy/Sell Orders that are in EXECUTED state
+// NOTE: only supports simple (single item) trades against musu atm
+// TODO: add support for Trades you're the Taker for (disable action)
+export const ExecutedOffer = (props: Props) => {
+  const { actions, controls, data } = props;
   const { completeTrade } = actions ?? {};
+  const { isConfirming, setIsConfirming, setConfirmData } = controls ?? {};
+  const { account, trade, type } = data;
 
   /////////////////
   // HANDLERS

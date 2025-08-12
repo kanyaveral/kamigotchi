@@ -5,15 +5,14 @@ import { Account } from 'network/shapes/Account';
 import { NPC } from 'network/shapes/Npc';
 import { Balance } from './Balance';
 
-export const Header = ({
-  merchant,
-  player,
-  balance,
-}: {
+export interface Props {
   merchant: NPC;
   player: Account;
   balance: number;
-}) => {
+}
+
+export const Header = (props: Props) => {
+  const { merchant, player, balance } = props;
 
   return (
     <Container>

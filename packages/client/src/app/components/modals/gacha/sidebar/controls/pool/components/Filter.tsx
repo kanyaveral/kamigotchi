@@ -3,14 +3,7 @@ import styled from 'styled-components';
 import { CircleExitButton, Overlay } from 'app/components/library';
 import { useEffect, useState } from 'react';
 
-// TODO (jb): fire these filter updates off on a debounce
-export const Filter = ({
-  name,
-  icon,
-  min,
-  max,
-  actions,
-}: {
+interface Props {
   name: string;
   icon: string;
   min: number;
@@ -20,7 +13,11 @@ export const Filter = ({
     setMin: (min: number) => void;
     setMax: (max: number) => void;
   };
-}) => {
+}
+
+// TODO (jb): fire these filter updates off on a debounce
+export const Filter = (props: Props) => {
+  const { name, icon, min, max, actions } = props;
   const { setMin, setMax, remove } = actions;
   const [stepSize, setStepSize] = useState(1);
 

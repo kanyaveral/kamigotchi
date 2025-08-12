@@ -8,19 +8,7 @@ import { Trade, TradeOrder } from 'network/shapes/Trade';
 import { playClick } from 'utils/sounds';
 import { getTypeColor } from '../helpers';
 
-// represents the player's Buy/Sell Orders that are in EXECUTED state
-// NOTE: only supports simple (single item) trades against musu atm
-// TODO: add support for Trades you're the Taker for (disable action)
-export const OfferCard = ({
-  button,
-  data: {
-    account,
-    trade,
-    type,
-  },
-  utils,
-  reverse,
-}: {
+interface Props {
   button: {
     onClick: (trade: Trade) => void;
     text: string;
@@ -36,7 +24,15 @@ export const OfferCard = ({
     getStateTooltip: () => string[];
   };
   reverse?: boolean;
-}) => {
+}
+
+// represents the player's Buy/Sell Orders that are in EXECUTED state
+// NOTE: only supports simple (single item) trades against musu atm
+// TODO: add support for Trades you're the Taker for (disable action)
+export const OfferCard = (props: Props) => {
+  const { button, data, utils, reverse } = props;
+  const { account, trade, type } = data;
+
   const [want, setWant] = useState<Item[]>([]);
   const [have, setHave] = useState<Item[]>([]);
   const [wantAmt, setWantAmt] = useState<number[]>([]);

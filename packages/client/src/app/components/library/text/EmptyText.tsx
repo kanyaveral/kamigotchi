@@ -10,19 +10,15 @@ interface Link {
 
 type TextPart = string | Link;
 
-export const EmptyText = ({
-  text,
-  size = 1.2,
-  gapScale = 3,
-  isHidden,
-  linkColor,
-}: {
+interface Props {
   text: TextPart[];
   size?: number;
   gapScale?: number;
   isHidden?: boolean;
   linkColor?: string;
-}) => {
+}
+
+export const EmptyText = ({ text, size = 1.2, gapScale = 3, isHidden, linkColor }: Props) => {
   return (
     <Container isHidden={!!isHidden}>
       {

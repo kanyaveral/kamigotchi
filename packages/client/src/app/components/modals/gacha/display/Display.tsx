@@ -12,13 +12,7 @@ import { Mint } from './mint/Mint';
 import { Pool } from './pool/Pool';
 import { Reroll } from './reroll/Reroll';
 
-export const Display = ({
-  caches,
-  controls,
-  data,
-  state,
-  utils,
-}: {
+interface Props {
   caches: {
     kamiBlocks: Map<EntityIndex, JSX.Element>;
   };
@@ -57,7 +51,10 @@ export const Display = ({
     getMintConfig: () => GachaMintConfig;
     getMintData: (id: EntityID) => GachaMintData;
   };
-}) => {
+}
+
+export const Display = (props: Props) => {
+  const { state, controls, data, caches, utils } = props;
   const { mode, setMode, tab } = controls;
   const { account, auctions, mint, poolKamis } = data;
 

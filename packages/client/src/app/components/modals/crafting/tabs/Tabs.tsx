@@ -2,17 +2,17 @@ import styled from 'styled-components';
 
 import { playClick } from 'utils/sounds';
 
-export const Tabs = ({
-  tab,
-  setTab: _setTab,
-}: {
+interface Props {
   tab: string;
   setTab: (tab: string) => void;
-}) => {
+}
+
+export const Tabs = (props: Props) => {
+  const { tab } = props;
   // layer on a sound effect
   const setTab = async (tab: string) => {
     playClick();
-    _setTab(tab);
+    props.setTab(tab);
   };
 
   return (

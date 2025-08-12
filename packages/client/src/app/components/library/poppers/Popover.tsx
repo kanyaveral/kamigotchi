@@ -1,16 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-export const Popover = ({
-  children,
-  content,
-  cursor = 'pointer',
-  mouseButton = 0,
-  closeOnClick = true,
-  onClose,
-  forceClose,
-  disabled,
-}: {
+interface Props {
   children: React.ReactNode;
   content: any;
   cursor?: string;
@@ -19,7 +10,14 @@ export const Popover = ({
   onClose?: () => void; // execute a function when the popover closes
   forceClose?: boolean; // forceclose the popover
   disabled?: boolean; // disable the popover
-}) => {
+}
+
+export const Popover = (props: Props) => {
+  const { children, content, onClose, disabled, forceClose } = props;
+  const cursor = props.cursor ?? 'pointer';
+  const mouseButton = props.mouseButton ?? 0;
+  const closeOnClick = props.closeOnClick ?? true;
+
   const popoverRef = useRef<HTMLDivElement>(document.createElement('div'));
   const triggerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);

@@ -16,13 +16,7 @@ interface DropdownOption {
   object?: any;
 }
 
-export const Toolbar = ({
-  actions,
-  controls,
-  data,
-  state,
-  utils,
-}: {
+interface Props {
   actions: {
     addKami: (kamis: Kami[]) => void;
     collect: (kamis: Kami[]) => void;
@@ -44,7 +38,10 @@ export const Toolbar = ({
     tick: number;
   };
   utils: { passesNodeReqs: (kami: Kami) => boolean };
-}) => {
+}
+
+export const Toolbar = (props: Props) => {
+  const { actions, controls, data, state, utils } = props;
   const { addKami, stopKami, collect } = actions;
   const { sort, setSort, view, setView } = controls;
   const { kamis, wildKamis } = data;

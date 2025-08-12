@@ -7,19 +7,16 @@ import { parseBonusText } from 'network/shapes/Bonus/interpretation';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
 
-export const Node = ({
-  index,
-  skill,
-  kami,
-  upgradeError,
-  setDisplayed,
-}: {
+interface Props {
   index: number;
   skill: Skill;
   kami: Kami;
   upgradeError: string[] | undefined;
   setDisplayed: () => void;
-}) => {
+}
+
+export const Node = (props: Props) => {
+  const { index, skill, kami, upgradeError, setDisplayed } = props;
   if (skill == undefined) return <></>;
 
   const handleClick = () => {

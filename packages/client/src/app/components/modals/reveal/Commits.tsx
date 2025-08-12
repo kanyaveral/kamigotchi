@@ -6,11 +6,7 @@ import { EntityID } from '@mud-classic/recs';
 import { Commit, canRevealCommit } from 'network/shapes/Commit';
 import { getTimeDeltaString } from 'utils/time';
 
-export const Commits = ({
-  actions,
-  data,
-  utils,
-}: {
+interface Props {
   actions: {
     revealTx: (commits: EntityID[]) => Promise<void>;
   };
@@ -21,7 +17,11 @@ export const Commits = ({
   utils: {
     getCommitState: (id: EntityID) => string;
   };
-}) => {
+}
+
+export const Commits = (props: Props) => {
+  const { actions, data, utils } = props;
+
   /////////////////
   // LOGIC
 

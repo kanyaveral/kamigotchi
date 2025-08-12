@@ -8,12 +8,7 @@ import { Account, Item } from 'network/shapes';
 import { ConfirmationData } from '../../library/Confirmation';
 import { PendingOffer } from './PendingOffer';
 
-export const Offers = ({
-  actions,
-  controls,
-  data,
-  utils,
-}: {
+interface Props {
   actions: {
     executeTrade: (trade: Trade) => void;
   };
@@ -31,7 +26,10 @@ export const Offers = ({
   utils: {
     getItemByIndex: (index: number) => Item;
   };
-}) => {
+}
+
+export const Offers = (props: Props) => {
+  const { actions, controls, data, utils } = props;
   const { typeFilter, sort, ascending, itemFilter, itemSearch } = controls;
   const { account, trades } = data;
 

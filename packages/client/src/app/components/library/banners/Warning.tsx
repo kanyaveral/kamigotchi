@@ -2,19 +2,7 @@ import styled from 'styled-components';
 import { ActionButton } from '../buttons';
 import { TextTooltip } from '../poppers/TextTooltip';
 
-export const Warning = ({
-  text: {
-    color: textColor = 'black',
-    size: textSize = 0.9,
-    value: textValue,
-  },
-  color = 'orange',
-  tooltip = [],
-  action: {
-    onClick: actionOnClick,
-    label: actionLabel = 'Fix',
-  } = {}
-}: {
+export interface Props {
   color?: string;
   text: {
     value: string;
@@ -26,16 +14,19 @@ export const Warning = ({
     onClick: () => void;
     label?: string;
   };
-}) => {
+}
+
+export const Warning = (props: Props) => {
+  const { text, color, tooltip, action } = props;
 
   return (
-    <Container color={color} size={textSize}>
-      <TextTooltip text={tooltip}>
-        <Text size={textSize} color={textColor}>
-          {textValue}
+    <Container color={color ?? 'orange'} size={text.size ?? 0.9}>
+      <TextTooltip text={tooltip ?? []}>
+        <Text size={text.size ?? 0.9} color={text.color ?? 'black'}>
+          {text.value}
         </Text>
       </TextTooltip>
-      {actionOnClick && <ActionButton onClick={actionOnClick} text={actionLabel} />}
+      {action && <ActionButton onClick={action.onClick} text={action.label ?? 'Fix'} />}
     </Container>
   );
 };

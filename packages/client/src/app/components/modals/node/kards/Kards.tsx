@@ -9,13 +9,7 @@ import { Kami } from 'network/shapes/Kami';
 import { AllyKards } from './AllyKards';
 import { EnemyCards } from './EnemyKards';
 
-export const Kards = ({
-  account,
-  kamiEntities,
-  actions,
-  display,
-  utils,
-}: {
+interface Props {
   account: Account;
   kamiEntities: {
     account: EntityIndex[];
@@ -36,7 +30,10 @@ export const Kards = ({
     calcExpRequirement: (lvl: number) => number;
     getTempBonuses: (kami: Kami) => Bonus[];
   };
-}) => {
+}
+
+export const Kards = (props: Props) => {
+  const { actions, kamiEntities, account, display, utils } = props;
   const { getKami } = utils;
   const { modals } = useVisibility();
   const containerRef = useRef<HTMLDivElement>(null);

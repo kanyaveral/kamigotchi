@@ -9,12 +9,7 @@ import { Inbound } from './Inbound';
 import { Outbound } from './Outbound';
 import { Searched } from './Searched';
 
-export const Requests = ({
-  account,
-  accounts,
-  requests,
-  actions,
-}: {
+interface Props {
   account: Account;
   accounts: BaseAccount[];
   requests: {
@@ -27,7 +22,10 @@ export const Requests = ({
     cancelFren: (friendship: Friendship) => void;
     requestFren: (account: BaseAccount) => void;
   };
-}) => {
+}
+
+export const Requests = (props: Props) => {
+  const { account, requests, actions, accounts } = props;
   const [mode, setMode] = useState('inbound');
   const [search, setSearch] = useState('');
   const [knownAccIndices, setKnownAccIndices] = useState([] as number[]);
@@ -78,19 +76,13 @@ export const Requests = ({
     setSearch(event.target.value);
   };
 
-  const ModeButton = ({
-    mode: _mode,
-    label,
-  }: {
-    mode: string;
-    label: string;
-  }) => {
+  const ModeButton = (props: { mode: string; label: string }) => {
     return (
-      <TextTooltip text={[_mode]}>
+      <TextTooltip text={[props.mode]}>
         <ActionButton
-          text={label}
-          onClick={() => setMode(_mode)}
-          disabled={mode === _mode}
+          text={props.label}
+          onClick={() => setMode(props.mode)}
+          disabled={mode === props.mode}
         />
       </TextTooltip>
     );

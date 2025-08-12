@@ -5,27 +5,26 @@ import { Text } from '../text';
 
 const SCALE_DEFAULT = 1.2;
 
-// horizontal icon and text pairing
-export const Pairing = ({
-  icon,
-  text,
-  tooltip = [],
-  scale = SCALE_DEFAULT,
-  reverse = false,
-}: {
+interface Props {
   icon: string;
   text: string;
   tooltip?: string[];
   scale?: number;
   reverse?: boolean;
-}) => {
+}
+
+// horizontal icon and text pairing
+export const Pairing = (props: Props) => {
+  const { icon, text, tooltip, scale, reverse } = props;
+  const size = scale ?? SCALE_DEFAULT;
+
   return (
-    <Container scale={scale}>
-      {reverse && <Text size={scale}>{text}</Text>}
-      <TextTooltip text={tooltip}>
-        <Icon src={icon} scale={scale} />
+    <Container scale={size}>
+      {reverse && <Text size={size}>{text}</Text>}
+      <TextTooltip text={tooltip ?? []}>
+        <Icon src={icon} scale={size} />
       </TextTooltip>
-      {!reverse && <Text size={scale}>{text}</Text>}
+      {!reverse && <Text size={size}>{text}</Text>}
     </Container>
   );
 };

@@ -5,12 +5,7 @@ import { PresaleData } from 'network/chain';
 import { useState } from 'react';
 import { InputButton } from './InputButton';
 
-export const Info = ({
-  actions,
-  data,
-  tokenBal,
-  time,
-}: {
+interface Props {
   actions: {
     approve: (quantity: number) => void;
     buy: (quantity: number) => void;
@@ -25,7 +20,10 @@ export const Info = ({
     start: number;
     end: number;
   };
-}) => {
+}
+
+export const Info = (props: Props) => {
+  const { actions, data, tokenBal, time } = props;
   const { approve, buy } = actions;
 
   const [quantity, setQuantity] = useState(0);
@@ -149,9 +147,9 @@ const TextSection = styled.div`
 
 const Text = styled.div<{ size: number; shift?: number }>`
   color: #d0fe41;
-  font-size: ${({ size }) => size}vw;
-  line-height: ${({ size }) => size * 2.1}vw;
-  padding-left: ${({ shift }) => shift ?? 0}vw;
+  font-size: ${(props) => props.size}vw;
+  line-height: ${(props) => props.size * 2.1}vw;
+  padding-left: ${(props) => props.shift ?? 0}vw;
 `;
 
 const ButtonSection = styled.div`

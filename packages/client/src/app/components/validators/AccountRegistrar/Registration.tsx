@@ -14,12 +14,7 @@ import { Section } from './components/shared';
 
 const IS_LOCAL = import.meta.env.MODE === 'puter';
 
-export const Registration = ({
-  address,
-  tokens,
-  actions,
-  utils,
-}: {
+interface Props {
   address: {
     selected: string;
     burner: string;
@@ -35,7 +30,10 @@ export const Registration = ({
     toggleFixtures: (toggle: boolean) => void;
     waitForActionCompletion: (action: EntityID) => Promise<void>;
   };
-}) => {
+}
+
+export const Registration = (props: Props) => {
+  const { address, tokens, actions, utils } = props;
   const { ethAddress } = tokens;
   const { balances: tokenBalances } = useTokens();
 

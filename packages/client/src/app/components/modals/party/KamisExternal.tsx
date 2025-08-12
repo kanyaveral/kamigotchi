@@ -14,19 +14,7 @@ const PORTAL_ROOM_INDEX = 12;
 const StakeButtons = new Map<number, React.ReactNode>();
 const SendButtons = new Map<number, React.ReactNode>();
 
-export const KamisExternal = ({
-  actions: {
-    sendKamis,
-    stakeKamis,
-  },
-  data: {
-    account,
-    accounts,
-    kamis,
-  },
-  isVisible,
-  utils,
-}: {
+interface Props {
   actions: {
     sendKamis: (kami: Kami, account: Account) => void;
     stakeKamis: (kamis: Kami[]) => void;
@@ -43,7 +31,13 @@ export const KamisExternal = ({
     getTempBonuses: (kami: Kami) => Bonus[];
   };
   isVisible: boolean;
-}) => {
+}
+
+export const KamisExternal = (props: Props) => {
+  const { actions, data, isVisible, utils } = props;
+  const { sendKamis, stakeKamis } = actions;
+  const { account, accounts, kamis } = data;
+
   /////////////////
   // SUBSCRIPTIONS
 

@@ -2,11 +2,12 @@ import styled from 'styled-components';
 import { Book } from './Book';
 import { HelpTabs } from './types';
 
-export const Books = ({
-  setTab,
-}: {
+interface Props {
   setTab: Function;
-}) => {
+}
+
+export const Books = (props: Props) => {
+  const { setTab } = props;
   return (
     <Container>
       <Book key={HelpTabs.WORLD} infoKey={HelpTabs.WORLD} setTab={setTab} />

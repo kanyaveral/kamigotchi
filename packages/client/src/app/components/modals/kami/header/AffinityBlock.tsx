@@ -6,13 +6,13 @@ import { AffinityColors } from 'constants/affinities';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
 
-export const AffinityBlock = ({
-  kami,
-  traitKey,
-}: {
+interface Props {
   kami: Kami;
   traitKey: 'body' | 'hand';
-}) => {
+}
+
+export const AffinityBlock = (props: Props) => {
+  const { kami, traitKey } = props;
   const traits = kami.traits!;
 
   const icon = TraitIcons[traitKey as keyof typeof TraitIcons];
@@ -53,15 +53,15 @@ const Container = styled.div<{ color?: string }>`
 
 // TODO: move to library
 const Icon = styled.img<{ size: number }>`
-  height: ${({ size }) => size}vw;
-  width: ${({ size }) => size}vw;
+  height: ${(props) => props.size}vw;
+  width: ${(props) => props.size}vw;
   filter: drop-shadow(0 0 0.2vw #bbb);
   user-drag: none;
 `;
 
 // TODO: generalize with library Text
 const Text = styled.div<{ size: number }>`
-  font-size: ${({ size }) => size}vw;
-  text-shadow: ${({ size }) => `0 0 ${size * 0.4}vw white`};
+  font-size: ${(props) => props.size}vw;
+  text-shadow: ${(props) => `0 0 ${props.size * 0.4}vw white`};
   pointer-events: none;
 `;

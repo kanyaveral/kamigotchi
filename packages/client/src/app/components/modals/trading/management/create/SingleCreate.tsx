@@ -12,13 +12,7 @@ import { LineItem } from './LineItem';
 
 type Mode = 'Buy' | 'Sell';
 
-// a GUI for creating Simple Trade Offers (single buy/sell)
-export const SingleCreate = ({
-  actions,
-  controls,
-  data,
-  isVisible,
-}: {
+interface Props {
   actions: {
     handleCreatePrompt: (want: Item[], wantAmt: number[], have: Item[], haveAmt: number[]) => void;
   };
@@ -32,7 +26,11 @@ export const SingleCreate = ({
     items: Item[];
   };
   isVisible: boolean;
-}) => {
+}
+
+// a GUI for creating Simple Trade Offers (single buy/sell)
+export const SingleCreate = (props: Props) => {
+  const { actions, controls, data, isVisible } = props;
   const { handleCreatePrompt } = actions;
   const { isConfirming } = controls;
   const { currencies, inventory, items } = data;

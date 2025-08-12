@@ -2,11 +2,7 @@ import { Overlay, TextTooltip } from 'app/components/library';
 import styled from 'styled-components';
 import { playClick } from 'utils/sounds';
 
-export const InputButton = ({
-  button,
-  input,
-  balance,
-}: {
+interface Props {
   button: {
     text: string;
     onClick: (value: number) => void;
@@ -22,7 +18,10 @@ export const InputButton = ({
     step: number;
   };
   balance: number; // eth balance
-}) => {
+}
+
+export const InputButton = (props: Props) => {
+  const { button, input, balance } = props;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const quantityStr = event.target.value.replace('[^d.]/g', '');
@@ -115,7 +114,7 @@ const Input = styled.input`
 `;
 
 const Button = styled.div<{ disabled: boolean }>`
-  background-color: ${({ disabled }) => (disabled ? '#bbb' : '#112535')};
+  background-color: ${(props) => (props.disabled ? '#bbb' : '#112535')};
   border-left: 0.15vw solid black;
   border-radius: 0 0.45vw 0.45vw 0;
 
@@ -131,7 +130,7 @@ const Button = styled.div<{ disabled: boolean }>`
   font-size: 1.5vw;
 
   cursor: pointer;
-  pointer-events: ${({ disabled }) => (disabled ? 'none' : 'auto')};
+  pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
   user-select: none;
   &:hover {
     background-color: #182630;
@@ -143,14 +142,14 @@ const Button = styled.div<{ disabled: boolean }>`
 
 const Text = styled.div<{ size: number }>`
   color: #d0fe41;
-  font-size: ${({ size }) => size}vw;
-  line-height: ${({ size }) => size * 1.5}vw;
+  font-size: ${(props) => props.size}vw;
+  line-height: ${(props) => props.size * 1.5}vw;
 `;
 
 const ClickableText = styled.div<{ size: number }>`
   color: black;
-  font-size: ${({ size }) => size}vw;
-  line-height: ${({ size }) => size * 1.5}vw;
+  font-size: ${(props) => props.size}vw;
+  line-height: ${(props) => props.size * 1.5}vw;
   cursor: pointer;
   &:hover {
     opacity: 0.8;

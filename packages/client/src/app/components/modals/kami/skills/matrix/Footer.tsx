@@ -10,11 +10,7 @@ import { RESPEC_POTION_INDEX } from 'constants/items';
 import { ONYX_RESPEC_PRICE } from 'constants/prices';
 import { Kami } from 'network/shapes';
 
-export const Footer = ({
-  kami,
-  actions,
-  utils,
-}: {
+interface Props {
   kami: Kami;
   actions: {
     reset: (kami: Kami) => void;
@@ -26,7 +22,10 @@ export const Footer = ({
     getUpgradeError: (index: number) => string[] | undefined;
     getTreePoints: (tree: string) => number;
   };
-}) => {
+}
+
+export const Footer = (props: Props) => {
+  const { kami, actions, utils } = props;
   const { reset, onyxApprove, onyxRespec } = actions;
   const { getItemBalance } = utils;
 

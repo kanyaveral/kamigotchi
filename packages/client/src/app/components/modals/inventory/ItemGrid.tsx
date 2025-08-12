@@ -17,12 +17,7 @@ import { ItemGridTooltip } from './ItemGridTooltip';
 const EMPTY_TEXT = ['Inventory is empty.', 'Be less poore..'];
 const REFRESH_INTERVAL = 2000;
 
-// get the row of consumable items to display in the player inventory
-export const ItemGrid = ({
-  accountEntity,
-  actions,
-  utils,
-}: {
+interface Props {
   accountEntity: EntityIndex;
   actions: {
     useForAccount: (item: Item, amount: number) => void;
@@ -36,7 +31,11 @@ export const ItemGrid = ({
     displayRequirements: (item: Item) => string;
     parseAllos: (allo: Allo[]) => DetailedEntity[];
   };
-}) => {
+}
+
+// get the row of consumable items to display in the player inventory
+export const ItemGrid = (props: Props) => {
+  const { actions, utils, accountEntity } = props;
   const { getAccount, getInventories, getKamis, meetsRequirements } = utils;
   const { modals } = useVisibility();
 

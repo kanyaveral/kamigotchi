@@ -23,19 +23,7 @@ import { Room } from 'network/shapes/Room';
 import { ActionSystem } from 'network/systems';
 import { Message } from './Message';
 
-// TODO: retrieve this in the flow of the application with hooks
-const KamidenClient = getKamidenClient();
-
-export const Feed = ({
-  activeTab,
-  setActiveTab,
-  utils,
-  actions,
-  player,
-  blocked,
-  actionSystem,
-  api,
-}: {
+interface Props {
   activeTab: number;
   setActiveTab: Dispatch<SetStateAction<number>>;
   utils: {
@@ -57,8 +45,14 @@ export const Feed = ({
       };
     };
   };
-}) => {
-  const { getAccount, getEntityIndex, getKami, getRoomByIndex } = utils;
+}
+
+// TODO: retrieve this in the flow of the application with hooks
+const KamidenClient = getKamidenClient();
+
+export const Feed = (props: Props) => {
+  const { utils, player, blocked, actionSystem, api, activeTab, setActiveTab } = props;
+  const { getAccount, getEntityIndex, getKami, getRoomByIndex } = props.utils;
   const { modals } = useVisibility();
   const [kamidenMessages, setKamidenMessages] = useState<KamiMessage[]>([]);
   const [feedData, setFeedData] = useState<String[]>([]);
@@ -211,8 +205,8 @@ export const Feed = ({
       node.scrollTop = scrollHeight - scrollBottom - clientHeight;
     }
   }, [kamidenMessages.length, feedData.length]);
-  /*   
-    when the player sends a message it scrolls to thebottom  
+  /*    
+    when the player sends a message it scrolls to thebottom   
   */
   useEffect(() => {
     if (!feedRef.current) return;

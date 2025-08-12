@@ -9,21 +9,17 @@ import {
 } from 'app/components/library';
 import { Item } from 'network/shapes';
 
-export const LineItem = ({
-  options,
-  selected,
-  amt,
-  setAmt,
-  remove,
-  reverse,
-}: {
+interface Props {
   options: IconListButtonOption[];
   selected: Item;
   amt: number;
   setAmt: (e: ChangeEvent<HTMLInputElement>) => void;
   remove?: () => void;
   reverse?: boolean;
-}) => {
+}
+
+export const LineItem = (props: Props) => {
+  const { options, selected, amt, setAmt, remove, reverse } = props;
   const [search, setSearch] = useState<string>('');
 
   return (

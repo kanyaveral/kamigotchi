@@ -12,19 +12,7 @@ import { formatEntityID } from 'engine/utils';
 import { BaseAccount } from 'network/shapes/Account';
 import { ActionSystem } from 'network/systems';
 
-export const Message = ({
-  previousEqual,
-  utils: {
-    getAccount,
-    getEntityIndex
-  },
-  data: {
-    message,
-  },
-  player,
-  actionSystem,
-  api,
-}: {
+interface Props {
   previousEqual: boolean;
   utils: {
     getAccount: (entityIndex: EntityIndex) => Account;
@@ -42,7 +30,14 @@ export const Message = ({
       };
     };
   };
-}) => {
+}
+
+export const Message = (props: Props) => {
+  const { message } = props.data;
+  const { getAccount, getEntityIndex } = props.utils;
+  const { actionSystem, api, previousEqual } = props;
+
+  const { player } = props;
   const [yours, setYours] = useState(false);
   const { modals, setModals } = useVisibility();
   const { setAccount } = useSelected();
@@ -275,7 +270,7 @@ const Body = styled.div<{ yours: boolean; previousEqual: boolean }>`
     width: 0.7vw;
     background: rgb(238, 238, 238);
     border-top-left-radius: 80%;
-    left: 0;   
+    left: 0;    
     rotate: -90deg;
   }`
       : ` ::before {
@@ -287,7 +282,7 @@ const Body = styled.div<{ yours: boolean; previousEqual: boolean }>`
     width: 0.7vw;
     background: rgb(238, 238, 238);
     border-top-right-radius: 80%;
-    right: 0; 
+    right: 0;  
     rotate: 90deg;
   } `}
 `;

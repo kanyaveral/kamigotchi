@@ -9,12 +9,7 @@ import { Footer } from './Footer';
 import { Menu } from './Menu';
 import { Node } from './Node';
 
-export const Matrix = ({
-  kami,
-  setDisplayed,
-  actions,
-  utils,
-}: {
+interface Props {
   kami: Kami;
   setDisplayed: (skillIndex: number) => void;
   actions: {
@@ -28,7 +23,10 @@ export const Matrix = ({
     getUpgradeError: (index: number) => string[] | undefined;
     getTreePoints: (tree: string) => number;
   };
-}) => {
+}
+
+export const Matrix = (props: Props) => {
+  const { kami, setDisplayed, actions, utils } = props;
   const { getTreePoints, getSkill } = utils;
   const [mode, setMode] = useState('Predator');
   const [tierMins, setTierMins] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);

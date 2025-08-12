@@ -21,14 +21,7 @@ import { getRateDisplay } from 'utils/numbers';
 import { playClick } from 'utils/sounds';
 
 const ONYX_REVIVE_PRICE = 3;
-export const KamisExpanded = ({
-  actions: { onyxApprove, onyxRevive },
-  data: { account, node, onyx },
-  display: { HarvestButton, UseItemButton },
-  state: { displayedKamis },
-  utils,
-  isVisible,
-}: {
+interface Props {
   actions: {
     onyxApprove: (price: number) => void;
     onyxRevive: (kami: Kami) => void;
@@ -55,7 +48,14 @@ export const KamisExpanded = ({
   };
 
   isVisible: boolean;
-}) => {
+}
+
+export const KamisExpanded = (props: Props) => {
+  const { actions, data, display, state, utils, isVisible } = props;
+  const { onyxApprove, onyxRevive } = actions;
+  const { account, node, onyx } = data;
+  const { displayedKamis } = state;
+  const { HarvestButton, UseItemButton } = display;
   const { modals, setModals } = useVisibility();
   const { nodeIndex, setNode: setSelectedNode } = useSelected(); // node selected by user
 

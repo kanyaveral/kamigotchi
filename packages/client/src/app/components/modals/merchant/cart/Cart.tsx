@@ -7,17 +7,15 @@ import { Account } from 'network/shapes/Account';
 import { CartItem } from '../types';
 import { CartRow } from './CartRow';
 
-export const Cart = ({
-  account,
-  cart,
-  setCart,
-  buy,
-}: {
+export interface Props {
   account: Account;
   cart: CartItem[];
   setCart: (cart: CartItem[]) => void;
   buy: (cart: CartItem[]) => void;
-}) => {
+}
+
+export const Cart = (props: Props) => {
+  const { account, cart, setCart, buy } = props;
 
   const calcTotalPrice = () => {
     let total = 0;
@@ -130,9 +128,11 @@ const Checkout = styled.div`
   align-items: center;
 `;
 
-const BuyButton = styled.div<{
+interface BuyButtonProps {
   disabled?: boolean;
-}>`
+}
+
+const BuyButton = styled.div<BuyButtonProps>`
   border: solid 0.15vw black;
   border-radius: 0.4vw;
 

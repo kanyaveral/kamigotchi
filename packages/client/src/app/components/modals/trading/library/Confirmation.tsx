@@ -10,13 +10,7 @@ export interface ConfirmationData {
   onConfirm: () => void;
 }
 
-export const Confirmation = ({
-  title,
-  subTitle,
-  children,
-  onConfirm,
-  controls,
-}: {
+interface Props {
   title?: string;
   subTitle?: string;
   children: React.ReactNode; // content to be displayed
@@ -25,7 +19,10 @@ export const Confirmation = ({
     isOpen: boolean;
     close: () => void;
   };
-}) => {
+}
+
+export const Confirmation = (props: Props) => {
+  const { title, subTitle, children, onConfirm, controls } = props;
   const { isOpen, close } = controls;
 
   const handleConfirm = () => {

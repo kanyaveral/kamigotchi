@@ -8,13 +8,7 @@ import { TabType } from '../types';
 import { Controls } from './Controls';
 import { Offers } from './offers/Offers';
 
-export const Orderbook = ({
-  actions,
-  controls,
-  data,
-  utils,
-  isVisible,
-}: {
+interface Props {
   actions: {
     cancelTrade: (trade: Trade) => void;
     executeTrade: (trade: Trade) => void;
@@ -34,7 +28,10 @@ export const Orderbook = ({
     getItemByIndex: (index: number) => Item;
   };
   isVisible: boolean;
-}) => {
+}
+
+export const Orderbook = (props: Props) => {
+  const { actions, controls, data, utils, isVisible } = props;
   const { tab } = controls;
 
   const [sort, setSort] = useState<string>('Price'); // Price, Owner

@@ -10,14 +10,7 @@ import { TabType } from '../../types';
 import { ExecutedOffer } from './ExecutedOffer';
 import { PendingOffer } from './PendingOffer';
 
-// displays the player's open and executed trade offers
-// TODO: display the 'Executable' offers (where the player is the Taker) as well
-export const Offers = ({
-  actions,
-  controls,
-  data,
-  utils,
-}: {
+interface Props {
   actions: {
     completeTrade: (trade: Trade) => void;
     cancelTrade: (trade: Trade) => void;
@@ -36,7 +29,12 @@ export const Offers = ({
   utils: {
     getItemByIndex: (index: number) => Item;
   };
-}) => {
+}
+
+// displays the player's open and executed trade offers
+// TODO: display the 'Executable' offers (where the player is the Taker) as well
+export const Offers = (props: Props) => {
+  const { actions, controls, data, utils } = props;
   const { tab } = controls;
   const { account, trades } = data;
   const { modals } = useVisibility();

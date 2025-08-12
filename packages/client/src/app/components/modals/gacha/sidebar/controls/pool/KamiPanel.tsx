@@ -4,10 +4,7 @@ import { ActionListButton, CircleExitButton, EmptyText } from 'app/components/li
 import { DefaultFilters, DefaultSorts, Filter, Sort } from '../../../types';
 import { Filter as FilterComponent, Sort as SortComponent } from './components';
 
-export const KamiPanel = ({
-  controls,
-  isVisible,
-}: {
+interface Props {
   controls: {
     filters: Filter[];
     setFilters: (filters: Filter[]) => void;
@@ -15,7 +12,10 @@ export const KamiPanel = ({
     setSorts: (sort: Sort[]) => void;
   };
   isVisible: boolean;
-}) => {
+}
+
+export const KamiPanel = (props: Props) => {
+  const { controls, isVisible } = props;
   const { filters, setFilters, sorts, setSorts } = controls;
 
   //////////////////

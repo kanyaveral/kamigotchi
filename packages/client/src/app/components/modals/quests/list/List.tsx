@@ -7,12 +7,7 @@ import { DetailedEntity } from 'network/shapes/utils';
 import { AcceptedTab } from './AcceptedTab';
 import { AvailableTab } from './AvailableTab';
 
-export const List = ({
-  quests,
-  mode,
-  actions,
-  utils,
-}: {
+interface Props {
   quests: {
     available: Quest[];
     ongoing: BaseQuest[];
@@ -28,7 +23,10 @@ export const List = ({
     parseRequirements: (quest: Quest) => Quest;
     describeEntity: (type: string, index: number) => DetailedEntity;
   };
-}) => {
+}
+
+export const List = (props: Props) => {
+  const { quests, mode, actions, utils } = props;
   const { available, ongoing, completed } = quests;
   const [imageCache, _] = useState(new Map<string, JSX.Element>());
 

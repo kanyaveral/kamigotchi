@@ -5,11 +5,13 @@ import { StatDescriptions, StatIcons } from 'constants/stats';
 import { Kami } from 'network/shapes/Kami';
 import { Stat } from 'network/shapes/Stats';
 
-export const Stats = ({
-  kami,
-}: {
+interface Props {
   kami: Kami;
-}) => {
+}
+
+export const Stats = (Props: Props) => {
+  const { kami } = Props;
+
   return (
     <Container>
       {/* <Title size={0.9}>Stats</Title> */}
@@ -69,7 +71,7 @@ const Title = styled.div<{ size: number }>`
 `;
 
 const Text = styled.div<{ size: number }>`
-  font-size: ${({ size }) => size}vw;
+  font-size: ${(props) => props.size}vw;
   margin: auto;
 `;
 

@@ -18,15 +18,14 @@ type Data = {
   price: number;
 };
 
-export const Chart = ({
-  name,
-  auction,
-  onClick,
-}: {
+interface Props {
   name: string;
   auction: Auction;
   onClick?: () => void;
-}) => {
+}
+
+export const Chart = (props: Props) => {
+  const { name, auction, onClick } = props;
   const chartRef = useRef<ChartJS>();
 
   const [buys, setBuys] = useState<AuctionBuy[]>([]);

@@ -6,13 +6,7 @@ import { Account as PlayerAccount } from 'app/stores';
 import { Account } from 'network/shapes';
 import { Friends as FriendsType } from 'network/shapes/Account/friends';
 import { Friendship } from 'network/shapes/Friendship';
-
-export const Friends = ({
-  data,
-  actions,
-  friendships,
-  utils,
-}: {
+interface Props {
   data: { isSelf: boolean; player: PlayerAccount };
   actions: {
     acceptFren: (friendship: Friendship) => void;
@@ -26,7 +20,10 @@ export const Friends = ({
   utils: {
     getFriends: (accEntity: EntityIndex) => FriendsType;
   };
-}) => {
+}
+
+export const Friends = (props: Props) => {
+  const { friendships, actions, utils, data } = props;
   const { getFriends } = utils;
   const { player, isSelf } = data;
 

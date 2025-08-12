@@ -9,11 +9,7 @@ import { Trade } from 'network/shapes/Trade/types';
 import { Controls } from './Controls';
 import { TradeHistory } from './TradeHistory';
 
-export const History = ({
-  isVisible,
-  data,
-  utils,
-}: {
+interface Props {
   isVisible: boolean;
   data: {
     account: Account;
@@ -25,7 +21,10 @@ export const History = ({
     getAccountByID: (id: EntityID) => Account;
     getTradeHistory: (tradeHistory: TradeHistoryType) => Trade;
   };
-}) => {
+}
+
+export const History = (props: Props) => {
+  const { isVisible, data, utils } = props;
   const [typeFilter, setTypeFilter] = useState<TradeType>('Buy');
   return (
     <Content isVisible={isVisible}>

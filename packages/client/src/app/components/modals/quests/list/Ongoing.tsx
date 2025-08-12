@@ -9,13 +9,7 @@ import { QuestCard } from './QuestCard';
 const STALE_TIME = 1500;
 const REFRESH_TIME = 3333;
 
-export const OngoingQuests = ({
-  quests,
-  utils,
-  actions,
-  imageCache,
-  isVisible,
-}: {
+interface Props {
   quests: BaseQuest[];
   actions: QuestModalActions;
   utils: {
@@ -28,7 +22,10 @@ export const OngoingQuests = ({
   };
   imageCache: Map<string, JSX.Element>;
   isVisible: boolean;
-}) => {
+}
+
+export const OngoingQuests = (props: Props) => {
+  const { quests, utils, actions, imageCache, isVisible } = props;
   const { populate, parseObjectives } = utils;
   const { modals } = useVisibility();
   const [cleaned, setCleaned] = useState<Quest[]>([]);

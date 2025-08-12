@@ -18,11 +18,7 @@ import { DetailedEntity, getAffinityImage } from 'network/shapes/utils';
 import { ItemDrops } from './ItemDrops';
 import { ScavengeBar } from './ScavengeBar';
 
-export const Header = ({
-  data,
-  actions,
-  utils,
-}: {
+interface Props {
   data: {
     account: Account;
     node: Node;
@@ -41,7 +37,10 @@ export const Header = ({
     passesNodeReqs: (kami: Kami) => boolean;
     queryScavInstance: (index: number, holderID: EntityID) => EntityIndex | undefined;
   };
-}) => {
+}
+
+export const Header = (props: Props) => {
+  const { data, utils, actions } = props;
   const { account, node } = data;
   const { addKami } = actions;
   const { getAccountKamis, getRoom, getValue } = utils;

@@ -2,39 +2,37 @@ import styled from 'styled-components';
 
 import { playClick } from 'utils/sounds';
 
-export const SubTabs = ({
-  subTab,
-  isSelf,
-  setSubTab,
-}: {
+interface Props {
   subTab: string;
   isSelf: boolean;
   setSubTab: (tab: string) => void;
-}) => {
+}
+
+export const SubTabs = (props: Props) => {
   // layer on a sound effect
-  const handleSetTab = async (tab: string) => {
+  const setTab = async (tab: string) => {
     playClick();
-    setSubTab(tab);
+    props.setSubTab(tab);
   };
 
   const SelfTabs = () => {
     return (
       <>
         <Button
-          onClick={() => handleSetTab('frens')}
-          disabled={subTab === 'frens'}
+          onClick={() => setTab('frens')}
+          disabled={props.subTab === 'frens'}
           style={{ borderRight: 'solid black .15vw' }}
         >
           Friends
         </Button>
         <Button
-          onClick={() => handleSetTab('requests')}
-          disabled={subTab === 'requests'}
+          onClick={() => setTab('requests')}
+          disabled={props.subTab === 'requests'}
           style={{ borderRight: 'solid black .15vw' }}
         >
           Requests
         </Button>
-        <Button onClick={() => handleSetTab('blocked')} disabled={subTab === 'blocked'}>
+        <Button onClick={() => setTab('blocked')} disabled={props.subTab === 'blocked'}>
           Blocked
         </Button>
       </>
@@ -45,20 +43,20 @@ export const SubTabs = ({
     return (
       <>
         <Button
-          onClick={() => handleSetTab('frens')}
-          disabled={subTab === 'frens'}
+          onClick={() => setTab('frens')}
+          disabled={props.subTab === 'frens'}
           style={{ borderRight: 'solid black .15vw' }}
         >
           Friends
         </Button>
-        <Button onClick={() => handleSetTab('activity')} disabled={subTab === 'activity'}>
+        <Button onClick={() => setTab('activity')} disabled={props.subTab === 'activity'}>
           Activity
         </Button>
       </>
     );
   };
 
-  return <Container>{isSelf ? SelfTabs() : OtherTabs()}</Container>;
+  return <Container>{props.isSelf ? SelfTabs() : OtherTabs()}</Container>;
 };
 
 const Container = styled.div`

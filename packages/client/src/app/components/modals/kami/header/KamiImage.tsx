@@ -14,11 +14,7 @@ import { playClick } from 'utils/sounds';
 
 const LEVEL_UP_STRING = 'Level Up!!';
 
-export const KamiImage = ({
-  actions,
-  data,
-  utils,
-}: {
+interface Props {
   actions: {
     levelUp: (kami: Kami) => void;
   };
@@ -30,7 +26,10 @@ export const KamiImage = ({
   utils: {
     calcExpRequirement: (level: number) => number;
   };
-}) => {
+}
+
+export const KamiImage = (props: Props) => {
+  const { actions, data, utils } = props;
   const { levelUp } = actions;
   const { account, kami, owner } = data;
   const { calcExpRequirement } = utils;
@@ -163,9 +162,9 @@ const Grouping = styled.div`
 
 const Text = styled.div<{ size: number }>`
   color: white;
-  font-size: ${({ size }) => size}vw;
-  line-height: ${({ size }) => size * 1.5}vw;
-  text-shadow: ${({ size }) => `0 0 ${size * 0.5}vw black`};
+  font-size: ${(props) => props.size}vw;
+  line-height: ${(props) => props.size * 1.5}vw;
+  text-shadow: ${(props) => `0 0 ${props.size * 0.5}vw black`};
 
   &:hover {
     opacity: 0.8;
@@ -212,10 +211,12 @@ const ExperienceBar = styled.div<{ percent: number }>`
   align-items: center;
 `;
 
-const Button = styled.div<{
+interface ButtonProps {
   color?: string;
   disabled?: boolean;
-}>`
+}
+
+const Button = styled.div<ButtonProps>`
   border: solid black 0.15vw;
   border-radius: 0 0 0.6vw 0;
   opacity: 0.8;

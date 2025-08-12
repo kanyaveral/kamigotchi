@@ -11,21 +11,18 @@ export interface Option {
   disabled?: boolean;
 }
 
-export const ActionListButton = ({
-  id,
-  text,
-  options,
-  size = 'medium',
-  disabled = false,
-  persist = false,
-}: {
+interface Props {
   id: string;
   text: string;
   options: Option[];
   size?: 'small' | 'medium';
   disabled?: boolean;
   persist?: boolean; // whether to persist menu on click
-}) => {
+}
+
+export function ActionListButton(props: Props) {
+  const { id, text, options, disabled } = props;
+
   const toggleRef = useRef<HTMLButtonElement>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -45,13 +42,14 @@ export const ActionListButton = ({
     if (option.disabled) return;
     playClick();
     option.onClick();
-    if (!persist || options.length < 2) handleClose();
+    if (!props.persist || options.length < 2) handleClose();
   };
 
   const setButtonStyles = () => {
-    const styles: any = {};
+    var styles: any = {};
     if (disabled) styles.backgroundColor = '#bbb';
 
+    const size = props.size ?? 'medium';
     if (size === 'small') {
       styles.fontSize = '.6vw';
       styles.margin = '0vw .12vw';

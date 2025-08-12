@@ -2,13 +2,13 @@ import styled from 'styled-components';
 
 import { Room } from 'network/shapes/Room';
 
-export const RoomInfo = ({
-  index,
-  rooms,
-}: {
+interface Props {
   index: number; // index of displayed room
   rooms: Map<number, Room>;
-}) => {
+}
+
+export const RoomInfo = (props: Props) => {
+  const { index, rooms } = props;
   if (index == 0 || !rooms.has(index)) return <div />;
   const room = rooms.get(index)!;
 

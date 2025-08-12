@@ -4,14 +4,14 @@ import { clickFx, hoverFx } from 'app/styles/effects';
 import { playClick } from 'utils/sounds';
 import { CopyInfo } from './copy';
 
+interface Props {
+  infoKey: keyof typeof CopyInfo;
+  setTab: Function;
+}
+
 // ActionButton is a text button that triggers an Action when clicked
-export const Book = ({
-  infoKey,
-  setTab,
-}: {
-  infoKey: keyof typeof CopyInfo
-  setTab: Function
-}) => {
+export const Book = (props: Props) => {
+  const { infoKey, setTab } = props;
   const details = CopyInfo[infoKey];
 
   // layer on a sound effect
