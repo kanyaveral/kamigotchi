@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { EmptyText, Overlay } from 'app/components/library';
+import { EmptyText, IconButton, Overlay } from 'app/components/library';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
 import { KamiBlock } from '../../library/KamiBlock';
@@ -46,13 +46,11 @@ export const WildKamis = (props: Props) => {
   // INTERPRETATION
 
   const getEmptyText = () => {
-    if (mode === 'IMPORT') return ['You have no Kami', 'in the wild'];
-    else return ['You must select', 'some Kami'];
+    return ['You have no Kami', 'in the wild'];
   };
 
   const getCount = () => {
     return `${wild.length}`;
-    // return `${wild.length}+${selected.length}`;
   };
 
   /////////////////
@@ -60,8 +58,15 @@ export const WildKamis = (props: Props) => {
 
   return (
     <Container>
-      <Overlay top={0.9} fullWidth>
-        <Text size={0.9}>Wilderness({getCount()})</Text>
+      <Overlay top={0.9} fullWidth orientation='column' gap={0.4}>
+        <Text size={0.9}>World({getCount()})</Text>
+        <IconButton
+          onClick={() => {
+            setSelectedWild(wild);
+          }}
+          text={'Select All'}
+          disabled={(selectedWorld?.length ?? 0) > 0}
+        />
       </Overlay>
       <Scrollable>
         {displayed.map((kami) => (
@@ -87,6 +92,7 @@ export const WildKamis = (props: Props) => {
 const Container = styled.div`
   position: relative;
   width: 40%;
+  height: 100%;
   display: flex;
   flex-flow: column nowrap;
 `;
@@ -98,7 +104,7 @@ const Scrollable = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 2.5vw;
+  margin-top: 5vw;
   scrollbar-width: none;
   -ms-overflow-style: none;
   &::-webkit-scrollbar {

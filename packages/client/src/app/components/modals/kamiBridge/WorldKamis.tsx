@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { EmptyText, Overlay } from 'app/components/library';
+import { EmptyText, IconButton, Overlay } from 'app/components/library';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
 import { KamiBlock } from '../../library/KamiBlock';
@@ -50,13 +50,11 @@ export const WorldKamis = (props: Props) => {
   };
 
   const getEmptyText = () => {
-    if (mode === 'EXPORT') return ['You have no Kami', 'in the world'];
-    else return ['You must select', 'some Kami'];
+    return ['You have no Kami', 'in the world'];
   };
 
   const getCount = () => {
     return `${world.length}`;
-    //return `${world.length}+${selected.length}`;
   };
 
   /////////////////
@@ -64,8 +62,15 @@ export const WorldKamis = (props: Props) => {
 
   return (
     <Container>
-      <Overlay top={0.9} fullWidth>
+      <Overlay top={0.9} fullWidth orientation='column' gap={0.4}>
         <Text size={0.9}>World({getCount()})</Text>
+        <IconButton
+          onClick={() => {
+            setSelectedWorld(world);
+          }}
+          text={'Select All'}
+          disabled={(selectedWild?.length ?? 0) > 0}
+        />
       </Overlay>
       <Scrollable>
         {displayed.map((kami) => (
@@ -103,7 +108,7 @@ const Scrollable = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 2.5vw;
+  margin-top: 5vw;
   scrollbar-width: none;
   -ms-overflow-style: none;
   &::-webkit-scrollbar {
