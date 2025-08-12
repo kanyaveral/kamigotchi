@@ -71,6 +71,7 @@ export const WorldKamis = (props: Props) => {
         {displayed.map((kami) => (
           <KamiBlock
             key={kami.index}
+            tooltip={(selectedWild?.length ?? 0) > 0 ? ['Only imports or exports at a time'] : []}
             kami={kami}
             select={{
               isDisabled: isDisabled(kami),

@@ -68,6 +68,7 @@ export const WildKamis = (props: Props) => {
           <KamiBlock
             key={kami.index}
             kami={kami}
+            tooltip={(selectedWorld?.length ?? 0) > 0 ? ['Only imports or exports at a time'] : []}
             select={{
               //isSelected: mode === 'EXPORT',
               isDisabled: (selectedWorld?.length ?? 0) > 0,

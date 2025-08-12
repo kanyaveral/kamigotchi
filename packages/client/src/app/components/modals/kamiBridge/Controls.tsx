@@ -50,27 +50,9 @@ export const Controls = (props: Props) => {
       </Overlay>
 
       {selectedWild.length > 0 &&
-        selectedWild.map((kami) => (
-          <KamiBlock
-            key={kami.index}
-            kami={kami}
-            select={{
-              isDisabled: true,
-              onClick: () => {},
-            }}
-          />
-        ))}
+        selectedWild.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
       {selectedWorld.length > 0 &&
-        selectedWorld.map((kami) => (
-          <KamiBlock
-            key={kami.index}
-            kami={kami}
-            select={{
-              isDisabled: true,
-              onClick: () => {},
-            }}
-          />
-        ))}
+        selectedWorld.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
     </Container>
   );
 };
