@@ -5,7 +5,7 @@ import { useReadContracts, useWatchBlockNumber } from 'wagmi';
 
 import { getAccount, getAccountKamis } from 'app/cache/account';
 import { getConfigAddress } from 'app/cache/config';
-import { getKami, isHarvesting, onCooldown } from 'app/cache/kami';
+import { getKami, isDead, isHarvesting, onCooldown } from 'app/cache/kami';
 import { ModalHeader, ModalWrapper } from 'app/components/library';
 import { registerUIComponent } from 'app/root';
 import { useNetwork, useVisibility } from 'app/stores';
@@ -109,7 +109,7 @@ export function registerKamiBridge() {
         if (!modals.bridgeERC721) return;
         const accountKamis = getAccountKamis(account.entity);
         const filteredKamis = accountKamis.filter(
-          (kami) => !onCooldown(kami) && !isHarvesting(kami)
+          (kami) => !onCooldown(kami) && !isHarvesting(kami) && !isDead(kami)
         );
         setWorldKamis(filteredKamis);
       }, [modals.bridgeERC721, tick]);

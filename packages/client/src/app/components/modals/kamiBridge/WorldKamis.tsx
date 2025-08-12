@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { isResting } from 'app/cache/kami';
 import { EmptyText, Overlay } from 'app/components/library';
 import { Kami } from 'network/shapes/Kami';
 import { playClick } from 'utils/sounds';
@@ -47,7 +46,7 @@ export const WorldKamis = (props: Props) => {
   // INTERPRETATION
 
   const isDisabled = (kami: Kami) => {
-    return (selectedWild?.length ?? 0) > 0 || !isResting(kami);
+    return (selectedWild?.length ?? 0) > 0;
   };
 
   const getEmptyText = () => {
@@ -97,7 +96,6 @@ const Container = styled.div`
 `;
 
 const Scrollable = styled.div`
-  height: 100%;
   display: flex;
   flex-flow: row;
   overflow-y: scroll;
