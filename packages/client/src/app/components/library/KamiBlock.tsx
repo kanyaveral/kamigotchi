@@ -10,6 +10,7 @@ interface Props {
   select?: {
     onClick?: () => void;
     isDisabled?: boolean;
+    isSelected?: boolean;
   };
   tooltip?: string[];
 }
@@ -47,7 +48,12 @@ export const KamiBlock = (props: Props) => {
         </Overlay>
         {select && (
           <Overlay bottom={0.5} right={0.5}>
-            <ClickBox type='checkbox' disabled={!!select.isDisabled} onClick={select.onClick} />
+            <ClickBox
+              type='checkbox'
+              disabled={!!select.isDisabled}
+              checked={!!select.isSelected}
+              onChange={select.onClick}
+            />
           </Overlay>
         )}
       </TextTooltip>

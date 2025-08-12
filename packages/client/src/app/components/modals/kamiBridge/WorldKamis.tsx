@@ -75,7 +75,7 @@ export const WorldKamis = (props: Props) => {
             kami={kami}
             select={{
               isDisabled: isDisabled(kami),
-              // isSelected: mode === 'IMPORT',
+              isSelected: selectedWorld.includes(kami),
               onClick: () => handleSelect(kami),
             }}
           />

@@ -70,7 +70,7 @@ export const WildKamis = (props: Props) => {
             kami={kami}
             tooltip={(selectedWorld?.length ?? 0) > 0 ? ['Only imports or exports at a time'] : []}
             select={{
-              //isSelected: mode === 'EXPORT',
+              isSelected: selectedWild.includes(kami),
               isDisabled: (selectedWorld?.length ?? 0) > 0,
               onClick: () => handleSelect(kami),
             }}
