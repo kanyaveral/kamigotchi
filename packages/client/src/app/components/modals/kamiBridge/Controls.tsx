@@ -48,11 +48,12 @@ export const Controls = (props: Props) => {
           disabled={selectedWild.length === 0 && selectedWorld.length === 0}
         />
       </Overlay>
-
-      {selectedWild.length > 0 &&
-        selectedWild.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
-      {selectedWorld.length > 0 &&
-        selectedWorld.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
+      <Scrollable>
+        {selectedWild.length > 0 &&
+          selectedWild.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
+        {selectedWorld.length > 0 &&
+          selectedWorld.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
+      </Scrollable>{' '}
     </Container>
   );
 };
@@ -62,20 +63,25 @@ const Container = styled.div<{ expand: boolean }>`
   height: 100%;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
   border-left: solid black 0.15vw;
   border-right: solid black 0.15vw;
-  overflow: hidden scroll;
+  ${({ expand }) => (expand ? ' width: 40%; justify-content: flex-start; ' : 'width: 23%;')}
+  transition: width 0.8s ease-in-out;
+  padding-top: 6vw;
+`;
+
+const Scrollable = styled.div`
+  display: flex;
+  flex-flow: row;
+  overflow-y: scroll;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
   scrollbar-width: none;
   -ms-overflow-style: none;
   &::-webkit-scrollbar {
     display: none;
   }
-
-  ${({ expand }) => (expand ? ' width: 40%; justify-content: flex-start; ' : 'width: 23%;')}
-  transition: width 1s ease-in-out;
-  padding-top: 6vw;
 `;
 
 const Text = styled.div<{ size: number }>`

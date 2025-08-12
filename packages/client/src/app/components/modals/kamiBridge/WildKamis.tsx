@@ -87,7 +87,6 @@ export const WildKamis = (props: Props) => {
 const Container = styled.div`
   position: relative;
   width: 40%;
-
   display: flex;
   flex-flow: column nowrap;
 `;
