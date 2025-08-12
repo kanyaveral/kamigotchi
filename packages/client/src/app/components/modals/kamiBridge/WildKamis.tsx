@@ -65,7 +65,7 @@ export const WildKamis = (props: Props) => {
             setSelectedWild(wild);
           }}
           text={'Select All'}
-          disabled={(selectedWorld?.length ?? 0) > 0}
+          disabled={(selectedWorld?.length ?? 0) > 0 || selectedWild.length === wild.length}
         />
       </Overlay>
       <Scrollable>

@@ -98,12 +98,8 @@ const Text = styled.div<{ size: number }>`
 `;
 
 const ClickBox = styled.input`
-  border: 'solid .15vw #333';
-  border-radius: 0.4vw;
   width: 1.8vw;
   height: 1.8vw;
-
   opacity: 0.9;
-
   user-select: none;
 `;

@@ -69,7 +69,7 @@ export const WorldKamis = (props: Props) => {
             setSelectedWorld(world);
           }}
           text={'Select All'}
-          disabled={(selectedWild?.length ?? 0) > 0}
+          disabled={(selectedWild?.length ?? 0) > 0 || selectedWorld.length === world.length}
         />
       </Overlay>
       <Scrollable>
