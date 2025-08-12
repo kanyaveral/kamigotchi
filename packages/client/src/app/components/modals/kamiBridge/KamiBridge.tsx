@@ -135,8 +135,8 @@ export function registerKamiBridge() {
         action: ReturnType<typeof defineActionComponent>,
         transaction: EntityIndex
       ) => {
-        await waitForActionCompletion(actions.Action, transaction);
-        const finalState = getComponentValue(actions.Action, transaction);
+        await waitForActionCompletion(action, transaction);
+        const finalState = getComponentValue(action, transaction);
         return finalState?.state === ActionState.Complete;
       };
 
