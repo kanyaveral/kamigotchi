@@ -1,4 +1,4 @@
-import { EntityIndex } from '@mud-classic/recs';
+import { EntityIndex, getComponentValue } from '@mud-classic/recs';
 import { useEffect, useState } from 'react';
 import { interval, map } from 'rxjs';
 import { useReadContracts, useWatchBlockNumber } from 'wagmi';
@@ -13,6 +13,8 @@ import { MenuIcons } from 'assets/images/icons/menu';
 import { erc721ABI } from 'network/chain/ERC721';
 import { queryAccountFromEmbedded } from 'network/shapes/Account';
 import { Kami, queryKamiByIndex } from 'network/shapes/Kami';
+import { ActionState, defineActionComponent } from 'network/systems';
+import { waitForActionCompletion } from 'network/utils';
 import styled from 'styled-components';
 import { Controls } from './Controls';
 import { WildKamis } from './WildKamis';
@@ -127,9 +129,20 @@ export function registerKamiBridge() {
       /////////////////
       // TRANSACTIONS
 
+      // if action completed successfully
+      // signal the stage area to be cleaned
+      const checkState = async (
+        action: ReturnType<typeof defineActionComponent>,
+        transaction: EntityIndex
+      ) => {
+        await waitForActionCompletion(actions.Action, transaction);
+        const finalState = getComponentValue(actions.Action, transaction);
+        return finalState?.state === ActionState.Complete;
+      };
+
       // import a kami from the wild to the world
       // TODO: pets without accounts are linked to EOA, no account. link EOA
-      const depositTx = (kamis: Kami[]) => {
+      const depositTx = async (kamis: Kami[]) => {
         const api = apis.get(selectedAddress);
         if (!api) return console.error(`API not established for ${selectedAddress}`);
 
@@ -142,7 +155,7 @@ export function registerKamiBridge() {
         else description = `Staking ${numKamis} Kami`;
 
         // add the transaction to the queue
-        actions.add({
+        const transaction = actions.add({
           action: 'KamiDeposit',
           params: indices,
           description,
@@ -150,10 +163,15 @@ export function registerKamiBridge() {
             return api.bridge.ERC721.kami.batch.stake(indices);
           },
         });
+
+        const completed = await checkState(actions.Action, transaction);
+        if (completed) {
+          setSelectedWild([]);
+        }
       };
 
       // export a kami from the world to the wild
-      const withdrawTx = (kamis: Kami[]) => {
+      const withdrawTx = async (kamis: Kami[]) => {
         const api = apis.get(selectedAddress);
         if (!api) return console.error(`API not established for ${selectedAddress}`);
 
@@ -166,7 +184,7 @@ export function registerKamiBridge() {
         else description = `Unstaking ${numKamis} Kami`;
 
         // add the transaction to the queue
-        actions.add({
+        const transaction = actions.add({
           action: 'KamiWithdraw',
           params: indices,
           description,
@@ -174,6 +192,10 @@ export function registerKamiBridge() {
             return api.bridge.ERC721.kami.batch.unstake(indices);
           },
         });
+        const completed = await checkState(actions.Action, transaction);
+        if (completed) {
+          setSelectedWorld([]);
+        }
       };
 
       /////////////////
