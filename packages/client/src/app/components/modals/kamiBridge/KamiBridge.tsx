@@ -217,7 +217,7 @@ export function registerKamiBridge() {
             />
             <Controls
               actions={{ import: depositTx, export: withdrawTx }}
-              state={{ selectedWild, selectedWorld }}
+              state={{ selectedWild, selectedWorld, setSelectedWild, setSelectedWorld }}
             />
             <WildKamis
               mode={'EXPORT'}

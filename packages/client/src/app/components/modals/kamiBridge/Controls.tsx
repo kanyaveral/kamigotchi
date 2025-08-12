@@ -12,14 +12,15 @@ interface Props {
 
   state: {
     selectedWild: Kami[];
+    setSelectedWild: (kamis: Kami[]) => void;
     selectedWorld: Kami[];
+    setSelectedWorld: (kamis: Kami[]) => void;
   };
 }
 
 export const Controls = (props: Props) => {
   const { actions, state } = props;
-
-  const { selectedWild, selectedWorld } = state;
+  const { selectedWild, selectedWorld, setSelectedWild, setSelectedWorld } = state;
 
   // this allows importing and exporting at the same time
   const handleAction = () => {
@@ -53,7 +54,17 @@ export const Controls = (props: Props) => {
           selectedWild.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
         {selectedWorld.length > 0 &&
           selectedWorld.map((kami) => <KamiBlock key={kami.index} kami={kami} />)}
-      </Scrollable>{' '}
+      </Scrollable>
+      <Overlay top={30} fullWidth>
+        <IconButton
+          onClick={() => {
+            setSelectedWild([]);
+            setSelectedWorld([]);
+          }}
+          text={'Clear'}
+          disabled={selectedWild.length === 0 && selectedWorld.length === 0}
+        />
+      </Overlay>
     </Container>
   );
 };
@@ -71,6 +82,7 @@ const Container = styled.div<{ expand: boolean }>`
   will-change: width;
   overflow: hidden;
 `;
+
 const Scrollable = styled.div`
   display: flex;
   flex-flow: row;
