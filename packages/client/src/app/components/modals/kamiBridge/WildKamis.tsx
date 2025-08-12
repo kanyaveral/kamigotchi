@@ -59,7 +59,7 @@ export const WildKamis = (props: Props) => {
   return (
     <Container>
       <Overlay top={0.9} fullWidth orientation='column' gap={0.4}>
-        <Text size={0.9}>World({getCount()})</Text>
+        <Text size={0.9}>Wilderness({getCount()})</Text>
         <IconButton
           onClick={() => {
             setSelectedWild(wild);
