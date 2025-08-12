@@ -65,11 +65,12 @@ const Container = styled.div<{ expand: boolean }>`
   flex-flow: column nowrap;
   border-left: solid black 0.15vw;
   border-right: solid black 0.15vw;
-  ${({ expand }) => (expand ? ' width: 40%; justify-content: flex-start; ' : 'width: 23%;')}
+  ${({ expand }) => (expand ? 'width: 40%; justify-content: flex-start;' : 'width: 23%;')}
   transition: width 0.8s ease-in-out;
   padding-top: 6vw;
+  will-change: width;
+  overflow: hidden;
 `;
-
 const Scrollable = styled.div`
   display: flex;
   flex-flow: row;
