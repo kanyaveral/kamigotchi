@@ -26,7 +26,7 @@ interface Props {
   showSkillPoints?: boolean;
   showCooldown?: boolean;
   utils?: {
-    calcExpRequirement: (lvl: number) => number;
+    calcExpRequirement?: (lvl: number) => number;
     getTempBonuses: (kami: Kami) => Bonus[];
   };
 }

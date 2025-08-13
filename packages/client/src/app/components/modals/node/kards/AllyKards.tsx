@@ -20,7 +20,6 @@ interface Props {
     UseItemButton: (kami: Kami, account: Account) => React.ReactNode;
   };
   utils: {
-    calcExpRequirement: (lvl: number) => number;
     getTempBonuses: (kami: Kami) => Bonus[];
   };
 }
