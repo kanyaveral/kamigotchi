@@ -138,10 +138,8 @@ export function registerLootBoxModal() {
           <Content>
             <Overlay top={4} left={5} gap={0.3} orientation='column' align='flex-end'>
               {arrowButtons.map(({ label, value, symbol, smaller, marginLeft }) => (
-                <Row key={label}>
-                  <Arrow onClick={() => onEggClick(value)} smaller={smaller}>
-                    {symbol}
-                  </Arrow>
+                <Row onClick={() => onEggClick(value)} key={label}>
+                  <Arrow smaller={smaller}>{symbol}</Arrow>
                   <Number marginLeft={marginLeft}>{label}</Number>
                 </Row>
               ))}
@@ -298,6 +296,7 @@ const Row = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  color: white;
   &:hover {
     animation: ${() => hoverFx()} 0.2s;
     transform: scale(1.05);
@@ -307,12 +306,12 @@ const Row = styled.div`
 `;
 
 const Arrow = styled.div<{ smaller?: boolean }>`
+  color: currentColor;
   font-size: ${({ smaller }) => (smaller ? '0.7vw' : '0.8vw')};
-  color: white;
 `;
 
 const Number = styled.div<{ marginLeft?: string }>`
-  color: white;
+  color: currentColor;
   font-size: 0.8vw;
   margin-left: ${({ marginLeft }) => marginLeft ?? '0.4'}vw;
 `;
