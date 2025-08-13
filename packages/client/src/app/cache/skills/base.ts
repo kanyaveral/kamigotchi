@@ -1,7 +1,13 @@
 import { EntityIndex, World } from '@mud-classic/recs';
 
 import { Components } from 'network/';
-import { getSkill, NullSkill, querySkillRegistry, Skill } from 'network/shapes/Skill';
+import {
+  getSkill,
+  NullSkill,
+  querySkillRegistry,
+  Skill,
+  querySkillByIndex,
+} from 'network/shapes/Skill';
 
 // cache for skill registry. doesnt ever change, assume stable once retrieved
 const SkillCache = new Map<EntityIndex, Skill>(); // skill registry entity -> Skill
@@ -14,9 +20,10 @@ export const get = (world: World, components: Components, entity: EntityIndex) =
   return SkillCache.get(entity)!;
 };
 
-// get a Skill object by Index from the cache. assume the Skill is already populated
+// get a Skill object by Index from the cache. if miss, fallback to world query
 export const getByIndex = (world: World, components: Components, index: number) => {
-  const entity = IndexMap.get(index);
+  const mappedEntity = IndexMap.get(index);
+  const entity = mappedEntity ?? querySkillByIndex(world, components, index);
   if (!entity) return NullSkill;
   return get(world, components, entity);
 };
