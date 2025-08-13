@@ -12,6 +12,8 @@ import { hoverFx } from 'app/styles/effects';
 import { ItemImages } from 'assets/images/items';
 import { queryAccountFromEmbedded } from 'network/shapes/Account';
 import { getAllItems } from 'network/shapes/Item';
+import { Ingredient, Recipe } from 'network/shapes/Recipe';
+import pluralize from 'pluralize';
 
 const SYNC_TIME = 1000;
 //placeholders
@@ -63,6 +65,7 @@ export function registerLootBoxModal() {
 
     // Render
     ({ network, data, types, utils }) => {
+      const { actions, api, world, components } = network;
       const { getAllItems } = utils;
       const { modals, setModals } = useVisibility();
       const { selectedAddress, apis } = useNetwork();
@@ -89,6 +92,32 @@ export function registerLootBoxModal() {
       const onEggClick = (quantity: number) => {
         if (eggsQuantity + quantity <= 0) setEggsQuantity(1);
         else setEggsQuantity(eggsQuantity + quantity);
+      };
+      /////////////////
+      // INTERPRETATION
+
+      const getIngredientsText = (ingredients: Ingredient[], multiplier: number) => {
+        let text = '';
+        ingredients.forEach((ingredient) => {
+          const amount = ingredient.amount * multiplier;
+          const name = ingredient.item?.name ?? 'Unknown';
+          text += pluralize(name, amount, true) + ' ';
+        });
+        return text;
+      };
+
+      /////////////////
+      // ACTIONS
+
+      const craft = (recipe: Recipe, amount: number) => {
+        actions.add({
+          action: 'Craft',
+          params: [recipe.id, amount],
+          description: `Crafting ${getIngredientsText(recipe.outputs, amount)}`,
+          execute: async () => {
+            return api.player.account.item.craft(recipe.index, amount);
+          },
+        });
       };
 
       /////////////////
@@ -120,11 +149,7 @@ export function registerLootBoxModal() {
         );
       }, []);
 
-      /////////////////
-      // GETTERS
-
-      /////////////////
-      // ACTIONS
+      // onClick={()=>{craft( getRecipe(obolentityindex)   ,eggsQuantity)}}
 
       return (
         <ModalWrapper
