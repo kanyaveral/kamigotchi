@@ -14,7 +14,15 @@ import { queryAccountFromEmbedded } from 'network/shapes/Account';
 import { getAllItems } from 'network/shapes/Item';
 
 const SYNC_TIME = 1000;
-const eggPrice = 5;
+//placeholders
+const obolsPerEgg = 5;
+const playerObols = 100;
+const arrowButtons = [
+  { label: '+5', value: 5, symbol: '\u25B2' },
+  { label: '+1', value: 1, symbol: '\u25B4', smaller: true, marginLeft: '0.6vw' },
+  { label: '-1', value: -1, symbol: '\u25BE', smaller: true, marginLeft: '0.7vw' },
+  { label: '-5', value: -5, symbol: '\u25BC' },
+];
 
 export function registerLootBoxModal() {
   registerUIComponent(
@@ -56,12 +64,13 @@ export function registerLootBoxModal() {
     // Render
     ({ network, data, types, utils }) => {
       const { getAllItems } = utils;
-      const { modals } = useVisibility();
+      const { modals, setModals } = useVisibility();
       const { selectedAddress, apis } = useNetwork();
-      const [eggsQuantityt, setEggsQuantity] = useState(1);
+      const [eggsQuantity, setEggsQuantity] = useState(1);
 
       const [tick, setTick] = useState(Date.now());
 
+      /////////////////
       // time trigger to use for periodic refreshes
       useEffect(() => {
         const updateSync = () => setTick(Date.now());
@@ -74,6 +83,16 @@ export function registerLootBoxModal() {
         if (!modals.lootBox) return;
       }, [modals.lootBox, tick]);
 
+      /////////////////
+      // HELPERS
+
+      const onEggClick = (quantity: number) => {
+        if (eggsQuantity + quantity <= 0) setEggsQuantity(1);
+        else setEggsQuantity(eggsQuantity + quantity);
+      };
+
+      /////////////////
+      // RENDERING
       const HeaderRenderer = useMemo(() => {
         return (
           <Header>
@@ -118,34 +137,32 @@ export function registerLootBoxModal() {
         >
           <Content>
             <Overlay top={4} left={5} gap={0.3} orientation='column' align='flex-end'>
-              <Row>
-                <Arrow>{'\u25B2'}</Arrow>
-                <Number>+5</Number>
-              </Row>
-              <Row>
-                <Arrow smaller>{'\u25B4'}</Arrow>
-                <Number style={{ marginLeft: '0.6vw' }}>+1</Number>
-              </Row>
-              <Row>
-                <Arrow smaller>{'\u25BE'}</Arrow>
-                <Number style={{ marginLeft: '0.7vw' }}>-1</Number>
-              </Row>
-              <Row>
-                <Arrow>{'\u25BC'}</Arrow>
-                <Number>-5</Number>
-              </Row>
+              {arrowButtons.map(({ label, value, symbol, smaller, marginLeft }) => (
+                <Row key={label}>
+                  <Arrow onClick={() => onEggClick(value)} smaller={smaller}>
+                    {symbol}
+                  </Arrow>
+                  <Number marginLeft={marginLeft}>{label}</Number>
+                </Row>
+              ))}
             </Overlay>
             <Text>Demon Egg</Text>
             <Img src={ItemImages.demon_egg} />
             <Overlay top={6} right={6} orientation='column'>
               <Text size={1.7} weight={`bold`}>
-                X{eggsQuantityt}
+                X{eggsQuantity}
               </Text>
             </Overlay>
-            <Text> {eggsQuantityt * eggPrice} Obols</Text>
+            <Text> {eggsQuantity * obolsPerEgg} Obols</Text>
             <ButtonsRow>
-              <Button onClick={() => {}}>I accept.</Button>
-              <Button onClick={() => {}}>I refuse.</Button>
+              <Button disabled={eggsQuantity * obolsPerEgg > playerObols}> I accept. </Button>
+              <Button
+                onClick={() => {
+                  setModals({ lootBox: false });
+                }}
+              >
+                I refuse.
+              </Button>
             </ButtonsRow>
           </Content>
         </ModalWrapper>
@@ -255,7 +272,7 @@ const Img = styled.img`
   padding: 0.5vw;
 `;
 
-const Text = styled.text<{ size?: number; weight?: string }>`
+const Text = styled.span<{ size?: number; weight?: string }>`
   color: white;
   ${({ size }) => (size ? `font-size: ${size}vw;` : '0.8vw;')}
   ${({ weight }) => (weight ? `font-weight: ${weight};` : 'normal;')}
@@ -284,6 +301,7 @@ const Row = styled.div`
   &:hover {
     animation: ${() => hoverFx()} 0.2s;
     transform: scale(1.05);
+    color: red;
     cursor: pointer;
   }
 `;
@@ -293,8 +311,8 @@ const Arrow = styled.div<{ smaller?: boolean }>`
   color: white;
 `;
 
-const Number = styled.div`
+const Number = styled.div<{ marginLeft?: string }>`
   color: white;
   font-size: 0.8vw;
-  margin-left: 0.4vw;
+  margin-left: ${({ marginLeft }) => marginLeft ?? '0.4'}vw;
 `;

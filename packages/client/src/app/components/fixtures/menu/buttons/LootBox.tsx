@@ -1,5 +1,5 @@
 import { Modals } from 'app/stores';
-import { FeedIcon } from 'assets/images/icons/actions';
+import { ItemImages } from 'assets/images/items';
 import { MenuButton } from './MenuButton';
 
 const ModalsToHide: Partial<Modals> = {
@@ -13,7 +13,7 @@ export const LootBoxButton = () => {
   return (
     <MenuButton
       id='lootbox-button'
-      image={FeedIcon}
+      image={ItemImages.obol}
       tooltip='Loot Box'
       targetModal='lootBox'
       hideModals={ModalsToHide}
