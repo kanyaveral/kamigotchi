@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { calcHealth } from 'app/cache/kami';
@@ -22,6 +22,8 @@ interface Props {
   subtextOnClick?: () => void;
   actions?: React.ReactNode;
   showBattery?: boolean;
+  showLevelUp?: boolean;
+  showSkillPoints?: boolean;
   showCooldown?: boolean;
   utils?: {
     calcExpRequirement: (lvl: number) => number;
@@ -32,27 +34,26 @@ interface Props {
 // KamiCard is a card that displays information about a Kami. It is designed to display
 // information ranging from current harvest or death as well as support common actions.
 export const KamiCard = (props: Props) => {
-  const { kami, actions, showBattery, showCooldown, isFriend, utils } = props;
+  const {
+    kami,
+    actions,
+    showLevelUp,
+    showSkillPoints,
+    showBattery,
+    showCooldown,
+    isFriend,
+    utils,
+  } = props;
   const getTempBonuses = utils?.getTempBonuses;
-  const { calcExpRequirement } = utils ?? {};
   const { description, descriptionOnClick } = props;
   const { contentTooltip } = props;
   const { subtext, subtextOnClick } = props;
 
   const { modals, setModals } = useVisibility();
   const { kamiIndex, setKami } = useSelected();
-  const [canLevel, setCanLevel] = useState(false);
 
   /////////////////
   // INTERACTION
-
-  // check if a kami can level up
-  useEffect(() => {
-    if (!kami.progress || !calcExpRequirement) return;
-    const expCurr = kami.progress.experience;
-    const expLimit = calcExpRequirement(kami.progress.level);
-    setCanLevel(expCurr >= expLimit);
-  }, [kami, calcExpRequirement]);
 
   // toggle the kami modal settings depending on its current state
   const handleKamiClick = () => {
@@ -91,8 +92,8 @@ export const KamiCard = (props: Props) => {
     <Card
       image={{
         icon: kami.image,
-        canLevel,
-        skillPoints: (kami.skills?.points ?? 0) > 0,
+        showLevelUp,
+        showSkillPoints,
         onClick: handleKamiClick,
       }}
     >
