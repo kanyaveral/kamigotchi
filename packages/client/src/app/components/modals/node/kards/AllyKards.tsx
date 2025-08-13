@@ -29,7 +29,6 @@ interface Props {
 export const AllyKards = (props: Props) => {
   const { actions, display, account, kamis, utils } = props;
   const { getTempBonuses } = utils;
-  const { calcExpRequirement } = utils;
   const { collect, stop } = actions;
   const { UseItemButton } = display;
 

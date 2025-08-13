@@ -120,14 +120,6 @@ export const KamisExpanded = (props: Props) => {
     return tooltip;
   };
 
-  // check if a kami can level up
-  const showLevelUp = (kami: Kami): boolean => {
-    if (!kami.progress) return false;
-    const expCurr = kami.progress.experience;
-    const expLimit = calcExpRequirement(kami.progress.level);
-    return expCurr >= expLimit;
-  };
-
   /////////////////
   // INTERACTION
 
@@ -197,8 +189,8 @@ export const KamisExpanded = (props: Props) => {
           actions={DisplayedActions(account, kami, node)}
           showBattery
           showCooldown
-          showLevelUp={showLevelUp(kami)}
-          showSkillPoints={(kami.skills?.points ?? 0) > 0}
+          showLevelUp
+          showSkillPoints
           utils={utils}
         />
       ))}
