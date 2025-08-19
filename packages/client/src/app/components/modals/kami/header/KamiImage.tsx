@@ -2,7 +2,6 @@ import styled from 'styled-components';
 
 import { isResting } from 'app/cache/kami';
 import { TextTooltip } from 'app/components/library';
-import { LevelUpArrows } from 'app/components/library/animations/LevelUp';
 import { Overlay } from 'app/components/library/styles';
 import { useSelected, useVisibility } from 'app/stores';
 import { clickFx, hoverFx, Shimmer } from 'app/styles/effects';
@@ -93,7 +92,6 @@ export const KamiImage = (props: Props) => {
   return (
     <Container>
       <Image src={kami.image} />
-      {expCurr >= expLimit && <LevelUpArrows />}
       <Overlay top={0.75} left={0.7}>
         <Grouping>
           <Text size={0.6}>Lvl</Text>
