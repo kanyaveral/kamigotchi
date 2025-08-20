@@ -1,0 +1,13 @@
+[build]
+command = "pnpm install && cd packages/client && pnpm install && pnpm run build:prod"
+watchPatterns = ["packages/client/**"]
+
+[deploy]
+startCommand = "cd packages/client && pnpm run serve"
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[environments.production]
+variables = {}

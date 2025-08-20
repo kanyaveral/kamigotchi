@@ -22,7 +22,9 @@
     "nuke": "rimraf node_modules dist",
     "prettier": "prettier src --check",
     "prettier:fix": "pnpm run prettier --write",
-    "preview": "rimraf dist/ && mkdir dist/ && vite preview"
+    "preview": "rimraf dist/ && mkdir dist/ && vite preview",
+    "start": "serve dist -s -l 3000",
+    "serve": "serve dist -s -l $PORT"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
@@ -96,6 +98,7 @@
     "react-dom": "^18.2.0",
     "react-is": "^16.8.0",
     "rxjs": "^7.5.5",
+    "serve": "^14.2.1",
     "styled-components": "^5.3.6",
     "threads": "^1.7.0",
     "type-fest": "^2.14.0",

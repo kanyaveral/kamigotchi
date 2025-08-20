@@ -1,0 +1,58 @@
+# Development files
+.git
+.gitignore
+README.md
+*.md
+
+# Local environment files
+.env.local
+.env.development
+.env.test
+.env.puter
+
+# Node modules (will be installed during build)
+node_modules
+packages/*/node_modules
+
+# Build artifacts that will be generated
+packages/client/dist
+packages/contracts/out
+packages/contracts/broadcast
+packages/contracts/cache
+
+# Development and testing files
+test/
+tests/
+*.test.*
+*.spec.*
+coverage/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Package manager lock files (keeping pnpm-lock.yaml)
+yarn.lock
+package-lock.json
+
+# Contract specific files not needed for client
+packages/contracts/lib/
+packages/contracts/deployments/
+packages/contracts/typechain-types/
+
+# Static files directory (not needed for deployment)
+static/
