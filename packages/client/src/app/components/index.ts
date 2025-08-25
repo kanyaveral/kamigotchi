@@ -28,8 +28,8 @@ import { PartyModal } from './modals/party';
 import { QuestModal } from './modals/quests';
 import { RevealModal } from './modals/reveal';
 import { SettingsModal } from './modals/settings';
+import { AnimationStudio } from './modals/studio/AnimationStudio';
 import { TradingModal } from './modals/trading';
-
 import {
   AccountRegistrar,
   GasHarasser,
@@ -186,4 +186,15 @@ export const allComponents: UIComponentWithGrid[] = [
     uiComponent: MerchantModal,
     gridConfig: { colStart: 2, colEnd: 67, rowStart: 8, rowEnd: 99 },
   },
+
+  // dev-only
+  ...(typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? [
+        {
+          uiComponent: AnimationStudio,
+          gridConfig: { colStart: 20, colEnd: 80, rowStart: 20, rowEnd: 80 },
+        },
+      ]
+    : []),
 ];
