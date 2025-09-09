@@ -105,7 +105,7 @@ export const Tooltip = ({
   );
 };
 
-const Container = styled.div<{
+const Container = styled.span<{
   flexGrow: string;
   disabled?: boolean;
   direction?: string;
@@ -119,7 +119,7 @@ const Container = styled.div<{
   ${({ fullWidth }) => fullWidth && 'width: 100%;'}
 `;
 
-const PopoverContainer = styled.div.attrs<{
+const PopoverContainer = styled.span.attrs<{
   isVisible: boolean;
   color?: string;
   tooltipPosition?: any;

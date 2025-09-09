@@ -59,6 +59,7 @@ export interface Feed {
   HarvestEnds: HarvestEnd[];
   Kills: Kill[];
   Trades: Trade[];
+  KamiCasts: KamiCast[];
 }
 
 export interface AuctionBuy {
@@ -97,6 +98,14 @@ export interface ItemTransfer {
   RecvAccountID: string;
   ItemIndex: number;
   Amount: string;
+}
+
+export interface KamiCast {
+  AccountID: string;
+  Timestamp: number;
+  TargetID: string;
+  itemIndex: number;
+  nodeIndex: number;
 }
 
 /** REQUESTS */
@@ -684,7 +693,7 @@ export const BattleStats: MessageFns<BattleStats> = {
 };
 
 function createBaseFeed(): Feed {
-  return { Movements: [], HarvestEnds: [], Kills: [], Trades: [] };
+  return { Movements: [], HarvestEnds: [], Kills: [], Trades: [], KamiCasts: [] };
 }
 
 export const Feed: MessageFns<Feed> = {
@@ -700,6 +709,10 @@ export const Feed: MessageFns<Feed> = {
     }
     for (const v of message.Trades) {
       Trade.encode(v!, writer.uint32(34).fork()).join();
+    }
+
+    for (const v of message.KamiCasts) {
+      KamiCast.encode(v!, writer.uint32(42).fork()).join();
     }
     return writer;
   },
@@ -743,6 +756,15 @@ export const Feed: MessageFns<Feed> = {
           message.Trades.push(Trade.decode(reader, reader.uint32()));
           continue;
         }
+
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.KamiCasts.push(KamiCast.decode(reader, reader.uint32()));
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -761,6 +783,7 @@ export const Feed: MessageFns<Feed> = {
     message.HarvestEnds = object.HarvestEnds?.map((e) => HarvestEnd.fromPartial(e)) || [];
     message.Kills = object.Kills?.map((e) => Kill.fromPartial(e)) || [];
     message.Trades = object.Trades?.map((e) => Trade.fromPartial(e)) || [];
+    message.KamiCasts = object.KamiCasts?.map((e) => KamiCast.fromPartial(e)) || [];
     return message;
   },
 };
@@ -879,13 +902,7 @@ export const AuctionBuy: MessageFns<AuctionBuy> = {
 };
 
 function createBaseRankRow(): RankRow {
-  return {
-    KamiName: '',
-    OwnerName: '',
-    OwnerAddress: '',
-    KamiIndex: 0,
-    Amount: 0,
-  };
+  return { KamiName: '', OwnerName: '', OwnerAddress: '', KamiIndex: 0, Amount: 0 };
 }
 
 export const RankRow: MessageFns<RankRow> = {
@@ -1262,6 +1279,102 @@ export const ItemTransfer: MessageFns<ItemTransfer> = {
   },
 };
 
+
+function createBaseKamiCast(): KamiCast {
+  return { AccountID: '', Timestamp: 0, TargetID: '', itemIndex: 0, nodeIndex: 0 };
+}
+
+export const KamiCast: MessageFns<KamiCast> = {
+  encode(message: KamiCast, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.AccountID !== '') {
+      writer.uint32(10).string(message.AccountID);
+    }
+    if (message.Timestamp !== 0) {
+      writer.uint32(16).uint64(message.Timestamp);
+    }
+    if (message.TargetID !== '') {
+      writer.uint32(26).string(message.TargetID);
+    }
+    if (message.itemIndex !== 0) {
+      writer.uint32(32).uint32(message.itemIndex);
+    }
+    if (message.nodeIndex !== 0) {
+      writer.uint32(40).uint32(message.nodeIndex);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): KamiCast {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseKamiCast();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.AccountID = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.Timestamp = longToNumber(reader.uint64());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.TargetID = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.itemIndex = reader.uint32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.nodeIndex = reader.uint32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  create(base?: DeepPartial<KamiCast>): KamiCast {
+    return KamiCast.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<KamiCast>): KamiCast {
+    const message = createBaseKamiCast();
+    message.AccountID = object.AccountID ?? '';
+    message.Timestamp = object.Timestamp ?? 0;
+    message.TargetID = object.TargetID ?? '';
+    message.itemIndex = object.itemIndex ?? 0;
+    message.nodeIndex = object.nodeIndex ?? 0;
+    return message;
+  },
+};
+
+
 function createBaseRoomRequest(): RoomRequest {
   return { RoomIndex: 0, Timestamp: 0, Size: undefined };
 }
@@ -1529,13 +1642,7 @@ export const BattleStatsRequest: MessageFns<BattleStatsRequest> = {
 };
 
 function createBaseRankingRequest(): RankingRequest {
-  return {
-    StartBlock: 0,
-    EndBlock: 0,
-    ApiKey: '',
-    IsVip: undefined,
-    ByCount: undefined,
-  };
+  return { StartBlock: 0, EndBlock: 0, ApiKey: '', IsVip: undefined, ByCount: undefined };
 }
 
 export const RankingRequest: MessageFns<RankingRequest> = {

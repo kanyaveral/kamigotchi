@@ -64,6 +64,7 @@ export const TextTooltip = ({
   );
 };
 
+
 const Text = styled.div<{ size: number; align?: string }>`
   font-size: ${({ size }) => size}vw;
   line-height: ${({ size }) => size * 1.8}vw;
