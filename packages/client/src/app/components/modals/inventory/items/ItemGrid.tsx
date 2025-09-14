@@ -77,6 +77,7 @@ export const ItemGrid = ({
     const available = kamis.filter((kami) => meetsRequirements(kami, item));
     return available.map((kami) => ({
       text: kami.name,
+      image: kami.image,
       onClick: () => useForKami(kami, item),
     }));
   };
@@ -126,7 +127,7 @@ export const ItemGrid = ({
               balance={inv.balance}
               options={options}
               disabled={options.length == 0}
-              tooltipProps={{
+              tooltip={{
                 text: [<ItemGridTooltip key={item.index} item={item} utils={utils} />],
                 maxWidth: 25,
               }}
