@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { IconButton, TextTooltip } from 'app/components/library';
@@ -25,6 +26,47 @@ export const MusuRow = ({
   const { modals, setModals } = useVisibility();
   const { musu, obols } = data;
   const { mode, setMode, setShuffle } = state;
+
+  const [displayMusu, setDisplayMusu] = useState<number>(musu);
+  const animationRef = useRef<number | null>(null);
+  const stepTimeRef = useRef<number | null>(null);
+  const prevMusuRef = useRef<number>(musu);
+
+  // animate the musu balance, eased to the target value
+  useEffect(() => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    stepTimeRef.current = null;
+    const from = prevMusuRef.current;
+    const to = musu;
+
+    // don't animate if the musu balance difference is low
+    if (Math.abs(to - from) < 10) {
+      prevMusuRef.current = musu;
+      setDisplayMusu(to);
+      return;
+    }
+
+    // animation step
+    const step = (t: number) => {
+      if (stepTimeRef.current == null) stepTimeRef.current = t;
+      const elapsed = t - stepTimeRef.current;
+      const progress = Math.min(1, elapsed / 750); // elapsed divided by tick duration
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = Math.round(from + (to - from) * eased);
+      setDisplayMusu(value);
+      if (progress < 1) animationRef.current = requestAnimationFrame(step);
+    };
+
+    animationRef.current = requestAnimationFrame(step);
+    prevMusuRef.current = musu;
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [musu]);
+
+  /////////////////
+  // INTERACTION
 
   // toggles views and activates the shuffle animation
   const triggerModalShuffle = () => {
@@ -74,7 +116,7 @@ export const MusuRow = ({
       <TextTooltip text={['MUSU']} direction='row' fullWidth>
         <MusuSection>
           <Icon src={ItemImages.musu} onClick={() => null} />
-          <Balance>{musu.toLocaleString()}</Balance>
+          <Balance>{displayMusu.toLocaleString()}</Balance>
         </MusuSection>
       </TextTooltip>
     </Container>
