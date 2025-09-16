@@ -17,11 +17,11 @@ import { useNetwork, useSelected, useVisibility } from 'app/stores';
 import { TradeIcon } from 'assets/images/icons/menu';
 import { getKamidenClient } from 'clients/kamiden';
 import { Trade as TradeHistory, TradesRequest } from 'clients/kamiden/proto';
-import { ETH_INDEX, MUSU_INDEX, ONYX_INDEX } from 'constants/items';
 import { Account, NullAccount, queryAccountFromEmbedded } from 'network/shapes/Account';
 import { getMusuBalance as _getMusuBalance, Item } from 'network/shapes/Item';
 import { queryTrades as _queryTrades } from 'network/shapes/Trade';
 import { Trade } from 'network/shapes/Trade/types';
+import { CURRENCIES } from './constants';
 import { History } from './history/History';
 import { Confirmation, ConfirmationData, EmptyConfimation } from './library/Confirmation';
 import { Tabs } from './library/Tabs';
@@ -30,7 +30,6 @@ import { Orderbook } from './orderbook';
 import { TabType } from './types';
 
 const SYNC_TIME = 1000;
-const CurrencyIndices = [MUSU_INDEX, ETH_INDEX, ONYX_INDEX];
 const KamidenClient = getKamidenClient();
 
 export const TradingModal: UIComponent = {
@@ -100,6 +99,20 @@ export const TradingModal: UIComponent = {
       return () => clearInterval(timerId);
     }, []);
 
+    // sets trades upon opening modal
+    useEffect(() => {
+      if (!modalVisible) return;
+      const account = getAccount(accountEntity);
+      setAccount(account);
+      refreshTrades(account);
+    }, [modalVisible, tick]);
+
+    // update trade history whenever tab is checked
+    useEffect(() => {
+      if (!modalVisible || tab !== `History`) return;
+      getTradeHistory(account.id);
+    }, [tab]);
+
     // open account modal on events from offers
     // Q: what is this used for?
     useEffect(() => {
@@ -147,13 +160,6 @@ export const TradingModal: UIComponent = {
       };
     }, []);
 
-    // sets trades upon opening modal
-    useEffect(() => {
-      if (!modalVisible || accountEntity) return;
-      refreshTrades(account);
-      // getTradeHistory(account.id);
-    }, [modalVisible, tick]);
-
     /////////////////
     // GETTERS
 
@@ -161,12 +167,12 @@ export const TradingModal: UIComponent = {
     const refreshItemRegistry = () => {
       const all: Item[] = getAllItems();
 
-      const nonCurrencies = all.filter((item) => !CurrencyIndices.includes(item.index));
-      const tradable = nonCurrencies.filter((item) => item.is.tradeable);
+      // const nonCurrencies = all.filter((item) => !CURRENCIES.includes(item.index));
+      const tradable = all.filter((item) => item.is.tradeable);
       tradable.sort((a, b) => (a.name > b.name ? 1 : -1));
       if (tradable.length !== items.length) setItems(tradable);
 
-      const currencyIndices = new Set(CurrencyIndices);
+      const currencyIndices = new Set(CURRENCIES);
       setCurrencies(all.filter((item) => currencyIndices.has(item.index)));
     };
 
