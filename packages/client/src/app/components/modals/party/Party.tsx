@@ -1,6 +1,4 @@
-import { EntityID, EntityIndex } from 'engine/recs';
 import { useEffect, useState } from 'react';
-import { v4 as uuid } from 'uuid';
 import { erc721Abi } from 'viem';
 import { useReadContracts, useWatchBlockNumber, useWriteContract } from 'wagmi';
 
@@ -20,12 +18,10 @@ import {
   HarvestButton as _HarvestButton,
   UseItemButton as _UseItemButton,
 } from 'app/components/library';
-import { useLayers } from 'app/root/hooks';
-import { UIComponent } from 'app/root/types';
-import { useAccount, useNetwork, useSelected, useTokens, useVisibility } from 'app/stores';
-import { BalPair } from 'app/stores/tokens';
+import { UIComponent, useLayers } from 'app/root';
+import { useAccount, useNetwork, useSelected, useVisibility } from 'app/stores';
 import { KamiIcon } from 'assets/images/icons/menu';
-import { ONYX_INDEX } from 'constants/items';
+import { EntityIndex } from 'engine/recs';
 import { erc721ABI } from 'network/chain/ERC721';
 import {
   Account,
@@ -33,14 +29,13 @@ import {
   queryAllAccounts as _queryAllAccounts,
   queryAccountFromEmbedded,
 } from 'network/shapes/Account';
-import { Item, NullItem, getItemByIndex } from 'network/shapes/Item';
+import { getItemByIndex } from 'network/shapes/Item';
 import {
   Kami,
   queryKamiByIndex as _queryKamiByIndex,
   calcKamiExpRequirement,
 } from 'network/shapes/Kami';
 import { Node, NullNode, passesNodeReqs as _passesNodeReqs } from 'network/shapes/Node';
-import { getCompAddr } from 'network/shapes/utils';
 import { KamiList } from './KamiList';
 import { Toolbar } from './Toolbar';
 import { Sort, View } from './types';
@@ -52,24 +47,7 @@ export const PartyModal: UIComponent = {
   Render: () => {
     const layers = useLayers();
 
-    const {
-      network,
-      data: { accountEntity, kamiNFTAddress, spender },
-      display: { HarvestButton, UseItemButton },
-      utils: {
-        calcExpRequirement,
-        getAccount,
-        getAllAccounts,
-        getTempBonuses,
-        getItem,
-        getKami,
-        getNode,
-        getWorldKamis,
-        passesNodeReqs,
-        queryKamiByIndex,
-        queryAllAccounts,
-      },
-    } = (() => {
+    const { network, data, display, utils } = (() => {
       const { network } = layers;
       const { world, components } = network;
       const { debug } = useAccount.getState();
@@ -92,7 +70,6 @@ export const PartyModal: UIComponent = {
         data: {
           accountEntity,
           kamiNFTAddress: getConfigAddress(world, components, 'KAMI721_ADDRESS'),
-          spender: getCompAddr(world, components, 'component.token.allowance'),
         },
 
         display: {
@@ -120,12 +97,17 @@ export const PartyModal: UIComponent = {
       };
     })();
 
+    /////////////////
+    // INSTANTIATIONS
+
     const { actions, api } = network;
+    const { accountEntity, kamiNFTAddress } = data;
+    const { getNode, getAccount, queryAllAccounts } = utils;
+    const { getKami, getWorldKamis, queryKamiByIndex } = utils;
 
     const partyModalVisible = useVisibility((s) => s.modals.party);
     const selectedAddress = useNetwork((s) => s.selectedAddress);
     const ownerAPIs = useNetwork((s) => s.apis);
-    const tokenBals = useTokens((s) => s.balances);
     const { writeContract } = useWriteContract();
 
     const [account, setAccount] = useState<Account>(NullAccount);
@@ -138,11 +120,9 @@ export const PartyModal: UIComponent = {
 
     const [displayedKamis, setDisplayedKamis] = useState<Kami[]>(kamis);
     const [wildKamis, setWildKamis] = useState<Kami[]>([]);
-    const [onyxItem, setOnyxItem] = useState<Item>(NullItem);
-    const [onyxInfo, setOnyxInfo] = useState<BalPair>({ allowance: 0, balance: 0 });
 
     /////////////////
-    // BLOCK WATCHERS
+    // SUBSCRIPTIONS
 
     useWatchBlockNumber({
       onBlockNumber: () => refetchNFTs(),
@@ -159,15 +139,11 @@ export const PartyModal: UIComponent = {
       ],
     });
 
-    /////////////////
-    // SUBSCRIPTIONS
-
     // mounting
     useEffect(() => {
       // populate initial data
       setAccount(getAccount(accountEntity, { live: 0, inventory: 2 }));
       setKamis(getWorldKamis());
-      setOnyxItem(getItem(ONYX_INDEX));
 
       // set ticking
       const refreshClock = () => setTick(Date.now());
@@ -203,13 +179,6 @@ export const PartyModal: UIComponent = {
       setNode(getNode(roomIndex));
     }, [accountEntity, account.roomIndex]);
 
-    // update onyx info every tick or if the connnected account changes
-    useEffect(() => {
-      if (!onyxItem.address) return;
-      const onyxInfo = tokenBals.get(onyxItem.address);
-      setOnyxInfo(onyxInfo ?? { allowance: 0, balance: 0 });
-    }, [onyxItem, spender, tick]);
-
     // update list of wild kamis whenever that changes
     // TOTO: properly typecast the result of the abi call
     useEffect(() => {
@@ -224,39 +193,6 @@ export const PartyModal: UIComponent = {
 
     /////////////////
     // ACTIONS
-
-    // approve the spend of an ERC20 token
-    const approveOnyxTx = async (price: number) => {
-      const api = ownerAPIs.get(selectedAddress);
-      if (!api) return console.error(`API not established for ${selectedAddress}`);
-
-      const actionID = uuid() as EntityID;
-      actions.add({
-        id: actionID,
-        action: 'Approve token',
-        params: [onyxItem.address, spender, price],
-        description: `Approve ${price} ${onyxItem.name} to be spent`,
-        execute: async () => {
-          return api.erc20.approve(onyxItem.address!, spender, price);
-        },
-      });
-    };
-
-    const onyxReviveTx = async (kami: Kami) => {
-      const api = ownerAPIs.get(selectedAddress);
-      if (!api) return console.error(`API not established for ${selectedAddress}`);
-
-      const actionID = uuid() as EntityID;
-      actions.add({
-        id: actionID,
-        action: 'Onyx revive',
-        params: [kami.id],
-        description: `Reviving ${kami.name} with ONYX`,
-        execute: async () => {
-          return api.pet.onyx.revive(kami.id);
-        },
-      });
-    };
 
     // send a kami NFT to another player
     const sendKamiTx = (kami: Kami, to: Account) => {
@@ -279,7 +215,7 @@ export const PartyModal: UIComponent = {
         params: [kamis[0].index],
         description: `Staking Kami ${kamis[0].index}`,
         execute: async () => {
-          return api.bridge.ERC721.kami.batch.stake(indices);
+          return api.portal.ERC721.kami.batch.stake(indices);
         },
       });
     };
@@ -352,38 +288,19 @@ export const PartyModal: UIComponent = {
           controls={{ sort, setSort, view, setView }}
           data={{ kamis, wildKamis }}
           state={{ displayedKamis, setDisplayedKamis, tick }}
-          utils={{ passesNodeReqs }}
+          utils={utils}
         />
         <KamiList
           actions={{
-            onyxApprove: approveOnyxTx,
-            onyxRevive: onyxReviveTx,
             addKamis: (kamis: Kami[]) => start(kamis, node),
             stakeKamis: stakeKamiTx,
             sendKamis: sendKamiTx,
           }}
           controls={{ view }}
-          data={{
-            account,
-            accounts,
-            kamis,
-            wildKamis,
-            node,
-            onyx: onyxInfo,
-          }}
-          display={{
-            HarvestButton,
-            UseItemButton,
-          }}
-          state={{
-            displayedKamis,
-            tick,
-          }}
-          utils={{
-            calcExpRequirement,
-            getTempBonuses,
-            getAllAccounts,
-          }}
+          data={{ account, accounts, kamis, wildKamis, node }}
+          display={display}
+          state={{ displayedKamis, tick }}
+          utils={utils}
         />
       </ModalWrapper>
     );

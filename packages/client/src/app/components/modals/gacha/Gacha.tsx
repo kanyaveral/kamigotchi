@@ -1,7 +1,3 @@
-import { useLayers } from 'app/root/hooks';
-import { UIComponent } from 'app/root/types';
-import { EntityID, EntityIndex } from 'engine/recs';
-import { waitForActionCompletion } from 'network/utils';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuid } from 'uuid';
@@ -13,10 +9,13 @@ import { Inventory, getInventoryBalance } from 'app/cache/inventory';
 import { Item, getItemByIndex } from 'app/cache/item';
 import { getKami as _getKami } from 'app/cache/kami';
 import { ModalHeader, ModalWrapper } from 'app/components/library';
+import { useLayers } from 'app/root/hooks';
+import { UIComponent } from 'app/root/types';
 import { useNetwork, useVisibility } from 'app/stores';
 import { useDevControls } from 'app/stores/devControls';
 import { GACHA_ID } from 'constants/gacha';
 import { GACHA_TICKET_INDEX, REROLL_TICKET_INDEX } from 'constants/items';
+import { EntityID, EntityIndex } from 'engine/recs';
 import { Account, NullAccount, queryAccountFromEmbedded } from 'network/shapes/Account';
 import { NullAuction } from 'network/shapes/Auction';
 import { Commit, filterRevealableCommits } from 'network/shapes/Commit';
@@ -24,6 +23,7 @@ import { hasFlag } from 'network/shapes/Flag';
 import { getGachaCommits, getGachaMintData } from 'network/shapes/Gacha';
 import { Kami, queryKamis } from 'network/shapes/Kami';
 import { getCompAddr } from 'network/shapes/utils';
+import { waitForActionCompletion } from 'network/utils';
 import { playVend } from 'utils/sounds';
 import { Display } from './display/Display';
 import { Sidebar } from './sidebar/Sidebar';
@@ -34,25 +34,14 @@ const KamiBlockCache = new Map<EntityIndex, JSX.Element>();
 
 export const GachaModal: UIComponent = {
   id: 'Gacha',
+
+  /////////////////
+  // PREPARATION
+
   Render: () => {
     const layers = useLayers();
 
-    const {
-      network,
-      data: { accountEntity, commits, poolKamis },
-      tokens: { spenderAddr },
-      utils: {
-        getAccount,
-        getAccountKamis,
-        getAuction,
-        getItem,
-        getItemBalance,
-        getKami,
-        getMintConfig,
-        getMintData,
-        isWhitelisted,
-      },
-    } = (() => {
+    const { network, data, utils } = (() => {
       const { network } = layers;
       const { world, components } = network;
       const accountEntity = queryAccountFromEmbedded(network);
@@ -67,8 +56,6 @@ export const GachaModal: UIComponent = {
           accountEntity,
           commits: getGachaCommits(world, components, accountID),
           poolKamis: queryKamis(components, { account: GACHA_ID }),
-        },
-        tokens: {
           spenderAddr: getCompAddr(world, components, 'component.token.allowance'),
         },
         utils: {
@@ -88,7 +75,13 @@ export const GachaModal: UIComponent = {
       };
     })();
 
+    /////////////////
+    // INSTANTIATIONS
+
     const { actions, world, api } = network;
+    const { accountEntity, commits, poolKamis, spenderAddr } = data;
+    const { getAccount, getAuction, getItemBalance } = utils;
+    const { getMintConfig, getMintData, isWhitelisted } = utils; // TODO: deprecate these
 
     const setModals = useVisibility((s) => s.setModals);
     const gachaModalVisible = useVisibility((s) => s.modals.gacha);
@@ -122,6 +115,7 @@ export const GachaModal: UIComponent = {
 
     /////////////////
     // DEV CONTROL LISTENER
+
     const { lastEvent } = useDevControls();
     useEffect(() => {
       try {
@@ -171,10 +165,6 @@ export const GachaModal: UIComponent = {
       } else if (tab === 'REROLL' && mode === 'ALT') {
         const auction = getAuction(REROLL_TICKET_INDEX);
         setRerollAuction(auction);
-      } else if (tab === 'MINT') {
-        setAccountMintData(getMintData(account.id));
-        setGachaMintData(getMintData('0' as EntityID));
-        setWhitelisted(isWhitelisted(account.entity));
       }
     }, [gachaModalVisible, tab, mode, accountEntity, tick]);
 
@@ -239,10 +229,10 @@ export const GachaModal: UIComponent = {
       actions.add({
         id: actionID,
         action: 'Approve token',
-        params: [payItem.address, spenderAddr, price],
+        params: [payItem.token?.address, spenderAddr, price],
         description: `Approve ${price} ${payItem.name} to be spent`,
         execute: async () => {
-          return api.erc20.approve(payItem.address!, spenderAddr, price);
+          return api.erc20.approve(payItem.token?.address!, spenderAddr, price);
         },
       });
     };
@@ -429,12 +419,7 @@ export const GachaModal: UIComponent = {
               },
             }}
             state={{ setQuantity, selectedKamis, setSelectedKamis, tick }}
-            utils={{
-              getKami,
-              getAccountKamis,
-              getMintConfig,
-              getMintData,
-            }}
+            utils={utils}
           />
           <Sidebar
             actions={{
@@ -457,7 +442,7 @@ export const GachaModal: UIComponent = {
               setSorts,
             }}
             data={{
-              commits,
+              ...data,
               inventories: account.inventories ?? [],
               auctions: { gacha: gachaAuction, reroll: rerollAuction },
               mint: {
@@ -474,9 +459,8 @@ export const GachaModal: UIComponent = {
               tick,
             }}
             utils={{
-              getItem,
+              ...utils,
               getItemBalance: (index: number) => getItemBalance(account.inventories ?? [], index),
-              isWhitelisted,
             }}
           />
         </Container>

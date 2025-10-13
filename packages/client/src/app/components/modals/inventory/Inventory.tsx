@@ -88,6 +88,10 @@ export const InventoryModal: UIComponent = {
         },
       };
     })();
+
+    /////////////////
+    // INSTANTIATIONS
+
     const { actions, api } = network;
     const { accountEntity } = data;
     const { getAccount, getKamis } = utils;

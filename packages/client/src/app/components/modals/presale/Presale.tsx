@@ -1,4 +1,3 @@
-import { EntityID } from 'engine/recs';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuid } from 'uuid';
@@ -11,8 +10,9 @@ import { ModalWrapper, TextTooltip } from 'app/components/library';
 import { useLayers } from 'app/root/hooks';
 import { UIComponent } from 'app/root/types';
 import { useNetwork, useVisibility } from 'app/stores';
-import { ItemImages } from 'assets/images/items';
+import { TokenIcons } from 'assets/images/tokens';
 import { ETH_INDEX } from 'constants/items';
+import { EntityID } from 'engine/recs';
 import { useERC20Balance, usePresaleInfo } from 'network/chain';
 import { Info } from './controls/Info';
 import { Footer } from './Footer';
@@ -71,7 +71,7 @@ export const Presale: UIComponent = {
 
     const { balances: currencyBal, refetch: refetchToken } = useERC20Balance(
       selectedAddress as Address,
-      getAddress(currency.address || '0x0000000000000000000000000000000000000000'),
+      getAddress(currency.token?.address || '0x0000000000000000000000000000000000000000'),
       presaleAddress
     );
 
@@ -81,7 +81,7 @@ export const Presale: UIComponent = {
     const approveTx = async (quantity: number) => {
       const api = apis.get(selectedAddress);
       if (!api) return console.error(`API not established for ${selectedAddress}`);
-      const checksumAddr = getAddress(currency.address!);
+      const checksumAddr = getAddress(currency.token?.address!);
       const checksumSpender = getAddress(presaleAddress);
 
       const actionID = uuid() as EntityID;
@@ -129,7 +129,7 @@ export const Presale: UIComponent = {
                 text={['What is $ONYX?', '', "Wouldn't you like to know."]}
                 alignText='center'
               >
-                <Image src={ItemImages.onyx} onClick={openOnyxDocs} />
+                <Image src={TokenIcons.onyx} onClick={openOnyxDocs} />
               </TextTooltip>
             </OnyxColumn>
             <Info

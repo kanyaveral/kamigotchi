@@ -7,10 +7,9 @@ import { getItemByIndex } from 'app/cache/item';
 import { ModalHeader, ModalWrapper } from 'app/components/library';
 import { useLayers } from 'app/root/hooks';
 import { UIComponent } from 'app/root/types';
-import { useNetwork, useVisibility } from 'app/stores';
-import { BalPair, useTokens } from 'app/stores/tokens';
+import { useVisibility } from 'app/stores';
 import { KamiIcon } from 'assets/images/icons/menu';
-import { HOLY_DUST_INDEX, ONYX_INDEX } from 'constants/items';
+import { HOLY_DUST_INDEX } from 'constants/items';
 import { EntityID } from 'engine/recs';
 import { Account, NullAccount, queryAccountFromEmbedded } from 'network/shapes/Account';
 import { Item, NullItem } from 'network/shapes/Item';
@@ -26,11 +25,10 @@ export const EmaBoardModal: UIComponent = {
   Render: () => {
     const layers = useLayers();
 
-    const {
-      network,
-      data: { accountEntity, spender },
-      utils: { getAccount, getKamis, getItemBalance, getItem },
-    } = (() => {
+    /////////////////
+    // PREPARATION
+
+    const { network, data, utils } = (() => {
       const { network } = layers;
       const { world, components } = network;
       const accountEntity = queryAccountFromEmbedded(network);
@@ -57,9 +55,13 @@ export const EmaBoardModal: UIComponent = {
       };
     })();
 
+    /////////////////
+    // INSTANTIATIONS
+
+    const { accountEntity } = data;
     const { actions, api } = network;
-    const { selectedAddress, apis: ownerAPIs } = useNetwork();
-    const { balances: tokenBals } = useTokens();
+    const { getAccount, getItem, getKamis } = utils;
+
     const emaBoardVisible = useVisibility((s) => s.modals.emaBoard);
 
     const [tick, setTick] = useState(Date.now());
@@ -67,14 +69,11 @@ export const EmaBoardModal: UIComponent = {
     const [account, setAccount] = useState<Account>(NullAccount);
     const [selected, setSelected] = useState<Kami>(NullKami);
     const [holyDustItem, setHolyDustItem] = useState<Item>(NullItem);
-    const [onyxItem, setOnyxItem] = useState<Item>(NullItem);
-    const [onyxInfo, setOnyxInfo] = useState<BalPair>({ allowance: 0, balance: 0 });
 
     /////////////////
     // SUBSCRIPTIONS
 
     useEffect(() => {
-      setOnyxItem(getItem(ONYX_INDEX));
       setHolyDustItem(getItem(HOLY_DUST_INDEX));
 
       const refreshClock = () => setTick(Date.now());
@@ -88,31 +87,8 @@ export const EmaBoardModal: UIComponent = {
       setKamis(getKamis());
     }, [emaBoardVisible, accountEntity, tick]);
 
-    useEffect(() => {
-      const onyxInfo = tokenBals.get(onyxItem.address!);
-      setOnyxInfo(onyxInfo ?? { allowance: 0, balance: 0 });
-    }, [onyxItem, spender, tick]);
-
     /////////////////
     // ACTIONS
-
-    // approve the spend of an ERC20 token
-    const approveOnyxTx = (amt: number) => {
-      const api = ownerAPIs.get(selectedAddress);
-      if (!api) return console.error(`API not established for ${selectedAddress}`);
-
-      const actionID = uuid() as EntityID;
-      actions.add({
-        id: actionID,
-        action: 'Approve token',
-        params: [onyxItem.address, spender, amt],
-        description: `Approve ${amt} ${onyxItem.name} to be spent`,
-        execute: async () => {
-          return api.erc20.approve(onyxItem.address!, spender, amt);
-        },
-      });
-      return actionID;
-    };
 
     const renameTx = (kami: Kami, name: string) => {
       const actionID = uuid() as EntityID;
@@ -128,22 +104,6 @@ export const EmaBoardModal: UIComponent = {
       return actionID;
     };
 
-    const onyxRenameTx = (kami: Kami, name: string) => {
-      const api = ownerAPIs.get(selectedAddress);
-      if (!api) return console.error(`API not established for ${selectedAddress}`);
-
-      const actionID = uuid() as EntityID;
-      actions.add({
-        action: 'KamiOnyxRename',
-        params: [kami.id, name],
-        description: `Renaming ${kami.name} to ${name} with ONYX`,
-        execute: async () => {
-          return api.pet.onyx.rename(kami.id, name);
-        },
-      });
-      return actionID;
-    };
-
     return (
       <ModalWrapper
         id='emaBoard'
@@ -153,12 +113,10 @@ export const EmaBoardModal: UIComponent = {
         truncate
       >
         <Stage
-          actions={{ onyxApprove: approveOnyxTx, rename: renameTx, onyxRename: onyxRenameTx }}
-          data={{ account, kami: selected, onyxItem, holyDustItem, onyxInfo }}
+          actions={{ rename: renameTx }}
+          data={{ account, kami: selected, holyDustItem }}
           state={{ tick }}
-          utils={{
-            getItemBalance,
-          }}
+          utils={utils}
         />
         <Carousel kamis={kamis} state={{ selected, setSelected }} />
       </ModalWrapper>

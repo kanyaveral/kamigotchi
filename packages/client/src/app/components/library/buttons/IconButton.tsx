@@ -12,22 +12,15 @@ export const IconButton = forwardRef(function IconButton(
     onClick,
     text,
     disabled,
-
-    // general styling
     color,
     fullWidth,
     pulse,
     shadow,
     width,
     flatten,
-
-    // IconListButton options
     balance,
     corner,
-
-    // open page in new tab indicator
     cornerAlt,
-
     radius = 0.45,
     scale = 2.5,
     scaleOrientation = 'vw',
@@ -46,12 +39,9 @@ export const IconButton = forwardRef(function IconButton(
     fullWidth?: boolean;
     pulse?: boolean;
 
-    // IconListButton options
-    balance?: number;
-    corner?: boolean;
-
-    // open page in new tab indicator
-    cornerAlt?: boolean;
+    balance?: number; // shows a balance on icon (for Inventory)
+    corner?: boolean; // indicates button has options
+    cornerAlt?: boolean; // open page in new tab indicator
 
     radius?: number;
     scale?: number;
@@ -122,7 +112,7 @@ export const IconButton = forwardRef(function IconButton(
           {text}
         </Text>
       )}
-      {balance && <Balance>{balance}</Balance>}
+      {balance !== undefined && <Balance>{balance}</Balance>}
       {corner && <Corner radius={radius - 0.15} orientation={scaleOrientation} flatten={flatten} />}
       {cornerAlt && <CornerAlt radius={radius - 0.15} orientation={scaleOrientation} />}
     </Container>
@@ -195,7 +185,7 @@ const Image = styled.img<{
     `calc(${scale * 0.75}${orientation} - ${iconInsetXpx ?? iconInsetPx ?? 0}px)`};
   height: ${({ scale, orientation, iconInsetPx, iconInsetYpx }) =>
     `calc(${scale * 0.75}${orientation} - ${iconInsetYpx ?? iconInsetPx ?? 0}px)`};
-  ${({ scale }) => (scale > 4.5 ? 'image-rendering: pixelated;' : '')}
+  ${({ scale }) => (scale > 4 ? 'image-rendering: pixelated;' : '')}
   user-drag: none;
 `;
 
@@ -207,7 +197,8 @@ const Text = styled.div<{ scale: number; orientation: string }>`
 const Corner = styled.div<{ radius: number; orientation: string; flatten?: string }>`
   position: absolute;
   border: solid black ${({ radius }) => radius}${({ orientation }) => orientation};
-  border-bottom-right-radius: ${({ radius, flatten }) => (flatten === 'right' ? 0 : radius - 0.15)}${({ orientation }) => orientation};
+  border-bottom-right-radius: ${({ radius, flatten }) =>
+      flatten === 'right' ? 0 : radius - 0.15}${({ orientation }) => orientation};
   border-color: transparent black black transparent;
   bottom: 0;
   right: 0;

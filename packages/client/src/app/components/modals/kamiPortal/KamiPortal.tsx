@@ -24,11 +24,10 @@ export const KamiPortalModal: UIComponent = {
   Render: () => {
     const layers = useLayers();
 
-    const {
-      network: { actions },
-      data: { kamiNFTAddress, account },
-      utils: { getAccountKamis, getKami, queryKamiByIndex },
-    } = (() => {
+    /////////////////
+    // PREPARATION
+
+    const { network, data, utils } = (() => {
       const { network } = layers;
       const { world, components } = network;
       const accountEntity = queryAccountFromEmbedded(network);
@@ -52,8 +51,16 @@ export const KamiPortalModal: UIComponent = {
       };
     })();
 
-    const { selectedAddress, apis } = useNetwork();
-    const { modals } = useVisibility();
+    /////////////////
+    // INSTANTIATIONS
+
+    const { actions } = network;
+    const { kamiNFTAddress, account } = data;
+    const { getAccountKamis, getKami, queryKamiByIndex } = utils;
+
+    const apis = useNetwork((s) => s.apis);
+    const selectedAddress = useNetwork((s) => s.selectedAddress);
+    const modals = useVisibility((s) => s.modals);
 
     const [worldKamis, setWorldKamis] = useState<Kami[]>([]);
     const [wildKamis, setWildKamis] = useState<Kami[]>([]);
@@ -62,11 +69,9 @@ export const KamiPortalModal: UIComponent = {
     const [tick, setTick] = useState(Date.now());
 
     /////////////////
-    // BLOCK WATCHERS
+    // SUBSCRIPTIONS
 
-    useWatchBlockNumber({
-      onBlockNumber: () => refetchNFTs(),
-    });
+    useWatchBlockNumber({ onBlockNumber: () => refetchNFTs() });
 
     const { refetch: refetchNFTs, data: nftData } = useReadContracts({
       contracts: [
@@ -78,9 +83,6 @@ export const KamiPortalModal: UIComponent = {
         },
       ],
     });
-
-    /////////////////
-    // SUBSCRIPTIONS
 
     // ticking
     useEffect(() => {
@@ -140,7 +142,7 @@ export const KamiPortalModal: UIComponent = {
         params: indices,
         description,
         execute: async () => {
-          return api.bridge.ERC721.kami.batch.stake(indices);
+          return api.portal.ERC721.kami.batch.stake(indices);
         },
       });
 
@@ -170,7 +172,7 @@ export const KamiPortalModal: UIComponent = {
         params: indices,
         description,
         execute: async () => {
-          return api.bridge.ERC721.kami.batch.unstake(indices);
+          return api.portal.ERC721.kami.batch.unstake(indices);
         },
       });
 

@@ -1,4 +1,4 @@
-import { AdminAPI } from '../api';
+import { AdminAPI } from '../../api';
 
 export async function initConfigs(api: AdminAPI) {
   await initBase(api);
@@ -10,10 +10,12 @@ export async function initConfigs(api: AdminAPI) {
   await initStats(api);
   await initHarvest(api);
   await initLiquidation(api);
-  await initTokens(api);
   await initTrade(api);
   await initSkills(api);
   await initVIP(api);
+
+  await initTokens(api);
+  await initPortal(api);
 }
 
 // local config settings for faster testing
@@ -34,6 +36,17 @@ export async function initLocalConfigs(api: AdminAPI) {
 export async function initTestingConfigs(api: AdminAPI) {
   // await api.config.set.bool('WORLD_PRIVATE', true);
   await api.config.set.string('BASE_KAMI_NAME', 'Test Kami ');
+
+  // token portal
+  await api.config.set.number('PORTAL_TOKEN_EXPORT_DELAY', 60); // measured in seconds (1 minute)
+  await api.config.set.array('PORTAL_ITEM_EXPORT_TAX', [
+    1, // flat tax (in resulting item)
+    100, // % tax in basis points
+  ]);
+  await api.config.set.array('PORTAL_ITEM_IMPORT_TAX', [
+    1, // flat tax (in resulting item)
+    100, // % tax in basis points
+  ]);
 }
 
 export async function initProdConfigs(api: AdminAPI) {
@@ -83,7 +96,7 @@ export async function initMint(api: AdminAPI) {
 
   // public
   // TODO: update price and start time
-  await api.config.set.number('MINT_START_PUBLIC', 1746172800); // Thursday, May 2, 2025 8:00:00 AM UTC
+  await api.config.set.number('MINT_START_PUBLIC', 0);
   await api.config.set.number('MINT_PRICE_PUBLIC', 100); // 0.1 ETH, 100 mETH
   await api.config.set.number('MINT_MAX_PUBLIC', 222);
 }
@@ -128,7 +141,19 @@ export async function initLiquidation(api: AdminAPI) {
   await api.config.set.array('KAMI_LIQ_RECOIL', [0, 0, 600, 3, 0, 0, 1000, 3]);
 }
 
-async function initTokens(api: AdminAPI) {
+export async function initPortal(api: AdminAPI) {
+  await api.config.set.number('PORTAL_TOKEN_EXPORT_DELAY', 86400); // measured in seconds (1 week)
+  await api.config.set.array('PORTAL_ITEM_EXPORT_TAX', [
+    1, // flat tax (in resulting item)
+    100, // % in basis points
+  ]);
+  await api.config.set.array('PORTAL_ITEM_IMPORT_TAX', [
+    1, // flat tax (in resulting item)
+    100, // % in basis points
+  ]);
+}
+
+export async function initTokens(api: AdminAPI) {
   await api.config.set.address(
     'ERC20_RECEIVER_ADDRESS',
     '0x6a2350be9eA194cB67df934Df24bFA939A1aAd40'
