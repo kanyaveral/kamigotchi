@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Stepper, TextTooltip } from 'app/components/library';
-import { useTokens } from 'app/stores';
 import { GACHA_MAX_PER_TX } from 'constants/gacha';
 import { Item } from 'network/shapes/Item';
 import { Kami } from 'network/shapes/Kami';
@@ -29,6 +28,7 @@ export const Footer = ({
     payItem: Item;
     saleItem: Item;
     balance: number;
+    startTs?: number;
   };
   state: {
     quantity: number;
@@ -37,21 +37,19 @@ export const Footer = ({
     setPrice: (price: number) => void;
     selectedKamis: Kami[];
     setSelectedKamis: (kamis: Kami[]) => void;
-    tick: number;
   };
 }) => {
   const { approve, bid, pull, reroll } = actions;
   const { mode, tab } = controls;
-  const { payItem, saleItem, balance } = data;
+  const { payItem, saleItem, balance, startTs } = data;
   const { selectedKamis, setSelectedKamis } = state;
-  const { quantity, setQuantity, price, tick } = state;
+  const { quantity, setQuantity, price } = state;
 
-  const { balances: tokenBal } = useTokens();
   const [isDisabled, setIsDisabled] = useState(true);
 
   useEffect(() => {
-    setIsDisabled(quantity <= 0 || needsFunds() || exceedsMax());
-  }, [price, balance, quantity]);
+    setIsDisabled(quantity <= 0 || needsFunds() || exceedsMax() || !hasStarted());
+  }, [price, balance, quantity, startTs]);
 
   /////////////////
   // CHECKERS
@@ -59,7 +57,6 @@ export const Footer = ({
   // check if a user is under max amt per tx
   const exceedsMax = () => {
     if (tab === 'GACHA' && mode === 'DEFAULT') return quantity > GACHA_MAX_PER_TX;
-
     return false;
   };
 
@@ -71,6 +68,12 @@ export const Footer = ({
   // check if a user has enough balance of a token to purchase
   const needsFunds = () => {
     return balance < price;
+  };
+
+  // check if the auction has started
+  const hasStarted = () => {
+    if (!startTs) return true;
+    return startTs < Date.now() / 1000;
   };
 
   //////////////////
@@ -147,11 +150,10 @@ export const Footer = ({
     if (tab === 'GACHA') {
       if (mode === 'DEFAULT') {
         // if (!hasStarted()) return [`calm down`, `the pool isn't open yet`];
-        if (!exceedsMax()) return [`you can only claim ${GACHA_MAX_PER_TX} Kami at a time`];
+        if (exceedsMax()) return [`you can only claim ${GACHA_MAX_PER_TX} Kami at a time`];
       }
       if (mode === 'ALT') {
-        // if (!hasStarted()) return [`you're early!`, ``, `this auction hasn't started yet`];
-        if (needsFunds()) return [`too poore`, `you need ${price - balance} more musu`];
+        if (!hasStarted()) return [`you're early!`, ``, `this auction hasn't started yet`];
       }
     }
 
@@ -165,18 +167,13 @@ export const Footer = ({
             `it's time to play favorites..`,
           ];
         }
-        if (needsFunds()) {
-          return [`too poore`, `you need ${price - balance} more Reroll Tickets`];
-        }
       }
       if (mode === 'ALT') {
-        // if (!hasStarted()) return [`you're early!`, ``, `this auction hasn't started yet`];
-        if (needsFunds()) {
-          return [`too poore`, `you need ${(price - balance).toFixed(3)} more ONYX`];
-        }
-        if (needsApproval()) return [`approve ${price.toFixed(3)}ONYX to spend`];
+        if (!hasStarted()) return [`you're early!`, ``, `this auction hasn't started yet`];
       }
     }
+
+    if (needsFunds()) return [`too poore`, `you need ${price - balance} more ${payItem.name}(s)`];
 
     return [];
   };
