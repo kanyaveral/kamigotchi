@@ -81,15 +81,21 @@ export const Header = ({
         <Pfp account={account} isLoading={isLoading} />
       )}
       <Info>
-        <TitleSection>
+        <TitleSection isSelf={isSelf}>
           <TitleHeader>
             <Text size={1.1}>{account.name}</Text>
           </TitleHeader>
-          <TextTooltip title='Owner Address' text={[account.ownerAddress, '\n', '(click to copy)']}>
-            <Subtitle onClick={() => copyText(account.ownerAddress)}>
-              {isSelf && <TwitterPrivyAccountLink />} {abbreviateAddress(account.ownerAddress)}
-            </Subtitle>
-          </TextTooltip>
+          {isSelf && (
+            <TextTooltip
+              title='Owner Address'
+              text={[account.ownerAddress, '\n', '(click to copy)']}
+            >
+              <Subtitle onClick={() => copyText(account.ownerAddress)}>
+                <TwitterPrivyAccountLink />
+                {abbreviateAddress(account.ownerAddress)}
+              </Subtitle>
+            </TextTooltip>
+          )}
         </TitleSection>
         {!isSelf && (
           <FriendActions
@@ -128,10 +134,11 @@ const Info = styled.div`
   align-items: flex-start;
 `;
 
-const TitleSection = styled.div`
+const TitleSection = styled.div<{ isSelf: boolean }>`
   display: flex;
   flex-flow: column nowrap;
-  gap: 0.3vw;
+  gap: 0.5vw;
+  ${({ isSelf }) => !isSelf && `padding-bottom: 1vw;`}
 `;
 
 const TitleHeader = styled.div`
