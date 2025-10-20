@@ -5,12 +5,16 @@ import { IconListButton } from 'app/components/library';
 import { useVisibility } from 'app/stores';
 import { LogoutIcon } from 'assets/images/icons/actions';
 import { HelpIcon, MoreIcon, ResetIcon, SettingsIcon } from 'assets/images/icons/menu';
+import { TokenIcons } from 'assets/images/tokens';
+import { useBridgeOpener } from 'network/utils/hooks';
 
 export const MoreMenuButton = () => {
   const { ready, authenticated, logout } = usePrivy();
   const setModals = useVisibility((s) => s.setModals);
   const settingsVisible = useVisibility((s) => s.modals.settings);
   const helpVisible = useVisibility((s) => s.modals.help);
+  const openBridge = useBridgeOpener();
+
   const [disabled, setDisabled] = useState(true);
 
   useEffect(() => {
@@ -97,6 +101,7 @@ export const MoreMenuButton = () => {
         { text: 'Settings', disabled, image: SettingsIcon, onClick: toggleSettings },
         { text: 'Help', image: HelpIcon, onClick: toggleHelp },
         { text: 'Reset State', image: ResetIcon, onClick: handleResetState },
+        { text: 'Bridge', image: TokenIcons.init, onClick: openBridge },
         { text: 'Logout', disabled, image: LogoutIcon, onClick: handleLogout },
       ]}
       scale={4.5}

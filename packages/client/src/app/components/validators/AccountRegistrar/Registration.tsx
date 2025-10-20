@@ -3,10 +3,12 @@ import { EntityID } from 'engine/recs';
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionButton, TextTooltip } from 'app/components/library';
+import { ActionButton, IconButton, TextTooltip } from 'app/components/library';
 import { useTokens } from 'app/stores';
 import { copy } from 'app/utils';
+import { TokenIcons } from 'assets/images/tokens';
 import { NameCache, OperatorCache } from 'network/shapes/Account';
+import { useBridgeOpener } from 'network/utils/hooks';
 import { abbreviateAddress } from 'utils/address';
 import { playSignup } from 'utils/sounds';
 import { BackButton, Description, Row } from './components';
@@ -33,6 +35,8 @@ export const Registration = ({
   };
 }) => {
   const ethBalance = useTokens((s) => s.eth.balance);
+  const openBridge = useBridgeOpener();
+
   const [name, setName] = useState('');
 
   /////////////////
@@ -117,18 +121,13 @@ export const Registration = ({
     );
   };
 
-  const getSubmitTooltip = () => {
-    if (isOperaterTaken(address.burner)) return ['That Operator address is already taken.'];
-    else if (isNameTaken(name)) return ['That name is already taken.'];
-    else if (name === '') return [`Name cannot be empty.`];
-    else if (/\s/.test(name)) return [`Name cannot contain whitespace.`];
-    else if (!hasEth())
-      return [
-        `You need to some ETH to register.`,
-        '',
-        'you can bridge some over at bridge.initia.xyz',
-      ];
-    return ['Register'];
+  const getError = (): string | null => {
+    if (!hasEth()) return 'You need to bridge some ETH to register.';
+    if (isOperaterTaken(address.burner)) return 'That Operator address is already taken.';
+    if (name === '') return 'Name cannot be empty.';
+    if (/\s/.test(name)) return 'Name cannot contain whitespace.';
+    if (isNameTaken(name)) return 'That name is already taken.';
+    return null;
   };
 
   return (
@@ -147,16 +146,21 @@ export const Registration = ({
           style={{ pointerEvents: 'auto' }}
         />
       </Row>
-      <Row>
-        <BackButton step={2} setStep={utils.setStep} />
-        <TextTooltip text={getSubmitTooltip()} alignText='center'>
+      <Text role='status' aria-live='polite'>
+        {getError() ?? ''}
+      </Text>
+      {!hasEth() ? (
+        <IconButton img={TokenIcons.init} onClick={openBridge} text={'Bridge ETH'} />
+      ) : (
+        <Row>
+          <BackButton step={2} setStep={utils.setStep} />
           <ActionButton
             text='Next ⟶'
-            disabled={getSubmitTooltip()[0] !== 'Register'} // so hacky..
+            disabled={!!getError()}
             onClick={() => handleAccountCreation()}
           />
-        </TextTooltip>
-      </Row>
+        </Row>
+      )}
     </Container>
   );
 };
@@ -195,4 +199,10 @@ export const Input = styled.input`
 
   font-size: 0.75vw;
   text-align: center;
+`;
+
+const Text = styled.div`
+  font-size: 0.75vw;
+  margin: 1vw 0 2vw 0;
+  color: red;
 `;
