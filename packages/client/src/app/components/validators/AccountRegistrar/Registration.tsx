@@ -7,14 +7,13 @@ import { ActionButton, IconButton, TextTooltip } from 'app/components/library';
 import { useTokens } from 'app/stores';
 import { copy } from 'app/utils';
 import { TokenIcons } from 'assets/images/tokens';
+import { GasConstants } from 'constants/gas';
 import { NameCache, OperatorCache } from 'network/shapes/Account';
 import { useBridgeOpener } from 'network/utils/hooks';
 import { abbreviateAddress } from 'utils/address';
 import { playSignup } from 'utils/sounds';
 import { BackButton, Description, Row } from './components';
 import { Section } from './components/shared';
-
-const IS_LOCAL = import.meta.env.MODE === 'puter';
 
 export const Registration = ({
   address,
@@ -34,8 +33,8 @@ export const Registration = ({
     waitForActionCompletion: (action: EntityID) => Promise<void>;
   };
 }) => {
-  const ethBalance = useTokens((s) => s.eth.balance);
   const openBridge = useBridgeOpener();
+  const ethBalance = useTokens((s) => s.eth.balance);
 
   const [name, setName] = useState('');
 
@@ -48,11 +47,6 @@ export const Registration = ({
 
   const isOperaterTaken = (address: string) => {
     return OperatorCache.has(address);
-  };
-
-  // check whether user has eth balance, skip check on local
-  const hasEth = () => {
-    return IS_LOCAL || ethBalance > 0;
   };
 
   /////////////////
@@ -122,7 +116,7 @@ export const Registration = ({
   };
 
   const getError = (): string | null => {
-    if (!hasEth()) return 'You need to bridge some ETH to register.';
+    if (ethBalance < GasConstants.Empty) return 'You need to bridge some ETH to register.';
     if (isOperaterTaken(address.burner)) return 'That Operator address is already taken.';
     if (name === '') return 'Name cannot be empty.';
     if (/\s/.test(name)) return 'Name cannot contain whitespace.';
@@ -149,7 +143,7 @@ export const Registration = ({
       <Text role='status' aria-live='polite'>
         {getError() ?? ''}
       </Text>
-      {!hasEth() ? (
+      {ethBalance < GasConstants.Empty ? (
         <IconButton img={TokenIcons.init} onClick={openBridge} text={'Bridge ETH'} />
       ) : (
         <Row>

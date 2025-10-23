@@ -1,17 +1,19 @@
-import { EntityID, EntityIndex } from 'engine/recs';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuid } from 'uuid';
 import { formatUnits } from 'viem';
 import { useBalance, useWatchBlockNumber } from 'wagmi';
 
-import { ActionButton, TextTooltip, ValidatorWrapper } from 'app/components/library';
+import { ActionButton, IconButton, TextTooltip, ValidatorWrapper } from 'app/components/library';
 import { useLayers } from 'app/root/hooks';
 import { UIComponent } from 'app/root/types';
-import { useAccount, useNetwork, useVisibility } from 'app/stores';
+import { useAccount, useNetwork, useTokens, useVisibility } from 'app/stores';
 import { copy } from 'app/utils';
+import { TokenIcons } from 'assets/images/tokens';
 import { GasConstants, GasExponent } from 'constants/gas';
+import { EntityID, EntityIndex } from 'engine/recs';
 import { waitForActionCompletion } from 'network/utils';
+import { useBridgeOpener } from 'network/utils/hooks';
 import { abbreviateAddress } from 'utils/address';
 import { playFund, playSuccess } from 'utils/sounds';
 
@@ -22,9 +24,19 @@ export const GasHarasser: UIComponent = {
     const { network } = layers;
     const { actions, world } = network;
 
-    const { account, validations, setValidations } = useAccount();
-    const { selectedAddress, apis, validations: networkValidations } = useNetwork();
-    const { validators, setValidators, toggleModals } = useVisibility();
+    const account = useAccount((s) => s.account);
+    const validations = useAccount((s) => s.validations);
+    const setValidations = useAccount((s) => s.setValidations);
+
+    const selectedAddress = useNetwork((s) => s.selectedAddress);
+    const apis = useNetwork((s) => s.apis);
+    const networkValidations = useNetwork((s) => s.validations);
+
+    const validators = useVisibility((s) => s.validators);
+    const setValidators = useVisibility((s) => s.setValidators);
+    const ethBalance = useTokens((s) => s.eth.balance);
+
+    const openBridge = useBridgeOpener();
 
     const fullGas = GasConstants.Full; // js floating points are retarded
     const [value, setValue] = useState(fullGas);
@@ -38,7 +50,7 @@ export const GasHarasser: UIComponent = {
       },
     });
 
-    const { data: balance, refetch } = useBalance({
+    const { data: operatorBalance, refetch } = useBalance({
       address: account.operatorAddress,
     });
 
@@ -48,10 +60,11 @@ export const GasHarasser: UIComponent = {
     // run the primary check(s) for this validator, track in store for easy access
     useEffect(() => {
       if (!validations.operatorMatches) return;
-      const hasGas = hasEnoughGas(balance?.value ?? BigInt(0));
-      if (hasGas == validations.operatorHasGas) return; // no change
-      setValidations({ ...validations, operatorHasGas: hasGas });
-    }, [validations.operatorMatches, balance]);
+      const hasGas = hasEnoughGas(operatorBalance?.value ?? BigInt(0));
+      if (hasGas !== validations.operatorHasGas) {
+        setValidations({ ...validations, operatorHasGas: hasGas });
+      }
+    }, [validations.operatorMatches, operatorBalance]);
 
     // adjust actual visibility of windows based on above determination
     useEffect(() => {
@@ -106,6 +119,7 @@ export const GasHarasser: UIComponent = {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       let newValue = Number(event.target.value);
       newValue = Math.max(fullGas / 10, newValue);
+      newValue = Math.min(ethBalance, newValue);
       newValue = Math.min(fullGas * 10, newValue);
       setValue(newValue);
     };
@@ -131,31 +145,29 @@ export const GasHarasser: UIComponent = {
         title='Embedded wallet is empty!'
         errorPrimary={`pls feed me pls a crumb of ETH ._.`}
       >
-        <GasLink
-          key='gas'
-          href={`https://www.gas.zip/`}
-          target='_blank'
-          rel='noopener noreferrer'
-          linkColor='#d44c79'
-        >
-          Not enough gas? Get some here!
-        </GasLink>
         <TextTooltip text={[account.operatorAddress, '(click to copy)']}>
           <Description onClick={() => copy(account.operatorAddress)}>
             Address: {abbreviateAddress(account.operatorAddress)}
           </Description>
         </TextTooltip>
-        <Row>
-          <Input
-            type='number'
-            value={value}
-            step={fullGas / 10}
-            onChange={(e) => handleChange(e)}
-            onKeyDown={(e) => catchKeys(e)}
-            style={{ pointerEvents: 'auto' }}
-          />
-          <ActionButton text='feed' onClick={feed} />
-        </Row>
+        {ethBalance < GasConstants.Empty ? (
+          <Bridge>
+            <Text> Not enough gas. You need to bridge some ETH first.</Text>
+            <IconButton img={TokenIcons.init} onClick={openBridge} text={'Bridge ETH'} />
+          </Bridge>
+        ) : (
+          <Row>
+            <Input
+              type='number'
+              value={value}
+              step={fullGas / 10}
+              onChange={(e) => handleChange(e)}
+              onKeyDown={(e) => catchKeys(e)}
+              style={{ pointerEvents: 'auto' }}
+            />
+            <ActionButton text='feed' onClick={feed} />
+          </Row>
+        )}
       </ValidatorWrapper>
     );
   },
@@ -196,11 +208,15 @@ const Input = styled.input`
   justify-content: center;
 `;
 
-const GasLink = styled.a<{ linkColor?: string }>`
-  color: ${({ linkColor }) => linkColor ?? '#0077cc'};
-  font-size: 0.8vw;
-  text-decoration: underline;
-  &:hover {
-    text-decoration: none;
-  }
+const Bridge = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  margin-top: 1vw;
+`;
+
+const Text = styled.div`
+  font-size: 0.75vw;
+  margin: 0 0 2vw 0;
+  color: red;
 `;
