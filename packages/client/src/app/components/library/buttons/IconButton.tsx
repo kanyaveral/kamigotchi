@@ -108,7 +108,7 @@ export const IconButton = forwardRef(function IconButton(
     >
       {MyImage()}
       {text && (
-        <Text scale={scale} orientation={scaleOrientation}>
+        <Text scale={scale} orientation={scaleOrientation} withIcon={!!img}>
           {text}
         </Text>
       )}
@@ -165,6 +165,7 @@ const Container = styled.button<{
   &:hover {
     animation: ${() => hoverFx()} 0.2s;
     transform: scale(1.05);
+    z-index: 1;
   }
   &:active {
     animation: ${() => clickFx()} 0.3s;
@@ -189,8 +190,9 @@ const Image = styled.img<{
   user-drag: none;
 `;
 
-const Text = styled.div<{ scale: number; orientation: string }>`
+const Text = styled.div<{ scale: number; orientation: string; withIcon?: boolean }>`
   font-size: ${({ scale }) => scale * 0.3}${({ orientation }) => orientation};
+  padding: ${({ withIcon }) => (withIcon ? '0' : '0 0.6vw')};
 `;
 
 // TODO: get this scaling correctly with parent hover

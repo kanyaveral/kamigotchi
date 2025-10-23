@@ -37,6 +37,7 @@ import {
 } from 'network/shapes/Kami';
 import { Node, NullNode, passesNodeReqs as _passesNodeReqs } from 'network/shapes/Node';
 import { KamiList } from './KamiList';
+import { SendBar } from './SendBar';
 import { Toolbar } from './Toolbar';
 import { Sort, View } from './types';
 
@@ -171,7 +172,7 @@ export const PartyModal: UIComponent = {
 
       // check if we need to update the list of accounts
       const accountEntities = queryAllAccounts() as EntityIndex[];
-      if (accountEntities.length > accounts.length) {
+      if (accountEntities.length - 1 > accounts.length) {
         const filtered = accountEntities.filter((entity) => entity != accountEntity);
         const newAccounts = filtered.map((entity) => getAccount(entity));
         const accountsSorted = newAccounts.sort((a, b) => a.name.localeCompare(b.name));
@@ -295,11 +296,12 @@ export const PartyModal: UIComponent = {
         <Toolbar
           actions={{
             addKami: (kamis: Kami[]) => start(kamis, node),
+            collectKami: (kamis: Kami[]) => collect(kamis),
             stopKami: (kamis: Kami[]) => stop(kamis),
-            collect: (kamis: Kami[]) => collect(kamis),
+            stakeKami: (kamis: Kami[]) => stakeKamiTx(kamis),
           }}
           controls={{ sort, setSort, view, setView }}
-          data={{ kamis, wildKamis }}
+          data={{ account, kamis, wildKamis }}
           state={{ displayedKamis, setDisplayedKamis, tick }}
           utils={{ passesNodeReqs: (kami: Kami) => passesNodeReqs(node, kami) }}
         />
@@ -314,6 +316,13 @@ export const PartyModal: UIComponent = {
           display={display}
           state={{ displayedKamis, tick }}
           utils={utils}
+        />
+        <SendBar
+          actions={{ sendKami: (k: Kami, a: Account) => sendKamiTx(k, a) }}
+          controls={{ sort, view }}
+          data={{ accounts }}
+          state={{ kamis: displayedKamis }}
+          isVisible={isModalOpen && view === 'external'}
         />
       </ModalWrapper>
     );
