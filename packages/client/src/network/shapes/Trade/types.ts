@@ -32,7 +32,7 @@ interface Options {
 }
 
 // get a Trade Object
-export const getTrade = (
+export const get = (
   world: World,
   comps: Components,
   entity: EntityIndex,
