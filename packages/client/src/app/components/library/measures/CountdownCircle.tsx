@@ -1,14 +1,8 @@
 import styled from 'styled-components';
 
 // 0% means countdown is finished
-export const Countdown = ({
-  total,
-  current,
-}: {
-  total: number
-  current: number
-}) => {
-  const percent = (current / total) * 100;
+export const CountdownCircle = ({ total, current }: { total: number; current: number }) => {
+  const percent = Math.min(100, Math.max(0, (current / total) * 100));
 
   let color = '#29ABE9'; // blue;
   if (percent > 80)
@@ -18,26 +12,23 @@ export const Countdown = ({
   else if (percent > 0) color = '#23BD41'; // green
 
   return (
-    <CountdownWrapper>
-      <CountdownCircle percent={percent} color={color} />
+    <Container>
+      <OuterCircle percent={percent} color={color} />
       <InnerCircle />
-    </CountdownWrapper>
+    </Container>
   );
 };
 
-const CountdownWrapper = styled.div`
+const Container = styled.div`
   position: relative;
   width: 1.1vw;
   height: 1.1vw;
 `;
 
-const CountdownCircle = styled.div.attrs<{
+const OuterCircle = styled.div.attrs<{
   percent: number;
   color: string;
-}>(({
-  percent,
-  color,
-}) => ({
+}>(({ percent, color }) => ({
   style: {
     background: `conic-gradient(
       #aaa ${percent}%,
@@ -45,7 +36,10 @@ const CountdownCircle = styled.div.attrs<{
       ${color} ${percent}%
     )`,
   },
-}))`
+}))<{
+  percent: number;
+  color: string;
+}>`
   position: absolute;
   top: 0;
   left: 0;
