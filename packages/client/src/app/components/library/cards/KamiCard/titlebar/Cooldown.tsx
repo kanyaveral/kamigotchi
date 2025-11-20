@@ -5,8 +5,7 @@ import { makeCRTLayer } from 'app/components/shaders/CRTShader';
 import { ShaderStack } from 'app/components/shaders/ShaderStack';
 import { makeStaticLayer } from 'app/components/shaders/StaticShader';
 import { Kami } from 'network/shapes/Kami';
-import { CountdownBar } from '../../measures';
-import { TextTooltip } from '../../poppers';
+import { CountdownBar } from '../../../measures';
 
 const cooldownEndCache: Map<number | string, number> = new Map();
 
@@ -19,19 +18,11 @@ export const Cooldown = ({ kami, tick }: { kami: Kami; tick: number }) => {
   const [current, setCurrent] = useState(0);
   const [total, setTotal] = useState(0);
 
-  // ticking and setting total cooldown on mount
-  useEffect(() => {
-    const total = calcCooldownRequirement(kami);
-    setTotal(total);
-  }, []);
-
   // update the total of the cooldown meter whenever the kami changes
   useEffect(() => {
     const total = calcCooldownRequirement(kami);
     setTotal(total);
-  }, [kami.bonuses?.general.cooldown]);
-
-  // const calcRemainingForVisuals = () => calcRemainingFromCooldownOrCache(kami);
+  }, [kami.bonuses?.general.cooldown, kami.config?.general.cooldown]);
 
   // update the remaining time on the cooldown
   useEffect(() => {
@@ -39,11 +30,9 @@ export const Cooldown = ({ kami, tick }: { kami: Kami; tick: number }) => {
     setCurrent(currentCooldown);
   }, [tick, kami]);
 
-  return (
-    <TextTooltip key='cooldown' text={[`Cooldown: ${Math.round(current)}s`]}>
-      <CountdownBar total={total} current={current} />
-    </TextTooltip>
-  );
+  // const calcRemainingForVisuals = () => calcRemainingFromCooldownOrCache(kami);
+
+  return <CountdownBar total={total} current={current} />;
 };
 
 ////////////////

@@ -2,65 +2,54 @@ import styled from 'styled-components';
 
 import { objectClock } from 'assets/images/rooms/13_giftshop';
 import { calcPercent } from 'utils/numbers';
-import { TextTooltip } from '../poppers';
+import { Text } from '../text';
 
 export const CountdownBar = ({ total, current }: { total: number; current: number }) => {
   return (
-    <TextTooltip text={[`Cooldown: ${Math.round(current)}s`]}>
-      <StaminaContainer>
-        {`${Math.round(current)}s`}
-        <Icon src={objectClock} />
-      </StaminaContainer>
-      <CooldownFill percent={calcPercent(current, total)} />
-    </TextTooltip>
+    <Container>
+      <Fill percent={calcPercent(current, total)} />
+      <Text size={0.55} color='#2d0b42ff' weight='bold' style={{ zIndex: 1 }}>
+        {current === 0 ? 'ready' : `${Math.floor(current)}s`}
+      </Text>
+      <Icon src={objectClock} />
+    </Container>
   );
 };
 
-interface CooldownFillProps {
+interface FillProps {
   percent: number;
 }
 
-const StaminaContainer = styled.div`
-  position: absolute;
-  margin-left: 0.3vw;
+const Container = styled.div`
+  position: relative;
+  height: 100%;
+  width: 100%;
   gap: 0.2vw;
-  top: 12%;
-  right: 1%;
-  z-index: 1;
 
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-
-  font-size: 0.55vw;
-  font-weight: bold;
-  color: #2d0b42ff;
+  justify-content: flex-end;
 `;
 
-const CooldownFill = styled.div.attrs<CooldownFillProps>(({ percent }) => ({
+const Fill = styled.div.attrs<FillProps>(({ percent }) => ({
   style: {
     '--fill': `${Math.min(100, Math.max(0, percent))}%`,
   },
-}))<CooldownFillProps>`
+}))<FillProps>`
   position: absolute;
   overflow: hidden;
-  border-top-right-radius: 0.45vw;
+  border-top-right-radius: 0.6vw;
 
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 19.9%;
+  width: 100%;
+  height: 100%;
   background: #bd8fd4ff;
 
   &::after {
     content: '';
     position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    height: 100%;
     width: var(--fill);
-    border-top-right-radius: 0.6vw;
     background: #faf5c9ff;
     transition: width 0.4s ease;
   }
@@ -69,6 +58,11 @@ const CooldownFill = styled.div.attrs<CooldownFillProps>(({ percent }) => ({
 const Icon = styled.img`
   height: 1.2vw;
   width: 1.2vw;
+  margin-right: 0.2vw;
+
   filter: sepia(1) saturate(200%);
   transform: rotate(20deg);
+
+  user-drag: none;
+  -webkit-user-drag: none;
 `;
