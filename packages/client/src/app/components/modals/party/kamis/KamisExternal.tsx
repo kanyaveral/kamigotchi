@@ -30,9 +30,11 @@ export const KamisExternal = ({
 
   return (
     <Container isVisible={isVisible}>
-      {kamis.map((kami) => (
-        <KamiBar key={kami.entity} kami={kami} utils={utils} tick={0} />
-      ))}
+      <Kamis>
+        {kamis.map((kami) => (
+          <KamiBar key={kami.entity} kami={kami} utils={utils} tick={0} />
+        ))}
+      </Kamis>
       <EmptyText text={['You can import your new Kami', 'through the Kami Portal.']} size={1.2} />
       <Row>
         <EmptyText
@@ -52,14 +54,22 @@ export const KamisExternal = ({
 const Container = styled.div<{ isVisible: boolean }>`
   display: ${({ isVisible }) => (isVisible ? 'flex' : 'none')};
   flex-flow: column nowrap;
+`;
+
+const Kamis = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 0.6vw 0.6vw 0 0.6vw;
   gap: 0.45vw;
-  padding: 0.6vw;
 `;
 
 const Row = styled.div`
+  width: 100%;
+  gap: 0.6vw;
+
   display: flex;
   flex-flow: row nowrap;
-  gap: 0.6vw;
+  justify-content: flex-end;
 `;
 
 const Image = styled.img`
