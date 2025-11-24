@@ -122,12 +122,22 @@ const calcIntensityAt = (kami: Kami, delta: number) => {
 /////////////////
 // EFFICACY
 
-enum Effectiveness {
+export enum Effectiveness {
   NEUTRAL,
   UP,
   DOWN,
   SPECIAL,
 }
+
+// Helper: map an Effectiveness to its config shift (ignoring bonuses).
+// Used only to decide optimal mixed-node matchups; final efficacy still uses
+// calcEfficacyShift with full config + bonus.
+const configShiftFor = (eff: Effectiveness, config: Efficacy): number => {
+  if (eff === Effectiveness.UP) return config.up;
+  if (eff === Effectiveness.DOWN) return config.down;
+  if (eff === Effectiveness.SPECIAL) return config.special ?? 0;
+  return config.base;
+};
 
 // calculate the shift in harvest Efficacy (Fertility Boost)
 export const calcEfficacyShifts = (harvest: Harvest, kami: Kami): number => {
@@ -143,6 +153,8 @@ export const calcEfficacyShifts = (harvest: Harvest, kami: Kami): number => {
 
   const bodyAffinity = getKamiBodyAffinity(kami);
   const handAffinity = getKamiHandAffinity(kami);
+  const bodyConfig = kami.config.harvest.efficacy.body;
+  const handConfig = kami.config.harvest.efficacy.hand;
 
   const nodeAffs = node.affinity;
   if (nodeAffs.length > 2) {
@@ -150,19 +162,37 @@ export const calcEfficacyShifts = (harvest: Harvest, kami: Kami): number => {
     return 0;
   }
 
-  // determine most favorable matchup order
-  // NOTE: below logic assumes no XX-NORMAL nodes and impact body > impact hand
+  // determine most favorable matchup order (order-independent, config-weighted)
   let nodeBodyAff = '';
   let nodeHandAff = '';
   if (nodeAffs.length == 1) {
     nodeBodyAff = nodeAffs[0];
     nodeHandAff = nodeAffs[0];
   } else if (nodeAffs.length == 2) {
-    let isReversed = false;
-    if (bodyAffinity === nodeAffs[1]) isReversed = true;
-    else if (handAffinity === nodeAffs[0]) isReversed = true;
-    nodeBodyAff = isReversed ? nodeAffs[1] : nodeAffs[0];
-    nodeHandAff = isReversed ? nodeAffs[0] : nodeAffs[1];
+    const [a, b] = nodeAffs;
+
+    // Option 1: body↔a, hand↔b
+    const bodyEff1 = getHarvestEffectiveness(a, bodyAffinity);
+    const handEff1 = getHarvestEffectiveness(b, handAffinity);
+    const bodyShift1 = configShiftFor(bodyEff1, bodyConfig);
+    const handShift1 = configShiftFor(handEff1, handConfig);
+
+    // Option 2: body↔b, hand↔a
+    const bodyEff2 = getHarvestEffectiveness(b, bodyAffinity);
+    const handEff2 = getHarvestEffectiveness(a, handAffinity);
+    const bodyShift2 = configShiftFor(bodyEff2, bodyConfig);
+    const handShift2 = configShiftFor(handEff2, handConfig);
+
+    const score1 = bodyShift1 + handShift1;
+    const score2 = bodyShift2 + handShift2;
+
+    if (score2 > score1) {
+      nodeBodyAff = b;
+      nodeHandAff = a;
+    } else {
+      nodeBodyAff = a;
+      nodeHandAff = b;
+    }
   }
 
   // calculate the efficacy shifts
@@ -170,11 +200,9 @@ export const calcEfficacyShifts = (harvest: Harvest, kami: Kami): number => {
   const upShiftBonus = kami.bonuses?.harvest.fertility.boost ?? 0;
 
   const bodyEffectiveness = getHarvestEffectiveness(nodeBodyAff, bodyAffinity);
-  const bodyConfig = kami.config.harvest.efficacy.body;
   shift += calcEfficacyShift(bodyEffectiveness, bodyConfig, upShiftBonus);
 
   const handEffectiveness = getHarvestEffectiveness(nodeHandAff, handAffinity);
-  const handConfig = kami.config.harvest.efficacy.hand;
   shift += calcEfficacyShift(handEffectiveness, handConfig, upShiftBonus);
 
   return shift;

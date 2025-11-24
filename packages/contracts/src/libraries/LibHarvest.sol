@@ -44,6 +44,19 @@ library LibHarvest {
   using SafeCastLib for int256;
   using SafeCastLib for uint256;
 
+  /// @dev Helper: map an Effectiveness to its raw config shift (ignoring bonuses).
+  /// Used only for deciding optimal mixed-node matchups; actual efficacy still
+  /// uses full config+bonus via LibAffinity.calcEfficacyShift.
+  function _configShiftFor(
+    Effectiveness effectiveness,
+    Shifts memory cfg
+  ) private pure returns (int256) {
+    if (effectiveness == Effectiveness.Strong) return cfg.up;
+    if (effectiveness == Effectiveness.Weak) return cfg.down;
+    if (effectiveness == Effectiveness.Special) return cfg.special;
+    return cfg.base;
+  }
+
   /////////////////
   // INTERACTIONS
 
@@ -194,19 +207,42 @@ library LibHarvest {
     string[] memory nodeAffs = nodeAffStr.split("-"); // could be 1 or 2
     if (nodeAffs.length > 2) revert("too many node affinities");
 
-    // determine most favorable matchup order
-    // NOTE: below logic assumes no XX-NORMAL nodes and impact body > impact hand
+    // load efficacy config shifts for body and hand
+    Shifts memory bodyCfgShifts = LibAffinity.getShifts(comps, "KAMI_HARV_EFFICACY_BODY");
+    Shifts memory handCfgShifts = LibAffinity.getShifts(comps, "KAMI_HARV_EFFICACY_HAND");
+
+    // determine most favorable matchup order (order-independent, config-weighted)
     string memory nodeBodyAff;
     string memory nodeHandAff;
     if (nodeAffs.length == 1) {
       nodeBodyAff = nodeAffStr;
       nodeHandAff = nodeAffStr;
     } else if (nodeAffs.length == 2) {
-      bool isReversed = false;
-      if (bodyAff.eq(nodeAffs[1])) isReversed = true;
-      else if (handAff.eq(nodeAffs[0])) isReversed = true;
-      nodeBodyAff = isReversed ? nodeAffs[1] : nodeAffs[0];
-      nodeHandAff = isReversed ? nodeAffs[0] : nodeAffs[1];
+      string memory a = nodeAffs[0];
+      string memory b = nodeAffs[1];
+
+      // Option 1: body↔a, hand↔b
+      Effectiveness bodyEff1 = LibAffinity.getHarvestEffectiveness(bodyAff, a);
+      Effectiveness handEff1 = LibAffinity.getHarvestEffectiveness(handAff, b);
+      int256 bodyShift1 = _configShiftFor(bodyEff1, bodyCfgShifts);
+      int256 handShift1 = _configShiftFor(handEff1, handCfgShifts);
+
+      // Option 2: body↔b, hand↔a
+      Effectiveness bodyEff2 = LibAffinity.getHarvestEffectiveness(bodyAff, b);
+      Effectiveness handEff2 = LibAffinity.getHarvestEffectiveness(handAff, a);
+      int256 bodyShift2 = _configShiftFor(bodyEff2, bodyCfgShifts);
+      int256 handShift2 = _configShiftFor(handEff2, handCfgShifts);
+
+      int256 score1 = bodyShift1 + handShift1;
+      int256 score2 = bodyShift2 + handShift2;
+
+      if (score2 > score1) {
+        nodeBodyAff = b;
+        nodeHandAff = a;
+      } else {
+        nodeBodyAff = a;
+        nodeHandAff = b;
+      }
     }
 
     // calculate the efficacy shifts
