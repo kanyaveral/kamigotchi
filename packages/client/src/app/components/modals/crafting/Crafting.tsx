@@ -2,15 +2,18 @@ import pluralize from 'pluralize';
 import { useEffect, useState } from 'react';
 
 import { getAccount } from 'app/cache/account';
+import { getItemByIndex as _getItemByIndex } from 'app/cache/item';
 import { getAllRecipes } from 'app/cache/recipes';
 import { ActionButton, EmptyText, ModalHeader, ModalWrapper } from 'app/components/library';
 import { useLayers } from 'app/root/hooks';
 import { UIComponent } from 'app/root/types';
 import { useVisibility } from 'app/stores';
 import { CraftIcon } from 'assets/images/icons/actions';
-import { queryAccountFromEmbedded } from 'network/shapes/Account';
+import { Account, queryAccountFromEmbedded } from 'network/shapes/Account';
+import { parseAllos as _parseAllos, Allo } from 'network/shapes/Allo';
 import { parseConditionalText, passesConditions } from 'network/shapes/Conditional';
-import { getItemBalance as _getItemBalance } from 'network/shapes/Item';
+import { getItemBalance as _getItemBalance, Item } from 'network/shapes/Item';
+import { Kami } from 'network/shapes/Kami';
 import { hasIngredients as _hasIngredients, Ingredient, Recipe } from 'network/shapes/Recipe';
 import { Recipes } from './Recipes/Recipes';
 import { Tabs } from './tabs/Tabs';
@@ -23,7 +26,16 @@ export const CraftingModal: UIComponent = {
     const {
       network: { actions, api, components, world },
       data: { account },
-      utils: { meetsRequirements, displayRequirements, getItemBalance, hasIngredients },
+      utils: {
+        meetsRequirementsRecipe,
+        meetsRequirements,
+        displayRecipeRequirements,
+        displayItemRequirements,
+        getItemBalance,
+        hasIngredients,
+        parseAllos,
+        getItemByIndex,
+      },
     } = (() => {
       const { network } = layers;
       const { world, components } = network;
@@ -35,15 +47,26 @@ export const CraftingModal: UIComponent = {
         network,
         data: { account },
         utils: {
-          meetsRequirements: (recipe: Recipe) =>
+          meetsRequirementsRecipe: (recipe: Recipe) =>
             passesConditions(world, components, recipe.requirements, account),
-          displayRequirements: (recipe: Recipe) =>
-            recipe.requirements
+          meetsRequirements: (holder: Kami | Account, item: Item) =>
+            passesConditions(world, components, item.requirements.use, holder),
+          // TODO: horrendous pattern. refactor when/how we parse conditional text
+          displayRecipeRequirements: (recipe: Recipe) => {
+            return recipe.requirements
               .map((req) => parseConditionalText(world, components, req))
-              .join(', '),
+              .join(', ');
+          },
+          displayItemRequirements: (item: Item) => {
+            return item.requirements.use
+              .map((req) => parseConditionalText(world, components, req))
+              .join('\n ');
+          },
           getItemBalance: (index: number) => _getItemBalance(world, components, account.id, index),
           hasIngredients: (recipe: Recipe) =>
             _hasIngredients(world, components, recipe, account.id),
+          parseAllos: (allo: Allo[]) => _parseAllos(world, components, allo),
+          getItemByIndex: (index: number) => _getItemByIndex(world, components, index),
         },
       };
     })();
@@ -68,7 +91,9 @@ export const CraftingModal: UIComponent = {
       if (showAll) setRecipes(currentTabRecipes);
       else
         setRecipes(
-          currentTabRecipes.filter((recipe) => meetsRequirements(recipe) && hasIngredients(recipe))
+          currentTabRecipes.filter(
+            (recipe) => meetsRequirementsRecipe(recipe) && hasIngredients(recipe)
+          )
         );
     }, [showAll, tab, craftingModalVisible]);
 
@@ -123,9 +148,13 @@ export const CraftingModal: UIComponent = {
               craft,
             }}
             utils={{
+              meetsRequirementsRecipe,
               meetsRequirements,
-              displayRequirements,
+              displayRecipeRequirements,
+              displayItemRequirements,
               getItemBalance,
+              parseAllos,
+              getItemByIndex,
             }}
           />
         )}

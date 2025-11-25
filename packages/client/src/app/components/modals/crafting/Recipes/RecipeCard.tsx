@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { Card, CraftButton, Stepper, TextTooltip } from 'app/components/library';
+import { Card, CraftButton, ItemTooltip, Stepper, TextTooltip } from 'app/components/library';
 import { ExpIcon, StaminaIcon } from 'assets/images/icons/stats';
+import { Kami } from 'network/shapes';
 import { Account } from 'network/shapes/Account';
-import { NullItem } from 'network/shapes/Item';
+import { Allo } from 'network/shapes/Allo';
+import { Item, NullItem } from 'network/shapes/Item';
 import { Recipe } from 'network/shapes/Recipe';
+import { DetailedEntity } from 'network/shapes/utils';
 import { Input } from './Input';
+import { RecipeTooltip } from './RecipeTooltip';
 
 export const RecipeCard = ({
   data,
@@ -22,9 +26,13 @@ export const RecipeCard = ({
     craft: (amount: number) => void;
   };
   utils: {
-    displayRequirements: (recipe: Recipe) => string;
+    displayRecipeRequirements: (recipe: Recipe) => string;
+    displayItemRequirements: (item: Item) => string;
     getItemBalance: (index: number) => number;
-    meetsRequirements: (recipe: Recipe) => boolean;
+    meetsRequirementsRecipe: (recipe: Recipe) => boolean;
+    meetsRequirements: (holder: Kami | Account, item: Item) => boolean;
+    parseAllos: (allo: Allo[]) => DetailedEntity[];
+    getItemByIndex: (itemIndex: number) => Item;
   };
 }) => {
   const { recipe, stamina } = data;
@@ -35,19 +43,8 @@ export const RecipeCard = ({
   const item = output.item ?? NullItem;
   const amt = output.amount;
 
-  const getTooltipText = () => {
-    const text = [
-      `Requires: ${utils.displayRequirements(recipe)}`,
-      `Grants: ${recipe.experience} xp`,
-      `Costs: ${recipe.cost.stamina} stamina`,
-    ];
-    recipe.inputs.forEach((input) => {
-      const itemName = input.item?.name ?? '???';
-      text.push(`• ${input.amount} ${itemName}`);
-    });
-
-    return text;
-  };
+  /////////////////
+  // RENDER
 
   return (
     <Card
@@ -57,7 +54,19 @@ export const RecipeCard = ({
         icon: item.image,
         scale: 7.5,
         padding: 1,
-        tooltip: [item.description ?? ''],
+        tooltip: {
+          text: [
+            <ItemTooltip
+              key={item.index}
+              item={item}
+              utils={{
+                parseAllos: utils.parseAllos,
+                displayRequirements: utils.displayItemRequirements,
+              }}
+            />,
+          ],
+          maxWidth: 25,
+        },
         effects: {
           overlay: `${amt * quantity}`,
         },
@@ -73,7 +82,10 @@ export const RecipeCard = ({
         </TitleCorner>
       </TitleBar>
       <Content>
-        <TextTooltip text={getTooltipText()} direction='row' grow>
+        <TextTooltip
+          text={[<RecipeTooltip key={recipe.index} recipe={recipe} utils={utils} />]}
+          maxWidth={25}
+        >
           <ContentRow key='column-1'>
             {inputs.map((input, i) => (
               <Input
@@ -98,7 +110,6 @@ export const RecipeCard = ({
 
 const TitleBar = styled.div`
   border-bottom: solid black 0.15vw;
-
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
@@ -111,7 +122,6 @@ const TitleText = styled.div`
   display: flex;
   justify-content: flex-start;
   padding: 0.6vw;
-
   font-size: 0.9vw;
   text-align: left;
 `;
@@ -119,7 +129,6 @@ const TitleText = styled.div`
 const TitleCorner = styled.div`
   padding: 0.45vw;
   gap: 0.15vw;
-
   display: flex;
   flex-grow: 1;
   align-items: center;
@@ -136,18 +145,20 @@ const Icon = styled.img`
 `;
 
 const Content = styled.div`
+  padding: 0.2vw;
+
   display: flex;
-  flex-grow: 1;
   flex-flow: row nowrap;
   align-items: stretch;
-
-  padding: 0.2vw;
+  flex-grow: 1;
 `;
+
 const ContentRow = styled.div`
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
   align-items: center;
+
   padding: 0.3vw;
 `;
 
@@ -156,7 +167,6 @@ const ContentColumn = styled.div`
   flex-flow: column nowrap;
   flex-grow: 1;
   justify-content: flex-end;
-
   margin: 0.2vw;
   padding-top: 0.2vw;
 `;
@@ -165,5 +175,4 @@ const Actions = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-end;
-  gap: 0.4vw;
 `;

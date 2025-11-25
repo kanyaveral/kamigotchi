@@ -3,8 +3,8 @@ import styled from 'styled-components';
 
 import { playClick } from 'utils/sounds';
 import { LevelUpArrows } from '../animations/LevelUp';
-import { TextTooltip } from '../poppers/TextTooltip';
 import { Overlay } from '../styles';
+import { TextTooltip } from '../tooltips';
 
 // Card is a card that displays a visually encapsulated image (left) and text-based content (right)
 export const Card = ({
@@ -14,12 +14,12 @@ export const Card = ({
 }: {
   children: React.ReactNode;
   image?: {
-    fit?: 'cover' | 'contain';
     icon?: string;
     onClick?: () => void;
+    fit?: 'cover' | 'contain';
     padding?: number;
     scale?: number;
-    tooltip?: string[];
+    tooltip?: { text: string[] | React.ReactNode[]; maxWidth?: number };
     effects?: {
       overlay?: string;
       showLevelUp?: boolean; // TODO: move this field up one level to KamiCard, pass in as Foreground
@@ -44,7 +44,7 @@ export const Card = ({
 
   return (
     <Wrapper fullWidth={fullWidth}>
-      <TextTooltip text={image?.tooltip ?? []}>
+      <TextTooltip text={image?.tooltip?.text ?? []} maxWidth={image?.tooltip?.maxWidth}>
         <ImageContainer scale={scale} padding={image?.padding}>
           {!!effects?.background && <BackgroundSlot>{effects.background}</BackgroundSlot>}
           <Overlay bottom={scale * 0.075} right={scale * 0.06}>

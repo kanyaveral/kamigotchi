@@ -1,63 +1,55 @@
+import { ReactNode } from 'react';
 import styled from 'styled-components';
 
-import { Item } from 'app/cache/item';
-import { Allo } from 'network/shapes/Allo';
-import { DetailedEntity } from 'network/shapes/utils';
-
-export const ItemGridTooltip = ({
-  item,
-  utils: {
-    displayRequirements,
-    parseAllos,
-  },
+export const TooltipContent = ({
+  img,
+  title,
+  description,
+  subtitle,
+  left,
+  right,
 }: {
-  item: Item;
-  utils: {
-    displayRequirements: (recipe: Item) => string;
-    parseAllos: (allo: Allo[]) => DetailedEntity[];
+  img: string;
+  title: string;
+  description?: string;
+  subtitle: {
+    text: string;
+    content: ReactNode;
+  };
+  left?: {
+    text: string;
+    content: ReactNode;
+    align?: 'center' | 'flex-start' | 'flex-end';
+  };
+  right?: {
+    text: string;
+    content: ReactNode;
+    align?: 'center' | 'flex-start' | 'flex-end';
   };
 }) => {
-
-  const image = item.image;
-  const title = item.name;
-  const type = item.type;
-  const description = item.description;
-  const requirements = item.requirements;
-  const effects = item.effects;
-
-  const isLootbox = type === 'LOOTBOX';
-
-  const display = (item: Item) => {
-    const disp = displayRequirements(item);
-    if (disp === '???') return 'None';
-    else return disp;
-  };
-
   return (
     <Container>
       <Header>
-        <Image src={image} />
+        <Image src={img} />
         <SubSection>
           <Title>{title}</Title>
-          Type: {type}
+          <Subtitle>
+            {subtitle.text}: {subtitle.content}
+          </Subtitle>
         </SubSection>
       </Header>
-
-      <Description>{description}</Description>
+      {description && <Description>{description}</Description>}
       <BottomSection>
-        <Section>
-          Requirements: <p>{requirements?.use?.length > 0 ? display(item) : 'None'}</p>
-        </Section>
-        <Section>
-          Effects:
-          <p>
-            {!isLootbox && effects?.use?.length > 0
-              ? parseAllos(effects.use)
-                  .map((entry) => entry.description)
-                  .join('\n')
-              : 'None'}
-          </p>
-        </Section>
+        {left && (
+          <Section align={left.align ?? 'center'}>
+            {left.text}: <Content>{left.content}</Content>
+          </Section>
+        )}
+        {right && (
+          <Section align={right.align ?? 'center'}>
+            {right.text}: <Content>{right.content}</Content>
+          </Section>
+        )}
       </BottomSection>
     </Container>
   );
@@ -77,12 +69,17 @@ const Header = styled.span`
   padding: 0 0.3vw;
 `;
 
-const Section = styled.span`
+const Section = styled.span<{ align?: 'center' | 'flex-start' | 'flex-end' }>`
   color: #666;
   background: #f0f0f0;
   border-radius: 0.4vw;
   padding: 0 0.3vw;
   width: 100%;
+
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: ${({ align }) => align ?? 'center'};
 `;
 
 const SubSection = styled.span`
@@ -118,9 +115,19 @@ const Title = styled.div`
   font-weight: bold;
 `;
 
+const Subtitle = styled.div`
+  display: flex;
+  gap: 0.3vw;
+  align-items: flex-start;
+`;
+
 const Description = styled.div`
   margin: 0.5vw 0 0 0;
   font-size: 0.8vw;
   font-style: italic;
   white-space: normal;
+`;
+
+const Content = styled.div`
+  white-space: pre-line;
 `;
