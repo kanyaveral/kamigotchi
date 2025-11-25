@@ -1,5 +1,6 @@
 import { EntityIndex } from 'engine/recs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
 
 import { ModalWrapper } from 'app/components/library';
 import { useLayers } from 'app/root/hooks';
@@ -18,14 +19,15 @@ import {
   queryRegistryQuests,
 } from 'network/shapes/Quest';
 import { BaseQuest } from 'network/shapes/Quest/quest';
-import { didActionComplete } from 'network/utils';
+import { didActionSucceed } from 'network/utils';
 import { useComponentEntities } from 'network/utils/hooks';
-import styled from 'styled-components';
-import { QuestDialogue } from './QuestDialogue';
+import { Bottom } from './Bottom';
+import { Dialogue } from './Dialogue';
+
 const REFRESH_INTERVAL = 3333;
 
-export const QuestDialogueModal: UIComponent = {
-  id: 'QuestDialogue',
+export const QuestDetailsModal: UIComponent = {
+  id: 'QuestDetails',
   Render: () => {
     const layers = useLayers();
     const { network, data, utils } = (() => {
@@ -36,7 +38,6 @@ export const QuestDialogueModal: UIComponent = {
         kamis: true,
         inventory: true,
       });
-
       return {
         network,
         data: {
@@ -56,17 +57,21 @@ export const QuestDialogueModal: UIComponent = {
       };
     })();
 
+    /////////////////
+    // INSTANTIATIONS
+
     const { actions, api, components, world } = network;
     const { IsRegistry, OwnsQuestID, IsComplete } = components;
     const { getBase, populate, parseObjectives } = utils;
 
-    const questDialogueOpen = useVisibility((s) => s.modals.questDialogue);
+    const isModalOpen = useVisibility((s) => s.modals.questDialogue);
     const setModals = useVisibility((s) => s.setModals);
     const questIndex = useSelected((s) => s.questIndex);
 
     const [quest, setQuest] = useState<Quest>();
-    const [modalOpen, setModalOpen] = useState(false);
     const [tick, setTick] = useState(Date.now());
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     // Reactively subscribe to ECS changes relevant to quests
     const registryEntities = useComponentEntities(IsRegistry) || [];
     const ownsQuestEntities = useComponentEntities(OwnsQuestID) || [];
@@ -75,53 +80,47 @@ export const QuestDialogueModal: UIComponent = {
     /////////////////
     // SUBSCRIPTIONS
 
-    // set data and setup ticking on mount
+    // setup ticking on mount. clear timeout ref and ticking on dismount
     useEffect(() => {
       const refreshClock = () => setTick(Date.now());
       const timerId = setInterval(refreshClock, REFRESH_INTERVAL);
-      return () => clearInterval(timerId);
+      return () => {
+        clearInterval(timerId);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      };
     }, []);
 
+    // populate the quest data whenever the modal is open
     useEffect(() => {
-      if (!questDialogueOpen) {
-        setModalOpen(false);
-        return;
-      }
+      if (!isModalOpen) return;
       if (questIndex == null) {
         setQuest(undefined);
         return;
       }
-      setModalOpen(true);
+
       const base = getBase(questIndex);
       const populated = populate(base);
       const parsed = parseObjectives(populated);
       const filtered = filterOngoingQuests([parsed]);
       setQuest(filtered[0]);
-    }, [
-      tick,
-      questIndex,
-      questDialogueOpen,
-      registryEntities,
-      ownsQuestEntities,
-      isCompleteEntities,
-    ]);
+    }, [tick, questIndex, isModalOpen, registryEntities, ownsQuestEntities, isCompleteEntities]);
 
     /////////////////
     // ACTIONS
 
-    // always close modal after
-    //Accet/Complete
-    // except when there is
-    // a completion text
-    const handleClick = async (tx: EntityIndex, isComplete = false) => {
-      const completed = await didActionComplete(actions.Action, tx);
-      if (completed) {
-        if (!(isComplete && !!quest?.descriptionAlt)) {
-          setTimeout(() => setModals({ questDialogue: false }), 500);
+    // always close modal after Accept/Complete, if there is no completion text
+    const handleStateUpdate = async (txEntity: EntityIndex, willComplete = false) => {
+      const actionSucceeded = await didActionSucceed(actions.Action, txEntity);
+      if (actionSucceeded) {
+        const hasCompletionText = !!quest?.descriptionAlt;
+        if (!willComplete || !hasCompletionText) {
+          const closeModal = () => setModals({ questDialogue: false });
+          timeoutRef.current = setTimeout(closeModal, 500);
         }
       }
     };
 
+    // accept an available quest (creates a player instance to track progress)
     const acceptQuest = async (quest: BaseQuest) => {
       const tx = actions.add({
         action: 'QuestAccept',
@@ -131,9 +130,10 @@ export const QuestDialogueModal: UIComponent = {
           return api.player.account.quest.accept(quest.index);
         },
       });
-      handleClick(tx);
+      handleStateUpdate(tx);
     };
 
+    // complete an ongoing quest
     const completeQuest = async (quest: BaseQuest) => {
       const tx = actions.add({
         action: 'QuestComplete',
@@ -143,7 +143,7 @@ export const QuestDialogueModal: UIComponent = {
           return api.player.account.quest.complete(quest.id);
         },
       });
-      handleClick(tx, true);
+      handleStateUpdate(tx, true);
     };
 
     if (!quest) return <></>;
@@ -156,16 +156,16 @@ export const QuestDialogueModal: UIComponent = {
         backgroundColor={`#f8f6e4`}
         noScroll
       >
-        <QuestDialogue
-          modalOpened={modalOpen}
-          questText={quest.description.replace(/\n+/g, '\n')}
-          questCompletion={
-            quest?.descriptionAlt && quest.complete
-              ? quest.descriptionAlt.replace(/\n+/g, '\n')
-              : ''
-          }
-          questColor='#5e4a14ff'
-          questButtons={{
+        <Dialogue
+          isModalOpen={isModalOpen}
+          text={quest.description.replace(/\n+/g, '\n')}
+          color='#5e4a14ff'
+          isComplete={quest.complete}
+          completionText={quest?.descriptionAlt?.replace(/\n+/g, '\n')}
+        />
+        <Bottom
+          color='#5e4a14ff'
+          buttons={{
             AcceptButton: {
               backgroundColor: '#f8f6e4',
               onClick: () => acceptQuest(quest),
@@ -186,11 +186,11 @@ export const QuestDialogueModal: UIComponent = {
 };
 
 const Header = styled.div`
-  padding: 0.7vw 1vw 0.2vw 1vw;
-  font-size: 1.4vw;
-  color: #5e4a14ff;
   border-color: white;
-  font-weight: bold;
+  padding: 0.7vw 1vw 0.2vw 1vw;
   width: 95%;
+
+  font-size: 1.4vw;
+  font-weight: bold;
   line-height: 2vw;
 `;

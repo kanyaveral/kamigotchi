@@ -1,8 +1,7 @@
 import styled from 'styled-components';
 
 import { ActionListButton, IconButton, Overlay, TextTooltip } from 'app/components/library';
-import { triggerQuestDialogueModal } from 'app/triggers/triggerQuestDialogueModal';
-import { QuestsIcon } from 'assets/images/icons/menu';
+import { triggerQuestDetailsModal } from 'app/triggers/triggerQuestDetailsModal';
 import { Allo } from 'network/shapes/Allo';
 import { parseConditionalTracking } from 'network/shapes/Conditional';
 import { meetsObjectives, Objective, Quest } from 'network/shapes/Quest';
@@ -31,6 +30,12 @@ export const QuestCard = ({
 
   /////////////////
   // INTERPRETATION
+
+  function getButtonText(status: string) {
+    if (status === 'AVAILABLE') return 'Accept';
+    if (status === 'ONGOING' && !meetsObjectives(quest)) return 'Details';
+    return 'Complete';
+  }
 
   // idea: room objectives should state the number of rooms away you are on the grid map
   const getObjectiveText = (objective: Objective): string => {
@@ -164,15 +169,11 @@ export const QuestCard = ({
         </Overlay>
       )}
       <ButtonRow>
-        {meetsObjectives(quest) && status !== 'AVAILABLE' && !quest.complete && (
-          <TickIcon>✓</TickIcon>
-        )}
         <IconButton
           scale={2.5}
-          img={status !== 'AVAILABLE' ? QuestsIcon : null}
-          text={status === 'AVAILABLE' ? ' Details' : ''}
+          text={getButtonText(status)}
           onClick={() => {
-            triggerQuestDialogueModal(quest.entity);
+            triggerQuestDetailsModal(quest.entity);
           }}
         />
       </ButtonRow>
