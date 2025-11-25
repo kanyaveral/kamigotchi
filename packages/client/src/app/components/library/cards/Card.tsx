@@ -14,6 +14,7 @@ export const Card = ({
 }: {
   children: React.ReactNode;
   image?: {
+    fit?: 'cover' | 'contain';
     icon?: string;
     onClick?: () => void;
     padding?: number;
@@ -53,7 +54,12 @@ export const Card = ({
           <Overlay top={0.5} right={0.5}>
             {!!effects?.showSkillPoints && <Sp>SP</Sp>}
           </Overlay>
-          <Image src={image?.icon} onClick={handleImageClick} style={{ filter: effects?.filter }} />
+          <Image
+            src={image?.icon}
+            onClick={handleImageClick}
+            style={{ filter: effects?.filter }}
+            fit={image?.fit}
+          />
           {!!effects?.foreground && <ForegroundSlot>{effects.foreground}</ForegroundSlot>}
         </ImageContainer>
       </TextTooltip>
@@ -77,20 +83,21 @@ const ImageContainer = styled.div<{ scale: number; padding?: number }>`
   position: relative;
   border-right: solid black 0.15vw;
   border-radius: 0.6vw 0vw 0vw 0.6vw;
+
   min-height: 100%;
   height: ${({ scale }) => scale}vw;
   width: ${({ scale }) => scale}vw;
   padding: ${({ padding }) => padding ?? 0}vw;
+
   ${({ scale }) => scale > 4 && `image-rendering: pixelated;`}
   user-select: none;
   overflow: hidden;
 `;
 
-const Image = styled.img<{ onClick?: () => void }>`
-  object-fit: cover;
+const Image = styled.img<{ onClick?: () => void; fit?: string }>`
+  object-fit: ${({ fit }) => fit ?? 'cover'};
   height: 100%;
   width: 100%;
-
   cursor: ${({ onClick }) => (onClick ? 'pointer' : 'auto')};
   &:hover {
     opacity: 0.75;
